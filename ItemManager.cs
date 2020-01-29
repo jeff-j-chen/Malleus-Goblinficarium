@@ -100,43 +100,56 @@ public class ItemManager : MonoBehaviour {
     public int col = 0;
     public List<GameObject> curList;
     public int discardableDieCounter = 0;
-
     public bool usedAnkh = false;
     public bool usedHelm = false;
     public bool usedBoots = false;
-
     public int numItemsDroppedForTrade = 0;
 
     void Start() {
         allSprites = commonItemSprites.ToArray().Concat(rareItemSprites.ToArray()).Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
-        // create a list 
+        // create a list containing all of the sprites
         scripts = FindObjectOfType<Scripts>();
         curList = scripts.player.inventory;
+        // assign the curlist variable for item selection navigation
         lootText.text = "";
         CreateWeaponWithStats("sword", "common", 2, 1, 2, 2);
         MoveToInventory(0, true);
         CreateItem("steak", "common");
         MoveToInventory(0, true);
+        // create items based on class and move them into the inventory
         Select(curList, 0);
+        // select the first item
     }
 
     void Update() {
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
+            // if pressing one of the ctrl keys
             if (curList == scripts.player.inventory) { Select(floorItems, 0); }
             else if (curList == floorItems) { Select(scripts.player.inventory, 0); }
+            // swap the curList (used for selection) to the other
             else { print("invalid list to select from"); }
+            // something is wrong here
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow)) {
             Select(curList, col - 1, false);
+            // if pressing left, move the selection left
         }
         else if (Input.GetKeyDown(KeyCode.RightArrow)) {
             Select(curList, col + 1, false);
+            // if moving right, move the selection right
         }
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) {
             highlightedItem.GetComponent<Item>().Use();
+            // if pressing return or enter, use the item that is selected
         }
     } 
-    
+
+    /// <summary>
+    /// Select an item from the given list at the given index. 
+    /// </summary>
+    /// <param name="itemList">The list of which to attempt to make a selection from.</param>
+    /// <param name="c">The column number of which to attempt to make a selection from.</param>
+    /// <param name="forceDifferentSelection"></param>
     public void Select(List<GameObject> itemList, int c, bool forceDifferentSelection=true) {
         if (c <= itemList.Count - 1 && c >= 0) {
             itemList[c].GetComponent<Item>().Select();
