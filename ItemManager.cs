@@ -149,59 +149,98 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <param name="itemList">The list of which to attempt to make a selection from.</param>
     /// <param name="c">The column number of which to attempt to make a selection from.</param>
-    /// <param name="forceDifferentSelection"></param>
+    /// <param name="forceDifferentSelection">Whether or not to try to force a different selection if the column was not valid for the list.</param>
     public void Select(List<GameObject> itemList, int c, bool forceDifferentSelection=true) {
         if (c <= itemList.Count - 1 && c >= 0) {
+            // if the column is within the bounds of the list
             itemList[c].GetComponent<Item>().Select();
+            // select the object
             curList = itemList;
             col = c;
+            // update the variables used for selection 
         }
         else {
+            // column is invalid for the list
             if (forceDifferentSelection) {
+                // if we want to force a different selection
                 if (itemList.Count > 1) {
+                    // if there is more than 1 item
                     itemList[col - 1].GetComponent<Item>().Select();
+                    // select the next item over
                     curList = itemList;
                     col--;
+                    // update the variables used for selection
                 }
                 else {
+                    // player only has weapon
                     scripts.player.inventory[0].GetComponent<Item>().Select();
                     curList = scripts.player.inventory;
                     col = 0;
+                    // select the weapon and update the variables used for selection.
                 }
             }
             else {
                 highlightedItem.GetComponent<Item>().Select();
+                // not forcing a different selection, so select the item regardless
             }
         }
     }
 
+    /// <summary>
+    /// Create an item with specified itemtype.
+    /// </summary>
+    /// <param name="itemType">The type of item of which to create.</param>
     private void CreateItem(string itemType) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
+        // create an item object at the correct position
         Sprite sprite = null;
+        // create a variable of which we can place the sprite upon to depending on the item type
         if (itemType == "weapon") { sprite = weaponSprites[UnityEngine.Random.Range(0, weaponSprites.Length - 1)]; }
         else if (itemType == "common") { sprite = commonItemSprites[UnityEngine.Random.Range(0, commonItemSprites.Length - 1)]; }
         else if (itemType == "rare") { sprite = rareItemSprites[UnityEngine.Random.Range(0, rareItemSprites.Length - 1)]; }
+        // depending on the type, give it a corresponding random sprite.
         else { print("bad item type to create"); }
+        // can only create item types of weapon, common, and rare
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = sprite;
+        // give the sprite renderer the proper sprite 
         instantiatedItem.transform.parent = gameObject.transform;
+        // make the item childed to this manager
         instantiatedItem.GetComponent<Item>().itemName = sprite.name.Replace("_", " ");
         instantiatedItem.GetComponent<Item>().itemType = itemType;
+        // assign the attributes for the name and the type of the item 
         SetItemStatsImmediately(instantiatedItem);
+        // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);
+        // add the item to the array
     }
 
+    /// <summary>
+    /// Create an item with the specified name and itemtype.
+    /// </summary>
+    /// <param name="itemName">The name of the item of which to create.</param>
+    /// <param name="itemType">The type of the item of which to create</param>
     public void CreateItem(string itemName, string itemType) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
+        // instantiate the item
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)];
+        // give the item the proper sprite
         instantiatedItem.transform.parent = gameObject.transform;
+        // make the item childed to this manager
         instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<SpriteRenderer>().sprite.name.Replace("_", " ");
-        SetItemStatsImmediately(instantiatedItem);
         instantiatedItem.GetComponent<Item>().itemType = itemType;
+        // assign the attributes for the name and the type of the item
+        SetItemStatsImmediately(instantiatedItem);
+        // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);
+        // add the item to the array
     }
 
+    /// <summary>
+    /// Instantly assign necessary attributes of items (like their modifier).
+    /// </summary>
+    /// <param name="instantiatedItem"></param>
     private void SetItemStatsImmediately(GameObject instantiatedItem) {
-        // if doing this in item.cs the timing is off and it breaks
+        // this needs to be done here rather than in Item.Start() or Awake() because the timing will be off and errors will be thrown
         if (instantiatedItem.GetComponent<Item>().itemName == "necklet") {
             instantiatedItem.GetComponent<Item>().modifier = neckletTypes[UnityEngine.Random.Range(0, 5)];
         }
@@ -211,29 +250,65 @@ public class ItemManager : MonoBehaviour {
         else if (instantiatedItem.GetComponent<Item>().itemName == "potion") {
             instantiatedItem.GetComponent<Item>().modifier = potionTypes[UnityEngine.Random.Range(0, potionTypes.Length)];
         }
+        // assign a modifier for a necklet, scroll, or potion
     }
 
+    /// <summary>
+    /// Create a item with random modifier and stats. 
+    /// </summary>
     public void CreateRandomWeapon() {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
+        // instantiate the item
         int rand = UnityEngine.Random.Range(0, weaponNames.Length);
+        // get a random variable of which we will pull item information from
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = weaponSprites[rand];
+        // get the sprite from the random number
         instantiatedItem.transform.parent = gameObject.transform;
+        // child the item to this manager
         instantiatedItem.GetComponent<Item>().itemType = "weapon";
+        // set the itemtype to be a weaon
         string modifier = modifierNames[UnityEngine.Random.Range(0, modifierNames.Length)];
+        // pull a random modifier from the array
         instantiatedItem.GetComponent<Item>().modifier = modifier.Substring(0, modifier.Length - 1);
+        // assign the modifier attribute (cut off the final letter, as modifiers are like 'common0' and 'common1')
         instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<Item>().modifier + " " + instantiatedItem.GetComponent<SpriteRenderer>().sprite.name.Replace("_", " ");
+        // concatenate the modifier with weapon name and assign the item's name attribute to be that
         baseWeapon = weaponDict[weaponNames[rand]];
-        foreach (string key in statArr) { baseWeapon[key] += modifierDict[modifier][key]; }
+        // get the base weapon's stats from the array of dictionaries gotten from the previous random number
+        foreach (string key in statArr)
+        { 
+            // for every key in the stat array ("green", "blue", etc.)
+            baseWeapon[key] += modifierDict[modifier][key]; 
+            // add the modifier stats to the weapon stats
+            if (baseWeapon[key] < 1) { baseWeapon[key] = -1; }
+            // limit the item so it can't go down to -2 (not in the actual game, but in my modded version later i may do this)
+        }
         instantiatedItem.GetComponent<Item>().weaponStats = baseWeapon;
+        // assign the weapon stats to the weapon
         floorItems.Add(instantiatedItem);
+        // add the item to the array
     }
 
+    /// <summary>
+    /// Create a weapon with specified name, modifier, and stats.
+    /// </summary>
+    /// <param name="weaponName">The name of the weapon of which to create.</param>
+    /// <param name="modifier">The name of the modifier of which to apply to the weapon.</param>
+    /// <param name="aim">The aim stat to give to the weapon.</param>
+    /// <param name="spd">The spd stat to give to the weapon.</param>
+    /// <param name="atk">The atk stat to give to the weapon.</param>
+    /// <param name="def">The def stat to give to the weapon.</param>
     public void CreateWeaponWithStats(string weaponName, string modifier, int aim, int spd, int atk, int def) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
+        // instantiaet the item
         Sprite sprite = null;
+        // create an empty sprite variable to imprint on
         sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(weaponName)];
+        // get the sprite based on the weapon name
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = sprite;
+        // give the sprite based on the item name
         instantiatedItem.transform.parent = gameObject.transform;
+        // child the item to this manager
         instantiatedItem.GetComponent<Item>().itemName = modifier + " " + sprite.name.Replace("_", " ");
         instantiatedItem.GetComponent<Item>().itemType = "weapon";
         instantiatedItem.GetComponent<Item>().modifier = modifier;
@@ -242,26 +317,45 @@ public class ItemManager : MonoBehaviour {
         baseWeapon["red"] = atk;
         baseWeapon["white"] = def;
         instantiatedItem.GetComponent<Item>().weaponStats = baseWeapon;
+        // assign the attributes of the item based on the given parameters
         floorItems.Add(instantiatedItem);
+        // add the item to the array
     }
 
+    /// <summary>
+    /// Move the floor item at the specifed index into the player's inventory.
+    /// </summary>
+    /// <param name="index">The index from which to move the item.</param>
+    /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
     public void MoveToInventory(int index, bool starter=false) {
         if (scripts.player.inventory.Count <= 7) {
+            // if the player doesn't have 7 or more items
             if (!starter) { scripts.soundManager.PlayClip("click"); }
+            // if the item is not the starter (so it doesn't instantly play a click), play the click sound
             if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
+                // if the item being moved is a weapon 
                 floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
+                // move the item to the weapon slot
                 scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
+                // set the player's stats to be equal to that of the weapon
                 if (!starter) {
+                    // if the weapon is not a starter (so player already has a weapon)
                     scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
+                    // notify the player
                     Destroy(scripts.player.inventory[0]);
+                    // destroy the previous weapon
                     scripts.player.inventory[0] = floorItems[index]; 
+                    // add the new weapon to the player's inventory
                     scripts.statSummoner.SetDebugInformationFor("player");
                     scripts.statSummoner.SummonStats();
+                    // set the debug information and summon the new stats
                 }
                 else {
                     scripts.player.inventory.Add(floorItems[index]);
+                    // item is a starter, so just add it to the player's inventory
                 }
                 floorItems.RemoveAt(0);
+                // remove the item at index 0 (which is the weapon, because the item is always)
                 foreach(GameObject item in floorItems) {
                     item.transform.position = new Vector2(item.transform.position.x - 1f, itemY);
                 }
