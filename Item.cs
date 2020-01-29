@@ -442,11 +442,9 @@ public class Item : MonoBehaviour {
                 }
             }
             else {
-                // if (itemType == "weapon") {
-                //     if (scripts.itemManager.descriptionDict[itemName.Split(' ')[1]] == "") { scripts.turnManager.SetStatusText($"you drop {itemName}"); }
-                //     else { scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); }
-                // }
-                // i have no idea what the code ^ does but it seems to be wrong. leaving it here just incase
+                if (itemType == "weapon") { 
+                    scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
+                }
                 if (itemName == "necklet")  { 
                     if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you drop arcane necklet"); }
                     else { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }

@@ -355,13 +355,16 @@ public class ItemManager : MonoBehaviour {
                     // item is a starter, so just add it to the player's inventory
                 }
                 floorItems.RemoveAt(0);
-                // remove the item at index 0 (which is the weapon, because the item is always)
+                // remove the item at index 0 (which is the weapon, because the weapon is always created first)
                 foreach(GameObject item in floorItems) {
                     item.transform.position = new Vector2(item.transform.position.x - 1f, itemY);
+                    // for every item, shift it over now that an item has been removed
                 }
                 Select(curList, 0);
+                // select the item at index 0
             }
             else {
+                // not a weapon
                 if (floorItems[index].GetComponent<Item>().itemName == "necklet") {
                     if (floorItems[index].GetComponent<Item>().modifier == "solidity") { 
                         neckletStats["green"] += neckletCounter["arcane"]; 
@@ -387,8 +390,22 @@ public class ItemManager : MonoBehaviour {
                     } 
                     else if (floorItems[index].GetComponent<Item>().modifier == "nothing") {}
                     else { print("bad modifier"); }
+                    // depending on the type of the necklet, modify the stats accordingly
                 }
-                if (!starter) { scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName); }
+                if (!starter) 
+                { 
+                    if (itemType == "weapon") { 
+                        scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
+                    }
+                    if (itemName == "necklet")  { 
+                        if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you take arcane necklet"); }
+                        else { scripts.turnManager.SetStatusText($"you take {itemName} of {modifier}"); }
+                    }
+                    else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {itemName} of {modifier}"); }
+                    else { scripts.turnManager.SetStatusText($"you take {itemName}"); }
+                    // notify the player of which item that they took
+                }
+                // if the item is not a starter item, notify the player that they have picked up the item
                 floorItems[index].transform.position = new Vector2(-2.75f + itemSpacing * scripts.player.inventory.Count, 3.16f);
                 scripts.player.inventory.Add(floorItems[index]);
                 floorItems.RemoveAt(index);
