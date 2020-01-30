@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-public class LevelManager : MonoBehaviour
-{
+public class LevelManager : MonoBehaviour {
     [SerializeField] GameObject levelBox;
     [SerializeField] GameObject loadingCircle;
     Vector3 onScreen = new Vector2(0.0502f, -1.533f);
@@ -20,8 +19,7 @@ public class LevelManager : MonoBehaviour
     private float[] mix =      new float[] { 2f, -10f, 18f, 18f };
     public int level { get; private set; } = 1;
     public int sub { get; private set; } = 1;
-    private Dictionary<string, float[]> levelStats = new Dictionary<string, float[]>()
-    {
+    private Dictionary<string, float[]> levelStats = new Dictionary<string, float[]>() {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
         { "11", new float[] { 10f, 10f, 10f, 10f, 0f,    7f, 1f, 1f, 1f, 0f } },
@@ -55,10 +53,8 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     /// <param name="lichOrDevilOrNormal">Which type of enemy to generate.</param>
     /// <returns>A float array of the stats that were generated.</returns>
-    public float[] GenStats(string lichOrDevilOrNormal = "normal")
-    {
-        if (lichOrDevilOrNormal != "normal")
-        {
+    public float[] GenStats(string lichOrDevilOrNormal = "normal") {
+        if (lichOrDevilOrNormal != "normal") {
             if (lichOrDevilOrNormal == "lich") { return new float[] { 1f, 1f, 1f, 1f }; }
             // lich has 1/1/1/1
             else if (lichOrDevilOrNormal == "devil") { return new float[] { 2f, 2f, 2f, 2f }; }
@@ -66,8 +62,7 @@ public class LevelManager : MonoBehaviour
             else { print("invalid enemy to attempt to spawn");return balanced;}
             // notify me of error and return a basic one
         }
-        else
-        {
+        else {
             float[] stats = levelStats[level.ToString() + sub.ToString()];
             // based on the level and sub, get the stats from the level
             float[] totalStats = new float[4];
@@ -77,8 +72,7 @@ public class LevelManager : MonoBehaviour
             else if (level == 2) { baseStats = GenBaseStats(stats, damage); }
             else if (level == 3) { baseStats = GenBaseStats(stats, fast); }
             // generate the stats for the enemy based on level 
-            for (int i = 0; i < 4; i++)
-            {
+            for (int i = 0; i < 4; i++) {
                 // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
                 totalStats[i] = Mathf.Round((stats[i] + baseStats[i] + UnityEngine.Random.Range(0f, stats[4]))/10f);
             }
@@ -93,14 +87,12 @@ public class LevelManager : MonoBehaviour
     /// <param name="stats">The stat (float[]) which contains the chances for the different stat presets.</param>
     /// <param name="normal">The default stat to go back to if something goes wrong.</param>
     /// <returns>A float array of the generated stats.</returns>
-    private float[] GenBaseStats(float[] stats, float[] normal)
-    {
+    private float[] GenBaseStats(float[] stats, float[] normal) {
         float sum = stats[5] + stats[6] + stats[7] + stats[8] + stats[9];
         // get the sum of the present chances
         if (sum != 10f) { print("not 10f"); return balanced; }
         // something went wrong while setting up the dictionary, so notify me and return (so compiler is happy)
-        else
-        {
+        else {
             int rand = UnityEngine.Random.Range(1, 11);
             // get a random number from 1-10
             float[] chances = new float[] { stats[5], stats[5] + stats[6], stats[5] + stats[6] + stats[7], stats[5] + stats[6] + stats[7] + stats[8], 10f };
@@ -124,8 +116,7 @@ public class LevelManager : MonoBehaviour
     /// <summary>
     /// Summon a trader.
     /// </summary>
-    private void SummonTrader()
-    {
+    private void SummonTrader() {
         scripts.enemy.SpawnNewEnemy(99); // spawn the trader here
         // create the trader enemy
         scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
@@ -138,14 +129,11 @@ public class LevelManager : MonoBehaviour
     /// Makes the game go to the next level.
     /// </summary>
     /// <param name="isLich">true to spawn the lich, false (default) otherwise</param>
-    /// <returns></returns>
-    public IEnumerator NextLevel(bool isLich=false)
-    {
+    public IEnumerator NextLevel(bool isLich=false) {
         Color temp = boxSR.color;
         temp.a = 0f;
         // hide the level loading box
-        for (int i = 0; i < 15; i++)
-        {
+        for (int i = 0; i < 15; i++) {
             yield return scripts.delays[0.033f];
             temp.a += 1f/15f;
             boxSR.color = temp;
@@ -155,13 +143,11 @@ public class LevelManager : MonoBehaviour
         // make the loading thing go on screen
         scripts.itemManager.HideItems();
         // hide the items (can't destroy them here or the game breaks for some reason)
-        if (!isLich)
-        {
+        if (!isLich) {
             // if spawning a normal enemy
             sub++;
             // increment the sub counter
-            if (sub == 4) 
-            { 
+            if (sub == 4) { 
                 SummonTrader();
                 // summon trader if necessary
                 levelText.text = "level " + level + "-3+"; 
@@ -179,8 +165,7 @@ public class LevelManager : MonoBehaviour
             else { scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); }
             // otherwise just spawn a random enemy
         }
-        else 
-        { 
+        else { 
             levelText.text = "???"; 
             // going to the lich level, so notify player
             scripts.enemy.SpawnNewEnemy(2);
@@ -198,15 +183,13 @@ public class LevelManager : MonoBehaviour
         // clear the loading text and move the box offscreen
         scripts.itemManager.numItemsDroppedForTrade = 0;
         // clear the number of items player has dropped
-        if (sub != 4)
-        {
+        if (sub != 4) {
             // if not going to the trader level
             scripts.diceSummoner.SummonDice(false);
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
             // summon die and make sure the enemy's stats can be seen
         }
-        for (int i = 0; i < 15; i++)
-        {
+        for (int i = 0; i < 15; i++) {
             yield return scripts.delays[0.033f];
             temp.a -= 1f/15f;
             boxSR.color = temp;

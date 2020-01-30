@@ -8,21 +8,18 @@ public class MenuButton : MonoBehaviour
     float transitionMultiplier;
     SoundManager soundManager;
     Arrow arrow;
-    void Start()
-    {
+    void Start() {
         transitionMultiplier = FindObjectOfType<BackToMenu>().transitionMultiplier;
         soundManager = FindObjectOfType<SoundManager>();
         arrow = FindObjectOfType<Arrow>();
     }
 
-    public void OnMouseEnter()
-    {
+    public void OnMouseEnter() {
         arrow.MoveToButtonPos(Array.IndexOf(arrow.menuButtons, gameObject));
         // when the cursor moves over a menu button, make the arrow go there
     }
 
-    public void OnMouseDown()
-    {
+    public void OnMouseDown() {
         // when clicked, call necessary function
         ButtonPress(name);
     }
@@ -31,12 +28,10 @@ public class MenuButton : MonoBehaviour
     /// Handle when one of the menu buttons is pressed.
     /// </summary>
     /// <param name="buttonName"></param>
-    public void ButtonPress(string buttonName)
-    {
+    public void ButtonPress(string buttonName) {
         soundManager.PlayClip("click");
         // play sound clip
-        switch (buttonName)
-        {
+        switch (buttonName) {
             case "Continue":
                 // do something special here
                 Initiate.Fade("Game", Color.black, transitionMultiplier);

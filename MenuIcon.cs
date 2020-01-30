@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
 using TMPro;
 
-public class MenuIcon : MonoBehaviour
-{
+public class MenuIcon : MonoBehavior {
     private const string DEBUG_KEY = "debug";
     private const string HINTS_KEY = "hints";
     private const string SOUNDS_KEY = "sounds";
     private const string MUSIC_KEY = "music";
     [SerializeField] GameObject debug;
     [SerializeField] GameObject hints;
-    [SerializeField] GameObject sounds;
+    [SerializeField] GameObject sound;
     [SerializeField] GameObject music;
     SpriteRenderer debugSR;
     SpriteRenderer soundsSR;
@@ -17,8 +16,7 @@ public class MenuIcon : MonoBehaviour
     SpriteRenderer musicSR;
     public Color gray;
     AudioSource musicPlayer;
-    void Start()
-    {
+    void Start() {
         musicPlayer = FindObjectOfType<Music>().GetComponent<AudioSource>();
         musicPlayer.ignoreListenerVolume = true;
         debugSR = debug.GetComponent<SpriteRenderer>();
@@ -35,24 +33,11 @@ public class MenuIcon : MonoBehaviour
         // set the default preferences
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown("d"))
-        {
-            PlayerPrefSetter(DEBUG_KEY, debugSR);
-        }
-        else if (Input.GetKeyDown("h"))
-        {
-            PlayerPrefSetter(HINTS_KEY, hintsSR);
-        }
-        else if (Input.GetKeyDown("s"))
-        {
-            PlayerPrefSetter(SOUNDS_KEY, soundsSR);
-        }
-        else if (Input.GetKeyDown("m"))
-        {
-            PlayerPrefSetter(MUSIC_KEY, musicSR);
-        }
+    void Update() {
+        if (Input.GetKeyDown("d")) { PlayerPrefSetter(DEBUG_KEY, debugSR); }
+        else if (Input.GetKeyDown("h")) { PlayerPrefSetter(HINTS_KEY, hintsSR); }
+        else if (Input.GetKeyDown("s")) { PlayerPrefSetter(SOUNDS_KEY, soundsSR); }
+        else if (Input.GetKeyDown("m")) { PlayerPrefSetter(MUSIC_KEY, musicSR); }
     }
     // toggle player preferences based on the keys pressed
 
@@ -62,13 +47,10 @@ public class MenuIcon : MonoBehaviour
     /// <param name="key">The string/key which maps to the player preference setting. </param>
     /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
     /// <param name="isSwap">true to toggle, false to keep it the same (just update the sprite)</param>
-    public void PlayerPrefSetter(string key, SpriteRenderer spriteRenderer, bool isSwap = true)
-    {
-        if (PlayerPrefs.GetString(key) == "on")
-        {
+    public void PlayerPrefSetter(string key, SpriteRenderer spriteRenderer, bool isSwap = true) {
+        if (PlayerPrefs.GetString(key) == "on") {
             // on
-            if (isSwap)
-            {
+            if (isSwap) {
                 PlayerPrefs.SetString(key, "off");
                 TurnOff(key, spriteRenderer);
                 // so turn off
@@ -76,11 +58,9 @@ public class MenuIcon : MonoBehaviour
             else { TurnOn(key, spriteRenderer); }
             // set the correct sprite
         }
-        else
-        {
+        else {
             // off
-            if (isSwap)
-            {
+            if (isSwap) {
                 PlayerPrefs.SetString(key, "on");
                 TurnOn(key, spriteRenderer);
                 // so turn on
@@ -95,12 +75,10 @@ public class MenuIcon : MonoBehaviour
     /// </summary>
     /// <param name="key">The key which maps to the player preference.</param>
     /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
-    private void TurnOn(string key, SpriteRenderer spriteRenderer)
-    {
+    private void TurnOn(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = Color.white;
         // make the icon white
-        switch (key)
-        {
+        switch (key) {
             case DEBUG_KEY:
                 break;
             case HINTS_KEY:
@@ -120,13 +98,11 @@ public class MenuIcon : MonoBehaviour
     /// </summary>
     /// <param name="key">The key which maps to the player preference.</param>
     /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
-    private void TurnOff(string key, SpriteRenderer spriteRenderer)
-    {
+    private void TurnOff(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = gray;
         // make the icon gray
         AssignColor(spriteRenderer, gray);
-        switch (key)
-        {
+        switch (key) {
             case DEBUG_KEY:
                 break;
             case HINTS_KEY:
