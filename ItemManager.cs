@@ -407,67 +407,125 @@ public class ItemManager : MonoBehaviour {
                 }
                 // if the item is not a starter item, notify the player that they have picked up the item
                 floorItems[index].transform.position = new Vector2(-2.75f + itemSpacing * scripts.player.inventory.Count, 3.16f);
+                // add the item to the proper location
                 scripts.player.inventory.Add(floorItems[index]);
+                // add the item to the player's inventory
                 floorItems.RemoveAt(index);
+                // and remove it from the floor
                 for (int i = index; i < floorItems.Count; i++) {
+                    // for every item after where the removed item was
                     floorItems[i].transform.position = new Vector2(floorItems[i].transform.position.x - 1f, itemY);
+                    // shift it over to the proper location
                 }
                 Select(curList, index);
+                // select the next item of where it was
             }
         }
     }
 
+    /// <summary>
+    /// Spawn the items after the enemy has died. 
+    /// </summary>
     public void SpawnItems() {
         lootText.text = "loot:";
-        int spawnCount = 3;
-        if (PlayerHas("torch")) { spawnCount = 5; }
+        // set the text 
+        int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
+        // count the number of torches
+        int spawnCount = 3 + torchCount * 2  + scripts.levelManager.level;
+        // create a spawn count 
         CreateRandomWeapon();
-        for (int i = 0; i < UnityEngine.Random.Range(0, spawnCount + scripts.levelManager.level); i++) {
+        // create a random weapon at index 0
+        for (int i = 0; i < UnityEngine.Random.Range(0, spawnCount); i++) {
             CreateItem("common");
+            // create a random number of items based on the spawn count
         }
         if (UnityEngine.Random.Range(0, 10) == 0) { CreateItem("rare"); }
+        // low chance to produce rare
         CreateItem("arrow", "arrow");
+        // create an arrow to move to the next level
     }
 
+    /// <summary>
+    /// Spawn the items for which the player can trade with.
+    /// </summary>
     public void SpawnTraderItems() {
         lootText.text = "PLACEHOLDER TEXT";
+        // set the test
         for (int i = 0; i < 3; i++) { CreateItem("common"); }
+        // create 3 common items
         CreateItem("arrow", "arrow");
+        // create the next level arrow
     }
 
+    /// <summary>
+    /// Hide floor items, preparing for deletion. MUST be kept separate from destroying them!
+    /// </summary>
     public void HideItems() {
         lootText.text = "";
+        // clear the text
         Select(scripts.player.inventory, 0);
+        // select player's inventory
         foreach (GameObject test in floorItems) {
+            // hide every item
             test.GetComponent<SpriteRenderer>().sprite = null;
         }
     }
-    // HIDE AND DESTROY ARE KEPT SEPARATE, DO NOT MERGE OR DELETE
+    
+    /// <summary>
+    /// Destroy floor items after they are hidden. MUST be kept separate from hiding them!
+    /// </summary>
     public void DestroyItems() {
         foreach (GameObject test in floorItems) {
             Destroy(test);
+            // destroy every floor item
         }
         floorItems.Clear();
+        // clear the array
     }
 
+    /// <summary>
+    /// Checks if the player has an item with specified item name.
+    /// </summary>
+    /// <param name="itemName">The item name to check for.</param>
+    /// <returns>true if the item was found, false otherwise.</returns>
     public bool PlayerHas(string itemName) {
         return (from a in scripts.player.inventory select a.GetComponent<Item>().itemName).Contains(itemName);
     }
 
+    /// <summary>
+    /// Checks if the player has a weapon with specified item name.
+    /// </summary>
+    /// <param name="weaponName">The weapon name to check for.</param>
+    /// <returns>true if the weapon was found, false otherwise.</returns>
     public bool PlayerHasWeapon(string weaponName) {
         return (from a in scripts.player.inventory select a.GetComponent<Item>().itemName).Contains(scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1]);
     }
 
+    /// <summary>
+    /// Gets the first item in the player's inventory with given name.
+    /// </summary>
+    /// <param name="itemName">The item name to check for.</param>
+    /// <returns>The GameObject that was found.</returns>
     public GameObject GetPlayerItem(string itemName) {
-        return scripts.player.inventory[(from a in scripts.player.inventory select a.GetComponent<Item>().itemName).ToList().IndexOf(itemName)];
+        try { return scripts.player.inventory[(from a in scripts.player.inventory select a.GetComponent<Item>().itemName).ToList().IndexOf(itemName)]; }
+        catch { return null; }
     }
 
+    /// <summary>
+    /// Fade all torches that have ended their lifespan.
+    /// </summary>
     public void AttemptFadeTorches() {
         foreach (GameObject item in scripts.player.inventory) {
+            // for every item
             if (item.GetComponent<Item>().itemName == "torch") {
+                // if the item is a torch
                 if ($"{scripts.levelManager.level}-{scripts.levelManager.sub}" == item.GetComponent<Item>().modifier) {
+                    // if the fade level matches the current level
                     scripts.turnManager.SetStatusText("your torch runs out");
+                    // notify player
+                    Destroy(scripts.player.inventory[scripts.player.inventory.IndexOf(item)]);
                     scripts.player.inventory[scripts.player.inventory.IndexOf(item)].GetComponent<Item>().Remove();
+                    // remove the torch. later come back an add an animation to this. 
                 }
             }
         }
