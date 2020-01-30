@@ -26,14 +26,15 @@ public class MenuIcon : MonoBehaviour
         soundsSR = sounds.GetComponent<SpriteRenderer>();
         musicSR = music.GetComponent<SpriteRenderer>();
         ColorUtility.TryParseHtmlString("#404040", out gray);
+        // get the necessary components and colors
         // assign var gray to the html string parsed
         PlayerPrefSetter(DEBUG_KEY, debugSR, false);
         PlayerPrefSetter(HINTS_KEY, hintsSR, false);
         PlayerPrefSetter(SOUNDS_KEY, soundsSR, false);
         PlayerPrefSetter(MUSIC_KEY, musicSR, false);
+        // set the default preferences
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown("d"))
@@ -53,45 +54,56 @@ public class MenuIcon : MonoBehaviour
             PlayerPrefSetter(MUSIC_KEY, musicSR);
         }
     }
+    // toggle player preferences based on the keys pressed
 
+    /// <summary>
+    /// Set the player preference (setting) for the given key.
+    /// </summary>
+    /// <param name="key">The string/key which maps to the player preference setting. </param>
+    /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
+    /// <param name="isSwap">true to toggle, false to keep it the same (just update the sprite)</param>
     public void PlayerPrefSetter(string key, SpriteRenderer spriteRenderer, bool isSwap = true)
     {
         if (PlayerPrefs.GetString(key) == "on")
         {
+            // on
             if (isSwap)
             {
                 PlayerPrefs.SetString(key, "off");
                 TurnOff(key, spriteRenderer);
+                // so turn off
             }
-            else
-            {
-                TurnOn(key, spriteRenderer);
-            }
+            else { TurnOn(key, spriteRenderer); }
+            // set the correct sprite
         }
         else
         {
+            // off
             if (isSwap)
             {
                 PlayerPrefs.SetString(key, "on");
                 TurnOn(key, spriteRenderer);
+                // so turn on
             }
-            else
-            {
-                TurnOff(key, spriteRenderer);
-            }
+            else { TurnOff(key, spriteRenderer); }
+            // set the correct sprite
         }
     }
 
+    /// <summary>
+    /// Turn on the player preference with the associated key.
+    /// </summary>
+    /// <param name="key">The key which maps to the player preference.</param>
+    /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
     private void TurnOn(string key, SpriteRenderer spriteRenderer)
     {
-        AssignColor(spriteRenderer, Color.white);
+        spriteRenderer.color = Color.white;
+        // make the icon white
         switch (key)
         {
             case DEBUG_KEY:
-                print("debug on");
                 break;
             case HINTS_KEY:
-                print("hints on");
                 break;
             case SOUNDS_KEY:
                 AudioListener.volume = 1f;
@@ -99,18 +111,25 @@ public class MenuIcon : MonoBehaviour
             case MUSIC_KEY:
                 musicPlayer.volume = 1f;
                 break;
+            // do the correct action
         }
     }
 
+    /// <summary>
+    /// Turn on the player preference with the associated key.
+    /// </summary>
+    /// <param name="key">The key which maps to the player preference.</param>
+    /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
     private void TurnOff(string key, SpriteRenderer spriteRenderer)
     {
+        spriteRenderer.color = gray;
+        // make the icon gray
         AssignColor(spriteRenderer, gray);
         switch (key)
         {
             case DEBUG_KEY:
                 break;
             case HINTS_KEY:
-                print("hints off");
                 break;
             case SOUNDS_KEY:
                 AudioListener.volume = 0f;
@@ -118,11 +137,7 @@ public class MenuIcon : MonoBehaviour
             case MUSIC_KEY:
                 musicPlayer.volume = 0f;
                 break;
+            // do the correct action
         }
-    }
-
-    private void AssignColor(SpriteRenderer debugSR, Color color)
-    {
-        debugSR.color = color;
     }
 }

@@ -5,10 +5,11 @@ using UnityEngine;
 
 public class Music : MonoBehaviour
 {
-    void Awake()
+    private void Awake()
     {
         SetUpSingleton();
         GetComponent<AudioSource>().ignoreListenerVolume = true;
+        // play the music through the audio mute (but not through the music mute)
     }
 
     private void SetUpSingleton()
@@ -22,9 +23,5 @@ public class Music : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
     }
-
-    void Update()
-    {
-        
-    }
+    // make sure the music doesn't cut off weirdly
 }

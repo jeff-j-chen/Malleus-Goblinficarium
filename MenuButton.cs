@@ -18,16 +18,23 @@ public class MenuButton : MonoBehaviour
     public void OnMouseEnter()
     {
         arrow.MoveToButtonPos(Array.IndexOf(arrow.menuButtons, gameObject));
+        // when the cursor moves over a menu button, make the arrow go there
     }
 
     public void OnMouseDown()
     {
+        // when clicked, call necessary function
         ButtonPress(name);
     }
 
+    /// <summary>
+    /// Handle when one of the menu buttons is pressed.
+    /// </summary>
+    /// <param name="buttonName"></param>
     public void ButtonPress(string buttonName)
     {
         soundManager.PlayClip("click");
+        // play sound clip
         switch (buttonName)
         {
             case "Continue":
@@ -40,6 +47,7 @@ public class MenuButton : MonoBehaviour
             default:
                 Initiate.Fade(buttonName, Color.black, transitionMultiplier);
                 break;
+            // go to the associated level
         }
     }
 }
