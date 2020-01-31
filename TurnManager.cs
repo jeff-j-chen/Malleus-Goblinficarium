@@ -19,6 +19,7 @@ public class TurnManager : MonoBehaviour {
     public bool alterationDuringMove = false;
     public bool diceDiscarded = false;
     public bool scimitarParry = false;
+    public bool maceUsed = false;
     public GameObject dieSavedFromLastRound = null;
     public bool discardDieBecauseCourage = false;
 
@@ -35,31 +36,50 @@ public class TurnManager : MonoBehaviour {
         DetermineMove(true);
     }
 
+    /// <summary>
+    /// Make the enemy move (if it is their turn).
+    /// </summary>
+    /// <param name="delay"></param>
     public void DetermineMove(bool delay=false) {
         if (scripts.statSummoner.SumOfStat("blue", "player") < scripts.statSummoner.SumOfStat("blue", "enemy") && !(scripts.itemManager.PlayerHasWeapon("spear"))) {
+            // if enemy is faster or player doesn't have spear
             StartCoroutine(EnemyMove(delay));
+            // make the enemy move
         }
     }
 
+    /// <summary>
+    /// Make the enemy choose die.
+    /// </summary>
+    /// <param name="delay">true to have a 0.45s delay before choosing, false to instantly chhoose.</param>
+    /// <param name="selectAllRemaining"></param>
+    /// <returns></returns>
     public IEnumerator EnemyMove(bool delay, bool selectAllRemaining=false) {
-        if (delay) {
-            yield return scripts.delays[0.45f];
-        }
+        if (delay) { yield return scripts.delays[0.45f]; }
+        // delay if necessary
         if (selectAllRemaining) {
             for (int i = 0; i < 3; i++) {
+                // if the player has used a scroll of haste, make the enemy choose all remaining die
                 scripts.enemy.ChooseBestDie();
             }
         }
         else { scripts.enemy.ChooseBestDie(); }
+        // otherwise, just choose a die
     }
 
+    /// <summary>
+    /// Make sure the player/enemy isn't aiming at a place they can't with their current accuracy. Reassigns the target if they can't.
+    /// </summary>
+    /// <param name="playerOrEnemy">Who to perform the check on.</param>
     public void RecalculateMaxFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             SetAvailableTargetsOf(playerOrEnemy);
             if (scripts.player.targetIndex > scripts.player.availableTargets.Count) {
                 scripts.player.targetIndex = scripts.player.availableTargets.Count;
             }
+            // check the available targets
             SetTargetOf("player");
+            // reset the target
         }
         else if (playerOrEnemy == "enemy") {
             SetAvailableTargetsOf(playerOrEnemy);
@@ -67,19 +87,28 @@ public class TurnManager : MonoBehaviour {
                 scripts.enemy.targetIndex = scripts.enemy.availableTargets.Count;
             }
             SetTargetOf("enemy");
+            // same as above
         }
         else { Debug.LogError("Invalid string passed in to RecalculateMax() in TurnManager.cs"); }
     }
 
+    
+    /// <summary>
+    /// Show the current wounds of the player and enemy.
+    /// </summary>
     public void DisplayWounds() {
         // add in something to fade in the wound text here
         if (scripts.player.woundList.Count > 0) {
+            // if player has 1 wound or more
             scripts.player.woundGUIElement.text = "";
+            // clear the text
             foreach (string wound in scripts.player.woundList) {
                 scripts.player.woundGUIElement.text += ("*" + wound + "\n");
+                // set the wound next fo each one
             }
         }
         else { scripts.player.woundGUIElement.text = "[no wounds]"; }
+        // 0 wounds, so display as such
         if (scripts.enemy.woundList.Count > 0) {
             scripts.enemy.woundGUIElement.text = "";
             foreach (string wound in scripts.enemy.woundList) {
@@ -87,216 +116,337 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else { scripts.enemy.woundGUIElement.text = "[no wounds]"; }
+        // pretty much the same as the above block
     }
 
+    /// <summary>
+    /// Fade and change the color of the text.
+    /// </summary>
+    /// <param name="text">The textmeshpro element for the text to change.</param>
     public IEnumerator InjuredTextChange(TextMeshProUGUI text) {
         yield return scripts.delays[0.55f];
+        // set a delay
         Color temp = text.color;
         temp.a = 0.5f;
+        // set text transparency to 1/2
         for (int i = 0; i < 20; i++) {
             yield return scripts.delays[0.01f];
             temp.a -= 0.025f;
             text.color = temp;
         }
+        // fade out
         DisplayWounds();
+        // update the wound display
         for (int i = 0; i < 40; i++) {
             yield return scripts.delays[0.005f];
             temp.a += 0.025f;
             text.color = temp;
         }
+        // fade back in
     }
 
+    /// <summary>
+    /// Set the current target and text based on the target index.
+    /// </summary>
+    /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
+                // if not enough accuracy, set the proper target text
                 scripts.player.target.text = "none";
                 scripts.player.targetInfo.text = "not enough accuracy to inflict any wound";
             }
             else {
-                // if (scripts.statSummoner.SumOfStat("green", "player") == 0) { if (!scripts.player.availableTargets.Contains("chest")) { scripts.player.availableTargets.Add("chest"); } }
+                // set the player's attack indicator + description based on the target index
                 if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
+                // add an asterick if already injured
                 else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
                 scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
             }
         }
         else if (playerOrEnemy == "enemy") {
+            // set enemy's target indicator based on the target index
             if (scripts.player.woundList.Contains("*")) { scripts.enemy.target.text = "*"+targetArr[scripts.enemy.targetIndex]; }
             else { scripts.enemy.target.text = targetArr[scripts.enemy.targetIndex]; }
         }
         else { Debug.LogError("Invalid string passed in to SetTarget() in TurnManager.cs"); }
     }
 
+    /// <summary>
+    /// Update the list of available targets based on accuracy. 
+    /// </summary>
+    /// <param name="playerOrEnemy">Whether to update the player or enemy's target list.</param>
     public void SetAvailableTargetsOf(string playerOrEnemy) {
         int accuracy = scripts.statSummoner.SumOfStat("green", playerOrEnemy);
+        // get the accuracy sum 
         if (accuracy > 7) { accuracy = 7; }
+        // limit accuracy to be 7
         if (playerOrEnemy == "player") {
-            scripts.player.availableTargets = new List<string>();
+            scripts.player.availableTargets.Clear();
+            // clear the list of targets
             foreach (string targetingString in targetArr.Take(accuracy)) {
+                // take the # of wounds based on accuracy (system.linq function)
                 scripts.player.availableTargets.Add(targetingString);
+                // add each one to the available targets
             }
         }
         else if (playerOrEnemy == "enemy") {
-            scripts.enemy.availableTargets = new List<string>();
+            scripts.enemy.availableTargets.Clear();
             foreach (string targetingString in targetArr.Take(accuracy)) {
                 scripts.enemy.availableTargets.Add(targetingString);
             }
-            
+            // same as above
         }
         else { Debug.LogError("Invalid string passed in to SetAvailableTargetsOf() in TurnManager.cs"); }
     }
 
+    /// <summary>
+    /// Change the available stamina of the player or enemy by the specified amount.
+    /// </summary>
+    /// <param name="playerOrEnemy">Who to change the stamina of.</param>
+    /// <param name="amount">The amount to change the stamina of.</param>
     public void ChangeStaminaOf(string playerOrEnemy, int amount) {
         if (playerOrEnemy == "player") {
             scripts.player.stamina += amount;
+            // change stamina
             scripts.player.staminaCounter.text = scripts.player.stamina.ToString();
+            // update counter
             RecalculateMaxFor(playerOrEnemy);
+            // recalculate max (in case stamina was taken from green)
         }
         else if (playerOrEnemy == "enemy") {
             scripts.enemy.stamina += amount;
             scripts.enemy.staminaCounter.text = scripts.enemy.stamina.ToString();
             RecalculateMaxFor(playerOrEnemy);
+            // same as above
         }
         else { Debug.LogError("Invalid string passed in to ChangeStaminaAndUpdate() in TurnManager.cs"); }
     }
 
+    /// <summary>
+    /// Start the first round of attack.
+    /// </summary>
     public void RoundOne() {
-        // targeting wounded body part
         scimitarParry = false;
+        // reset the scimitar parry (if set true from a previous round)
         isMoving = true;
+        // set the variable to true so that certain actions can check this and make sure actions are not taken when they shouldn't be
         List<Dice> availableDice = new List<Dice>();
+        // create an empty list to hold die in
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-            Dice diceScript = dice.GetComponent<Dice>();
-            if (diceScript.isAttached == false) {
-                availableDice.Add(diceScript);
+            // for every die
+            if (dice.GetComponent<Dice>().isAttached == false) {
+                availableDice.Add(dice.GetComponent<Dice>());
+                // if the die has not been chosen, add it to the list 
             }
         }
         if (availableDice.Count == 0) {
+            // if there are no available die
             RunEnemyCalculations();
+            // make enemy add stamina to stats as necessary
             if (scripts.player.woundList.Contains("head")) {
                 scripts.enemy.DiscardBestPlayerDie();
+                // if the player has a head wound, make the enemy discard it
             }
             InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
+            // get all the stats so we can use them
             if (playerSpd >= enemySpd) {
+                // make player go first
                 if (!PlayerAttacks(playerAtt, enemyDef)) {
+                    // if enemy was not killed
                     StartCoroutine(RoundTwo("enemy"));
+                    // begin the next round where the player will attadck
                 }
                 else {
+                    // enemy was killed
                     SetTargetOf("player");
+                    // reset target
                     StartCoroutine(Kill("enemy"));
+                    // make the enemy die
                     isMoving = false;
+                    // reset ismoving
                 }
             }
             else {
+                // enemy goes first
                 scripts.player.isDodgy = false;
                 scripts.player.SetPlayerStatusEffect("dodge", "off");
+                // enemy went first, so player can't be dodgy
                 if (!EnemyAttacks(enemyAtt, playerDef)) {
+                    // if player doesn't die
                     StartCoroutine(RoundTwo("player"));
+                    // start next round with player going
                 }
                 else {
+                    // player was killed
                     StartCoroutine(Kill("player"));
+                    // show animation
                     isMoving = false;
+                    // stop moving
                 }
             }
         }
         else { 
+            // dice are available
             isMoving = false;
-            if (scripts.itemManager.PlayerHasWeapon("mace")) {
+            // stop moving
+            if (scripts.itemManager.PlayerHasWeapon("mace") && !maceUsed) {
+                // if player has mace
+                maceUsed = true;
+                // prevent player from using mace again
                 foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
+                    // for every die that is not attached
                     StartCoroutine(dice.RerollAnimation(false));
+                    // reroll the die
                 }
             }
             else {
                 SetStatusText("choose a die"); 
+                // player doesn't have mace, so notify them to choose a die
             }
         }
     }
 
+    /// <summary>
+    /// Start the second round of attacks with the specified thing attacking.
+    /// </summary>
+    /// <param name="toMove">Who should be the one attacking.</param>
     private IEnumerator RoundTwo(string toMove) {
         int playerAtt;
         int playerDef;
         int enemyAtt;
         int enemyDef;
+        // variables to hold stats
         isMoving = true;
+        // make the player ready to move
         yield return scripts.delays[2f];
+        // wait 2 seconds for animation/status text from previous round to finish
         if (toMove == "player") {
+            // if player is the one attacking
             if (scimitarParry) {
+                // if they parried and had a scimitar
                 scripts.turnManager.SetStatusText("discard enemy's die");
+                // notify player
                 scripts.itemManager.discardableDieCounter++;
+                // increment # is discardable die
                 actionsAvailable = true;
+                // allow for player to take actions
                 for (float i = 2.5f; i > 0; i -= 0.1f) {
+                    // 2.5s time slot
                     if (scripts.diceSummoner.breakOutOfScimitarParryLoop) { break; }
+                    // handle the discard somewhere else, if the action was taken then will break out
                     yield return scripts.delays[0.1f];
+                    // wait 
                 }
                 actionsAvailable = false;
+                // prevent further action
                 scimitarParry = false;
+                // reset the variable
             }
             playerAtt = scripts.statSummoner.SumOfStat("red", "player");
             enemyDef = scripts.statSummoner.SumOfStat("white", "enemy");
+            // get necessary stats 
             if (PlayerAttacks(playerAtt, enemyDef)) {
+                // if player kills the enemy
                 SetTargetOf("player");
+                // reset target
                 StartCoroutine(Kill("enemy"));
+                // play information
                 isMoving = false;
+                // stop moving
             }
         }
         else if (toMove == "enemy") {
+            // enemy is the one attacking
             if ((scripts.enemy.woundList.Contains("chest") && Rerollable() || scripts.enemy.woundList.Contains("head") && !diceDiscarded) && PlayerPrefs.GetString("hints") == "on") {
-                if (scripts.enemy.woundList.Contains("head") && !diceDiscarded) { SetStatusText("note: you can discard enemy's die"); }
-                else if (scripts.enemy.woundList.Contains("chest") && Rerollable()) { SetStatusText("note: you can reroll enemy's dice"); }
+                // if player can reroll or discard enemy's die and hints are on
+                if (scripts.enemy.woundList.Contains("head")) { SetStatusText("note: you can discard enemy's die"); }
+                else if (scripts.enemy.woundList.Contains("chest")) { SetStatusText("note: you can reroll enemy's dice"); }
+                // notify the player
                 actionsAvailable = true;
+                // allow actions
                 for (float i = 2.5f; i > 0; i -= 0.1f) {
+                    // 2.5 second time slot
                     if (alterationDuringMove) {
+                        // actions handled elsewhere, but if there is an action taken (e.g. discard)
                         i += 0.75f;
+                        // increase time slot
                         alterationDuringMove = false;
+                        // allow timer to be changed again
                     }
                     yield return scripts.delays[0.1f];
+                    // wait
                 }
                 actionsAvailable = false;
                 diceDiscarded = false;
+                // reset the available actions
             }
             enemyAtt = scripts.statSummoner.SumOfStat("red", "enemy");
             playerDef = scripts.statSummoner.SumOfStat("white", "player");
+            // get necessary stats
             if (EnemyAttacks(enemyAtt, playerDef)) {
+                // if enemy kills player
                 StartCoroutine(Kill("player"));
+                // play animation
                 isMoving = false;
+                // stop moving
             }
         }
         else { print("error passing into ienumerator attack"); }
         if (!scripts.player.isDead && !scripts.enemy.isDead) { 
+            // if neither player or enemy is dead
             yield return scripts.delays[2f];
+            // wait for status text/animation etc.
             if (scripts.player.isCourageous) {
+                // if player is courageous (save die to next round)
                 actionsAvailable = true;
+                // allow actions
                 discardDieBecauseCourage = true;
+                // make sure the die will discard under the correct pretense
                 scripts.turnManager.SetStatusText("discard all your dice, except one");
+                // notify player
                 for (int i = 0; i < 50; i++) {
-                    yield return scripts.delays[0.1f];
                     if ((from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached && a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList().Count <= 1) {
+                        // if player has 1 (or less) die attached
                         dieSavedFromLastRound = (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList()[0];
-                        try { } catch {}
+                        // save the one remaining die
                         break;
+                        // break out of the loop
                     }
+                    yield return scripts.delays[0.1f];
+                    // wait
                 }
                 if (dieSavedFromLastRound == null && scripts.diceSummoner.existingDice.Count > 0) {
-                    // player has not discarded enough dice, so choose a random one
+                    // player has not discarded enough dice in the 5s time slot, so choose a random one
                     dieSavedFromLastRound = (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList()[UnityEngine.Random.Range(0, (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList().Count)];
+                    // save random die
                 }
                 actionsAvailable = false;
                 discardDieBecauseCourage = false;
                 scripts.player.isCourageous = false;
                 scripts.player.SetPlayerStatusEffect("courage", "off");
+                // reset necessary variables
             }
             isMoving = false;
+            // stop moving
             scripts.statSummoner.ResetDiceAndStamina();
+            // reset die and stamina
             scripts.diceSummoner.SummonDice(false);
+            // summon the die again
             scripts.statSummoner.SummonStats();
-            // keep the setdebugs!!!
+            // summon the stats again
             RecalculateMaxFor("player");
             RecalculateMaxFor("enemy");
+            // make sure the player and enemy are aiming at the correct place
             DetermineMove(true);
+            // make the next person go again
         }
         else {
             isMoving = false;
+            // one of them has died, so stop moving
         }
         yield return scripts.delays[0.45f];
+        // small delay
         scripts.player.isFurious = false;
         scripts.player.SetPlayerStatusEffect("fury", "off");
         scripts.player.isDodgy = false;
@@ -309,144 +459,202 @@ public class TurnManager : MonoBehaviour {
         scripts.itemManager.usedBoots = false;
         scripts.itemManager.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
+        maceUsed = false;
+        ClearPotionStats();
+        // reset all variables used in preparation for the next round
     }
     
+    /// <summary>
+    /// Clear the stats gained from potions from the player.
+    /// </summary>
     public void ClearPotionStats() {
         foreach (string key in scripts.itemManager.statArr) {
+            // for every key
             scripts.player.potionStats[key] = 0;
+            // clear stats
         }
     }
 
+    /// <summary>
+    /// Coroutine to play the death animation, set status text, toggle variables, etc.
+    /// </summary>
+    /// <param name="playerOrEnemy">Who to perform the function on.</param>
     private IEnumerator Kill(string playerOrEnemy) {
         if (playerOrEnemy == "player") { scripts.player.isDead = true; }
         else if (playerOrEnemy == "enemy") { scripts.enemy.isDead = true; }
+        // make sure whoever is killed is set to be dead
         yield return scripts.delays[0.55f];
+        // short delay
         if (playerOrEnemy == "player") {
             scripts.turnManager.SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you die");
             StartCoroutine(PlayDeathAnimation("player"));
-            
+            // set status text and play the animation
         }
         else if (playerOrEnemy == "enemy") {
             scripts.turnManager.SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... he dies");
             StartCoroutine(PlayDeathAnimation("enemy"));
+            // set status text and play the animation
         }
         else { print("invalid string passed"); }
     }
 
-    public IEnumerator PlayHitAnimation(string playerOrEnemy) {
+    /// <summary>
+    /// Play the hit animation for the player or enemy.
+    /// </summary>
+    /// <param name="playerOrEnemy">Who to play the hit animation for.</param>
+    private IEnumerator PlayHitAnimation(string playerOrEnemy) {
         SpriteRenderer spriteRenderer = null;
-        if (playerOrEnemy == "player") {
-            spriteRenderer = scripts.player.GetComponent<SpriteRenderer>();
-        }
-        else if (playerOrEnemy == "enemy") {
-            spriteRenderer = scripts.enemy.GetComponent<SpriteRenderer>();
-        }
+        // declare variable to hold the spriterenderer
+        if (playerOrEnemy == "player") { spriteRenderer = scripts.player.GetComponent<SpriteRenderer>(); }
+        else if (playerOrEnemy == "enemy") { spriteRenderer = scripts.enemy.GetComponent<SpriteRenderer>(); }
         else { print("bad"); }
+        // get the proper spriterenderer
         Color temp = Color.white;
         temp.a = 0.5f;
+        // white with 50% transparency
         for (int i = 0; i < 14; i++) {
             yield return scripts.delays[0.0125f];
             temp.a -= 1f / 28f;
             spriteRenderer.color = temp;
         }
+        // fade out
         for (int i = 0; i < 28; i++) {
             yield return scripts.delays[0.0125f];
             temp.a += 1f / 28f;
-            temp.a += 1f / 28f;
             spriteRenderer.color = temp;
         }
+        // fade back in
     }
 
+    /// <summary>
+    /// Play the death animation for the player or enemy.
+    /// </summary>
+    /// <param name="playerOrEnemy">Who to play the death animation for.</param>
     public IEnumerator PlayDeathAnimation(string playerOrEnemy) {
         SpriteRenderer spriteRenderer = null;
-        if (playerOrEnemy == "player") {
-            spriteRenderer = scripts.player.GetComponent<SpriteRenderer>();
-        }
-        else if (playerOrEnemy == "enemy") {
-            spriteRenderer = scripts.enemy.GetComponent<SpriteRenderer>();
-        }
+        // variable to hold the spriterenderer
+        if (playerOrEnemy == "player") { spriteRenderer = scripts.player.GetComponent<SpriteRenderer>(); }
+        else if (playerOrEnemy == "enemy") { spriteRenderer = scripts.enemy.GetComponent<SpriteRenderer>(); }
         else { print("invalid string passed"); }
+        // get the proper sprite renderer
         Color temp = Color.white;
         temp.a = 0.5f;
+        // white with 50% transparency
         for (int i = 0; i < 14; i++) {
             yield return scripts.delays[0.0125f];
             temp.a -= 1f / 28f;
             spriteRenderer.color = temp;
         }
-        if (playerOrEnemy == "player") {
-            scripts.player.GetComponent<Animator>().enabled = false;
-        }
-        else if (playerOrEnemy == "enemy") {
-            scripts.enemy.GetComponent<Animator>().enabled = false;
-        }
+        // fade out
+        if (playerOrEnemy == "player") { scripts.player.GetComponent<Animator>().enabled = false; }
+        else if (playerOrEnemy == "enemy") { scripts.enemy.GetComponent<Animator>().enabled = false; }
+        // disable the animator for whoever is dead
         for (int i = 0; i < 28; i++) {
             yield return scripts.delays[0.0125f];
             temp.a += 1f / 28f;
             spriteRenderer.color = temp;
         }
+        // fade back in
         yield return scripts.delays[0.8f];
+        // pause (animation is not playing so it looks like they are just standing there)
         scripts.soundManager.PlayClip("death");
-        if (scripts.itemManager.PlayerHasWeapon("rapier")) {
-            ChangeStaminaOf("player", 3);
-        }
+        // play the sound
+        if (scripts.itemManager.PlayerHasWeapon("rapier") && playerOrEnemy == "enemy") { ChangeStaminaOf("player", 3); }
+        // if player has rapier and the enemy dies, add to their stamina
         if (playerOrEnemy == "player") {
             scripts.player.GetComponent<SpriteRenderer>().sprite = scripts.player.GetDeathSprite();
             scripts.player.SetPlayerPositionAfterDeath();
+            // if player dies, set sprite and proper position
         }
         else if (playerOrEnemy == "enemy") {
             scripts.enemy.GetComponent<SpriteRenderer>().sprite = scripts.enemy.GetDeathSprite();
             scripts.enemy.SetEnemyPositionAfterDeath();
+            // if enemy dies, set sprite and proper position
             scripts.itemManager.SpawnItems();
+            // spawn items
             blackBox.transform.position = onScreen;
+            // hide the enemy's tats
         }
         else { print("invalid string passed"); }
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
             StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+            // fade out all existing die
         }
         scripts.statSummoner.ResetDiceAndStamina();
-        foreach (GameObject item in scripts.player.inventory) {
-            
-        }
+        // clear them
         ClearPotionStats();
+        // clear potion stats
         scripts.statSummoner.SummonStats();
+        // summon stats
         scripts.statSummoner.SetDebugInformationFor("player");
+        // set debug (only player needed here)
         RecalculateMaxFor("player");
         RecalculateMaxFor("enemy");
+        // reset target for both
     }
 
-    public IEnumerator StatusTextCoroutine(string text) {
+    /// <summary>
+    /// Coroutine for fading in the status text.
+    /// </summary>
+    /// <param name="text">The text to set the status text to.</param>
+    private IEnumerator StatusTextCoroutine(string text) {
         Color temp = statusText.color;
         temp.a = 0f;
+        // make the text invisible
         statusText.text = text;
+        // set the status text to the desired text
         for (int i = 0; i < 10; i++) {
             yield return scripts.delays[0.033f];
             temp.a += 0.1f;
             statusText.color = temp;
         }
+        // fade in
         yield return scripts.delays[1f];
+        // wait 1 sec (so player has time to read)
         for (int i = 0; i < 10; i++) {
             yield return scripts.delays[0.033f];
             temp.a -= 0.1f;
             statusText.color = temp;
         }
+        // fade out
         statusText.text = "";
+        // reset the text
     }
 
+    /// <summary>
+    /// Update the status text.
+    /// </summary>
+    /// <param name="text">What to set the new status text to</param>
     public void SetStatusText(string text) {
         try { StopCoroutine(coroutine); } catch {}
+        // stop any existing status text coroutines
         coroutine = StartCoroutine(StatusTextCoroutine(text));
+        // set the status text, and allow for it to be stopped
     }
 
+    /// <summary>
+    /// Perform actions (sound, animation) for when a player or enemy is hit.
+    /// </summary>
+    /// <param name="hitOrParry">Whether the attack was a hit or a parry.</param>
+    /// <param name="playerOrEnemy">Who is getting hit/parrying.</param>
+    /// <param name="showAnimation">true to show the animation, false to not (true by default).</param>
+    /// <param name="armor">true if the player has armor, false if not (false by default).</param>
+    /// <returns></returns>
     public IEnumerator DoStuffForAttack(string hitOrParry, string playerOrEnemy, bool showAnimation=true, bool armor=false) {
         yield return scripts.delays[0.55f];
+        // wait
         if (hitOrParry == "hit") {
             if (scripts.player.isDodgy && playerOrEnemy == "player") {
                 // play whoosh
             }
+            // player dodges
             else {
                 scripts.soundManager.PlayClip("hit");
+                // play sound clip
                 if (showAnimation) {
+                    // if showing an animation
                     if (!(playerOrEnemy == "player" && armor)) { 
+                        // if NOT player is getting hit and has armor
                         StartCoroutine(PlayHitAnimation(playerOrEnemy)); 
                     }
                 }
@@ -454,46 +662,68 @@ public class TurnManager : MonoBehaviour {
         }
         else if (hitOrParry == "parry") {
             scripts.soundManager.PlayClip("parry");
+            // play sound clip
         }
         else { Debug.LogError("invalid string passed"); }
     }
 
+    /// <summary>
+    /// Perform actions for the enemy's attack.
+    /// </summary>
+    /// <param name="enemyAtt">The enemy's attack stat.</param>
+    /// <param name="playerDef">The player's parry stat.</param>
+    /// <returns>true if the player was killed, false otherwise</returns>
     private bool EnemyAttacks(int enemyAtt, int playerDef) {
         bool armor = false;
+        // set armor to false
         scripts.soundManager.PlayClip("swing");
+        // play sound clip
         if (enemyAtt > playerDef) {
-            if (scripts.player.isDodgy) {
-                    SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you dodge");
-                }
-
+            // if enemy is hitting player
+            if (scripts.player.isDodgy) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you dodge"); }
+            // if player dodges, notify 
             else {
                 if (scripts.itemManager.PlayerHas("armour")) {
                     // play shatter
                     armor = true;
+                    // set armor to true
                     SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... your armour shatters");
-                    scripts.itemManager.Select(scripts.player.inventory, (from a in scripts.player.inventory select a.GetComponent<SpriteRenderer>().sprite.name).ToList().IndexOf("armour"));
+                    // notify player
                     scripts.itemManager.GetPlayerItem("armour").GetComponent<Item>().Remove();
+                    // remove armor from the player's inventory
                     scripts.itemManager.Select(scripts.player.inventory, 0);
+                    // select weapon
                 }
                 else {
                     if (scripts.enemy.target.text != "face") {
+                        // if player is not targeting face
                         if (scripts.enemy.target.text.Contains("*")) {
+                            // if previously wounded
                             SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text.Substring(1)}!");
+                            // notify player
                         }
                         else {
                             if (scripts.player.woundList.Count != 2) {
+                                // if player won't die
                                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text}!");
+                                // notify player
                             }
                         }
                     }
                 }
             }
             StartCoroutine(DoStuffForAttack("hit", "player", true, armor));
+            // play animation + sound for the attack
             if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text.Substring(1)) || armor || scripts.player.isDodgy)) {
+                // if the player hasn't been injured before, doesn't have armor, and didnt' dodge:
                 scripts.player.woundList.Add(scripts.enemy.target.text);
+                // add the hit
                 StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
+                // make it change
                 RecalculateMaxFor("player");
+                // reset stuff
                 return InstantlyApplyInjuries(scripts.enemy.target.text, "player");
+                // return if player died or not
             }
         }
         else {
