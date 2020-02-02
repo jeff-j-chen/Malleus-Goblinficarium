@@ -503,12 +503,9 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     /// <param name="playerOrEnemy">Who to play the hit animation for.</param>
     private IEnumerator PlayHitAnimation(string playerOrEnemy) {
-        SpriteRenderer spriteRenderer = null;
-        // declare variable to hold the spriterenderer
-        if (playerOrEnemy == "player") { spriteRenderer = scripts.player.GetComponent<SpriteRenderer>(); }
-        else if (playerOrEnemy == "enemy") { spriteRenderer = scripts.enemy.GetComponent<SpriteRenderer>(); }
-        else { print("bad"); }
+        SpriteRenderer spriteRenderer = playerOrEnemy == "player" ? scripts.player.GetComponent<SpriteRenderer>() : scripts.enemy.GetComponent<SpriteRenderer>();
         // get the proper spriterenderer
+        // conditional is true ? yes : no
         Color temp = Color.white;
         temp.a = 0.5f;
         // white with 50% transparency
@@ -531,12 +528,9 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     /// <param name="playerOrEnemy">Who to play the death animation for.</param>
     public IEnumerator PlayDeathAnimation(string playerOrEnemy) {
-        SpriteRenderer spriteRenderer = null;
-        // variable to hold the spriterenderer
-        if (playerOrEnemy == "player") { spriteRenderer = scripts.player.GetComponent<SpriteRenderer>(); }
-        else if (playerOrEnemy == "enemy") { spriteRenderer = scripts.enemy.GetComponent<SpriteRenderer>(); }
-        else { print("invalid string passed"); }
-        // get the proper sprite renderer
+        SpriteRenderer spriteRenderer = playerOrEnemy == "player" ? scripts.player.GetComponent<SpriteRenderer>() : scripts.enemy.GetComponent<SpriteRenderer>();
+        // get the proper spriterenderer
+        // conditional is true ? yes : no
         Color temp = Color.white;
         temp.a = 0.5f;
         // white with 50% transparency
@@ -727,73 +721,113 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else {
+            // player parreid
             StartCoroutine(DoStuffForAttack("parry", "player"));
+            // play sound and animation
             if (enemyAtt < 0) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... the attack is to weak"); }
             else { 
                 scimitarParry = true;
+                // player has parried (this resets at the start of every round so we can do it regardless)
                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you parry"); 
             }
+            // notify player
         }
         return false;
+        // player hasn't died, so return false
     }
 
     private bool PlayerAttacks(int playerAtt, int enemyDef) {
         scripts.soundManager.PlayClip("swing");
+        // play sound clip
         if (playerAtt > enemyDef) {
+            // if player will hit enemy
             if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
+                // player doesn't have enough accuracy to hit, so notify
                 SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... you miss");
                 // play missed atk sound
             }
             else {
                 if (scripts.player.target.text == "face" || (scripts.enemy.woundList.Count == 2 && !scripts.player.target.text.Contains("*"))) {
+                    // enemy is going to die
                     StartCoroutine(DoStuffForAttack("hit", "enemy", false));
+                    // play sound but no animation
                 }
                 else {
+                    // enemy will not die
                     StartCoroutine(DoStuffForAttack("hit", "enemy"));
+                    // play sound and animation
                     if (scripts.player.target.text.Contains("*")) {
+                        // if already injured
                         if (scripts.itemManager.PlayerHasWeapon("maul")) {}
+                        // don't say anything for maul (we want it to show that it is an instant kill)
                         else {
                             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
                         }
+                        // notify player if hitting injured
                     }
                     else {
+                        // not injured
                         if (scripts.itemManager.PlayerHasWeapon("maul")) {}
                         else {
                             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
                         }
+                        // same as above
                     }
                 }
                 if (!scripts.player.target.text.Contains("*") && scripts.statSummoner.SumOfStat("green", "player") >= 0) {
+                    // if wound was not injurd and player has enough accuracy to hit
                     scripts.enemy.woundList.Add(scripts.player.target.text);
+                    // add the wound
                     if (scripts.player.isBloodthirsty) {
+                        // if player is wounded
                         try { scripts.player.woundList.Remove(scripts.player.target.text); } catch { print("no need to heal"); }
+                        // try to heal the wound, else don't do anything
                         StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
+                        // update the text
                         scripts.player.isBloodthirsty = false;
                         scripts.player.SetPlayerStatusEffect("leech", "off");
+                        // turn off bloodthirsty
                     }
                     StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));
+                    // make the text change
                     RecalculateMaxFor("enemy");
+                    // recalculate max
                     return InstantlyApplyInjuries(scripts.player.target.text, "enemy");
+                    // return if the enemy dies and at the same time apply wounds instantly
                 }
                 if (scripts.itemManager.PlayerHasWeapon("maul")) { return true; }
+                // kill enemy instantly if player has a maul
             }
         }
         else {
+            // enemy will parry
             StartCoroutine(DoStuffForAttack("parry", "enemy"));
+            // play animation and sound
             if (playerAtt < 0) { SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... the attack is too weak"); }
             else if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
                 SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... you miss");
                 // play missed atk sound
             }
             else { SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... he parries"); }
+            // depending on the stats, notify player accordingly
         }
         return false;
+        // enemy has not died, so return false
     }
 
+    /// <summary>
+    /// Instantly apply injury effects (such as decreasing die on gut wound).
+    /// </summary>
+    /// <param name="injury">The injury name to apply the effects of.</param>
+    /// <param name="appliedTo">Who the injury was applied to.</param>
+    /// <returns>true if who the injury was applied to dies, false otherwise.</returns>
     private bool InstantlyApplyInjuries(string injury, string appliedTo) {
         if (appliedTo != "enemy" && appliedTo != "player") { print("invalid string passed into param. appliedTo in InstantlyApplyInjuries"); }
+        // just checking
         if (scripts.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
+        // return true immediately if maul
         if (injury == "guts") {
+            // for guts, decrease all die
             if (appliedTo == "player") {
                 foreach (string key in scripts.statSummoner.addedPlayerDice.Keys) {
                     foreach (Dice dice in scripts.statSummoner.addedPlayerDice[key]) {
@@ -812,14 +846,26 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else if (injury == "hip") {
-            scripts.statSummoner.addedPlayerStamina = new Dictionary<string, int>() {
-                { "green", 0 },
-                { "blue", 0 },
-                { "red", 0 },
-                { "white", 0 },
-            };
+            // if hip, remove all applied stamina
+            if (appliedTo == "player") {
+                scripts.statSummoner.addedPlayerStamina = new Dictionary<string, int>() {
+                    { "green", 0 },
+                    { "blue", 0 },
+                    { "red", 0 },
+                    { "white", 0 },
+                };
+            }
+            else {
+                scripts.statSummoner.addedEnemyStamina = new Dictionary<string, int>() {
+                    { "green", 0 },
+                    { "blue", 0 },
+                    { "red", 0 },
+                    { "white", 0 },
+                };
+            }
         }
         else if (injury == "hand") {
+            // if hand, remove white die
             if (appliedTo == "player") {
                 StartCoroutine(RemoveDice("white", "player"));
             }
@@ -828,6 +874,7 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else if (injury == "armpits") {
+            // if armpits, remove red die
             if (appliedTo == "player") {
                 StartCoroutine(RemoveDice("red", "player"));
             }
@@ -836,57 +883,60 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else if (injury == "face") {
+            // if face, kill instantly
             return true;
         }
         scripts.statSummoner.SetDebugInformationFor("player");
         scripts.statSummoner.SetDebugInformationFor("enemy");
+        // update debug information
         if (appliedTo == "player" && scripts.player.woundList.Count == 3) { return true; }
         else if (appliedTo == "enemy" && scripts.enemy.woundList.Count == 3) { return true; }
+        // if 3 wounds, return killed
         return false;
+        // appliedto has ot been killed, so return as such
     }
 
+    /// <summary>
+    /// Coroutine to remove all of a dice type from the player or enemy.
+    /// </summary>
+    /// <param name="diceType">The type of die to remove.</param>
+    /// <param name="removeFrom">Who to remove the die from.</param>
     private IEnumerator RemoveDice(string diceType, string removeFrom) {
         yield return scripts.delays[1f];
-        foreach (Dice dice in scripts.statSummoner.addedPlayerDice["red"]) {
+        List<Dice> diceList = removeFrom == "player" ? scripts.statSummoner.addedPlayerDice[diceType] : scripts.statSummoner.addedEnemyDice[diceType];
+        // assign the correct dicelist
+        // conditional is true ? yes: no
+        foreach (Dice dice in diceList.ToList()) {
+            // for every die in the stat we want to remove from
             if (dice.diceType == diceType) {
+                // if the die type matches
+                int index = diceList.IndexOf(dice);
+                // get where the die is currently in the array
                 scripts.diceSummoner.existingDice.Remove(dice.gameObject);
-                Destroy(dice.gameObject);
-            }
-        }
-        if (removeFrom == "player") {
-            for (int k = 0; k < scripts.statSummoner.addedPlayerDice[diceType].Count; k++) {
-                if (scripts.statSummoner.addedPlayerDice[diceType][k].diceType == diceType) {
-                    int index = scripts.statSummoner.addedPlayerDice[scripts.statSummoner.addedPlayerDice[diceType][k].statAddedTo].IndexOf(scripts.statSummoner.addedPlayerDice[diceType][k]);     
-                    if (index != -1 && index != scripts.statSummoner.addedPlayerDice[scripts.statSummoner.addedPlayerDice[diceType][k].statAddedTo].Count - 1) {
-                        scripts.statSummoner.addedPlayerDice[diceType].Remove(scripts.statSummoner.addedPlayerDice[diceType][k]);
-                        List<Dice> diceList = scripts.statSummoner.addedPlayerDice[scripts.statSummoner.addedPlayerDice[diceType][k].statAddedTo];
-                        for (int i = index; i < diceList.Count; i++) {
-                            diceList[i].transform.position = new Vector2(diceList[i].transform.position.x - scripts.statSummoner.diceOffset, diceList[i].transform.position.y);
-                            diceList[i].GetComponent<Dice>().instantiationPos = diceList[i].transform.position;
-                        }
-                        if (diceList.Count > 0) {
-                            Vector3 lastDicePos = diceList[diceList.Count - 1].transform.position;
-                            scripts.statSummoner.addedPlayerDice[diceType][k].instantiationPos = new Vector2(lastDicePos.x + scripts.statSummoner.diceOffset, lastDicePos.y);
-                        }
-                    }
+                scripts.statSummoner.addedPlayerDice.Remove(dice);
+                dice.FadeOut();
+                // remove from arrays and destroy
+                for (int i = index; i < diceList.Count; i++) {
+                    // for every die that was after where the die that was removed was
+                    diceList[i].transform.position = new Vector2(diceList[i].transform.position.x - scripts.statSummoner.diceOffset, diceList[i].transform.position.y);
+                    // shift the die over
+                    diceList[i].GetComponent<Dice>().instantiationPos = diceList[i].transform.position;
+                    // set the new instantiation position
                 }
             }
         }
-        else if (removeFrom == "enemy") {
-
-        }
-        else {
-            Debug.LogError("error in passing in to RemoveDice");
-        }
     }
 
+    /// <summary>
+    /// Make the enemy evaluate the current stats and add stamina to attack/defend etc.
+    /// </summary>
     private void RunEnemyCalculations() {
         if (!scripts.enemy.woundList.Contains("hip")) {
             InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
             if (enemyAtt <= playerDef && enemyAtt + scripts.enemy.stamina > playerDef) {
                 // if enemy can hit player
-                // add stamina to hit player
                 UseEnemyStaminaOn("red", (playerDef - enemyAtt) + 1);
+                // add stamina to hit player
                 if (playerSpd >= enemySpd && playerAtt > enemyDef) {
                     // if player will attack first
                     if (enemySpd + scripts.enemy.stamina > playerSpd) {
@@ -909,22 +959,38 @@ public class TurnManager : MonoBehaviour {
                 // TO DO: check for gut/hip/chest strike and take actions correspondingly
             }
             scripts.statSummoner.SetDebugInformationFor("enemy");
+            // update the debug
         }
     }
 
+    /// <summary>
+    /// Make the enemy use stamina.
+    /// </summary>
+    /// <param name="stat">Which stat to use the stamina on.</param>
+    /// <param name="amount">The amount of stamina to use on the stat.</param>
     private void UseEnemyStaminaOn(string stat, int amount) {
         if (scripts.enemy.stamina < amount) { print("too much stamina to use!"); }
+        // restrict just in case
         else {
             scripts.statSummoner.addedEnemyStamina[stat] += amount;
+            // incrase stat
             scripts.turnManager.ChangeStaminaOf("enemy", -amount);
+            // decrease available
             scripts.statSummoner.SummonStats();
+            // summon stats again
             foreach (Dice dice in scripts.statSummoner.addedEnemyDice[stat]) {
+                // for every die in the stat
                 dice.transform.position = new Vector2(dice.transform.position.x - scripts.statSummoner.xOffset * amount, dice.transform.position.y);
+                // shift it over
                 dice.instantiationPos = dice.transform.position;
+                // set the instantiation position
             }
         }
     }
 
+    /// <summary>
+    /// Create variables for local scope based on the current stats.
+    /// </summary>
     private void InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef) {
         playerAim = scripts.statSummoner.SumOfStat("green", "player");
         enemyAim = scripts.statSummoner.SumOfStat("green", "enemy");
@@ -936,14 +1002,23 @@ public class TurnManager : MonoBehaviour {
         enemyDef = scripts.statSummoner.SumOfStat("white", "enemy");
     }
 
+    /// <summary>
+    /// Checks if there is a die on the enemy that can be rerolled and is >= 3.
+    /// </summary>
+    /// <returns>true if there are die to be rerolled, false if not.</returns>
     private bool Rerollable() {
-        foreach (string key in scripts.statSummoner.addedPlayerDice.Keys) {
-            foreach (Dice dice in scripts.statSummoner.addedPlayerDice[key]) {
-                if (!dice.isRerolled) {
+        foreach (string key in scripts.statSummoner.addedEnemyDice.Keys) {
+            // for every key
+            foreach (Dice dice in scripts.statSummoner.addedEnemyDice[key]) {
+                // for every die
+                if (!dice.isRerolled && dice.diceNum >= 3) {
+                    // if the die is not rerolled and the number is >=3 
                     return true;
+                    // return true
                 }
             }
         }
         return false;
+        // none found, so return false
     }
 }
