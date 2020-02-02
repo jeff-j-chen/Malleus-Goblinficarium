@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Dice : MonoBehaviou {
+public class Dice : MonoBehaviour {
     public int diceNum;
     public string diceType;
     public string statAddedTo;

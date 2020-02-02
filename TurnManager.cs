@@ -913,7 +913,7 @@ public class TurnManager : MonoBehaviour {
                 int index = diceList.IndexOf(dice);
                 // get where the die is currently in the array
                 scripts.diceSummoner.existingDice.Remove(dice.gameObject);
-                scripts.statSummoner.addedPlayerDice.Remove(dice);
+                diceList.Remove(dice);
                 dice.FadeOut();
                 // remove from arrays and destroy
                 for (int i = index; i < diceList.Count; i++) {

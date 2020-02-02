@@ -365,24 +365,25 @@ public class ItemManager : MonoBehaviour {
             }
             else {
                 // not a weapon
-                if (floorItems[index].GetComponent<Item>().itemName == "necklet") {
-                    if (floorItems[index].GetComponent<Item>().modifier == "solidity") { 
+                Item tempItem = floorItems[index].GetComponent<Item>();
+                if (tempItem.itemName == "necklet") {
+                    if (tempItem.modifier == "solidity") { 
                         neckletStats["green"] += neckletCounter["arcane"]; 
                         neckletCounter["green"]++; 
                     } 
-                    else if (floorItems[index].GetComponent<Item>().modifier == "rapidity") { 
+                    else if (tempItem.modifier == "rapidity") { 
                         neckletStats["blue"] += neckletCounter["arcane"];
                         neckletCounter["blue"]++; 
                     } 
-                    else if (floorItems[index].GetComponent<Item>().modifier == "strength") { 
+                    else if (tempItem.modifier == "strength") { 
                         neckletStats["red"] += neckletCounter["arcane"]; 
                         neckletCounter["red"]++; 
                     } 
-                    else if (floorItems[index].GetComponent<Item>().modifier == "defense") { 
+                    else if (tempItem.modifier == "defense") { 
                         neckletStats["white"] += neckletCounter["arcane"]; 
                         neckletCounter["white"]++; 
                     }
-                    else if (floorItems[index].GetComponent<Item>().modifier == "arcane") {
+                    else if (tempItem.modifier == "arcane") {
                         neckletCounter["arcane"]++;    
                         foreach (string stat in statArr) { 
                             neckletStats[stat] = neckletCounter["arcane"] * neckletCounter[stat]; 
@@ -394,15 +395,15 @@ public class ItemManager : MonoBehaviour {
                 }
                 if (!starter) 
                 { 
-                    if (itemType == "weapon") { 
-                        scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
+                    if (tempItem.itemType == "weapon") { 
+                        scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
                     }
-                    if (itemName == "necklet")  { 
-                        if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you take arcane necklet"); }
-                        else { scripts.turnManager.SetStatusText($"you take {itemName} of {modifier}"); }
+                    if (tempItem.itemName == "necklet")  { 
+                        if (tempItem.modifier == "arcane") { scripts.turnManager.SetStatusText($"you take arcane necklet"); }
+                        else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
                     }
-                    else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {itemName} of {modifier}"); }
-                    else { scripts.turnManager.SetStatusText($"you take {itemName}"); }
+                    else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
+                    else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName}"); }
                     // notify the player of which item that they took
                 }
                 // if the item is not a starter item, notify the player that they have picked up the item

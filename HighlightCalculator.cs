@@ -240,7 +240,7 @@ public class HighlightCalculator : MonoBehaviour {
     private void HandleYellowDrop(string addTo, Dice dice, BoxCollider2D collider) {
         scripts.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to player's die list
-        dice.statAddedTo = addedTo;
+        dice.statAddedTo = addTo;
         // set attributes
         if (!dice.isAttached && scripts.player.woundList.Contains("guts")) {
             StartCoroutine(dice.DecreaseDiceValue(false));

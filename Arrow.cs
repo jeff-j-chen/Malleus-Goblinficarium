@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-public class Arrow : MonoBehaviou {
+public class Arrow : MonoBehaviour {
     [SerializeField] public GameObject[] menuButtons;
     // serialized field of menubuttons 
     private float xOffset = -3.2f;

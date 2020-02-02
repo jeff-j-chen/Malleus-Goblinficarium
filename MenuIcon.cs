@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using TMPro;
 
-public class MenuIcon : MonoBehavior {
+public class MenuIcon : MonoBehaviour {
     private const string DEBUG_KEY = "debug";
     private const string HINTS_KEY = "hints";
     private const string SOUNDS_KEY = "sounds";
@@ -21,7 +21,7 @@ public class MenuIcon : MonoBehavior {
         musicPlayer.ignoreListenerVolume = true;
         debugSR = debug.GetComponent<SpriteRenderer>();
         hintsSR = hints.GetComponent<SpriteRenderer>();
-        soundsSR = sounds.GetComponent<SpriteRenderer>();
+        soundsSR = sound.GetComponent<SpriteRenderer>();
         musicSR = music.GetComponent<SpriteRenderer>();
         ColorUtility.TryParseHtmlString("#404040", out gray);
         // get the necessary components and colors
@@ -101,7 +101,6 @@ public class MenuIcon : MonoBehavior {
     private void TurnOff(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = gray;
         // make the icon gray
-        AssignColor(spriteRenderer, gray);
         switch (key) {
             case DEBUG_KEY:
                 break;
