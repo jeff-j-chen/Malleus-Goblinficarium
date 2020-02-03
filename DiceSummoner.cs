@@ -12,7 +12,7 @@ public class DiceSummoner : MonoBehaviour
     public List<GameObject> existingDice = new List<GameObject>();
     public float yCoord = -5.51f;
     private float[] xCoords = new float[] { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
-    private List<Color> generatedDiceTypes;
+    private List<Color> generatedTypes = new List<Color>();
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -53,6 +53,7 @@ public class DiceSummoner : MonoBehaviour
         }
         existingDice.Clear();
         // clear the list so we have a fresh array
+        GenerateDiceTypes();
         for (int i = 0; i < 6; i++) {
             GenerateSingleDie(UnityEngine.Random.Range(1, 7), null, "none", null, i);
         }
@@ -85,7 +86,7 @@ public class DiceSummoner : MonoBehaviour
         else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
         int diceColorIndex;
         // reference variable for the die's color index relative to scripts.color.coloArr
-        if (diceType == null) { diceColorIndex = Array.IndexOf(scripts.colors.colorArr, generatedDiceTypes[i]);; }
+        if (diceType == null) { diceColorIndex = Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]); }
         // generate the respected die from the type list if not given a set die type
         else { diceColorIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType); }
         // else create one of the specified type
@@ -140,24 +141,24 @@ public class DiceSummoner : MonoBehaviour
     /// Generates a list of necessary dice types
     /// </summary>
     private void GenerateDiceTypes() {
-        generatedDiceTypes.Clear();
+        generatedTypes.Clear();
         // clear the list so we can start with a new one
         for (int a = 0; a < 3; a++) {
             // create 4 yellow dice
-            generatedDiceTypes.Add(scripts.colors.colorArr[4]);
+            generatedTypes.Add(scripts.colors.colorArr[4]);
         }
         for (int b = 0; b < 4; b++) {
             // for each dice type that is not yellow
             for (int c = 0; c < 3; c++) {
                 // create 3 dice 
-                generatedDiceTypes.Add(scripts.colors.colorArr[b]);
+                generatedTypes.Add(scripts.colors.colorArr[b]);
             }
         }
-        generatedDiceTypes.RemoveAt(3);
-        // remove the third green
+        generatedTypes.RemoveAt(3);
+        // remove a green
         for (int d = 0; d < 8; d++) {
             // remove dice needed to get just 6
-            generatedDiceTypes.RemoveAt(UnityEngine.Random.Range(0, generatedDiceTypes.Count));
+            generatedTypes.RemoveAt(UnityEngine.Random.Range(0, generatedTypes.Count));
         }
     }
 }

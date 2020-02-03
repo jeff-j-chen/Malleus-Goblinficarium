@@ -914,16 +914,20 @@ public class TurnManager : MonoBehaviour {
                 // get where the die is currently in the array
                 scripts.diceSummoner.existingDice.Remove(dice.gameObject);
                 diceList.Remove(dice);
-                dice.FadeOut();
+                StartCoroutine(dice.FadeOut());
                 // remove from arrays and destroy
                 for (int i = index; i < diceList.Count; i++) {
                     // for every die that was after where the die that was removed was
-                    diceList[i].transform.position = new Vector2(diceList[i].transform.position.x - scripts.statSummoner.diceOffset, diceList[i].transform.position.y);
+                    if (removeFrom == "player") { diceList[i].transform.position = new Vector2(diceList[i].transform.position.x - scripts.statSummoner.diceOffset, diceList[i].transform.position.y); }
+                    else { diceList[i].transform.position = new Vector2(diceList[i].transform.position.x + scripts.statSummoner.diceOffset, diceList[i].transform.position.y); } 
+                    
                     // shift the die over
                     diceList[i].GetComponent<Dice>().instantiationPos = diceList[i].transform.position;
                     // set the new instantiation position
                 }
             }
+            scripts.statSummoner.SetDebugInformationFor(removeFrom);
+            // update information
         }
     }
 
