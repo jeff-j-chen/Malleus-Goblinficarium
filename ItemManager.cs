@@ -112,7 +112,7 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("sword", "common", 2, 1, 2, 2);
+        CreateWeaponWithStats("flail", "common", 5, 5, 5, 5);
         MoveToInventory(0, true);
         CreateItem("steak", "common");
         MoveToInventory(0, true);
@@ -165,6 +165,8 @@ public class ItemManager : MonoBehaviour {
                 // if we want to force a different selection
                 if (itemList.Count > 1) {
                     // if there is more than 1 item
+                    print("itemList has" + itemList.Count + " items");
+                    print(itemList[col - 1]);
                     itemList[col - 1].GetComponent<Item>().Select();
                     // select the next item over
                     curList = itemList;
@@ -280,7 +282,7 @@ public class ItemManager : MonoBehaviour {
             // for every key in the stat array ("green", "blue", etc.)
             baseWeapon[key] += modifierDict[modifier][key]; 
             // add the modifier stats to the weapon stats
-            if (baseWeapon[key] < 1) { baseWeapon[key] = -1; }
+            if (baseWeapon[key] < 0) { baseWeapon[key] = -1; }
             // limit the item so it can't go down to -2 (not in the actual game, but in my modded version later i may do this)
         }
         instantiatedItem.GetComponent<Item>().weaponStats = baseWeapon;
@@ -450,7 +452,7 @@ public class ItemManager : MonoBehaviour {
     /// Spawn the items for which the player can trade with.
     /// </summary>
     public void SpawnTraderItems() {
-        lootText.text = "PLACEHOLDER TEXT";
+        lootText.text = "goods:";
         // set the test
         for (int i = 0; i < 3; i++) { CreateItem("common"); }
         // create 3 common items

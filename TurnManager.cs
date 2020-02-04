@@ -263,7 +263,6 @@ public class TurnManager : MonoBehaviour {
                     // reset target
                     StartCoroutine(Kill("enemy"));
                     // make the enemy die
-                    isMoving = false;
                     // reset ismoving
                 }
             }
@@ -281,14 +280,13 @@ public class TurnManager : MonoBehaviour {
                     // player was killed
                     StartCoroutine(Kill("player"));
                     // show animation
-                    isMoving = false;
-                    // stop moving
                 }
             }
         }
         else { 
             // dice are available
             isMoving = false;
+            print("Turningoff0");
             // stop moving
             if (scripts.itemManager.PlayerHasWeapon("mace") && !maceUsed) {
                 // if player has mace
@@ -352,8 +350,6 @@ public class TurnManager : MonoBehaviour {
                 // reset target
                 StartCoroutine(Kill("enemy"));
                 // play information
-                isMoving = false;
-                // stop moving
             }
         }
         else if (toMove == "enemy") {
@@ -388,8 +384,6 @@ public class TurnManager : MonoBehaviour {
                 // if enemy kills player
                 StartCoroutine(Kill("player"));
                 // play animation
-                isMoving = false;
-                // stop moving
             }
         }
         else { print("error passing into ienumerator attack"); }
@@ -428,6 +422,7 @@ public class TurnManager : MonoBehaviour {
                 // reset necessary variables
             }
             isMoving = false;
+            print("turning off1");
             // stop moving
             scripts.statSummoner.ResetDiceAndStamina();
             // reset die and stamina
@@ -440,10 +435,6 @@ public class TurnManager : MonoBehaviour {
             // make sure the player and enemy are aiming at the correct place
             DetermineMove(true);
             // make the next person go again
-        }
-        else {
-            isMoving = false;
-            // one of them has died, so stop moving
         }
         yield return scripts.delays[0.45f];
         // small delay
@@ -496,6 +487,8 @@ public class TurnManager : MonoBehaviour {
             // set status text and play the animation
         }
         else { print("invalid string passed"); }
+        yield return scripts.delays[0.45f];
+        isMoving = false;
     }
 
     /// <summary>

@@ -16,6 +16,7 @@ public class HighlightCalculator : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         HandleHighlightInitiation();
     }
+    
     /// <summary>
     /// Creates the highlights to use.
     /// </summary>

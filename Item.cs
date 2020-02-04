@@ -157,23 +157,25 @@ public class Item : MonoBehaviour {
                 // not trader, so just pick up the item
             }
         }
-        else  {
-            // in player's inventory
-            if (itemType == "weapon")  { 
-                // if player is trying to use weapon
-                if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
-                    // if conditions allow for attack
-                    if (!scripts.enemy.isDead && scripts.levelManager.sub != 4) { scripts.player.UseWeapon(); }
-                    // attack
-                    else if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
-                    else if (scripts.levelManager.sub == 4) { scripts.turnManager.SetStatusText("mind your manners"); }
-                    // send reminders accordingly
-                    else { print("error!"); }
+        else {
+            if (!scripts.turnManager.isMoving) {
+                // in player's inventory
+                if (itemType == "weapon")  { 
+                    // if player is trying to use weapon
+                    if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
+                        // if conditions allow for attack
+                        if (!scripts.enemy.isDead && scripts.levelManager.sub != 4) { scripts.player.UseWeapon(); }
+                        // attack
+                        else if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
+                        else if (scripts.levelManager.sub == 4) { scripts.turnManager.SetStatusText("mind your manners"); }
+                        // send reminders accordingly
+                        else { print("error!"); }
+                    }
                 }
+                else if (itemType == "common") { UseCommon(); }
+                else if (itemType == "rare") { UseRare(); }
+                // not item, so use corresponding item type
             }
-            else if (itemType == "common") { UseCommon(); }
-            else if (itemType == "rare") { UseRare(); }
-            // not item, so use corresponding item type
         }
     }
 
@@ -429,29 +431,32 @@ public class Item : MonoBehaviour {
 
     public void Remove(bool drop=false) {
         if (drop) { 
-            // if the item is being dropped
-            if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
-            // if trader increment the number of items dropped for trading
-            else if (scripts.itemManager.PlayerHas("kapala") && scripts.levelManager.sub != 4) {
-                // play add checks so that this doesn't happen multiple times a round / when dropping items after enemy has dead
-                if (itemType != "weapon") {
-                    // if the item is not the player's weapon
-                    scripts.player.isFurious = true;
-                    scripts.player.SetPlayerStatusEffect("fury", "on");
-                    // turn on fury
+            if (!scripts.turnManager.isMoving) {
+                // if the item is being dropped
+                if (scripts.itemManager.PlayerHas("kapala") && scripts.levelManager.sub != 4) {
+                    // play add checks so that this doesn't happen multiple times a round / when dropping items after enemy has dead
+                    if (itemType != "weapon") {
+                        // if the item is not the player's weapon
+                        scripts.player.isFurious = true;
+                        scripts.player.SetPlayerStatusEffect("fury", "on");
+                        // turn on fury
+                        scripts.turnManager.SetStatusText("PLACEHOLDER STATUS TEXT");
+                    }
                 }
-            }
-            else {
-                if (itemType == "weapon") { 
-                    scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
+                else {
+                    if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
+                    // if trader level increment the number of items dropped for trading
+                    if (itemType == "weapon") { 
+                        scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
+                    }
+                    if (itemName == "necklet")  { 
+                        if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you drop arcane necklet"); }
+                        else { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
+                    }
+                    else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
+                    else { scripts.turnManager.SetStatusText($"you drop {itemName}"); }
+                    // notify player that item has been dropped
                 }
-                if (itemName == "necklet")  { 
-                    if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you drop arcane necklet"); }
-                    else { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
-                }
-                else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
-                else { scripts.turnManager.SetStatusText($"you drop {itemName}"); }
-                // notify player that item has been dropped
             }
         }
         int index = scripts.itemManager.curList.IndexOf(gameObject);

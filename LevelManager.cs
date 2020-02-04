@@ -18,7 +18,7 @@ public class LevelManager : MonoBehaviour {
     private float[] defense =  new float[] { 2f, 10f, 2f, 23f };
     private float[] mix =      new float[] { 2f, -10f, 18f, 18f };
     public int level { get; private set; } = 1;
-    public int sub { get; private set; } = 1;
+    public int sub { get; private set; } = 3;
     private Dictionary<string, float[]> levelStats = new Dictionary<string, float[]>() {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
@@ -63,7 +63,10 @@ public class LevelManager : MonoBehaviour {
             // notify me of error and return a basic one
         }
         else {
-            float[] stats = levelStats[level.ToString() + sub.ToString()];
+            float[] stats;
+            if (sub == 4) { return new float[] { 0f, 0f, 0f, 0f }; }
+            // given key is not present in the dictionary for sub-4s, instantly return blank
+            else { stats = levelStats[level.ToString() + sub.ToString()]; }
             // based on the level and sub, get the stats from the level
             float[] totalStats = new float[4];
             float[] baseStats = null;
@@ -117,12 +120,10 @@ public class LevelManager : MonoBehaviour {
     /// Summon a trader.
     /// </summary>
     private void SummonTrader() {
-        scripts.enemy.SpawnNewEnemy(99); // spawn the trader here
+        scripts.enemy.SpawnNewEnemy(7); // spawn the trader here
         // create the trader enemy
         scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
         // hide the trader's stats (which are given to enemies by default)
-        scripts.itemManager.SpawnTraderItems();
-        // spawn the items so the player can interact with them
     }
 
     /// <summary>
@@ -199,6 +200,8 @@ public class LevelManager : MonoBehaviour {
         // try to remove torches
         scripts.itemManager.DestroyItems();
         // only now do we destroy the items
+        if (sub == 4) { scripts.itemManager.SpawnTraderItems(); }
+        // spawn the items so the player can interact with them, after the items are destroyed
         scripts.turnManager.DetermineMove(false);
         // determine who moves
         StopCoroutine(NextLevel());
