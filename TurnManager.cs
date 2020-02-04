@@ -552,7 +552,7 @@ public class TurnManager : MonoBehaviour {
         yield return scripts.delays[0.8f];
         // pause (animation is not playing so it looks like they are just standing there)
         scripts.soundManager.PlayClip("death");
-        // play the sound
+        // play sound clip
         if (scripts.itemManager.PlayerHasWeapon("rapier") && playerOrEnemy == "enemy") { ChangeStaminaOf("player", 3); }
         // if player has rapier and the enemy dies, add to their stamina
         if (playerOrEnemy == "player") {
@@ -639,7 +639,8 @@ public class TurnManager : MonoBehaviour {
         // wait
         if (hitOrParry == "hit") {
             if (scripts.player.isDodgy && playerOrEnemy == "player") {
-                // play whoosh
+                scripts.soundManager.PlayClip("miss");
+                // play sound clip
             }
             // player dodges
             else {
@@ -678,7 +679,7 @@ public class TurnManager : MonoBehaviour {
             // if player dodges, notify 
             else {
                 if (scripts.itemManager.PlayerHas("armour")) {
-                    // play shatter
+                    scripts.soundManager.PlayClip("armor");
                     armor = true;
                     // set armor to true
                     SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... your armour shatters");
@@ -721,7 +722,7 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else {
-            // player parreid
+            // player parried
             StartCoroutine(DoStuffForAttack("parry", "player"));
             // play sound and animation
             if (enemyAtt < 0) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... the attack is to weak"); }
@@ -744,7 +745,8 @@ public class TurnManager : MonoBehaviour {
             if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
                 // player doesn't have enough accuracy to hit, so notify
                 SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... you miss");
-                // play missed atk sound
+                scripts.soundManager.PlayClip("miss");
+                // play sound clip
             }
             else {
                 if (scripts.player.target.text == "face" || (scripts.enemy.woundList.Count == 2 && !scripts.player.target.text.Contains("*"))) {
@@ -806,7 +808,8 @@ public class TurnManager : MonoBehaviour {
             if (playerAtt < 0) { SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... the attack is too weak"); }
             else if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
                 SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... you miss");
-                // play missed atk sound
+                scripts.soundManager.PlayClip("miss");
+                // play sound clip
             }
             else { SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... he parries"); }
             // depending on the stats, notify player accordingly

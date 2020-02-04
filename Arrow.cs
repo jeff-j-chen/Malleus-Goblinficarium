@@ -43,7 +43,7 @@ public class Arrow : MonoBehaviour {
             scripts.menuButton.ButtonPress(menuButtons[currentIndex].name);
             // call the function for buttonpress
             scripts.soundManager.PlayClip("click");
-            // play the click sound
+            // play sound clip
         }
     }
 

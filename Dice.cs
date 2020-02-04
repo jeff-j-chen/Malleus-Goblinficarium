@@ -209,7 +209,7 @@ public class Dice : MonoBehaviour {
             yield return rollTimes[i];
             // wait for a set amount of time
             if (playSound) { scripts.soundManager.PlayClip("click"); }
-            // play noise clip if necessary
+            // play sound clip if necessary
             int randNum = UnityEngine.Random.Range(0, 5);
             // get a random number for the dice 
             spriteRenderer.sprite = scripts.diceSummoner.numArr[randNum].GetComponent<SpriteRenderer>().sprite;

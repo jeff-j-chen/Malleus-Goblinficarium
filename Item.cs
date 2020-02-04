@@ -207,9 +207,8 @@ public class Item : MonoBehaviour {
             Remove();
         }
         else if (itemName == "scroll") {
-
-            // play fwoosh
-
+            scripts.soundManager.PlayClip("fwoosh");
+            // play sound clip
             if (modifier == "fury") {
                 if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
                 // prevent player from accidentally using two scrolls
@@ -305,9 +304,7 @@ public class Item : MonoBehaviour {
             // the modifier for the scroll was invalid, so notify ourselves
         }
         else if (itemName == "potion") {
-
-            // play gulp
-
+            scripts.soundManager.PlayClip("gulp");
             scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
             // notify player
             if (modifier == "accuracy") {
@@ -345,12 +342,15 @@ public class Item : MonoBehaviour {
             Remove();
         }
         else if (itemName == "shuriken") {
-            // play shuriken noise
+            scripts.soundManager.PlayClip("shuriken");
+            // play sound clip
             scripts.itemManager.discardableDieCounter++;
+            // increment counter
             Remove();
         }
         else if (itemName == "skeleton key") { 
-            // play nextlvlsfx
+            scripts.soundManager.PlayClip("next");
+            // play sound clip
             StartCoroutine(scripts.levelManager.NextLevel());
             Remove();
         }

@@ -16,7 +16,7 @@ public class Enemy : MonoBehaviour {
     public List<string> woundList = new List<string>();
     public bool isDead = false;
     public Dictionary<string, int> stats;
-    private string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin" };
+    private string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant" };
     private string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
     public int stamina = 1;
     public int targetIndex = 0;
