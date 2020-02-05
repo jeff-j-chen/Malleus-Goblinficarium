@@ -60,7 +60,7 @@ public class Item : MonoBehaviour {
     /// <summary>
     /// Select an item.
     /// </summary>
-    public void Select()  {
+    public void Select(bool playAudio=true)  {
         if (itemType == "weapon") {
             // if the item is a weapon    
             if (scripts.itemManager.descriptionDict[itemName.Split(' ')[1]] == "") { scripts.itemManager.itemDesc.text = itemName; }
@@ -123,7 +123,7 @@ public class Item : MonoBehaviour {
         // update the highlighted item variable
         scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
         // update the col variable
-        scripts.soundManager.PlayClip("click");
+        if (playAudio) { scripts.soundManager.PlayClip("click"); }
         // play sound clip
     }
 
@@ -136,6 +136,7 @@ public class Item : MonoBehaviour {
             if (itemType == "arrow")  { 
                 // if the item is arrow (next level indicator)
                 StartCoroutine(scripts.levelManager.NextLevel()); 
+                scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                 return;
                 // go to the next level and end the level
             }
@@ -158,8 +159,8 @@ public class Item : MonoBehaviour {
             }
         }
         else {
-            if (!scripts.turnManager.isMoving) {
-                // in player's inventory
+            if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
+                // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
                 if (itemType == "weapon")  { 
                     // if player is trying to use weapon
                     if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
@@ -431,31 +432,33 @@ public class Item : MonoBehaviour {
 
     public void Remove(bool drop=false) {
         if (drop) { 
-            if (!scripts.turnManager.isMoving) {
-                // if the item is being dropped
-                if (scripts.itemManager.PlayerHas("kapala") && scripts.levelManager.sub != 4) {
-                    // play add checks so that this doesn't happen multiple times a round / when dropping items after enemy has dead
-                    if (itemType != "weapon") {
-                        // if the item is not the player's weapon
-                        scripts.player.isFurious = true;
-                        scripts.player.SetPlayerStatusEffect("fury", "on");
-                        // turn on fury
-                        scripts.turnManager.SetStatusText("PLACEHOLDER STATUS TEXT");
+            if (!scripts.itemManager.floorItems.Contains(gameObject)) {
+                if (!scripts.turnManager.isMoving) {
+                    // if the item is being dropped
+                    if (scripts.itemManager.PlayerHas("kapala") && scripts.levelManager.sub != 4) {
+                        // play add checks so that this doesn't happen multiple times a round / when dropping items after enemy has dead
+                        if (itemType != "weapon") {
+                            // if the item is not the player's weapon
+                            scripts.player.isFurious = true;
+                            scripts.player.SetPlayerStatusEffect("fury", "on");
+                            // turn on fury
+                            scripts.turnManager.SetStatusText("PLACEHOLDER STATUS TEXT");
+                        }
                     }
-                }
-                else {
-                    if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
-                    // if trader level increment the number of items dropped for trading
-                    if (itemType == "weapon") { 
-                        scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
+                    else {
+                        if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
+                        // if trader level increment the number of items dropped for trading
+                        if (itemType == "weapon") { 
+                            scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
+                        }
+                        if (itemName == "necklet")  { 
+                            if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you drop arcane necklet"); }
+                            else { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
+                        }
+                        else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
+                        else { scripts.turnManager.SetStatusText($"you drop {itemName}"); }
+                        // notify player that item has been dropped
                     }
-                    if (itemName == "necklet")  { 
-                        if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you drop arcane necklet"); }
-                        else { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
-                    }
-                    else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
-                    else { scripts.turnManager.SetStatusText($"you drop {itemName}"); }
-                    // notify player that item has been dropped
                 }
             }
         }

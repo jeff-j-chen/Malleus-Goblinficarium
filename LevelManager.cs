@@ -171,8 +171,6 @@ public class LevelManager : MonoBehaviour {
             // going to the lich level, so notify player
             scripts.enemy.SpawnNewEnemy(2);
         }
-        scripts.itemManager.Select(scripts.player.inventory, 0);
-        // select item 0 of the player's inventory
         yield return scripts.delays[1.5f];
         // wait 1.5s
         scripts.statSummoner.SummonStats();
@@ -190,6 +188,8 @@ public class LevelManager : MonoBehaviour {
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
             // summon die and make sure the enemy's stats can be seen
         }
+        else{ scripts.itemManager.SpawnTraderItems(); }
+        // can spawn the items here because we have a deletion queue rather than just deleting all
         for (int i = 0; i < 15; i++) {
             yield return scripts.delays[0.033f];
             temp.a -= 1f/15f;
@@ -200,7 +200,6 @@ public class LevelManager : MonoBehaviour {
         // try to remove torches
         scripts.itemManager.DestroyItems();
         // only now do we destroy the items
-        if (sub == 4) { scripts.itemManager.SpawnTraderItems(); }
         // spawn the items so the player can interact with them, after the items are destroyed
         scripts.turnManager.DetermineMove(false);
         // determine who moves

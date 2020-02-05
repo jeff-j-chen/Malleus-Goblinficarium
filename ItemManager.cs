@@ -16,6 +16,7 @@ public class ItemManager : MonoBehaviour {
     [SerializeField] private Sprite[] weaponSprites;
     [SerializeField] private Sprite[] otherSprites;
     [SerializeField] public List<GameObject> floorItems;
+    public List<GameObject> deletionQueue = new List<GameObject>();
 
     public string[] statArr = new string[] { "green", "blue", "red", "white" };
     public string[] statArr1 = new string[] { "accuracy", "speed", "damage", "parry" };
@@ -150,10 +151,10 @@ public class ItemManager : MonoBehaviour {
     /// <param name="itemList">The list of which to attempt to make a selection from.</param>
     /// <param name="c">The column number of which to attempt to make a selection from.</param>
     /// <param name="forceDifferentSelection">Whether or not to try to force a different selection if the column was not valid for the list.</param>
-    public void Select(List<GameObject> itemList, int c, bool forceDifferentSelection=true) {
+    public void Select(List<GameObject> itemList, int c, bool forceDifferentSelection=true, bool playAudio=true) {
         if (c <= itemList.Count - 1 && c >= 0) {
             // if the column is within the bounds of the list
-            itemList[c].GetComponent<Item>().Select();
+            itemList[c].GetComponent<Item>().Select(playAudio);
             // select the object
             curList = itemList;
             col = c;
@@ -164,14 +165,21 @@ public class ItemManager : MonoBehaviour {
             if (forceDifferentSelection) {
                 // if we want to force a different selection
                 if (itemList.Count > 1) {
-                    // if there is more than 1 item
-                    print("itemList has" + itemList.Count + " items");
-                    print(itemList[col - 1]);
-                    itemList[col - 1].GetComponent<Item>().Select();
-                    // select the next item over
-                    curList = itemList;
-                    col--;
-                    // update the variables used for selection
+                    try {
+                        // if there is more than 1 item
+                        itemList[col - 1].GetComponent<Item>().Select();
+                        // select the next item over
+                        curList = itemList;
+                        col--;
+                        // update the variables used for selection
+                    }
+                    catch { 
+                        itemList[0].GetComponent<Item>().Select();
+                        // select item 0
+                        curList = itemList;
+                        col = 0;
+                        // update variables
+                    }
                 }
                 else {
                     // player only has weapon
@@ -192,8 +200,9 @@ public class ItemManager : MonoBehaviour {
     /// Create an item with specified itemtype.
     /// </summary>
     /// <param name="itemType">The type of item of which to create.</param>
-    private void CreateItem(string itemType) {
-        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
+    /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
+    private void CreateItem(string itemType, int negativeOffset=0) {
+        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // create an item object at the correct position
         Sprite sprite = null;
         // create a variable of which we can place the sprite upon to depending on the item type
@@ -213,6 +222,8 @@ public class ItemManager : MonoBehaviour {
         SetItemStatsImmediately(instantiatedItem);
         // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);
+        print("floor items now should have " + floorItems.Count + " items");
+         
         // add the item to the array
     }
 
@@ -221,8 +232,8 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <param name="itemName">The name of the item of which to create.</param>
     /// <param name="itemType">The type of the item of which to create</param>
-    public void CreateItem(string itemName, string itemType) {
-        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
+    public void CreateItem(string itemName, string itemType, int negativeOffset=0) {
+        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)];
         // give the item the proper sprite
@@ -452,11 +463,13 @@ public class ItemManager : MonoBehaviour {
     /// Spawn the items for which the player can trade with.
     /// </summary>
     public void SpawnTraderItems() {
+        int tempOffset = deletionQueue.Count;
+        // get the count now so we can spawn items without fear of it changing
         lootText.text = "goods:";
         // set the test
-        for (int i = 0; i < 3; i++) { CreateItem("common"); }
-        // create 3 common items
-        CreateItem("arrow", "arrow");
+        for (int i = 0; i < 3; i++) { CreateItem("common", tempOffset); }
+        // create 3 common items, negativelyoffesting by the deletionq
+        CreateItem("arrow", "arrow", tempOffset);
         // create the next level arrow
     }
 
@@ -471,6 +484,8 @@ public class ItemManager : MonoBehaviour {
         foreach (GameObject test in floorItems) {
             // hide every item
             test.GetComponent<SpriteRenderer>().sprite = null;
+            deletionQueue.Add(test);
+            // queue item for deletion
         }
     }
     
@@ -478,12 +493,12 @@ public class ItemManager : MonoBehaviour {
     /// Destroy floor items after they are hidden. MUST be kept separate from hiding them!
     /// </summary>
     public void DestroyItems() {
-        foreach (GameObject test in floorItems) {
+        foreach (GameObject test in deletionQueue) {
             Destroy(test);
             // destroy every floor item
         }
-        floorItems.Clear();
-        // clear the array
+        deletionQueue.Clear();
+        // clear the arrays
     }
 
     /// <summary>

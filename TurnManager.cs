@@ -720,7 +720,7 @@ public class TurnManager : MonoBehaviour {
             // play sound and animation
             if (enemyAtt < 0) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... the attack is to weak"); }
             else { 
-                scimitarParry = true;
+                if (scripts.itemManager.PlayerHasWeapon("scimitar")) { scimitarParry = true; }
                 // player has parried (this resets at the start of every round so we can do it regardless)
                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you parry"); 
             }
