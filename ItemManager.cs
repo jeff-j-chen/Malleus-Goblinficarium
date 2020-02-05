@@ -501,7 +501,7 @@ public class ItemManager : MonoBehaviour {
     /// <param name="weaponName">The weapon name to check for.</param>
     /// <returns>true if the weapon was found, false otherwise.</returns>
     public bool PlayerHasWeapon(string weaponName) {
-        return (from a in scripts.player.inventory select a.GetComponent<Item>().itemName).Contains(scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1]);
+        return (from a in scripts.player.inventory where a.GetComponent<Item>().itemName.Split(' ').Length > 1 select a.GetComponent<Item>().itemName.Split(' ')[1]).Contains(weaponName);
     }
 
     /// <summary>
