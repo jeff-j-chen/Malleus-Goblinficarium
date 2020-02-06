@@ -280,11 +280,13 @@ public class Dice : MonoBehaviour {
     /// </summary>
     public IEnumerator FadeIn() {
         // very similar to fadeout
+        yield return scripts.delays[0.001f];
         // wait here or it breaks. I HAVE TRIED REMOVING IT, JUST KEEP THIS
         SpriteRenderer numSR = GetComponent<SpriteRenderer>();
         SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
         Color numTemp = numSR.color;
         Color baseTemp = baseSR.color;
+        baseSR.color = baseTemp;
         for (int i = 0; i < 40; i++) {
             yield return scripts.delays[0.005f];
             numTemp.a += 0.025f;

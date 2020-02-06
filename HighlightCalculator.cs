@@ -61,6 +61,7 @@ public class HighlightCalculator : MonoBehaviour {
         int diceIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType);
         // get the index of the color relative to the colorName array
         highlights[diceIndex].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(scripts.colors.colorNameArr[diceIndex], diceType), scripts.statSummoner.yCoords[diceIndex] - 0.01f);
+        highlights[diceIndex].GetComponent<BoxCollider2D>().size = new Vector2(6f, 6f);
         // move it to the correct position
     }
 
@@ -71,6 +72,7 @@ public class HighlightCalculator : MonoBehaviour {
         for (int i = 0; i < 4; i++) {
             // 4 highlights
             highlights[i].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(scripts.colors.colorNameArr[i]), scripts.statSummoner.yCoords[i] - 0.01f);
+            highlights[i].GetComponent<BoxCollider2D>().size = new Vector2(6f, 1f);
             // move the highlight into position with the corresponding stat.
         }
     }
