@@ -22,11 +22,6 @@ public class Dice : MonoBehaviour {
         // must be in awake, otherwise scripts not set fast enough
         scripts = FindObjectOfType<Scripts>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        Color color = spriteRenderer.color;
-        // get the color of the sprite of the spriterenderer
-        color.a = 0;
-        spriteRenderer.color = color;
-        // set the alpha of the spriterenderer to be zero
     }
 
     private void OnMouseDown() {
@@ -285,15 +280,11 @@ public class Dice : MonoBehaviour {
     /// </summary>
     public IEnumerator FadeIn() {
         // very similar to fadeout
-        yield return scripts.delays[0.001f];
         // wait here or it breaks. I HAVE TRIED REMOVING IT, JUST KEEP THIS
         SpriteRenderer numSR = GetComponent<SpriteRenderer>();
         SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
         Color numTemp = numSR.color;
         Color baseTemp = baseSR.color;
-        baseTemp.a = 0;
-        numTemp.a = 0;
-        baseSR.color = baseTemp;
         for (int i = 0; i < 40; i++) {
             yield return scripts.delays[0.005f];
             numTemp.a += 0.025f;

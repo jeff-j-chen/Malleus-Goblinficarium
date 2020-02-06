@@ -91,7 +91,18 @@ public class DiceSummoner : MonoBehaviour
         else { diceColorIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType); }
         // else create one of the specified type
         GameObject number = Instantiate(numArr[diceNum - 1], instantiationPos, Quaternion.identity);
+        SpriteRenderer temp = number.GetComponent<SpriteRenderer>();
+        Color color = temp.color;
+        // get the color of the sprite of the spriterenderer
+        color.a = 0;
+        temp.color = color;
+        // set the alpha of the spriterenderer to be zero
         GameObject indivBase = Instantiate(diceBase, instantiationPos, Quaternion.identity);
+        temp = indivBase.GetComponent<SpriteRenderer>();
+        color = temp.color;
+        // get the color of the sprite of the spriterenderer
+        color.a = 0;
+        temp.color = color;
         // create the gameobjects
         indivBase.transform.parent = number.transform;
         number.transform.parent = transform;
@@ -128,13 +139,13 @@ public class DiceSummoner : MonoBehaviour
         }
         indivBase.GetComponent<SpriteRenderer>().color = scripts.colors.colorArr[diceColorIndex];
         // set the color of the base
-        StartCoroutine(number.GetComponent<Dice>().FadeIn());
         // fade in the die
         existingDice.Add(number);
         // add it to the array of existing dice so that functions can be performed on all die at once
         if (attachToPlayerOrEnemy == "player") { scripts.statSummoner.SetDebugInformationFor("player"); }
         else if (attachToPlayerOrEnemy == "enemy") { scripts.statSummoner.SetDebugInformationFor("enemy"); }
         // set the necessary debug information
+        StartCoroutine(number.GetComponent<Dice>().FadeIn());
     }
 
     /// <summary>
