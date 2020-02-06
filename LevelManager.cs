@@ -167,7 +167,11 @@ public class LevelManager : MonoBehaviour {
 
                 // add something here to make it really glitchy (like how it is in the actual game)
 
-                else { scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); }
+                else { 
+                    if (sub != 4) {
+                        scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); 
+                    }
+                }
                 // otherwise just spawn a random enemy
             }
             else { 

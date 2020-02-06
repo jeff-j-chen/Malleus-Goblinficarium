@@ -199,171 +199,173 @@ public class Item : MonoBehaviour {
     /// Use a common item. 
     /// </summary>
     private void UseCommon() {
-        if (itemName == "steak")  {
-            scripts.soundManager.PlayClip("eat");
-            // play sound clip
-            if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 7); }
-            else { scripts.turnManager.ChangeStaminaOf("player", 5); }
-            // change stamina based on the character
-            scripts.turnManager.SetStatusText("you swallow steak");
-            // status text
-            Remove();
-            // remove from player inventory
-        }
-        else if (itemName == "cheese")  {
-            scripts.soundManager.PlayClip("eat");
-            if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 5); }
-            else { scripts.turnManager.ChangeStaminaOf("player", 3); }
-            scripts.turnManager.SetStatusText("you swallow cheese");
-            Remove();
-        }
-        else if (itemName == "scroll") {
-            scripts.soundManager.PlayClip("fwoosh");
-            // play sound clip
-            if (modifier == "fury") {
-                if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
-                // prevent player from accidentally using two scrolls
-                else {
-                    scripts.player.isFurious = true;
-                    scripts.player.SetPlayerStatusEffect("fury", "on");
-                    // turn on fury
-                    scripts.turnManager.SetStatusText("you read scroll of fury... you feel furious");
-                    // notfiy player
-                    foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-                        // for every die
-                        if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") {
-                            // if the die is attached to the player
-                            dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black; 
-                            dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
-                            dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
-                            // make the die yellow
-                            dice.GetComponent<Dice>().moveable = true;
-                            // allow for moving the die around
-                        }
-                    }
-                    Remove();
-                    // consume the scroll
-                }
+        if (!scripts.levelManager.lockActions) {
+            if (itemName == "steak")  {
+                scripts.soundManager.PlayClip("eat");
+                // play sound clip
+                if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 7); }
+                else { scripts.turnManager.ChangeStaminaOf("player", 5); }
+                // change stamina based on the character
+                scripts.turnManager.SetStatusText("you swallow steak");
+                // status text
+                Remove();
+                // remove from player inventory
             }
-            else if (modifier == "dodge") {
-                if (scripts.player.isDodgy) { scripts.turnManager.SetStatusText("you are already dodgy"); }
-                // prevent player from accidentally using two scrolls
-                else {
-                    scripts.player.isDodgy = true;
-                    scripts.player.SetPlayerStatusEffect("dodge", "on");
-                    // turn on dodge
-                    scripts.turnManager.SetStatusText("you read scroll of dodge... you feel dodgy");
-                    Remove();
-                    // consume and notify player
-                }
+            else if (itemName == "cheese")  {
+                scripts.soundManager.PlayClip("eat");
+                if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 5); }
+                else { scripts.turnManager.ChangeStaminaOf("player", 3); }
+                scripts.turnManager.SetStatusText("you swallow cheese");
+                Remove();
             }
-            else if (modifier == "haste") {
-                if ((from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a).ToList().Count == 0) {
-                    scripts.turnManager.SetStatusText("all dice have been chosen");
-                    // prevent player from wasting scroll
-                }
-                else {
-                    if (scripts.player.isHasty) { scripts.turnManager.SetStatusText("you are already winged"); }
+            else if (itemName == "scroll") {
+                scripts.soundManager.PlayClip("fwoosh");
+                // play sound clip
+                if (modifier == "fury") {
+                    if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
                     // prevent player from accidentally using two scrolls
-                    else
-                    {
-                        scripts.player.isHasty = true;
-                        scripts.player.SetPlayerStatusEffect("haste", "on");
-                        // turn on haste
-                        scripts.turnManager.SetStatusText("you read scroll of haste... you feel winged");
+                    else {
+                        scripts.player.isFurious = true;
+                        scripts.player.SetPlayerStatusEffect("fury", "on");
+                        // turn on fury
+                        scripts.turnManager.SetStatusText("you read scroll of fury... you feel furious");
+                        // notfiy player
+                        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+                            // for every die
+                            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") {
+                                // if the die is attached to the player
+                                dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black; 
+                                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
+                                dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
+                                // make the die yellow
+                                dice.GetComponent<Dice>().moveable = true;
+                                // allow for moving the die around
+                            }
+                        }
+                        Remove();
+                        // consume the scroll
+                    }
+                }
+                else if (modifier == "dodge") {
+                    if (scripts.player.isDodgy) { scripts.turnManager.SetStatusText("you are already dodgy"); }
+                    // prevent player from accidentally using two scrolls
+                    else {
+                        scripts.player.isDodgy = true;
+                        scripts.player.SetPlayerStatusEffect("dodge", "on");
+                        // turn on dodge
+                        scripts.turnManager.SetStatusText("you read scroll of dodge... you feel dodgy");
                         Remove();
                         // consume and notify player
                     }
                 }
-                
-            }
-            else if (modifier == "leech") {
-                if (scripts.player.isBloodthirsty) { scripts.turnManager.SetStatusText("you are already bloodthirsty"); }
-                // prevent player from accidentally using two scrolls
-                else {
-                    scripts.player.isBloodthirsty = true;
-                    scripts.player.SetPlayerStatusEffect("leech", "on");
-                    // turn on leech
-                    scripts.turnManager.SetStatusText("you read scroll of leech... you feel bloodthirsty");
-                    Remove();
-                    // consume and notify player
+                else if (modifier == "haste") {
+                    if ((from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a).ToList().Count == 0) {
+                        scripts.turnManager.SetStatusText("all dice have been chosen");
+                        // prevent player from wasting scroll
+                    }
+                    else {
+                        if (scripts.player.isHasty) { scripts.turnManager.SetStatusText("you are already winged"); }
+                        // prevent player from accidentally using two scrolls
+                        else
+                        {
+                            scripts.player.isHasty = true;
+                            scripts.player.SetPlayerStatusEffect("haste", "on");
+                            // turn on haste
+                            scripts.turnManager.SetStatusText("you read scroll of haste... you feel winged");
+                            Remove();
+                            // consume and notify player
+                        }
+                    }
+                    
                 }
-            }
-            else if (modifier == "courage")  {
-                if (scripts.player.isCourageous) { scripts.turnManager.SetStatusText("you are already courageous"); }
-                // prevent player from accidentally using two scrolls
-                else {
-                    scripts.player.isCourageous = true;
-                    scripts.player.SetPlayerStatusEffect("courage", "on");
-                    // turn on courage
-                    scripts.turnManager.SetStatusText("you read scroll of courage... you feel courageous");
-                    Remove();
-                    // consume and notify player
+                else if (modifier == "leech") {
+                    if (scripts.player.isBloodthirsty) { scripts.turnManager.SetStatusText("you are already bloodthirsty"); }
+                    // prevent player from accidentally using two scrolls
+                    else {
+                        scripts.player.isBloodthirsty = true;
+                        scripts.player.SetPlayerStatusEffect("leech", "on");
+                        // turn on leech
+                        scripts.turnManager.SetStatusText("you read scroll of leech... you feel bloodthirsty");
+                        Remove();
+                        // consume and notify player
+                    }
                 }
+                else if (modifier == "courage")  {
+                    if (scripts.player.isCourageous) { scripts.turnManager.SetStatusText("you are already courageous"); }
+                    // prevent player from accidentally using two scrolls
+                    else {
+                        scripts.player.isCourageous = true;
+                        scripts.player.SetPlayerStatusEffect("courage", "on");
+                        // turn on courage
+                        scripts.turnManager.SetStatusText("you read scroll of courage... you feel courageous");
+                        Remove();
+                        // consume and notify player
+                    }
+                }
+                else if (modifier == "challenge") {
+                    print("summon the lich!");
+                    // scripts.levelManager.NextLevel(true); // lich level will load but you will still need to code in its special features later on
+                    Remove();
+                }
+                else if (modifier == "nothing") {
+                    scripts.turnManager.SetStatusText("you read scroll of nothing... nothing happens");
+                    Remove();
+                    // consume and notfiy player
+                }
+                else { print("bad scroll modifier"); }
+                // the modifier for the scroll was invalid, so notify ourselves
             }
-            else if (modifier == "challenge") {
-                print("summon the lich!");
-                // scripts.levelManager.NextLevel(true); // lich level will load but you will still need to code in its special features later on
+            else if (itemName == "potion") {
+                scripts.soundManager.PlayClip("gulp");
+                scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
+                // notify player
+                if (modifier == "accuracy") {
+                    scripts.player.potionStats["green"] += 3;
+                    ShiftDiceAccordingly("green", 3);
+                }
+                else if (modifier == "speed") {
+                    scripts.player.potionStats["blue"] += 3;
+                    ShiftDiceAccordingly("blue", 3);
+                }
+                else if (modifier == "strength") {
+                    scripts.player.potionStats["red"] += 3;
+                    ShiftDiceAccordingly("red", 3);
+                }
+                else if (modifier == "defense") {
+                    scripts.player.potionStats["white"] += 3;
+                    ShiftDiceAccordingly("white", 3);
+                }
+                // increase stat temporarily via scripts.player.potionStats if it is a stat potion
+                else if (modifier == "might") {
+                    scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+                    // create a yellow die and add it to player's attack
+                }
+                else if (modifier == "life") {
+                    scripts.player.woundList.Clear();
+                    scripts.turnManager.DisplayWounds();
+                    // heal and display the wounds
+                    // injuredtextchange does not want to work for some reason
+                    // StartCoroutine(scripts.turnManager.InjuredTextChange(scripts.player.woundGUIElement));
+                }
+                else if (modifier == "nothing") {}
+                else { print("invalid potion modifier detected"); }
+                scripts.statSummoner.SummonStats();
+                scripts.statSummoner.SetDebugInformationFor("player");
                 Remove();
             }
-            else if (modifier == "nothing") {
-                scripts.turnManager.SetStatusText("you read scroll of nothing... nothing happens");
+            else if (itemName == "shuriken") {
+                scripts.soundManager.PlayClip("shuriken");
+                // play sound clip
+                scripts.itemManager.discardableDieCounter++;
+                // increment counter
                 Remove();
-                // consume and notfiy player
             }
-            else { print("bad scroll modifier"); }
-            // the modifier for the scroll was invalid, so notify ourselves
-        }
-        else if (itemName == "potion") {
-            scripts.soundManager.PlayClip("gulp");
-            scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
-            // notify player
-            if (modifier == "accuracy") {
-                scripts.player.potionStats["green"] += 3;
-                ShiftDiceAccordingly("green", 3);
+            else if (itemName == "skeleton key") { 
+                scripts.soundManager.PlayClip("next");
+                // play sound clip
+                StartCoroutine(scripts.levelManager.NextLevel());
+                Remove();
             }
-            else if (modifier == "speed") {
-                scripts.player.potionStats["blue"] += 3;
-                ShiftDiceAccordingly("blue", 3);
-            }
-            else if (modifier == "strength") {
-                scripts.player.potionStats["red"] += 3;
-                ShiftDiceAccordingly("red", 3);
-            }
-            else if (modifier == "defense") {
-                scripts.player.potionStats["white"] += 3;
-                ShiftDiceAccordingly("white", 3);
-            }
-            // increase stat temporarily via scripts.player.potionStats if it is a stat potion
-            else if (modifier == "might") {
-                scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
-                // create a yellow die and add it to player's attack
-            }
-            else if (modifier == "life") {
-                scripts.player.woundList.Clear();
-                scripts.turnManager.DisplayWounds();
-                // heal and display the wounds
-                // injuredtextchange does not want to work for some reason
-                // StartCoroutine(scripts.turnManager.InjuredTextChange(scripts.player.woundGUIElement));
-            }
-            else if (modifier == "nothing") {}
-            else { print("invalid potion modifier detected"); }
-            scripts.statSummoner.SummonStats();
-            scripts.statSummoner.SetDebugInformationFor("player");
-            Remove();
-        }
-        else if (itemName == "shuriken") {
-            scripts.soundManager.PlayClip("shuriken");
-            // play sound clip
-            scripts.itemManager.discardableDieCounter++;
-            // increment counter
-            Remove();
-        }
-        else if (itemName == "skeleton key") { 
-            scripts.soundManager.PlayClip("next");
-            // play sound clip
-            StartCoroutine(scripts.levelManager.NextLevel());
-            Remove();
         }
     }
 
@@ -372,53 +374,55 @@ public class Item : MonoBehaviour {
     /// </summary>
     private void UseRare() {
         // these are pretty self explanatory
-        if (itemName == "helm of might") {
-            if (!scripts.itemManager.usedHelm) {
-                if (scripts.player.stamina >= 3) {
-                    // need 3 stamina
-                    scripts.itemManager.usedHelm = true;
-                    // set variable
-                    scripts.turnManager.SetStatusText("you feel mighty");
+        if (!scripts.levelManager.lockActions) {
+            if (itemName == "helm of might") {
+                if (!scripts.itemManager.usedHelm) {
+                    if (scripts.player.stamina >= 3) {
+                        // need 3 stamina
+                        scripts.itemManager.usedHelm = true;
+                        // set variable
+                        scripts.turnManager.SetStatusText("you feel mighty");
+                        // notify player
+                        scripts.turnManager.ChangeStaminaOf("player", -3);
+                        // use stamina
+                        scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+                        // add yellow die to red stat
+                    }
+                    else { scripts.turnManager.SetStatusText("not enough stamina"); }
                     // notify player
-                    scripts.turnManager.ChangeStaminaOf("player", -3);
-                    // use stamina
-                    scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
-                    // add yellow die to red stat
                 }
-                else { scripts.turnManager.SetStatusText("not enough stamina"); }
-                // notify player
+                else { scripts.turnManager.SetStatusText("helm can help you no further"); }
+                // notfiy player
             }
-            else { scripts.turnManager.SetStatusText("helm can help you no further"); }
-            // notfiy player
-        }
-        // these are pretty self explanatory
-        else if (itemName == "kapala") { scripts.turnManager.SetStatusText("offer an item to become furious"); }
-        else if (itemName == "boots of dodge") {
-            if (!scripts.itemManager.usedBoots) {
-                if (scripts.player.stamina >= 1) {
-                    scripts.turnManager.SetStatusText("you feel dodgy");
-                    scripts.itemManager.usedBoots = true;
-                    scripts.turnManager.ChangeStaminaOf("player", -1);
-                    scripts.player.isDodgy = true;
-                    scripts.player.SetPlayerStatusEffect("dodge", "on");
+            // these are pretty self explanatory
+            else if (itemName == "kapala") { scripts.turnManager.SetStatusText("offer an item to become furious"); }
+            else if (itemName == "boots of dodge") {
+                if (!scripts.itemManager.usedBoots) {
+                    if (scripts.player.stamina >= 1) {
+                        scripts.turnManager.SetStatusText("you feel dodgy");
+                        scripts.itemManager.usedBoots = true;
+                        scripts.turnManager.ChangeStaminaOf("player", -1);
+                        scripts.player.isDodgy = true;
+                        scripts.player.SetPlayerStatusEffect("dodge", "on");
+                    }
+                    else { scripts.turnManager.SetStatusText("not enough stamina"); }
                 }
-                else { scripts.turnManager.SetStatusText("not enough stamina"); }
+                else { scripts.turnManager.SetStatusText("boots can help you no further"); }
             }
-            else { scripts.turnManager.SetStatusText("boots can help you no further"); }
-        }
-        else if (itemName == "ankh") {
-            if (!scripts.itemManager.usedAnkh) {
-                scripts.itemManager.usedAnkh = true;
-                foreach (string key in scripts.itemManager.statArr) {
-                    scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
-                    scripts.statSummoner.addedPlayerStamina[key] = 0;
-                    // refund stamina
+            else if (itemName == "ankh") {
+                if (!scripts.itemManager.usedAnkh) {
+                    scripts.itemManager.usedAnkh = true;
+                    foreach (string key in scripts.itemManager.statArr) {
+                        scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
+                        scripts.statSummoner.addedPlayerStamina[key] = 0;
+                        // refund stamina
+                    }
+                    scripts.statSummoner.ResetDiceAndStamina();
+                    scripts.diceSummoner.SummonDice(false);
+                    scripts.statSummoner.SummonStats();
                 }
-                scripts.statSummoner.ResetDiceAndStamina();
-                scripts.diceSummoner.SummonDice(false);
-                scripts.statSummoner.SummonStats();
+                else { scripts.turnManager.SetStatusText("ankh glows with red light"); }
             }
-            else { scripts.turnManager.SetStatusText("ankh glows with red light"); }
         }
     }
 
