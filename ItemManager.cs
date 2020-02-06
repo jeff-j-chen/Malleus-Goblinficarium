@@ -117,7 +117,7 @@ public class ItemManager : MonoBehaviour {
         MoveToInventory(0, true);
         CreateItem("steak", "common");
         MoveToInventory(0, true);
-        // create items based on class and move them into the inventory
+        // move to the inventory
         Select(curList, 0);
         // select the first item
     }
@@ -221,9 +221,7 @@ public class ItemManager : MonoBehaviour {
         // assign the attributes for the name and the type of the item 
         SetItemStatsImmediately(instantiatedItem);
         // if needed, immediately give the item its proper attributes
-        floorItems.Add(instantiatedItem);
-        print("floor items now should have " + floorItems.Count + " items");
-         
+        floorItems.Add(instantiatedItem);         
         // add the item to the array
     }
 
@@ -359,9 +357,6 @@ public class ItemManager : MonoBehaviour {
                     // destroy the previous weapon
                     scripts.player.inventory[0] = floorItems[index]; 
                     // add the new weapon to the player's inventory
-                    scripts.statSummoner.SetDebugInformationFor("player");
-                    scripts.statSummoner.SummonStats();
-                    // set the debug information and summon the new stats
                 }
                 else {
                     scripts.player.inventory.Add(floorItems[index]);
@@ -405,6 +400,9 @@ public class ItemManager : MonoBehaviour {
                     else if (floorItems[index].GetComponent<Item>().modifier == "nothing") {}
                     else { print("bad modifier"); }
                     // depending on the type of the necklet, modify the stats accordingly
+                    scripts.statSummoner.SetDebugInformationFor("player");
+                    scripts.statSummoner.SummonStats();
+                    // set the debug information and summon the new stats
                 }
                 if (!starter) 
                 { 
@@ -483,9 +481,11 @@ public class ItemManager : MonoBehaviour {
         // select player's inventory
         foreach (GameObject test in floorItems) {
             // hide every item
-            test.GetComponent<SpriteRenderer>().sprite = null;
-            deletionQueue.Add(test);
-            // queue item for deletion
+            if (test != null) {
+                test.GetComponent<SpriteRenderer>().sprite = null;
+                deletionQueue.Add(test);
+                // queue item for deletion
+            }
         }
     }
     

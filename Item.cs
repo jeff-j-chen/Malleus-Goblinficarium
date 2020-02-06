@@ -81,101 +81,109 @@ public class Item : MonoBehaviour {
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
             }
         }
-        else  {
-            if (scripts.enemy.isDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
-            // hide the weapon stats if enemy is dead and not clicking on an enemy
-            if (itemName == "potion")  {
-                if (modifier == "accuracy") {  scripts.itemManager.itemDesc.text = "potion of accuracy\n+3 accuracy"; }
-                else if (modifier == "speed") {  scripts.itemManager.itemDesc.text = "potion of speed\n+3 speed"; }
-                else if (modifier == "strength") {  scripts.itemManager.itemDesc.text = "potion of strength\n+3 damage"; }
-                else if (modifier == "defense") {  scripts.itemManager.itemDesc.text = "potion of parry\n+3 parry"; }
-                else if (modifier == "might") {  scripts.itemManager.itemDesc.text = "potion of might\ngain a yellow die"; }
-                else if (modifier == "life") {  scripts.itemManager.itemDesc.text = "potion of life\nheal all wounds"; }
-                else if (modifier == "nothing") {  scripts.itemManager.itemDesc.text = "potion of nothing\ndoes nothing"; }
-                else { print("invalid potion modifier detected"); }
+        else {
+            if (!scripts.levelManager.lockActions) {
+                // only allow weapons to be selected when locked
+                if (scripts.enemy.isDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
+                // hide the weapon stats if enemy is dead and not clicking on an enemy
+                if (itemName == "potion")  {
+                    if (modifier == "accuracy") {  scripts.itemManager.itemDesc.text = "potion of accuracy\n+3 accuracy"; }
+                    else if (modifier == "speed") {  scripts.itemManager.itemDesc.text = "potion of speed\n+3 speed"; }
+                    else if (modifier == "strength") {  scripts.itemManager.itemDesc.text = "potion of strength\n+3 damage"; }
+                    else if (modifier == "defense") {  scripts.itemManager.itemDesc.text = "potion of parry\n+3 parry"; }
+                    else if (modifier == "might") {  scripts.itemManager.itemDesc.text = "potion of might\ngain a yellow die"; }
+                    else if (modifier == "life") {  scripts.itemManager.itemDesc.text = "potion of life\nheal all wounds"; }
+                    else if (modifier == "nothing") {  scripts.itemManager.itemDesc.text = "potion of nothing\ndoes nothing"; }
+                    else { print("invalid potion modifier detected"); }
+                }
+                else if (itemName == "scroll")  { 
+                    if (modifier == "fury") { scripts.itemManager.itemDesc.text = "scroll of fury\nall picked dice turn yellow"; }
+                    else if (modifier == "haste") { scripts.itemManager.itemDesc.text = "scroll of haste\npick 3 dice, enemy gets the rest"; }
+                    else if (modifier == "dodge") { scripts.itemManager.itemDesc.text = "scroll of dodge\nif you strike first, ignore all damage"; }
+                    else if (modifier == "leech") { scripts.itemManager.itemDesc.text = "scroll of leech\ncure the same wound as inflicted"; }
+                    else if (modifier == "courage") { scripts.itemManager.itemDesc.text = "scroll of courage\nkeep 1 of your die till next round"; }
+                    else if (modifier == "challenge") { scripts.itemManager.itemDesc.text = "scroll of challenge\n???"; }
+                    else if (modifier == "nothing") { scripts.itemManager.itemDesc.text = "scroll of nothing\ndoes nothing"; }
+                }
+                else if (itemName == "necklet") {
+                    int t = scripts.itemManager.neckletCounter["arcane"];
+                    if (modifier == "arcane") { scripts.itemManager.itemDesc.text = $"arcane necklet\nall necklets are more effective"; }
+                    else if (modifier == "nothing") { scripts.itemManager.itemDesc.text = $"necklet of nothing\ndoes nothing"; }
+                    else { scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{t} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; } 
+                }
+                else if (itemName == "cheese" || itemName == "steak") {
+                    if (scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
+                    else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
+                }
+                else if (itemName == "arrow") { scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; }
+                else { scripts.itemManager.itemDesc.text = $"{itemName}\n{scripts.itemManager.descriptionDict[itemName]}"; }
+                // set the proper item descriptions for all items
             }
-            else if (itemName == "scroll")  { 
-                if (modifier == "fury") { scripts.itemManager.itemDesc.text = "scroll of fury\nall picked dice turn yellow"; }
-                else if (modifier == "haste") { scripts.itemManager.itemDesc.text = "scroll of haste\npick 3 dice, enemy gets the rest"; }
-                else if (modifier == "dodge") { scripts.itemManager.itemDesc.text = "scroll of dodge\nif you strike first, ignore all damage"; }
-                else if (modifier == "leech") { scripts.itemManager.itemDesc.text = "scroll of leech\ncure the same wound as inflicted"; }
-                else if (modifier == "courage") { scripts.itemManager.itemDesc.text = "scroll of courage\nkeep 1 of your die till next round"; }
-                else if (modifier == "challenge") { scripts.itemManager.itemDesc.text = "scroll of challenge\n???"; }
-                else if (modifier == "nothing") { scripts.itemManager.itemDesc.text = "scroll of nothing\ndoes nothing"; }
-            }
-            else if (itemName == "necklet") {
-                int t = scripts.itemManager.neckletCounter["arcane"];
-                if (modifier == "arcane") { scripts.itemManager.itemDesc.text = $"arcane necklet\nall necklets are more effective"; }
-                else if (modifier == "nothing") { scripts.itemManager.itemDesc.text = $"necklet of nothing\ndoes nothing"; }
-                else { scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{t} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; } 
-            }
-            else if (itemName == "cheese" || itemName == "steak") {
-                if (scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
-                else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
-            }
-            else if (itemName == "arrow") { scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; }
-            else { scripts.itemManager.itemDesc.text = $"{itemName}\n{scripts.itemManager.descriptionDict[itemName]}"; }
-            // set the proper item descriptions for all items
         }
-        scripts.itemManager.highlight.transform.position = transform.position;
-        // move the highlight to the selected item
-        scripts.itemManager.highlightedItem = gameObject;
-        // update the highlighted item variable
-        scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
-        // update the col variable
-        if (playAudio) { scripts.soundManager.PlayClip("click"); }
-        // play sound clip
+        if (!scripts.levelManager.lockActions || itemType == "weapon") {
+            // only allow weapons to be used when locked
+            scripts.itemManager.highlight.transform.position = transform.position;
+            // move the highlight to the selected item
+            scripts.itemManager.highlightedItem = gameObject;
+            // update the highlighted item variable
+            scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
+            // update the col variable
+            if (playAudio) { scripts.soundManager.PlayClip("click"); }
+            // play sound clip
+        }
     }
 
     /// <summary>
     /// Pick up or use an item.
     /// </summary>
     public void Use() {
-        if (scripts.itemManager.floorItems.Contains(gameObject)) {
-            // if item is on the floor
-            if (itemType == "arrow")  { 
-                // if the item is arrow (next level indicator)
-                StartCoroutine(scripts.levelManager.NextLevel()); 
-                scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
-                return;
-                // go to the next level and end the level
-            }
-            else  { 
-                // not an arrow
-                if (scripts.levelManager.sub == 4)  { 
-                    // if on the trader level
-                    if (scripts.itemManager.numItemsDroppedForTrade > 0)  { 
-                        // if player has dropped items for trading
-                        scripts.itemManager.numItemsDroppedForTrade--;
-                        // decrement counter
-                        scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject)); 
-                        // move the selected item into the player's inventory
-                    }
-                    else { scripts.turnManager.SetStatusText("drop an item to trade"); }
-                    // player has not dropped items, so give a reminder
+        if (!scripts.levelManager.lockActions) {
+            if (scripts.itemManager.floorItems.Contains(gameObject)) {
+                // if item is on the floor
+                if (itemType == "arrow")  { 
+                    // if the item is arrow (next level indicator)
+                    StartCoroutine(scripts.levelManager.NextLevel()); 
+                    scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
+                    return;
+                    // go to the next level and end the level
                 }
-                else { scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject)); }
-                // not trader, so just pick up the item
-            }
-        }
-        else {
-            if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
-                // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
-                if (itemType == "weapon")  { 
-                    // if player is trying to use weapon
-                    if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
-                        // if conditions allow for attack
-                        if (!scripts.enemy.isDead && scripts.levelManager.sub != 4) { scripts.player.UseWeapon(); }
-                        // attack
-                        else if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
-                        else if (scripts.levelManager.sub == 4) { scripts.turnManager.SetStatusText("mind your manners"); }
-                        // send reminders accordingly
-                        else { print("error!"); }
+                else  { 
+                    // not an arrow
+                    if (scripts.levelManager.sub == 4)  { 
+                        // if on the trader level
+                        if (scripts.itemManager.numItemsDroppedForTrade > 0)  { 
+                            // if player has dropped items for trading
+                            scripts.itemManager.numItemsDroppedForTrade--;
+                            // decrement counter
+                            scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
+                            // move the selected item into the player's inventory
+                        }
+                        else { scripts.turnManager.SetStatusText("drop an item to trade"); }
+                        // player has not dropped items, so give a reminder
                     }
+                    else { scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject)); }
+                    // not trader, so just pick up the item
                 }
-                else if (itemType == "common") { UseCommon(); }
-                else if (itemType == "rare") { UseRare(); }
-                // not item, so use corresponding item type
+            }
+            else {
+                if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
+                    // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
+                    if (itemType == "weapon")  { 
+                        // if player is trying to use weapon
+                        if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
+                            // if conditions allow for attack
+                            if (!scripts.enemy.isDead && scripts.levelManager.sub != 4) { scripts.player.UseWeapon(); }
+                            // attack
+                            else if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
+                            else if (scripts.levelManager.sub == 4) { scripts.turnManager.SetStatusText("mind your manners"); }
+                            // send reminders accordingly
+                            else { print("error!"); }
+                        }
+                    }
+                    else if (itemType == "common") { UseCommon(); }
+                    else if (itemType == "rare") { UseRare(); }
+                    // not item, so use corresponding item type
+                }
             }
         }
     }

@@ -46,7 +46,7 @@ public class TurnManager : MonoBehaviour {
             StartCoroutine(EnemyMove(delay));
             // make the enemy move
         }
-    }
+    } 
 
     /// <summary>
     /// Make the enemy choose die.
@@ -286,7 +286,6 @@ public class TurnManager : MonoBehaviour {
         else { 
             // dice are available
             isMoving = false;
-            print("Turningoff0");
             // stop moving
             if (scripts.itemManager.PlayerHasWeapon("mace") && !maceUsed) {
                 // if player has mace

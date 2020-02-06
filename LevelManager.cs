@@ -34,6 +34,8 @@ public class LevelManager : MonoBehaviour {
         // something to make it more probable that genstats will gen more difficult enemies later
     };
 
+    [SerializeField] public bool lockActions = false;
+
     void Start()
     {
         scripts = FindObjectOfType<Scripts>();
@@ -131,79 +133,83 @@ public class LevelManager : MonoBehaviour {
     /// </summary>
     /// <param name="isLich">true to spawn the lich, false (default) otherwise</param>
     public IEnumerator NextLevel(bool isLich=false) {
-        Color temp = boxSR.color;
-        temp.a = 0f;
-        // hide the level loading box
-        for (int i = 0; i < 15; i++) {
-            yield return scripts.delays[0.033f];
-            temp.a += 1f/15f;
-            boxSR.color = temp;
-        }
-        // fade in the box
-        loadingCircle.transform.position = onScreen;
-        // make the loading thing go on screen
-        scripts.itemManager.HideItems();
-        // hide the items (can't destroy them here or the game breaks for some reason)
-        if (!isLich) {
-            // if spawning a normal enemy
-            sub++;
-            // increment the sub counter
-            if (sub == 4) { 
-                SummonTrader();
-                // summon trader if necessary
-                levelText.text = "level " + level + "-3+"; 
-                // set the correct level loading text
+        if (!lockActions) {
+            lockActions = true;
+            Color temp = boxSR.color;
+            temp.a = 0f;
+            // hide the level loading box
+            for (int i = 0; i < 15; i++) {
+                yield return scripts.delays[0.033f];
+                temp.a += 1f/15f;
+                boxSR.color = temp;
             }
-            else if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
-            // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
-            else { levelText.text = "level " + level + "-" + sub; }
-            // only going to the next sub, so notify the player accordingly
-            if (level == 3 && sub == 4) { scripts.enemy.SpawnNewEnemy(0); }
-            // spawn the devil if on the correct level
+            // fade in the box
+            loadingCircle.transform.position = onScreen;
+            // make the loading thing go on screen
+            scripts.itemManager.HideItems();
+            // hide the items (can't destroy them here or the game breaks for some reason)
+            if (!isLich) {
+                // if spawning a normal enemy
+                sub++;
+                // increment the sub counter
+                if (sub == 4) { 
+                    SummonTrader();
+                    // summon trader if necessary
+                    levelText.text = "level " + level + "-3+"; 
+                    // set the correct level loading text
+                }
+                else if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
+                // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
+                else { levelText.text = "level " + level + "-" + sub; }
+                // only going to the next sub, so notify the player accordingly
+                if (level == 3 && sub == 4) { scripts.enemy.SpawnNewEnemy(0); }
+                // spawn the devil if on the correct level
 
-            // add something here to make it really glitchy (like how it is in the actual game)
+                // add something here to make it really glitchy (like how it is in the actual game)
 
-            else { scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); }
-            // otherwise just spawn a random enemy
+                else { scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); }
+                // otherwise just spawn a random enemy
+            }
+            else { 
+                levelText.text = "???"; 
+                // going to the lich level, so notify player
+                scripts.enemy.SpawnNewEnemy(2);
+            }
+            yield return scripts.delays[1.5f];
+            // wait 1.5s
+            scripts.statSummoner.SummonStats();
+            scripts.statSummoner.SetDebugInformationFor("enemy");
+            // summon the stats and update the debug information
+            levelText.text = "";
+            loadingCircle.transform.position = offScreen;
+            levelBox.transform.position = offScreen;
+            // clear the loading text and move the box offscreen
+            scripts.itemManager.numItemsDroppedForTrade = 0;
+            // clear the number of items player has dropped
+            if (sub != 4) {
+                // if not going to the trader level
+                scripts.diceSummoner.SummonDice(false);
+                scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
+                // summon die and make sure the enemy's stats can be seen
+            }
+            else{ scripts.itemManager.SpawnTraderItems(); }
+            // can spawn the items here because we have a deletion queue rather than just deleting all
+            for (int i = 0; i < 15; i++) {
+                yield return scripts.delays[0.033f];
+                temp.a -= 1f/15f;
+                boxSR.color = temp;
+            }
+            // fade the level box back out
+            scripts.itemManager.AttemptFadeTorches();
+            // try to remove torches
+            scripts.itemManager.DestroyItems();
+            // only now do we destroy the items
+            // spawn the items so the player can interact with them, after the items are destroyed
+            scripts.turnManager.DetermineMove(false);
+            // determine who moves
+            lockActions = false;
+            StopCoroutine(NextLevel());
+            // stop this coroutine
         }
-        else { 
-            levelText.text = "???"; 
-            // going to the lich level, so notify player
-            scripts.enemy.SpawnNewEnemy(2);
-        }
-        yield return scripts.delays[1.5f];
-        // wait 1.5s
-        scripts.statSummoner.SummonStats();
-        scripts.statSummoner.SetDebugInformationFor("enemy");
-        // summon the stats and update the debug information
-        levelText.text = "";
-        loadingCircle.transform.position = offScreen;
-        levelBox.transform.position = offScreen;
-        // clear the loading text and move the box offscreen
-        scripts.itemManager.numItemsDroppedForTrade = 0;
-        // clear the number of items player has dropped
-        if (sub != 4) {
-            // if not going to the trader level
-            scripts.diceSummoner.SummonDice(false);
-            scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
-            // summon die and make sure the enemy's stats can be seen
-        }
-        else{ scripts.itemManager.SpawnTraderItems(); }
-        // can spawn the items here because we have a deletion queue rather than just deleting all
-        for (int i = 0; i < 15; i++) {
-            yield return scripts.delays[0.033f];
-            temp.a -= 1f/15f;
-            boxSR.color = temp;
-        }
-        // fade the level box back out
-        scripts.itemManager.AttemptFadeTorches();
-        // try to remove torches
-        scripts.itemManager.DestroyItems();
-        // only now do we destroy the items
-        // spawn the items so the player can interact with them, after the items are destroyed
-        scripts.turnManager.DetermineMove(false);
-        // determine who moves
-        StopCoroutine(NextLevel());
-        // stop this coroutine
     }
 }
