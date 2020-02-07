@@ -226,24 +226,13 @@ public class Item : MonoBehaviour {
                 if (modifier == "fury") {
                     if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
                     // prevent player from accidentally using two scrolls
-                    else {
+                    else
+                    {
                         scripts.player.isFurious = true;
                         scripts.player.SetPlayerStatusEffect("fury", "on");
                         // turn on fury
                         scripts.turnManager.SetStatusText("you read scroll of fury... you feel furious");
-                        // notfiy player
-                        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-                            // for every die
-                            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") {
-                                // if the die is attached to the player
-                                dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black; 
-                                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
-                                dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
-                                // make the die yellow
-                                dice.GetComponent<Dice>().moveable = true;
-                                // allow for moving the die around
-                            }
-                        }
+                        MakeAllAttachedYellow();
                         Remove();
                         // consume the scroll
                     }
@@ -373,6 +362,28 @@ public class Item : MonoBehaviour {
     }
 
     /// <summary>
+    /// Make all die attached to the player into yellow.
+    /// </summary>
+    private void MakeAllAttachedYellow()
+    {
+        // notfiy player
+        foreach (GameObject dice in scripts.diceSummoner.existingDice)
+        {
+            // for every die
+            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player")
+            {
+                // if the die is attached to the player
+                dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black;
+                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
+                dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
+                // make the die yellow
+                dice.GetComponent<Dice>().moveable = true;
+                // allow for moving the die around
+            }
+        }
+    }
+
+    /// <summary>
     /// Use a rare item. 
     /// </summary>
     private void UseRare() {
@@ -380,6 +391,7 @@ public class Item : MonoBehaviour {
         if (!scripts.levelManager.lockActions) {
             if (itemName == "helm of might" && scripts.levelManager.sub != 4) {
                 if (!scripts.itemManager.usedHelm) {
+                    scripts.soundManager.PlayClip("fwoosh");
                     if (scripts.player.stamina >= 3) {
                         // need 3 stamina
                         scripts.itemManager.usedHelm = true;
@@ -401,6 +413,7 @@ public class Item : MonoBehaviour {
             else if (itemName == "kapala" && scripts.levelManager.sub != 4) { scripts.turnManager.SetStatusText("offer an item to become furious"); }
             else if (itemName == "boots of dodge" && scripts.levelManager.sub != 4) {
                 if (!scripts.itemManager.usedBoots) {
+                    scripts.soundManager.PlayClip("fwoosh");
                     if (scripts.player.stamina >= 1) {
                         scripts.turnManager.SetStatusText("you feel dodgy");
                         scripts.itemManager.usedBoots = true;
@@ -414,6 +427,7 @@ public class Item : MonoBehaviour {
             }
             else if (itemName == "ankh" && scripts.levelManager.sub != 4) {
                 if (!scripts.itemManager.usedAnkh) {
+                    scripts.soundManager.PlayClip("click");
                     scripts.itemManager.usedAnkh = true;
                     foreach (string key in scripts.itemManager.statArr) {
                         scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
@@ -457,7 +471,11 @@ public class Item : MonoBehaviour {
                             scripts.player.isFurious = true;
                             scripts.player.SetPlayerStatusEffect("fury", "on");
                             // turn on fury
-                            scripts.turnManager.SetStatusText("PLACEHOLDER STATUS TEXT");
+                            scripts.turnManager.SetStatusText("deity accepts your offering... you feel furious");
+                            // notify player
+                            scripts.soundManager.PlayClip("fwoosh");
+                            // play sound clip
+                            MakeAllAttachedYellow();
                         }
                     }
                     else {

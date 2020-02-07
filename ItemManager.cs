@@ -17,7 +17,6 @@ public class ItemManager : MonoBehaviour {
     [SerializeField] private Sprite[] otherSprites;
     [SerializeField] public List<GameObject> floorItems;
     public List<GameObject> deletionQueue = new List<GameObject>();
-
     public string[] statArr = new string[] { "green", "blue", "red", "white" };
     public string[] statArr1 = new string[] { "accuracy", "speed", "damage", "parry" };
     public Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
