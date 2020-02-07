@@ -92,15 +92,8 @@ public class DiceSummoner : MonoBehaviour
         // else create one of the specified type
         GameObject number = Instantiate(numArr[diceNum - 1], instantiationPos, Quaternion.identity);
         GameObject indivBase = Instantiate(diceBase, instantiationPos, Quaternion.identity);
-        SpriteRenderer numSR = number.GetComponent<SpriteRenderer>();
-        SpriteRenderer baseSR = indivBase.GetComponent<SpriteRenderer>();
-        Color numTemp = numSR.color;
-        Color baseTemp = baseSR.color;
-        baseTemp.a = 0;
-        numTemp.a = 0;
-        // instantly make them not visible.
+        // create gameobjects
         indivBase.transform.parent = number.transform;
-        StartCoroutine(number.GetComponent<Dice>().FadeIn());
         number.transform.parent = transform;
         // parent the base to the number and the number to this (the manager)
         number.GetComponent<Dice>().diceNum = diceNum;

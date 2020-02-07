@@ -199,8 +199,8 @@ public class Item : MonoBehaviour {
     /// Use a common item. 
     /// </summary>
     private void UseCommon() {
-        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4) {
-            // don't use items when locked or in trader
+        if (!scripts.levelManager.lockActions) {
+            // don't use items when locked
             if (itemName == "steak")  {
                 scripts.soundManager.PlayClip("eat");
                 // play sound clip
@@ -219,7 +219,8 @@ public class Item : MonoBehaviour {
                 scripts.turnManager.SetStatusText("you swallow cheese");
                 Remove();
             }
-            else if (itemName == "scroll") {
+            else if (itemName == "scroll" && scripts.levelManager.sub != 4) {
+                // don't let scrolls be used at trader
                 scripts.soundManager.PlayClip("fwoosh");
                 // play sound clip
                 if (modifier == "fury") {
@@ -316,7 +317,8 @@ public class Item : MonoBehaviour {
                 else { print("bad scroll modifier"); }
                 // the modifier for the scroll was invalid, so notify ourselves
             }
-            else if (itemName == "potion") {
+            else if (itemName == "potion" && scripts.levelManager.sub != 4) {
+                // don't let potions be used at lich
                 scripts.soundManager.PlayClip("gulp");
                 scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
                 // notify player
@@ -354,14 +356,14 @@ public class Item : MonoBehaviour {
                 scripts.statSummoner.SetDebugInformationFor("player");
                 Remove();
             }
-            else if (itemName == "shuriken") {
+            else if (itemName == "shuriken" && scripts.levelManager.sub != 4) {
                 scripts.soundManager.PlayClip("shuriken");
                 // play sound clip
                 scripts.itemManager.discardableDieCounter++;
                 // increment counter
                 Remove();
             }
-            else if (itemName == "skeleton key") { 
+            else if (itemName == "skeleton key" && scripts.levelManager.sub != 4) { 
                 scripts.soundManager.PlayClip("next");
                 // play sound clip
                 StartCoroutine(scripts.levelManager.NextLevel());
@@ -375,8 +377,8 @@ public class Item : MonoBehaviour {
     /// </summary>
     private void UseRare() {
         // these are pretty self explanatory
-        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4) {
-            if (itemName == "helm of might") {
+        if (!scripts.levelManager.lockActions) {
+            if (itemName == "helm of might" && scripts.levelManager.sub != 4) {
                 if (!scripts.itemManager.usedHelm) {
                     if (scripts.player.stamina >= 3) {
                         // need 3 stamina
@@ -396,8 +398,8 @@ public class Item : MonoBehaviour {
                 // notfiy player
             }
             // these are pretty self explanatory
-            else if (itemName == "kapala") { scripts.turnManager.SetStatusText("offer an item to become furious"); }
-            else if (itemName == "boots of dodge") {
+            else if (itemName == "kapala" && scripts.levelManager.sub != 4) { scripts.turnManager.SetStatusText("offer an item to become furious"); }
+            else if (itemName == "boots of dodge" && scripts.levelManager.sub != 4) {
                 if (!scripts.itemManager.usedBoots) {
                     if (scripts.player.stamina >= 1) {
                         scripts.turnManager.SetStatusText("you feel dodgy");
@@ -410,7 +412,7 @@ public class Item : MonoBehaviour {
                 }
                 else { scripts.turnManager.SetStatusText("boots can help you no further"); }
             }
-            else if (itemName == "ankh") {
+            else if (itemName == "ankh" && scripts.levelManager.sub != 4) {
                 if (!scripts.itemManager.usedAnkh) {
                     scripts.itemManager.usedAnkh = true;
                     foreach (string key in scripts.itemManager.statArr) {

@@ -117,6 +117,14 @@ public class ItemManager : MonoBehaviour {
         MoveToInventory(0, true);
         CreateItem("steak", "common");
         MoveToInventory(0, true);
+        CreateItem("helm_of_might", "rare");
+        MoveToInventory(0, true);
+        CreateItem("kapala", "rare");
+        MoveToInventory(0, true);
+        CreateItem("boots_of_dodge", "rare");
+        MoveToInventory(0, true);
+        CreateItem("ankh", "rare");
+        MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0);
         // select the first item

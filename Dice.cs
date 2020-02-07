@@ -24,6 +24,8 @@ public class Dice : MonoBehaviour {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
+    private void Start() {StartCoroutine(FadeIn());}
+
     private void OnMouseDown() {
         // as soon as the mouse button is pressed over
         if (moveable) {
@@ -250,6 +252,9 @@ public class Dice : MonoBehaviour {
         SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
         Color numTemp = numSR.color;
         Color baseTemp = baseSR.color;
+        numTemp.a = 1;
+        baseTemp.a = 1;
+        // set them to 1 here because for some reason sometimes alpha starts at 2 and nothing works right
         // assign the necessary variables to manipulate the color
         for (int i = 0; i < 40; i++) {
             // 40 times
@@ -280,13 +285,12 @@ public class Dice : MonoBehaviour {
     /// </summary>
     public IEnumerator FadeIn() {
         // very similar to fadeout
-        yield return scripts.delays[0.001f];
-        // wait here or it breaks. I HAVE TRIED REMOVING IT, JUST KEEP THIS
         SpriteRenderer numSR = GetComponent<SpriteRenderer>();
         SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
         Color numTemp = numSR.color;
         Color baseTemp = baseSR.color;
-        baseSR.color = baseTemp;
+        numTemp.a = 0;
+        baseTemp.a = 0;
         for (int i = 0; i < 40; i++) {
             yield return scripts.delays[0.005f];
             numTemp.a += 0.025f;

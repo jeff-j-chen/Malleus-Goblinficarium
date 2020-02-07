@@ -421,7 +421,6 @@ public class TurnManager : MonoBehaviour {
                 // reset necessary variables
             }
             isMoving = false;
-            print("turning off1");
             // stop moving
             scripts.statSummoner.ResetDiceAndStamina();
             // reset die and stamina
