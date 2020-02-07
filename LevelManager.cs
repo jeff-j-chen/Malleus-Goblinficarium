@@ -138,6 +138,8 @@ public class LevelManager : MonoBehaviour {
             Color temp = boxSR.color;
             temp.a = 0f;
             // hide the level loading box
+            scripts.soundManager.PlayClip("next");
+            // play sound clip
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
                 temp.a += 1f/15f;

@@ -477,7 +477,7 @@ public class ItemManager : MonoBehaviour {
     public void HideItems() {
         lootText.text = "";
         // clear the text
-        Select(scripts.player.inventory, 0);
+        Select(scripts.player.inventory, 0, playAudio:false);
         // select player's inventory
         foreach (GameObject test in floorItems) {
             // hide every item

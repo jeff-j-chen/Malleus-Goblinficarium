@@ -678,7 +678,7 @@ public class TurnManager : MonoBehaviour {
                     // notify player
                     scripts.itemManager.GetPlayerItem("armour").GetComponent<Item>().Remove();
                     // remove armor from the player's inventory
-                    scripts.itemManager.Select(scripts.player.inventory, 0);
+                    scripts.itemManager.Select(scripts.player.inventory, 0, playAudio: false);
                     // select weapon
                 }
                 else {

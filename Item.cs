@@ -199,7 +199,8 @@ public class Item : MonoBehaviour {
     /// Use a common item. 
     /// </summary>
     private void UseCommon() {
-        if (!scripts.levelManager.lockActions) {
+        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4) {
+            // don't use items when locked or in trader
             if (itemName == "steak")  {
                 scripts.soundManager.PlayClip("eat");
                 // play sound clip
@@ -374,7 +375,7 @@ public class Item : MonoBehaviour {
     /// </summary>
     private void UseRare() {
         // these are pretty self explanatory
-        if (!scripts.levelManager.lockActions) {
+        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4) {
             if (itemName == "helm of might") {
                 if (!scripts.itemManager.usedHelm) {
                     if (scripts.player.stamina >= 3) {
