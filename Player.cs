@@ -61,8 +61,8 @@ public class Player : MonoBehaviour {
     }
 
     private void Update() {
-        if ((Input.GetKeyDown(KeyCode.DownArrow) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f  && !scripts.turnManager.isMoving)) {
-            // if player is trying to change the target (up/down arrow or scroll wheel)
+        if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f  && !scripts.turnManager.isMoving)) {
+            // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
             scripts.turnManager.SetAvailableTargetsOf("player");
             // set the available targets to make sure the player can do that
             if (targetIndex < scripts.player.availableTargets.Count) {
@@ -75,13 +75,40 @@ public class Player : MonoBehaviour {
                 // and set target based off the new target index
             }
         }
-        else if ((Input.GetKeyDown(KeyCode.UpArrow) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
+        else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
             // pretty much the same as above
             if (targetIndex > 0) {  
                 if (hintTimer > 0.05f) { hintTimer += 0.1f; }
                 targetIndex--;
                 scripts.turnManager.SetTargetOf("player");
             }
+        }
+        else if (Input.GetKeyDown(KeyCode.R)) {
+            // player wants to restart
+            // player death on r is instant, so don't do animation stuff
+            isDead = true;
+            // mark player as dead
+            scripts.soundManager.PlayClip("death");
+            // play sound clip
+            scripts.player.GetComponent<Animator>().enabled = false;
+            GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
+            SetPlayerPositionAfterDeath();
+            foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+                StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+                // fade out all existing die
+            }
+            scripts.statSummoner.ResetDiceAndStamina();
+            // clear them
+            scripts.turnManager.ClearPotionStats();
+            // clear potion stats
+            scripts.statSummoner.SummonStats();
+            // summon stats
+            scripts.statSummoner.SetDebugInformationFor("player");
+            // set debug (only player needed here)
+            scripts.turnManager.RecalculateMaxFor("player");
+            // reset target
+            scripts.itemManager.GivePlayerRetry();
+            // allow player to retry
         }
     }
 

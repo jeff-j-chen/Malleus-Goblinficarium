@@ -468,7 +468,7 @@ public class TurnManager : MonoBehaviour {
     /// Coroutine to play the death animation, set status text, toggle variables, etc.
     /// </summary>
     /// <param name="playerOrEnemy">Who to perform the function on.</param>
-    private IEnumerator Kill(string playerOrEnemy) {
+    public IEnumerator Kill(string playerOrEnemy) {
         if (playerOrEnemy == "player") { scripts.player.isDead = true; }
         else if (playerOrEnemy == "enemy") { scripts.enemy.isDead = true; }
         // make sure whoever is killed is set to be dead
@@ -576,6 +576,8 @@ public class TurnManager : MonoBehaviour {
         RecalculateMaxFor("player");
         RecalculateMaxFor("enemy");
         // reset target for both
+        scripts.itemManager.GivePlayerRetry();
+        // allow the player to retry
     }
 
     /// <summary>
@@ -897,6 +899,7 @@ public class TurnManager : MonoBehaviour {
     /// <param name="removeFrom">Who to remove the die from.</param>
     private IEnumerator RemoveDice(string diceType, string removeFrom) {
         yield return scripts.delays[1f];
+        print("function called");
         List<Dice> diceList = removeFrom == "player" ? scripts.statSummoner.addedPlayerDice[diceType] : scripts.statSummoner.addedEnemyDice[diceType];
         // assign the correct dicelist
         // conditional is true ? yes: no
@@ -920,8 +923,6 @@ public class TurnManager : MonoBehaviour {
                     // set the new instantiation position
                 }
             }
-            scripts.statSummoner.SetDebugInformationFor(removeFrom);
-            // update information
         }
     }
 

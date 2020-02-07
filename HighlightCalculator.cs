@@ -229,10 +229,10 @@ public class HighlightCalculator : MonoBehaviour {
             StartCoroutine(dice.DecreaseDiceValue(false));
         }
         if (dice.diceType == "red" && scripts.player.woundList.Contains("armpits")) {
-            StartCoroutine(dice.FadeOut());
+            StartCoroutine(dice.FadeOut(decrease:true));
         }
         else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) {
-            StartCoroutine(dice.FadeOut());
+            StartCoroutine(dice.FadeOut(decrease:true));
         }
         // take actions depending on injuries and die types
     }

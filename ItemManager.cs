@@ -60,33 +60,33 @@ public class ItemManager : MonoBehaviour {
         { "sharp1", new Dictionary<string, int>()    { { "green", 1 }, { "blue", -1 }, { "red", 1 }, { "white", 0 } } },
     };
     private string[] modifierNames = new string[] { "accurate0", "accurate1", "brisk0", "brisk1", "blunt0", "blunt1", "common0", "common1", "common2", "common3", "common4", "common5", "heavy0", "heavy1", "nimble0", "nimble1", "precise0", "precise1", "ruthless0", "ruthless1", "stable0", "stable1", "sharp0", "sharp1" };
-
     public Dictionary<string, string> descriptionDict = new Dictionary<string, string>() {
-        {"armour", "protects from one hit"}, // finished
-        {"arrow", "proceed to the next level"}, // finished
-        {"ankh", "force new draft"}, // finished
-        {"boots of dodge", "pay 1 stamina to become dodgy"}, // finished
-        {"cheese", "3"}, // finished
-        {"dagger", "green dice buff damage"}, // finished
-        {"flail", "start with red die"}, // finished
-        {"hatchet", "enemy can't choose yellow die"},  // finished
-        {"helm of might", "pay 3 stamina to gain a yellow die"}, // finished
-        {"kapala", "offer an item to become furious"}, // finished
-        {"mace", "reroll all dice still to be picked"}, // finished
-        {"maul", "any wound is deadly"}, // finished
-        {"montante", ""}, // finished
-        {"necklet", ""}, // finished
-        {"phylactery", "gain leech buff once wounded"}, //
-        {"potion", ""}, // finished
-        {"rapier", "gain 3 stamina upon kill"}, // finished
-        {"scimitar", "discard enemy's die upon parry"},  // finished
-        {"scroll", ""}, // finished
-        {"shuriken", "discard enemy's die"}, // finished
-        {"skeleton key", "escape the fight"}, // finished
-        {"spear", "always choose first die"}, // finished
-        {"steak", "5"}, // finished
-        {"sword", ""}, // finished
-        {"torch", "find more loot"} // finished
+        {"armour", "protects from one hit"}, 
+        {"arrow", "proceed to the next level"}, 
+        {"ankh", "force new draft"}, 
+        {"boots of dodge", "pay 1 stamina to become dodgy"}, 
+        {"cheese", "3"}, 
+        {"dagger", "green dice buff damage"}, 
+        {"flail", "start with red die"}, 
+        {"hatchet", "enemy can't choose yellow die"},  
+        {"helm of might", "pay 3 stamina to gain a yellow die"}, 
+        {"kapala", "offer an item to become furious"}, 
+        {"mace", "reroll all dice still to be picked"}, 
+        {"maul", "any wound is deadly"}, 
+        {"montante", ""}, 
+        {"necklet", ""}, 
+        {"phylactery", "gain leech buff once wounded"},
+        {"potion", ""}, 
+        {"rapier", "gain 3 stamina upon kill"}, 
+        {"retry", "retry?"}, 
+        {"scimitar", "discard enemy's die upon parry"},  
+        {"scroll", ""}, 
+        {"shuriken", "discard enemy's die"}, 
+        {"skeleton key", "escape the fight"}, 
+        {"spear", "always choose first die"}, 
+        {"steak", "5"}, 
+        {"sword", ""}, 
+        {"torch", "find more loot"} 
     };
     public string[] neckletTypes = new string[] { "solidity", "rapidity", "strength", "defense", "arcane", "nothing" };
     public Dictionary<string, int> neckletStats = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
@@ -112,17 +112,9 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("flail", "common", 5, 5, 5, 5);
+        CreateWeaponWithStats("sword", "common", -2, -2, -2, -2);
         MoveToInventory(0, true);
         CreateItem("steak", "common");
-        MoveToInventory(0, true);
-        CreateItem("helm_of_might", "rare");
-        MoveToInventory(0, true);
-        CreateItem("kapala", "rare");
-        MoveToInventory(0, true);
-        CreateItem("boots_of_dodge", "rare");
-        MoveToInventory(0, true);
-        CreateItem("ankh", "rare");
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0);
@@ -554,5 +546,17 @@ public class ItemManager : MonoBehaviour {
                 }
             }
         }
+    }
+
+    public void GivePlayerRetry() {
+        foreach (GameObject item in scripts.player.inventory.ToList()) {
+            item.GetComponent<Item>().Remove(selectNew:false);
+            // remove all items from the player's inventory
+            // .ToList() is a trick to prevent ienumerator froma acting up
+        }
+        CreateItem("retry", "retry");
+        MoveToInventory(0, true);
+        Select(curList, 0);
+        // make the player retry
     }
 }

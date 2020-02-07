@@ -115,7 +115,7 @@ public class Item : MonoBehaviour {
                     if (scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
                     else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
                 }
-                else if (itemName == "arrow") { scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; }
+                else if (itemName == "arrow" || itemName == "retry") { scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; }
                 else { scripts.itemManager.itemDesc.text = $"{itemName}\n{scripts.itemManager.descriptionDict[itemName]}"; }
                 // set the proper item descriptions for all items
             }
@@ -166,7 +166,10 @@ public class Item : MonoBehaviour {
                 }
             }
             else {
-                if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
+                if (itemType == "retry") {
+                    Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
+                }
+                else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
                     // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
                     if (itemType == "weapon")  { 
                         // if player is trying to use weapon
@@ -193,8 +196,6 @@ public class Item : MonoBehaviour {
     // none
     // why would you try to wound a tombstone?
     // mind your manners (if attempt to attack)
-
-
     /// <summary>
     /// Use a common item. 
     /// </summary>
@@ -459,7 +460,7 @@ public class Item : MonoBehaviour {
         scripts.statSummoner.SetDebugInformationFor("player");
     }
 
-    public void Remove(bool drop=false) {
+    public void Remove(bool drop=false, bool selectNew=true) {
         if (drop) { 
             if (!scripts.itemManager.floorItems.Contains(gameObject)) {
                 if (!scripts.turnManager.isMoving) {
@@ -529,8 +530,8 @@ public class Item : MonoBehaviour {
             scripts.player.inventory[i].transform.position = new Vector2(scripts.player.inventory[i].transform.position.x - 1f, 3.16f);
             // shift over each item
         }
-        scripts.itemManager.Select(scripts.itemManager.curList, index);
-        // select the next item over
+        if (selectNew) { scripts.itemManager.Select(scripts.itemManager.curList, index); }
+        // select the next item over if needed
         Destroy(gameObject);
         // destroy the object
     }
