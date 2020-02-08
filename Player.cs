@@ -83,7 +83,7 @@ public class Player : MonoBehaviour {
                 scripts.turnManager.SetTargetOf("player");
             }
         }
-        else if (Input.GetKeyDown(KeyCode.R)) {
+        else if (Input.GetKeyDown(KeyCode.R) && !isDead) {
             // player wants to restart
             // player death on r is instant, so don't do animation stuff
             isDead = true;

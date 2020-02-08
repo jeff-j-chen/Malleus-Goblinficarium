@@ -157,17 +157,23 @@ public class Item : MonoBehaviour {
                             // decrement counter
                             scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
                             // move the selected item into the player's inventory
+                            print("move0");
                         }
                         else { scripts.turnManager.SetStatusText("drop an item to trade"); }
                         // player has not dropped items, so give a reminder
                     }
                     else { scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject)); }
+                    print("move1");
                     // not trader, so just pick up the item
                 }
             }
             else {
                 if (itemType == "retry") {
+                    scripts.levelManager.lockActions = true;
                     Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
+                    // reload scene
+                    scripts.soundManager.PlayClip("next");
+                    // play sound clip
                 }
                 else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
                     // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS

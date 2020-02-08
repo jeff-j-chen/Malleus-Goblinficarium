@@ -515,7 +515,7 @@ public class TurnManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Play the death animation for the player or enemy.
+    /// Play the death animation for the player or enemy. Also handle things like clearing potion stats.
     /// </summary>
     /// <param name="playerOrEnemy">Who to play the death animation for.</param>
     public IEnumerator PlayDeathAnimation(string playerOrEnemy) {
@@ -613,10 +613,14 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     /// <param name="text">What to set the new status text to</param>
     public void SetStatusText(string text) {
-        try { StopCoroutine(coroutine); } catch {}
-        // stop any existing status text coroutines
-        coroutine = StartCoroutine(StatusTextCoroutine(text));
-        // set the status text, and allow for it to be stopped
+        if (!(text == statusText.text))
+        {
+            // if the message is not already displayed
+            try { StopCoroutine(coroutine); } catch {}
+            // stop any existing status text coroutines
+            coroutine = StartCoroutine(StatusTextCoroutine(text));
+            // set the status text, and allow for it to be stopped
+        }
     }
 
     /// <summary>

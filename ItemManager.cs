@@ -200,7 +200,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <param name="itemType">The type of item of which to create.</param>
     /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
-    private void CreateItem(string itemType, int negativeOffset=0) {
+    private GameObject CreateItem(string itemType, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // create an item object at the correct position
         Sprite sprite = null;
@@ -222,6 +222,7 @@ public class ItemManager : MonoBehaviour {
         // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);         
         // add the item to the array
+        return instantiatedItem;
     }
 
     /// <summary>
@@ -229,7 +230,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <param name="itemName">The name of the item of which to create.</param>
     /// <param name="itemType">The type of the item of which to create</param>
-    public void CreateItem(string itemName, string itemType, int negativeOffset=0) {
+    public GameObject CreateItem(string itemName, string itemType, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)];
@@ -243,6 +244,7 @@ public class ItemManager : MonoBehaviour {
         // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);
         // add the item to the array
+        return instantiatedItem;
     }
 
     /// <summary>
@@ -308,7 +310,7 @@ public class ItemManager : MonoBehaviour {
     /// <param name="spd">The spd stat to give to the weapon.</param>
     /// <param name="atk">The atk stat to give to the weapon.</param>
     /// <param name="def">The def stat to give to the weapon.</param>
-    public void CreateWeaponWithStats(string weaponName, string modifier, int aim, int spd, int atk, int def) {
+    public GameObject CreateWeaponWithStats(string weaponName, string modifier, int aim, int spd, int atk, int def) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
         // instantiaet the item
         Sprite sprite = null;
@@ -322,14 +324,16 @@ public class ItemManager : MonoBehaviour {
         instantiatedItem.GetComponent<Item>().itemName = modifier + " " + sprite.name.Replace("_", " ");
         instantiatedItem.GetComponent<Item>().itemType = "weapon";
         instantiatedItem.GetComponent<Item>().modifier = modifier;
-        baseWeapon["green"] = aim;
-        baseWeapon["blue"] = spd;
-        baseWeapon["red"] = atk;
-        baseWeapon["white"] = def;
+        baseWeapon["green"] = aim >= 0 ? aim : -1;
+        baseWeapon["blue"] = spd >= 0 ? spd : -1;
+        baseWeapon["red"] = atk >= 0 ? atk : -1;
+        baseWeapon["white"] = def >= 0 ? def : -1;
+        // if >=0 set normally, otherwise limit to -1 (easier for tombstone stat saving)
         instantiatedItem.GetComponent<Item>().weaponStats = baseWeapon;
         // assign the attributes of the item based on the given parameters
         floorItems.Add(instantiatedItem);
         // add the item to the array
+        return instantiatedItem;
     }
 
     /// <summary>
@@ -548,15 +552,14 @@ public class ItemManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Save tombstone data, clear player's inventory, and give them the retry button.
+    /// </summary>
     public void GivePlayerRetry() {
-        foreach (GameObject item in scripts.player.inventory.ToList()) {
-            item.GetComponent<Item>().Remove(selectNew:false);
-            // remove all items from the player's inventory
-            // .ToList() is a trick to prevent ienumerator froma acting up
-        }
+        scripts.tombstoneData.SetTombstoneData();
         CreateItem("retry", "retry");
         MoveToInventory(0, true);
-        Select(curList, 0);
+        Select(scripts.player.inventory, 0);
         // make the player retry
     }
 }

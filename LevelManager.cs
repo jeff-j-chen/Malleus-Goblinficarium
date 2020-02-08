@@ -17,8 +17,8 @@ public class LevelManager : MonoBehaviour {
     private float[] damage =   new float[] { 10f, 3f, 23f, 3f };
     private float[] defense =  new float[] { 2f, 10f, 2f, 23f };
     private float[] mix =      new float[] { 2f, -10f, 18f, 18f };
-    public int level { get; private set; } = 1;
-    public int sub { get; private set; } = 3;
+    [SerializeField] public int level;
+    [SerializeField] public int sub;
     private Dictionary<string, float[]> levelStats = new Dictionary<string, float[]>() {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
@@ -38,6 +38,8 @@ public class LevelManager : MonoBehaviour {
 
     void Start()
     {
+        level = 1;
+        sub = 1;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -48,6 +50,8 @@ public class LevelManager : MonoBehaviour {
         levelBox.transform.position = offScreen;
         loadingCircle.transform.position = offScreen;
         // make the black box and the loading circle go off the screen
+        lockActions = false;
+        // make sure actions aren't locked
     }
 
     /// <summary>

@@ -18,6 +18,7 @@ public class Scripts : MonoBehaviour {
     public SoundManager soundManager;
     public LevelManager levelManager;
     public StatSummoner statSummoner;
+    public TombstoneData tombstoneData;
     public HighlightCalculator highlightCalculator;
     private readonly float[] delayArr = { 0.0001f, 0.001f, 0.005f, 0.01f, 0.0125f, 0.025f, 0.033f, 0.1f, 0.15f, 0.2f, 0.25f, 0.4f, 0.45f, 0.5f, 0.55f, 0.6f, 0.65f, 0.75f, 0.8f, 1f, 1.5f, 1.55f, 2f, 2.5f, 3f };
     public Dictionary<float, WaitForSeconds> delays = new Dictionary<float, WaitForSeconds>();
@@ -38,6 +39,7 @@ public class Scripts : MonoBehaviour {
         soundManager = FindObjectOfType<SoundManager>();
         levelManager = FindObjectOfType<LevelManager>();
         statSummoner = FindObjectOfType<StatSummoner>();
+        tombstoneData = FindObjectOfType<TombstoneData>();
         highlightCalculator = FindObjectOfType<HighlightCalculator>();
         foreach (float delay in delayArr) {
             delays.Add(delay, new WaitForSeconds(delay));
