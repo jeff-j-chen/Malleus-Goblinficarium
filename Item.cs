@@ -163,7 +163,6 @@ public class Item : MonoBehaviour {
                         // player has not dropped items, so give a reminder
                     }
                     else { scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject)); }
-                    print("move1");
                     // not trader, so just pick up the item
                 }
             }
@@ -181,10 +180,10 @@ public class Item : MonoBehaviour {
                         // if player is trying to use weapon
                         if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
                             // if conditions allow for attack
-                            if (!scripts.enemy.isDead && scripts.levelManager.sub != 4) { scripts.player.UseWeapon(); }
-                            // attack
+                            if (!(scripts.enemy.isDead || scripts.levelManager.sub == 4 || scripts.levelManager.level == scripts.tombstoneData.level && scripts.levelManager.sub == scripts.tombstoneData.sub)) { scripts.player.UseWeapon(); }
+                            // attack if enemy is not dead or tombstone
                             else if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
-                            else if (scripts.levelManager.sub == 4) { scripts.turnManager.SetStatusText("mind your manners"); }
+                            else if (scripts.levelManager.sub == 4 || scripts.levelManager.level == scripts.tombstoneData.level && scripts.levelManager.sub == scripts.tombstoneData.sub) { scripts.turnManager.SetStatusText("mind your manners"); }
                             // send reminders accordingly
                             else { print("error!"); }
                         }
@@ -197,11 +196,6 @@ public class Item : MonoBehaviour {
         }
     }
 
-    // for tombstone: 
-    //you come across a humble tombstone
-    // none
-    // why would you try to wound a tombstone?
-    // mind your manners (if attempt to attack)
     /// <summary>
     /// Use a common item. 
     /// </summary>

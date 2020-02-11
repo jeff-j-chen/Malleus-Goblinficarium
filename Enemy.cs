@@ -16,7 +16,7 @@ public class Enemy : MonoBehaviour {
     public List<string> woundList = new List<string>();
     public bool isDead = false;
     public Dictionary<string, int> stats;
-    private string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant" };
+    private string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone" };
     private string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
     public int stamina = 1;
     public int targetIndex = 0;
@@ -116,7 +116,9 @@ public class Enemy : MonoBehaviour {
     /// <param name="enemyNum"></param>
     public void SpawnNewEnemy(int enemyNum) {
         isDead = false;
+        // make sure enemy is not dead
         float[] temp;
+        // array to hold tsats
         if (enemyNum == 2) { temp = scripts.levelManager.GenStats("lich"); }
         else if (enemyNum == 0) { temp = scripts.levelManager.GenStats("devil"); }
         else { temp = scripts.levelManager.GenStats(); }
@@ -126,23 +128,43 @@ public class Enemy : MonoBehaviour {
             { "red", (int)temp[2] },
             { "white", (int)temp[3] },
         };
+        // set stats
         woundList.Clear();
+        // make sure is not woudneds
         // woundList = new List<string>() { "armpits" };
         try { scripts.turnManager.DisplayWounds(); } catch {}
+        // try to display wounds
         Transform child = transform.GetChild(0);
+        // get the child
         child.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+        // set the sprite
         GetComponent<Animator>().enabled = true;
+        // enable the animator (which is disabled frmo enemies dying)
         GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum];
+        // set the controller, must use runtimeanimationcontrollerhere
         if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
+            // devil needs to be in a different spot
             transform.position = new Vector2(enemyPos.x, -1.3333f);
             child.transform.position = new Vector2(childPos.x, childPos.y - 1.3333f / 4f);
         }
-        else  {
+        else {
+            // set normal position
             transform.position = enemyPos;
             child.transform.position = childPos;
         }
+        // set stamina counter
         enemyName.text = enemyArr[enemyNum];
+        if (scripts.levelManager.sub == 4 || scripts.levelManager.level == scripts.tombstoneData.level && scripts.levelManager.sub == scripts.tombstoneData.sub) {
+            stamina = 0;
+            // tombstone and merchant don't have stamina
+        }
+        else {
+            // normal enemy 
+            stamina = scripts.levelManager.level + scripts.levelManager.sub <= 5 ? scripts.levelManager.level + scripts.levelManager.sub : 5;
+            // assign stamina based on level and sub, up to a max of 5
+        }
         staminaCounter.text = stamina.ToString();
+        // 
     }
 
     /// <summary>

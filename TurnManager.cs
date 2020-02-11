@@ -91,7 +91,6 @@ public class TurnManager : MonoBehaviour {
         }
         else { Debug.LogError("Invalid string passed in to RecalculateMax() in TurnManager.cs"); }
     }
-
     
     /// <summary>
     /// Show the current wounds of the player and enemy.
@@ -151,23 +150,45 @@ public class TurnManager : MonoBehaviour {
     /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
-                // if not enough accuracy, set the proper target text
+            if (scripts.levelManager.sub == 4) { 
+                // trader
+                scripts.player.target.text = "PLACEHOLDER TEXT";
+            }
+            else if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
+                // tombstone
                 scripts.player.target.text = "none";
-                scripts.player.targetInfo.text = "not enough accuracy to inflict any wound";
+                scripts.player.targetInfo.text = "why would you try to wound a tombstone?";
             }
             else {
-                // set the player's attack indicator + description based on the target index
-                if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
-                // add an asterick if already injured
-                else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
-                scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
+                // normal setting
+                if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
+                    // if not enough accuracy, set the proper target text
+                    scripts.player.target.text = "none";
+                    scripts.player.targetInfo.text = "not enough accuracy to inflict any wound";
+                }
+                else {
+                    // set the player's attack indicator + description based on the target index
+                    if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
+                    // add an asterick if already injured
+                    else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
+                    scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
+                }
             }
         }
         else if (playerOrEnemy == "enemy") {
-            // set enemy's target indicator based on the target index
-            if (scripts.player.woundList.Contains("*")) { scripts.enemy.target.text = "*"+targetArr[scripts.enemy.targetIndex]; }
-            else { scripts.enemy.target.text = targetArr[scripts.enemy.targetIndex]; }
+            if (scripts.levelManager.sub == 4) { 
+                // trader
+                scripts.enemy.target.text = "barter";
+            }
+            else if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
+                // tombstone
+                scripts.enemy.target.text = "serenity";
+            }
+            else {
+                // normal enemy, so set enemy's target indicator based on the target index
+                if (scripts.player.woundList.Contains("*")) { scripts.enemy.target.text = "*"+targetArr[scripts.enemy.targetIndex]; }
+                else { scripts.enemy.target.text = targetArr[scripts.enemy.targetIndex]; }
+            }
         }
         else { Debug.LogError("Invalid string passed in to SetTarget() in TurnManager.cs"); }
     }
@@ -550,6 +571,8 @@ public class TurnManager : MonoBehaviour {
             scripts.player.GetComponent<SpriteRenderer>().sprite = scripts.player.GetDeathSprite();
             scripts.player.SetPlayerPositionAfterDeath();
             // if player dies, set sprite and proper position
+            scripts.itemManager.GivePlayerRetry();
+            // allow the player to retry
         }
         else if (playerOrEnemy == "enemy") {
             scripts.enemy.GetComponent<SpriteRenderer>().sprite = scripts.enemy.GetDeathSprite();
@@ -576,8 +599,6 @@ public class TurnManager : MonoBehaviour {
         RecalculateMaxFor("player");
         RecalculateMaxFor("enemy");
         // reset target for both
-        scripts.itemManager.GivePlayerRetry();
-        // allow the player to retry
     }
 
     /// <summary>

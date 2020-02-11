@@ -158,7 +158,18 @@ public class LevelManager : MonoBehaviour {
                 // if spawning a normal enemy
                 sub++;
                 // increment the sub counter
-                if (sub == 4) { 
+                if (sub == scripts.tombstoneData.sub && level == scripts.tombstoneData.level) {
+                    // level matches which level to add to
+                    scripts.tombstoneData.sub = -1;
+                    scripts.tombstoneData.level = -1;
+                    // make tombstone inaccessible
+                    levelText.text = "level " + level + "-" + sub + "*";
+                    sub--;
+                    // decrement sub (because we went up 1 level but aren't going to fight anything)
+                    scripts.enemy.SpawnNewEnemy(8);
+                    // spawn the tombstone
+                }
+                else if (sub == 4) { 
                     SummonTrader();
                     // summon trader if necessary
                     levelText.text = "level " + level + "-3+"; 
@@ -166,19 +177,20 @@ public class LevelManager : MonoBehaviour {
                 }
                 else if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
+                else if (level == 3 && sub == 4) { 
+                    levelText.text = "PLACEHOLDER TEXT";
+                    scripts.enemy.SpawnNewEnemy(0); 
+                // spawn the devil if on the correct level
+                }
                 else { levelText.text = "level " + level + "-" + sub; }
                 // only going to the next sub, so notify the player accordingly
-                if (level == 3 && sub == 4) { scripts.enemy.SpawnNewEnemy(0); }
-                // spawn the devil if on the correct level
 
                 // add something here to make it really glitchy (like how it is in the actual game)
 
-                else { 
-                    if (sub != 4) {
-                        scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); 
-                    }
+                if (!(sub == 4 || level == 3 && sub == 4 || sub == scripts.tombstoneData.sub && level == scripts.tombstoneData.level)) {
+                    scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); 
                 }
-                // otherwise just spawn a random enemy
+                // if not trader, not devil, or tombstone
             }
             else { 
                 levelText.text = "???"; 
@@ -196,18 +208,24 @@ public class LevelManager : MonoBehaviour {
             // clear the loading text and move the box offscreen
             scripts.itemManager.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
-            if (sub != 4) {
-                // if not going to the trader level
+            if (!(sub == 4 || sub == scripts.tombstoneData.sub && level == scripts.tombstoneData.level)) {
+                // if not going to the trader or tombstone
                 scripts.diceSummoner.SummonDice(false);
                 scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
                 // summon die and make sure the enemy's stats can be seen
             }
-            else{ scripts.itemManager.SpawnTraderItems(); }
+            else { 
+                if (sub == 4) { scripts.itemManager.SpawnTraderItems();  }
+                else { print("SPAWN TOMBSTONE ITEMS!"); }
+            }
             // can spawn the items here because we have a deletion queue rather than just deleting all
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
                 temp.a -= 1f/15f;
                 boxSR.color = temp;
+            }
+            if (sub == scripts.tombstoneData.sub && level == scripts.tombstoneData.level) {
+                scripts.turnManager.SetStatusText("you come across a humble tombstone");
             }
             // fade the level box back out
             scripts.itemManager.AttemptFadeTorches();

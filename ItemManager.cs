@@ -112,7 +112,7 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("sword", "common", -2, -2, -2, -2);
+        CreateWeaponWithStats("sword", "common", 10, 10, 10, 10);
         MoveToInventory(0, true);
         CreateItem("steak", "common");
         MoveToInventory(0, true);
@@ -342,99 +342,105 @@ public class ItemManager : MonoBehaviour {
     /// <param name="index">The index from which to move the item.</param>
     /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
     public void MoveToInventory(int index, bool starter=false) {
-        if (scripts.player.inventory.Count <= 7) {
-            // if the player doesn't have 7 or more items
-            if (!starter) { scripts.soundManager.PlayClip("click"); }
-            // if the item is not the starter (so it doesn't instantly play a click), play the click sound
-            if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
-                // if the item being moved is a weapon 
-                floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
-                // move the item to the weapon slot
-                scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
-                // set the player's stats to be equal to that of the weapon
-                if (!starter) {
-                    // if the weapon is not a starter (so player already has a weapon)
-                    scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
-                    // notify the player
-                    Destroy(scripts.player.inventory[0]);
-                    // destroy the previous weapon
-                    scripts.player.inventory[0] = floorItems[index]; 
-                    // add the new weapon to the player's inventory
+        if (floorItems[index] != null) {
+            if (scripts.player.inventory.Count <= 7) {
+                // if the player doesn't have 7 or more items
+                if (!starter) { scripts.soundManager.PlayClip("click"); }
+                // if the item is not the starter (so it doesn't instantly play a click), play the click sound
+                if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
+                    // if the item being moved is a weapon 
+                    floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
+                    // move the item to the weapon slot
+                    scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
+                    // set the player's stats to be equal to that of the weapon
+                    if (!starter) {
+                        // if the weapon is not a starter (so player already has a weapon)
+                        scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
+                        // notify the player
+                        Destroy(scripts.player.inventory[0]);
+                        // destroy the previous weapon
+                        scripts.player.inventory[0] = floorItems[index]; 
+                        // add the new weapon to the player's inventory
+                    }
+                    else {
+                        scripts.player.inventory.Add(floorItems[index]);
+                        // item is a starter, so just add it to the player's inventory
+                    }
+                    floorItems.RemoveAt(0);
+                    // remove the item at index 0 (which is the weapon, because the weapon is always created first)
+                    foreach(GameObject item in floorItems) {
+                        item.transform.position = new Vector2(item.transform.position.x - 1f, itemY);
+                        // for every item, shift it over now that an item has been removed
+                    }
+                    Select(curList, 0);
+                    // select the item at index 0
                 }
                 else {
-                    scripts.player.inventory.Add(floorItems[index]);
-                    // item is a starter, so just add it to the player's inventory
-                }
-                floorItems.RemoveAt(0);
-                // remove the item at index 0 (which is the weapon, because the weapon is always created first)
-                foreach(GameObject item in floorItems) {
-                    item.transform.position = new Vector2(item.transform.position.x - 1f, itemY);
-                    // for every item, shift it over now that an item has been removed
-                }
-                Select(curList, 0);
-                // select the item at index 0
-            }
-            else {
-                // not a weapon
-                Item tempItem = floorItems[index].GetComponent<Item>();
-                if (tempItem.itemName == "necklet") {
-                    if (tempItem.modifier == "solidity") { 
-                        neckletStats["green"] += neckletCounter["arcane"]; 
-                        neckletCounter["green"]++; 
-                    } 
-                    else if (tempItem.modifier == "rapidity") { 
-                        neckletStats["blue"] += neckletCounter["arcane"];
-                        neckletCounter["blue"]++; 
-                    } 
-                    else if (tempItem.modifier == "strength") { 
-                        neckletStats["red"] += neckletCounter["arcane"]; 
-                        neckletCounter["red"]++; 
-                    } 
-                    else if (tempItem.modifier == "defense") { 
-                        neckletStats["white"] += neckletCounter["arcane"]; 
-                        neckletCounter["white"]++; 
-                    }
-                    else if (tempItem.modifier == "arcane") {
-                        neckletCounter["arcane"]++;    
-                        foreach (string stat in statArr) { 
-                            neckletStats[stat] = neckletCounter["arcane"] * neckletCounter[stat]; 
+                    // not a weapon
+                    Item tempItem = floorItems[index].GetComponent<Item>();
+                    if (tempItem.itemName == "necklet") {
+                        if (tempItem.modifier == "solidity") { 
+                            neckletStats["green"] += neckletCounter["arcane"]; 
+                            neckletCounter["green"]++; 
+                        } 
+                        else if (tempItem.modifier == "rapidity") { 
+                            neckletStats["blue"] += neckletCounter["arcane"];
+                            neckletCounter["blue"]++; 
+                        } 
+                        else if (tempItem.modifier == "strength") { 
+                            neckletStats["red"] += neckletCounter["arcane"]; 
+                            neckletCounter["red"]++; 
+                        } 
+                        else if (tempItem.modifier == "defense") { 
+                            neckletStats["white"] += neckletCounter["arcane"]; 
+                            neckletCounter["white"]++; 
                         }
-                    } 
-                    else if (floorItems[index].GetComponent<Item>().modifier == "nothing") {}
-                    else { print("bad modifier"); }
-                    // depending on the type of the necklet, modify the stats accordingly
-                    scripts.statSummoner.SetDebugInformationFor("player");
-                    scripts.statSummoner.SummonStats();
-                    // set the debug information and summon the new stats
-                }
-                if (!starter) 
-                { 
-                    if (tempItem.itemType == "weapon") { 
-                        scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
+                        else if (tempItem.modifier == "arcane") {
+                            neckletCounter["arcane"]++;    
+                            foreach (string stat in statArr) { 
+                                neckletStats[stat] = neckletCounter["arcane"] * neckletCounter[stat]; 
+                            }
+                        } 
+                        else if (floorItems[index].GetComponent<Item>().modifier == "nothing") {}
+                        else { print("bad modifier"); }
+                        // depending on the type of the necklet, modify the stats accordingly
+                        scripts.statSummoner.SetDebugInformationFor("player");
+                        scripts.statSummoner.SummonStats();
+                        // set the debug information and summon the new stats
                     }
-                    if (tempItem.itemName == "necklet")  { 
-                        if (tempItem.modifier == "arcane") { scripts.turnManager.SetStatusText($"you take arcane necklet"); }
-                        else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
+                    if (!starter) 
+                    { 
+                        if (tempItem.itemType == "weapon") { 
+                            scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
+                        }
+                        if (tempItem.itemName == "necklet")  { 
+                            if (tempItem.modifier == "arcane") { scripts.turnManager.SetStatusText($"you take arcane necklet"); }
+                            else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
+                        }
+                        else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
+                        else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName}"); }
+                        // notify the player of which item that they took
                     }
-                    else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
-                    else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName}"); }
-                    // notify the player of which item that they took
+                    // if the item is not a starter item, notify the player that they have picked up the item
+                    floorItems[index].transform.position = new Vector2(-2.75f + itemSpacing * scripts.player.inventory.Count, 3.16f);
+                    // add the item to the proper location
+                    scripts.player.inventory.Add(floorItems[index]);
+                    // add the item to the player's inventory
+                    floorItems.RemoveAt(index);
+                    // and remove it from the floor
+                    for (int i = index; i < floorItems.Count; i++) {
+                        // for every item after where the removed item was
+                        floorItems[i].transform.position = new Vector2(floorItems[i].transform.position.x - 1f, itemY);
+                        // shift it over to the proper location
+                    }
+                    Select(curList, index);
+                    // select the next item of where it was
                 }
-                // if the item is not a starter item, notify the player that they have picked up the item
-                floorItems[index].transform.position = new Vector2(-2.75f + itemSpacing * scripts.player.inventory.Count, 3.16f);
-                // add the item to the proper location
-                scripts.player.inventory.Add(floorItems[index]);
-                // add the item to the player's inventory
-                floorItems.RemoveAt(index);
-                // and remove it from the floor
-                for (int i = index; i < floorItems.Count; i++) {
-                    // for every item after where the removed item was
-                    floorItems[i].transform.position = new Vector2(floorItems[i].transform.position.x - 1f, itemY);
-                    // shift it over to the proper location
-                }
-                Select(curList, index);
-                // select the next item of where it was
             }
+        }
+        else {
+            Destroy(floorItems[index]);
+            floorItems.RemoveAt(index);
         }
     }
 
@@ -557,9 +563,5 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     public void GivePlayerRetry() {
         scripts.tombstoneData.SetTombstoneData();
-        CreateItem("retry", "retry");
-        MoveToInventory(0, true);
-        Select(scripts.player.inventory, 0);
-        // make the player retry
     }
 }
