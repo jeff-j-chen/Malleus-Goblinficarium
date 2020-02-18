@@ -69,8 +69,6 @@ public class TombstoneData : MonoBehaviour
             // add it to the stored array
             // check for items to make them unusable
         }
-        GameObject retryButton = scripts.itemManager.CreateItem("retry", "retry");
-        // create retry button
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true);
             // move all items on the floor to the player's inventory
@@ -82,6 +80,8 @@ public class TombstoneData : MonoBehaviour
                 // .ToList() is a trick to prevent ienumerator from acting up
             }
         }
+        GameObject retryButton = scripts.itemManager.CreateItem("retry", "retry");
+        // create retry button
         scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
     }

@@ -19,7 +19,6 @@ public class ItemManager : MonoBehaviour {
     public List<GameObject> deletionQueue = new List<GameObject>();
     public string[] statArr = new string[] { "green", "blue", "red", "white" };
     public string[] statArr1 = new string[] { "accuracy", "speed", "damage", "parry" };
-    public Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
     public Dictionary<string, Dictionary<string, int>> weaponDict = new Dictionary<string, Dictionary<string, int>>() {
         { "dagger", new Dictionary<string, int>()   { { "green", 2 }, { "blue", 4 }, { "red", 0 }, { "white", 0 } } },
         { "flail", new Dictionary<string, int>()    { { "green", 0 }, { "blue", 3 }, { "red", 1 }, { "white", 0 } } },
@@ -138,7 +137,7 @@ public class ItemManager : MonoBehaviour {
             Select(curList, col + 1, false);
             // if moving right, move the selection right
         }
-        else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) {
+        else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) && !scripts.turnManager.isMoving) {
             highlightedItem.GetComponent<Item>().Use();
             // if pressing return or enter, use the item that is selected
         }
@@ -269,6 +268,7 @@ public class ItemManager : MonoBehaviour {
     /// Create a item with random modifier and stats. 
     /// </summary>
     public void CreateRandomWeapon() {
+        Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
         int rand = UnityEngine.Random.Range(0, weaponNames.Length);
@@ -311,6 +311,7 @@ public class ItemManager : MonoBehaviour {
     /// <param name="atk">The atk stat to give to the weapon.</param>
     /// <param name="def">The def stat to give to the weapon.</param>
     public GameObject CreateWeaponWithStats(string weaponName, string modifier, int aim, int spd, int atk, int def) {
+        Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
         // instantiaet the item
         Sprite sprite = null;
@@ -361,6 +362,9 @@ public class ItemManager : MonoBehaviour {
                         // destroy the previous weapon
                         scripts.player.inventory[0] = floorItems[index]; 
                         // add the new weapon to the player's inventory
+                        scripts.statSummoner.SummonStats();
+                        scripts.statSummoner.SetDebugInformationFor("player");
+                        // update debug, because player just took a new weapon
                     }
                     else {
                         scripts.player.inventory.Add(floorItems[index]);
@@ -434,7 +438,8 @@ public class ItemManager : MonoBehaviour {
                         // shift it over to the proper location
                     }
                     Select(curList, index);
-                    // select the next item of where it was
+                    
+                    // attempt toselect the next item of where it was
                 }
             }
         }

@@ -84,31 +84,41 @@ public class Player : MonoBehaviour {
             }
         }
         else if (Input.GetKeyDown(KeyCode.R) && !isDead) {
-            // player wants to restart
-            // player death on r is instant, so don't do animation stuff
-            isDead = true;
-            // mark player as dead
-            scripts.soundManager.PlayClip("death");
-            // play sound clip
-            scripts.player.GetComponent<Animator>().enabled = false;
-            GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
-            SetPlayerPositionAfterDeath();
-            foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-                StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
-                // fade out all existing die
+            if (scripts.enemy.isDead) {
+                // don't let player suicide when enemy is dead, because it is glitchy
+                scripts.turnManager.SetStatusText("you've killed him");
             }
-            scripts.statSummoner.ResetDiceAndStamina();
-            // clear them
-            scripts.turnManager.ClearPotionStats();
-            // clear potion stats
-            scripts.statSummoner.SummonStats();
-            // summon stats
-            scripts.statSummoner.SetDebugInformationFor("player");
-            // set debug (only player needed here)
-            scripts.turnManager.RecalculateMaxFor("player");
-            // reset target
-            scripts.itemManager.GivePlayerRetry();
-            // allow player to retry
+            else if (scripts.enemy.enemyName.text == "Tombstone") {
+                // or on tombstone
+                scripts.turnManager.SetStatusText("mind your manners");
+            }
+            else {
+                // player wants to restart
+                // player death on r is instant, so don't do animation stuff
+                isDead = true;
+                // mark player as dead
+                scripts.soundManager.PlayClip("death");
+                // play sound clip
+                scripts.player.GetComponent<Animator>().enabled = false;
+                GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
+                SetPlayerPositionAfterDeath();
+                foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+                    StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+                    // fade out all existing die
+                }
+                scripts.statSummoner.ResetDiceAndStamina();
+                // clear them
+                scripts.turnManager.ClearPotionStats();
+                // clear potion stats
+                scripts.statSummoner.SummonStats();
+                // summon stats
+                scripts.statSummoner.SetDebugInformationFor("player");
+                // set debug (only player needed here)
+                scripts.turnManager.RecalculateMaxFor("player");
+                // reset target
+                scripts.itemManager.GivePlayerRetry();
+                // allow player to retry
+            }
         }
     }
 
