@@ -85,4 +85,14 @@ public class TombstoneData : MonoBehaviour
         scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
     }
+
+    public void SpawnSavedItems() {
+        print("spawning in the tombstone items");
+        foreach (GameObject savedItem in items) {
+            savedItem.transform.position = new Vector2(-2.75f + (scripts.itemManager.floorItems.Count - 1) * scripts.itemManager.itemSpacing, scripts.itemManager.itemY);
+            scripts.itemManager.floorItems.Add(savedItem);
+            savedItem.transform.parent = scripts.itemManager.transform;
+        }
+        scripts.itemManager.CreateItem("arrow", "arrow");
+    }
 }

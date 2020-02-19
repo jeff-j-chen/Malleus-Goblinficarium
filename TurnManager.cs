@@ -924,7 +924,6 @@ public class TurnManager : MonoBehaviour {
     /// <param name="removeFrom">Who to remove the die from.</param>
     private IEnumerator RemoveDice(string diceType, string removeFrom) {
         yield return scripts.delays[1f];
-        print("function called");
         List<Dice> diceList = removeFrom == "player" ? scripts.statSummoner.addedPlayerDice[diceType] : scripts.statSummoner.addedEnemyDice[diceType];
         // assign the correct dicelist
         // conditional is true ? yes: no

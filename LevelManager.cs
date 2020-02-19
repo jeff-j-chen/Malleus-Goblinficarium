@@ -215,14 +215,7 @@ public class LevelManager : MonoBehaviour {
             // clear the number of items player has dropped
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
-                print("spawning in the tombstone items");
-                scripts.tombstoneData = FindObjectOfType<TombstoneData>();
-                foreach (GameObject savedItem in scripts.tombstoneData.items) {
-                    // new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY)
-                    savedItem.transform.position = new Vector2(-2.75f + (scripts.itemManager.floorItems.Count) * scripts.itemManager.itemSpacing, scripts.itemManager.itemY);
-                    scripts.itemManager.floorItems.Add(savedItem);
-                    savedItem.transform.parent = scripts.itemManager.transform;
-                }
+                scripts.tombstoneData.SpawnSavedItems();
             }
             else if (toSpawn == "trader") {
                 // going to trader, so spawn trader items

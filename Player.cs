@@ -129,7 +129,7 @@ public class Player : MonoBehaviour {
     /// Use the player's weapon. 
     /// </summary>
     public void UseWeapon() {
-        if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer >= 0.05 && PlayerPrefs.GetString("hints") == "on") {
+        if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on") {
             // if player wants hints, can aim for the face, but is not doing so
             coroutine = StartCoroutine(HintFace());
             // hint the player
