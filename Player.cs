@@ -93,31 +93,34 @@ public class Player : MonoBehaviour {
                 scripts.turnManager.SetStatusText("mind your manners");
             }
             else {
-                // player wants to restart
-                // player death on r is instant, so don't do animation stuff
-                isDead = true;
-                // mark player as dead
-                scripts.soundManager.PlayClip("death");
-                // play sound clip
-                scripts.player.GetComponent<Animator>().enabled = false;
-                GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
-                SetPlayerPositionAfterDeath();
-                foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-                    StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
-                    // fade out all existing die
+                if (!scripts.levelManager.lockActions) {
+                    // don't let player restart while actions are lockedd
+                    // player wants to restart
+                    // player death on r is instant, so don't do animation stuff
+                    isDead = true;
+                    // mark player as dead
+                    scripts.soundManager.PlayClip("death");
+                    // play sound clip
+                    scripts.player.GetComponent<Animator>().enabled = false;
+                    GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
+                    SetPlayerPositionAfterDeath();
+                    foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+                        StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+                        // fade out all existing die
+                    }
+                    scripts.statSummoner.ResetDiceAndStamina();
+                    // clear them
+                    scripts.turnManager.ClearPotionStats();
+                    // clear potion stats
+                    scripts.statSummoner.SummonStats();
+                    // summon stats
+                    scripts.statSummoner.SetDebugInformationFor("player");
+                    // set debug (only player needed here)
+                    scripts.turnManager.RecalculateMaxFor("player");
+                    // reset target
+                    scripts.itemManager.GivePlayerRetry();
+                    // allow player to retry
                 }
-                scripts.statSummoner.ResetDiceAndStamina();
-                // clear them
-                scripts.turnManager.ClearPotionStats();
-                // clear potion stats
-                scripts.statSummoner.SummonStats();
-                // summon stats
-                scripts.statSummoner.SetDebugInformationFor("player");
-                // set debug (only player needed here)
-                scripts.turnManager.RecalculateMaxFor("player");
-                // reset target
-                scripts.itemManager.GivePlayerRetry();
-                // allow player to retry
             }
         }
     }
@@ -126,7 +129,7 @@ public class Player : MonoBehaviour {
     /// Use the player's weapon. 
     /// </summary>
     public void UseWeapon() {
-        if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05 && PlayerPrefs.GetString("hints") == "on") {
+        if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer >= 0.05 && PlayerPrefs.GetString("hints") == "on") {
             // if player wants hints, can aim for the face, but is not doing so
             coroutine = StartCoroutine(HintFace());
             // hint the player

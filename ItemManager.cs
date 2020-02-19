@@ -93,8 +93,8 @@ public class ItemManager : MonoBehaviour {
     private string[] scrollTypes = new string[] { "fury", "haste", "dodge", "leech", "courage", "challenge", "nothing" };
     private string[] potionTypes = new string[] { "accuracy", "speed", "strength", "defense", "might", "life", "nothing" };
     private Sprite[] allSprites;
-    private float itemSpacing = 1f;
-    private float itemY = -5.3f;
+    public float itemSpacing = 1f;
+    public float itemY = -5.3f;
     private Scripts scripts;
     public int col = 0;
     public List<GameObject> curList;
@@ -121,7 +121,7 @@ public class ItemManager : MonoBehaviour {
     }
 
     void Update() {
-        if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
+        if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl)) {
             // if pressing one of the ctrl keys
             if (curList == scripts.player.inventory) { Select(floorItems, 0); }
             else if (curList == floorItems) { Select(scripts.player.inventory, 0); }

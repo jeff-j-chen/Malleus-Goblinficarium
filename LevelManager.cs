@@ -164,7 +164,6 @@ public class LevelManager : MonoBehaviour {
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
                 if (sub == scripts.tombstoneData.sub && level == scripts.tombstoneData.level) {
                     toSpawn = "tombstone";
-                    print("spawn in the tombstone!");
                     // level matches which level to add to
                     scripts.tombstoneData.sub = -1;
                     scripts.tombstoneData.level = -1;
@@ -216,7 +215,14 @@ public class LevelManager : MonoBehaviour {
             // clear the number of items player has dropped
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
-                print("SPAWN TOMBSTONE ITEMS!");
+                print("spawning in the tombstone items");
+                scripts.tombstoneData = FindObjectOfType<TombstoneData>();
+                foreach (GameObject savedItem in scripts.tombstoneData.items) {
+                    // new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY)
+                    savedItem.transform.position = new Vector2(-2.75f + (scripts.itemManager.floorItems.Count) * scripts.itemManager.itemSpacing, scripts.itemManager.itemY);
+                    scripts.itemManager.floorItems.Add(savedItem);
+                    savedItem.transform.parent = scripts.itemManager.transform;
+                }
             }
             else if (toSpawn == "trader") {
                 // going to trader, so spawn trader items
@@ -229,6 +235,7 @@ public class LevelManager : MonoBehaviour {
                 // summon die and make sure the enemy's stats can be seen
             }
             // can spawn the items here because we have a deletion queue rather than just deleting all
+            scripts.turnManager.RecalculateMaxFor("player");
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
                 temp.a -= 1f/15f;
