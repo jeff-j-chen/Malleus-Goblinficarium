@@ -115,6 +115,12 @@ public class Item : MonoBehaviour {
                     if (scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
                     else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
                 }
+                else if (itemName == "moldy cheese") {
+                    scripts.itemManager.itemDesc.text = "moldy cheese\n+0 stamina";
+                }
+                else if (itemName == "rotten steak") {
+                    scripts.itemManager.itemDesc.text = "rotten steak\n+0 stamina";
+                }
                 else if (itemName == "arrow" || itemName == "retry") { scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; }
                 else { scripts.itemManager.itemDesc.text = $"{itemName}\n{scripts.itemManager.descriptionDict[itemName]}"; }
                 // set the proper item descriptions for all items
@@ -157,7 +163,6 @@ public class Item : MonoBehaviour {
                             // decrement counter
                             scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
                             // move the selected item into the player's inventory
-                            print("move0");
                         }
                         else { scripts.turnManager.SetStatusText("drop an item to trade"); }
                         // player has not dropped items, so give a reminder
@@ -213,11 +218,22 @@ public class Item : MonoBehaviour {
                 Remove();
                 // remove from player inventory
             }
+            else if (itemName == "rotten steak") {
+                // don't change stamina for rotten foods
+                scripts.soundManager.PlayClip("eat");
+                scripts.turnManager.SetStatusText("you swallow rotten steak");
+                Remove();
+            }
             else if (itemName == "cheese")  {
                 scripts.soundManager.PlayClip("eat");
                 if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 5); }
                 else { scripts.turnManager.ChangeStaminaOf("player", 3); }
                 scripts.turnManager.SetStatusText("you swallow cheese");
+                Remove();
+            }
+            else if (itemName == "moldy cheese") {
+                scripts.soundManager.PlayClip("eat");
+                scripts.turnManager.SetStatusText("you swallow moldy cheese");
                 Remove();
             }
             else if (itemName == "scroll" && scripts.levelManager.sub != 4) {
@@ -229,8 +245,7 @@ public class Item : MonoBehaviour {
                     // prevent player from accidentally using two scrolls
                     else
                     {
-                        scripts.player.isFurious = true;
-                        scripts.player.SetPlayerStatusEffect("fury", "on");
+                        scripts.player.SetPlayerStatusEffect("fury", true);
                         // turn on fury
                         scripts.turnManager.SetStatusText("you read scroll of fury... you feel furious");
                         MakeAllAttachedYellow();
@@ -242,8 +257,7 @@ public class Item : MonoBehaviour {
                     if (scripts.player.isDodgy) { scripts.turnManager.SetStatusText("you are already dodgy"); }
                     // prevent player from accidentally using two scrolls
                     else {
-                        scripts.player.isDodgy = true;
-                        scripts.player.SetPlayerStatusEffect("dodge", "on");
+                        scripts.player.SetPlayerStatusEffect("dodge", true);
                         // turn on dodge
                         scripts.turnManager.SetStatusText("you read scroll of dodge... you feel dodgy");
                         Remove();
@@ -260,8 +274,7 @@ public class Item : MonoBehaviour {
                         // prevent player from accidentally using two scrolls
                         else
                         {
-                            scripts.player.isHasty = true;
-                            scripts.player.SetPlayerStatusEffect("haste", "on");
+                            scripts.player.SetPlayerStatusEffect("haste", true);
                             // turn on haste
                             scripts.turnManager.SetStatusText("you read scroll of haste... you feel winged");
                             Remove();
@@ -274,8 +287,7 @@ public class Item : MonoBehaviour {
                     if (scripts.player.isBloodthirsty) { scripts.turnManager.SetStatusText("you are already bloodthirsty"); }
                     // prevent player from accidentally using two scrolls
                     else {
-                        scripts.player.isBloodthirsty = true;
-                        scripts.player.SetPlayerStatusEffect("leech", "on");
+                        scripts.player.SetPlayerStatusEffect("leech", true);
                         // turn on leech
                         scripts.turnManager.SetStatusText("you read scroll of leech... you feel bloodthirsty");
                         Remove();
@@ -286,8 +298,7 @@ public class Item : MonoBehaviour {
                     if (scripts.player.isCourageous) { scripts.turnManager.SetStatusText("you are already courageous"); }
                     // prevent player from accidentally using two scrolls
                     else {
-                        scripts.player.isCourageous = true;
-                        scripts.player.SetPlayerStatusEffect("courage", "on");
+                        scripts.player.SetPlayerStatusEffect("courage", true);
                         // turn on courage
                         scripts.turnManager.SetStatusText("you read scroll of courage... you feel courageous");
                         Remove();
@@ -363,28 +374,6 @@ public class Item : MonoBehaviour {
     }
 
     /// <summary>
-    /// Make all die attached to the player into yellow.
-    /// </summary>
-    private void MakeAllAttachedYellow()
-    {
-        // notfiy player
-        foreach (GameObject dice in scripts.diceSummoner.existingDice)
-        {
-            // for every die
-            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player")
-            {
-                // if the die is attached to the player
-                dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black;
-                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
-                dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
-                // make the die yellow
-                dice.GetComponent<Dice>().moveable = true;
-                // allow for moving the die around
-            }
-        }
-    }
-
-    /// <summary>
     /// Use a rare item. 
     /// </summary>
     private void UseRare() {
@@ -419,8 +408,7 @@ public class Item : MonoBehaviour {
                         scripts.turnManager.SetStatusText("you feel dodgy");
                         scripts.itemManager.usedBoots = true;
                         scripts.turnManager.ChangeStaminaOf("player", -1);
-                        scripts.player.isDodgy = true;
-                        scripts.player.SetPlayerStatusEffect("dodge", "on");
+                        scripts.player.SetPlayerStatusEffect("dodge", true);
                     }
                     else { scripts.turnManager.SetStatusText("not enough stamina"); }
                 }
@@ -460,6 +448,27 @@ public class Item : MonoBehaviour {
         scripts.statSummoner.SetDebugInformationFor("player");
     }
 
+    /// <summary>
+    /// Make all die attached to the player into yellow.
+    /// </summary>
+    private void MakeAllAttachedYellow()
+    {
+        // notfiy player
+        foreach (GameObject dice in scripts.diceSummoner.existingDice)
+        {
+            // for every die
+            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player")
+            {
+                // if the die is attached to the player
+                dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black;
+                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
+                dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
+                // make the die yellow
+                dice.GetComponent<Dice>().moveable = true;
+                // allow for moving the die around
+            }
+        }
+    }
     public void Remove(bool drop=false, bool selectNew=true) {
         if (drop) { 
             if (!scripts.itemManager.floorItems.Contains(gameObject)) {
@@ -469,8 +478,7 @@ public class Item : MonoBehaviour {
                         // play add checks so that this doesn't happen multiple times a round / when dropping items after enemy has dead
                         if (itemType != "weapon") {
                             // if the item is not the player's weapon
-                            scripts.player.isFurious = true;
-                            scripts.player.SetPlayerStatusEffect("fury", "on");
+                            scripts.player.SetPlayerStatusEffect("fury", true);
                             // turn on fury
                             scripts.turnManager.SetStatusText("deity accepts your offering... you feel furious");
                             // notify player

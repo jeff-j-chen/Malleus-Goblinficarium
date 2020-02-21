@@ -6,7 +6,7 @@ using TMPro;
 using System;
 
 public class ItemManager : MonoBehaviour {
-    [SerializeField] private TextMeshProUGUI lootText;
+    [SerializeField] public TextMeshProUGUI lootText;
     [SerializeField] public TextMeshProUGUI itemDesc;
     [SerializeField] private GameObject item;
     [SerializeField] public GameObject highlight;
@@ -64,8 +64,10 @@ public class ItemManager : MonoBehaviour {
         {"arrow", "proceed to the next level"}, 
         {"ankh", "force new draft"}, 
         {"boots of dodge", "pay 1 stamina to become dodgy"}, 
+        {"broken helm", ""}, 
         {"cheese", "3"}, 
         {"dagger", "green dice buff damage"}, 
+        {"defiled kapala", ""}, 
         {"flail", "start with red die"}, 
         {"hatchet", "enemy can't choose yellow die"},  
         {"helm of might", "pay 3 stamina to gain a yellow die"}, 
@@ -78,10 +80,12 @@ public class ItemManager : MonoBehaviour {
         {"potion", ""}, 
         {"rapier", "gain 3 stamina upon kill"}, 
         {"retry", "retry?"}, 
+        {"ruined boots", ""}, 
         {"scimitar", "discard enemy's die upon parry"},  
         {"scroll", ""}, 
         {"shuriken", "discard enemy's die"}, 
         {"skeleton key", "escape the fight"}, 
+        {"shattered ankh", ""}, 
         {"spear", "always choose first die"}, 
         {"steak", "5"}, 
         {"sword", ""}, 
@@ -103,6 +107,7 @@ public class ItemManager : MonoBehaviour {
     public bool usedHelm = false;
     public bool usedBoots = false;
     public int numItemsDroppedForTrade = 0;
+    
     void Start() {
         allSprites = commonItemSprites.ToArray().Concat(rareItemSprites.ToArray()).Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
         // create a list containing all of the sprites
@@ -112,7 +117,7 @@ public class ItemManager : MonoBehaviour {
         lootText.text = "";
         CreateWeaponWithStats("sword", "common", 10, 10, 10, 10);
         MoveToInventory(0, true);
-        CreateItem("steak", "common");
+        CreateItem("torch", "common");
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0);
@@ -343,8 +348,8 @@ public class ItemManager : MonoBehaviour {
     /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
     public void MoveToInventory(int index, bool starter=false) {
         if (floorItems[index] != null) {
-            if (scripts.player.inventory.Count <= 7) {
-                // if the player doesn't have 7 or more items
+            if (scripts.player.inventory.Count <= 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
+                // if the player doesn't have 7 or more items or is trying to pick up weapon 
                 if (!starter) { scripts.soundManager.PlayClip("click"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 

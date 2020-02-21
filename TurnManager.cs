@@ -289,8 +289,7 @@ public class TurnManager : MonoBehaviour {
             }
             else {
                 // enemy goes first
-                scripts.player.isDodgy = false;
-                scripts.player.SetPlayerStatusEffect("dodge", "off");
+                scripts.player.SetPlayerStatusEffect("dodge", false);
                 // enemy went first, so player can't be dodgy
                 if (!EnemyAttacks(enemyAtt, playerDef)) {
                     // if player doesn't die
@@ -437,8 +436,7 @@ public class TurnManager : MonoBehaviour {
                 }
                 actionsAvailable = false;
                 discardDieBecauseCourage = false;
-                scripts.player.isCourageous = false;
-                scripts.player.SetPlayerStatusEffect("courage", "off");
+                scripts.player.SetPlayerStatusEffect("courage", false);
                 // reset necessary variables
             }
             isMoving = false;
@@ -457,12 +455,9 @@ public class TurnManager : MonoBehaviour {
         }
         yield return scripts.delays[0.45f];
         // small delay
-        scripts.player.isFurious = false;
-        scripts.player.SetPlayerStatusEffect("fury", "off");
-        scripts.player.isDodgy = false;
-        scripts.player.SetPlayerStatusEffect("dodge", "off");
-        scripts.player.isBloodthirsty = false;
-        scripts.player.SetPlayerStatusEffect("leech", "off");
+        scripts.player.SetPlayerStatusEffect("fury", false);
+        scripts.player.SetPlayerStatusEffect("dodge", false);
+        scripts.player.SetPlayerStatusEffect("leech", false);
         scripts.highlightCalculator.diceTakenByPlayer = 0;
         scripts.itemManager.discardableDieCounter = 0;
         scripts.itemManager.usedAnkh = false;
@@ -804,8 +799,7 @@ public class TurnManager : MonoBehaviour {
                         // try to heal the wound, else don't do anything
                         StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
                         // update the text
-                        scripts.player.isBloodthirsty = false;
-                        scripts.player.SetPlayerStatusEffect("leech", "off");
+                        scripts.player.SetPlayerStatusEffect("leech", false);
                         // turn off bloodthirsty
                     }
                     StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));

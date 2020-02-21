@@ -141,7 +141,10 @@ public class Enemy : MonoBehaviour {
         GetComponent<Animator>().enabled = true;
         // enable the animator (which is disabled frmo enemies dying)
         try {GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
-        catch { GetComponent<Animator>().runtimeAnimatorController = null; }
+        catch { 
+            GetComponent<Animator>().runtimeAnimatorController = null; 
+            GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+        }
         // try set the controller (none for tombstone), must use runtimeanimationcontroller here
         if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
             // devil needs to be in a different spot
@@ -152,6 +155,10 @@ public class Enemy : MonoBehaviour {
             // set normal position
             transform.position = enemyPos;
             child.transform.position = childPos;
+        }
+        if (enemyArr[enemyNum] == "Tombstone") {
+            MoveBy(0f, 0.251333f);
+            // adjust tombstone position afterwards
         }
         // set stamina counter
         enemyName.text = enemyArr[enemyNum];

@@ -216,8 +216,14 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <param name="statusEffect">The name of the status effect to toggle.</param>
     /// <param name="onOrOff">To turn on or off the status effect.</param>
-    public void SetPlayerStatusEffect(string statusEffect, string onOrOff) {
-        if (onOrOff == "on") {
+    public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
+        if (statusEffect == "fury") { if (scripts.player.isFurious && onOrOff == true) { return; } else { scripts.player.isFurious = onOrOff; } }
+        else if (statusEffect == "dodge") { if (scripts.player.isDodgy && onOrOff == true) { return; } else { scripts.player.isDodgy = onOrOff; } }
+        else if (statusEffect == "haste") { if (scripts.player.isHasty && onOrOff == true) { return; } else { scripts.player.isHasty = onOrOff; } }
+        else if (statusEffect == "leech") { if (scripts.player.isBloodthirsty && onOrOff == true) { return; } else { scripts.player.isBloodthirsty = onOrOff; } }
+        else if (statusEffect == "courage") { if (scripts.player.isCourageous && onOrOff == true) { return; } else { scripts.player.isCourageous = onOrOff; } }
+        // set as desired, if turning on something already on then instantly exit function
+        if (onOrOff == true) {
             // if turning on
             identifier.text = ":";
             // set colon (instead of you)
@@ -226,7 +232,7 @@ public class Player : MonoBehaviour {
             statusEffectList.Add(icon);
             // get the icon and add it to the status effect list.
         }
-        if (onOrOff == "off") {
+        if (onOrOff == false) {
             // turning off
             IEnumerable<GameObject> matchingIcons = from icon in statusEffectList where icon.GetComponent<SpriteRenderer>().sprite.name == statusEffect select icon;
             // get matching icons (just in case.)

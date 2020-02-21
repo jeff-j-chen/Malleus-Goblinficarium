@@ -53,6 +53,7 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
+        StartCoroutine(NextLevel());
     }
 
     /// <summary>
@@ -127,7 +128,7 @@ public class LevelManager : MonoBehaviour {
     /// Summon a trader.
     /// </summary>
     private void SummonTrader() {
-        scripts.enemy.SpawnNewEnemy(7); // spawn the trader here
+        scripts.enemy.SpawnNewEnemy(7);
         // create the trader enemy
         scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
         // hide the trader's stats (which are given to enemies by default)
@@ -139,6 +140,7 @@ public class LevelManager : MonoBehaviour {
     /// <param name="isLich">true to spawn the lich, false (default) otherwise</param>
     public IEnumerator NextLevel(bool isLich=false) {
         if (!lockActions) {
+            // yield return scripts.delays[1.5f]; // uncomment for tombstone tests
             scripts = FindObjectOfType<Scripts>();
             string toSpawn = "";
             lockActions = true;
@@ -193,7 +195,6 @@ public class LevelManager : MonoBehaviour {
                 else { 
                     toSpawn = "normal";
                     scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); 
-                    print("spawning normal enemy");
                     levelText.text = "level " + level + "-" + sub; 
                 }
                 // normal level, so notify the player accordingly and spawn basic enemy

@@ -43,31 +43,58 @@ public class TombstoneData : MonoBehaviour
             sub = -1;
         }
         // save level data only if the player got past 1-1
-        Item item = scripts.player.inventory[0].GetComponent<Item>();
-        GameObject created = scripts.itemManager.CreateWeaponWithStats(item.itemName.Split(' ')[1], "rusty", item.weaponStats["green"] - 1, item.weaponStats["blue"] - 1, item.weaponStats["red"] - 1, item.weaponStats["white"] - 1);
-        // create weapon with reduced stats
-        scripts.itemManager.floorItems.Remove(created);
-        // remove from floor items
-        created.transform.parent = transform;
-        // child it to this (so not deleted when reloading scene)
-        created.transform.position = offScreen;
-        // move the item offscreen
-        items.Add(created);
         // add the item to the list
-        for (int i = 1; i < scripts.player.inventory.Count; i++) {
+        Item item;
+        GameObject created;
+        foreach (GameObject toSave in scripts.player.inventory) {
             // for every item after the weapon
-            item = scripts.player.inventory[i].GetComponent<Item>();
-            created = scripts.itemManager.CreateItem(item.itemName, item.itemType);
-            // recreate the according item (replace so it goes from 'helm of might' -> 'helm_of_might', so we can use it)
-            scripts.itemManager.floorItems.Remove(created);
-            // remove it from the floor
-            created.transform.parent = transform;
-            // child it
-            created.transform.position = offScreen;
-            // move it offscreen
-            items.Add(created);
-            // add it to the stored array
-            // check for items to make them unusable
+            item = toSave.GetComponent<Item>();
+            // create a temporary store for the item
+            if (item.itemName == "torch") {} // don't do anything for the torch, it just disappears
+            else if (item.itemType == "weapon") {
+                created = scripts.itemManager.CreateWeaponWithStats(item.itemName.Split(' ')[1], "rusty", item.weaponStats["green"] - 1, item.weaponStats["blue"] - 1, item.weaponStats["red"] - 1, item.weaponStats["white"] - 1);
+                // create weapon with reduced stats
+                scripts.itemManager.floorItems.Remove(created);
+                // remove from floor items
+                created.transform.parent = transform;
+                // child it to this (so not deleted when reloading scene)
+                created.transform.position = offScreen;
+                // move the item offscreen
+                items.Add(created);
+            }
+            else if (item.itemType == "rare") {
+                created = scripts.itemManager.CreateItem(item.itemName.Replace(' ', '_'), item.itemType);
+                // recreate the according item, replacing ('helm of might' -> 'helm_of_might') to set things correctly
+                if (created.GetComponent<Item>().itemName == "helm of might") { created.GetComponent<Item>().itemName = "broken helm"; }
+                else if (created.GetComponent<Item>().itemName == "boots of dodge") { created.GetComponent<Item>().itemName = "ruined boots"; }
+                else if (created.GetComponent<Item>().itemName == "ankh") { created.GetComponent<Item>().itemName = "shattered ankh"; }
+                else if (created.GetComponent<Item>().itemName == "kapala") { created.GetComponent<Item>().itemName = "defiled kapala"; }
+                // set the name afterwards, because doing so beforehand won't have the correct sprite
+                scripts.itemManager.floorItems.Remove(created);
+                // remove it from the floor
+                created.transform.parent = transform;
+                // child it
+                created.transform.position = offScreen;
+                // move it offscreen
+                items.Add(created);
+                // add it to the stored array
+                // check for items to make them unusable
+            }
+            else {
+                created = scripts.itemManager.CreateItem(item.itemName, item.itemType);
+                if (item.itemName == "steak") { created.GetComponent<Item>().itemName = "rotten steak"; }
+                else if (item.itemName == "cheese") { created.GetComponent<Item>().itemName = "moldy cheese"; }
+                // recreate the according item
+                scripts.itemManager.floorItems.Remove(created);
+                // remove it from the floor
+                created.transform.parent = transform;
+                // child it
+                created.transform.position = offScreen;
+                // move it offscreen
+                items.Add(created);
+                // add it to the stored array
+                // check for items to make them unusable
+            }
         }
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true);
@@ -87,7 +114,7 @@ public class TombstoneData : MonoBehaviour
     }
 
     public void SpawnSavedItems() {
-        print("spawning in the tombstone items");
+        scripts.itemManager.lootText.text = "loot:";
         scripts = FindObjectOfType<Scripts>();
         foreach (GameObject savedItem in items) {
             savedItem.GetComponent<Item>().scripts = FindObjectOfType<Scripts>();

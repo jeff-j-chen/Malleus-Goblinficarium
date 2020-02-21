@@ -189,8 +189,7 @@ public class HighlightCalculator : MonoBehaviour {
                         if (diceTakenByPlayer >= 3) {
                             // if the player has taken 3 die
                             diceTakenByPlayer = 0;
-                            scripts.player.isHasty = false;
-                            scripts.player.SetPlayerStatusEffect("haste", "off");
+                            scripts.player.SetPlayerStatusEffect("haste", false);
                             // reset and turn status effect off
                             StartCoroutine(scripts.turnManager.EnemyMove(false, true));
                             // make the enemy move and select all remaining die
