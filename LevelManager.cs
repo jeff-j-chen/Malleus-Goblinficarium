@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class LevelManager : MonoBehaviour {
     [SerializeField] GameObject levelBox;
@@ -138,6 +139,7 @@ public class LevelManager : MonoBehaviour {
     /// <param name="isLich">true to spawn the lich, false (default) otherwise</param>
     public IEnumerator NextLevel(bool isLich=false) {
         if (!lockActions) {
+            scripts = FindObjectOfType<Scripts>();
             string toSpawn = "";
             lockActions = true;
             Color temp = boxSR.color;

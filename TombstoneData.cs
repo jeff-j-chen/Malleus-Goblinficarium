@@ -88,11 +88,13 @@ public class TombstoneData : MonoBehaviour
 
     public void SpawnSavedItems() {
         print("spawning in the tombstone items");
+        scripts = FindObjectOfType<Scripts>();
         foreach (GameObject savedItem in items) {
+            savedItem.GetComponent<Item>().scripts = FindObjectOfType<Scripts>();
             savedItem.transform.position = new Vector2(-2.75f + (scripts.itemManager.floorItems.Count - 1) * scripts.itemManager.itemSpacing, scripts.itemManager.itemY);
             scripts.itemManager.floorItems.Add(savedItem);
             savedItem.transform.parent = scripts.itemManager.transform;
         }
-        scripts.itemManager.CreateItem("arrow", "arrow");
+        scripts.itemManager.CreateItem("arrow", "arrow", 1);
     }
 }

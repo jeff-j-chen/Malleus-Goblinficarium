@@ -103,7 +103,6 @@ public class ItemManager : MonoBehaviour {
     public bool usedHelm = false;
     public bool usedBoots = false;
     public int numItemsDroppedForTrade = 0;
-
     void Start() {
         allSprites = commonItemSprites.ToArray().Concat(rareItemSprites.ToArray()).Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
         // create a list containing all of the sprites
@@ -508,11 +507,12 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     public void DestroyItems() {
         foreach (GameObject test in deletionQueue) {
+            floorItems.Remove(test);
             Destroy(test);
             // destroy every floor item
         }
         deletionQueue.Clear();
-        // clear the arrays
+        // clear the arrays, only delete nulls from flooritems (just created the new items)
     }
 
     /// <summary>

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : MonoBehaviour {
-    Scripts scripts;
+    public Scripts scripts;
     public string itemName;
     public string itemType;
     public string modifier;
