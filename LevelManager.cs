@@ -53,7 +53,7 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
-        StartCoroutine(NextLevel());
+        // StartCoroutine(NextLevel());
     }
 
     /// <summary>
@@ -135,10 +135,14 @@ public class LevelManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Makes the game go to the next level.
+    /// Go to the next level, or the lich. Call this instead of the coroutine (more stable).
     /// </summary>
-    /// <param name="isLich">true to spawn the lich, false (default) otherwise</param>
-    public IEnumerator NextLevel(bool isLich=false) {
+    /// <param name="isLich">true to go to the lich, false otherwise.</param>
+    public void NextLevel(bool isLich = false) {
+        StartCoroutine(NextLevelCoroutine(isLich));
+    }
+
+    public IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
             // yield return scripts.delays[1.5f]; // uncomment for tombstone tests
             scripts = FindObjectOfType<Scripts>();
@@ -157,9 +161,6 @@ public class LevelManager : MonoBehaviour {
             // fade in the box
             loadingCircle.transform.position = onScreen;
             // make the loading thing go on screen
-            scripts.itemManager.HideItems();
-            // hide the items (can't destroy them here or the game breaks for some reason)
-
             if (!isLich) {
                 // if spawning a normal enemy
                 sub++;
@@ -201,10 +202,12 @@ public class LevelManager : MonoBehaviour {
             }
             else { 
                 toSpawn = "lich";
-                levelText.text = "???"; 
+                levelText.text = "level ???"; 
                 // going to the lich level, so notify player
                 scripts.enemy.SpawnNewEnemy(2);
             }
+            scripts.itemManager.DestroyItems();
+            // remove all items from the floor
             yield return scripts.delays[1.5f];
             // wait 1.5s
             scripts.statSummoner.SummonStats();
@@ -240,17 +243,16 @@ public class LevelManager : MonoBehaviour {
             if (toSpawn == "tombstone") {
                 scripts.turnManager.SetStatusText("you come across a humble tombstone");
             }
+            else if (toSpawn == "lich") {
+                scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects");
+            }
             // fade the level box back out
             scripts.itemManager.AttemptFadeTorches();
             // try to remove torches
-            scripts.itemManager.DestroyItems();
-            // only now do we destroy the items
             // spawn the items so the player can interact with them, after the items are destroyed
             scripts.turnManager.DetermineMove(false);
             // determine who moves
             lockActions = false;
-            StopCoroutine(NextLevel());
-            // stop this coroutine
         }
     }
 }

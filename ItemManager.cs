@@ -117,7 +117,17 @@ public class ItemManager : MonoBehaviour {
         lootText.text = "";
         CreateWeaponWithStats("sword", "common", 10, 10, 10, 10);
         MoveToInventory(0, true);
-        CreateItem("torch", "common");
+        CreateItem("scroll", "common");
+        MoveToInventory(0, true);
+        CreateItem("scroll", "common");
+        MoveToInventory(0, true);
+        CreateItem("scroll", "common");
+        MoveToInventory(0, true);
+        CreateItem("scroll", "common");
+        MoveToInventory(0, true);
+        CreateItem("scroll", "common");
+        MoveToInventory(0, true);
+        CreateItem("scroll", "common");
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0);
@@ -348,7 +358,7 @@ public class ItemManager : MonoBehaviour {
     /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
     public void MoveToInventory(int index, bool starter=false) {
         if (floorItems[index] != null) {
-            if (scripts.player.inventory.Count <= 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
+            if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
                 // if the player doesn't have 7 or more items or is trying to pick up weapon 
                 if (!starter) { scripts.soundManager.PlayClip("click"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
@@ -488,36 +498,19 @@ public class ItemManager : MonoBehaviour {
         CreateItem("arrow", "arrow", tempOffset);
         // create the next level arrow
     }
-
-    /// <summary>
-    /// Hide floor items, preparing for deletion. MUST be kept separate from destroying them!
-    /// </summary>
-    public void HideItems() {
-        lootText.text = "";
-        // clear the text
-        Select(scripts.player.inventory, 0, playAudio:false);
-        // select player's inventory
-        foreach (GameObject test in floorItems) {
-            // hide every item
-            if (test != null) {
-                test.GetComponent<SpriteRenderer>().sprite = null;
-                deletionQueue.Add(test);
-                // queue item for deletion
-            }
-        }
-    }
     
     /// <summary>
-    /// Destroy floor items after they are hidden. MUST be kept separate from hiding them!
+    /// Destroy floor items when going on to the next level or restarting.
     /// </summary>
     public void DestroyItems() {
-        foreach (GameObject test in deletionQueue) {
-            floorItems.Remove(test);
-            Destroy(test);
+        lootText.text = "";
+        Select(scripts.player.inventory, 0, playAudio:false);
+        foreach (GameObject toBeRemoved in floorItems) {
+            Destroy(toBeRemoved);
             // destroy every floor item
         }
-        deletionQueue.Clear();
-        // clear the arrays, only delete nulls from flooritems (just created the new items)
+        floorItems.Clear(); 
+        // clear the array
     }
 
     /// <summary>

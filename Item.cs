@@ -148,7 +148,7 @@ public class Item : MonoBehaviour {
                 // if item is on the floor
                 if (itemType == "arrow")  { 
                     // if the item is arrow (next level indicator)
-                    StartCoroutine(scripts.levelManager.NextLevel()); 
+                    scripts.levelManager.NextLevel();
                     scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                     return;
                     // go to the next level and end the level
@@ -306,8 +306,9 @@ public class Item : MonoBehaviour {
                     }
                 }
                 else if (modifier == "challenge") {
-                    print("summon the lich!");
-                    // scripts.levelManager.NextLevel(true); // lich level will load but you will still need to code in its special features later on
+                    scripts.levelManager.NextLevel(true);
+                    // load lich level
+                    scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                     Remove();
                 }
                 else if (modifier == "nothing") {
@@ -315,8 +316,6 @@ public class Item : MonoBehaviour {
                     Remove();
                     // consume and notfiy player
                 }
-                else { print("bad scroll modifier"); }
-                // the modifier for the scroll was invalid, so notify ourselves
             }
             else if (itemName == "potion" && scripts.levelManager.sub != 4) {
                 // don't let potions be used at lich
@@ -365,10 +364,11 @@ public class Item : MonoBehaviour {
                 Remove();
             }
             else if (itemName == "skeleton key" && scripts.levelManager.sub != 4) { 
-                scripts.soundManager.PlayClip("next");
-                // play sound clip
-                StartCoroutine(scripts.levelManager.NextLevel());
+                scripts.levelManager.NextLevel();
+                // load next level
+                scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                 Remove();
+                // add check so that it crumbles to dust when attempting use on devil
             }
         }
     }

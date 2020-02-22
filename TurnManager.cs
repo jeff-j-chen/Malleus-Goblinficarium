@@ -174,6 +174,10 @@ public class TurnManager : MonoBehaviour {
                     scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
                 }
             }
+            if (scripts.enemy.enemyName.text == "lich") {
+                // set lich info afterwards
+                scripts.player.targetInfo.text = "no effect since enemy is immune";
+            }
         }
         else if (playerOrEnemy == "enemy") {
             if (scripts.levelManager.sub == 4) { 
@@ -840,6 +844,7 @@ public class TurnManager : MonoBehaviour {
         if (appliedTo != "enemy" && appliedTo != "player") { print("invalid string passed into param. appliedTo in InstantlyApplyInjuries"); }
         // just checking
         if (scripts.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
+
         // return true immediately if maul
         if (injury == "guts") {
             // for guts, decrease all die
@@ -851,7 +856,7 @@ public class TurnManager : MonoBehaviour {
                 }
                 RecalculateMaxFor("player");
             }
-            else if (appliedTo == "enemy") {
+            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
                 foreach (string key in scripts.statSummoner.addedEnemyDice.Keys) {
                     foreach (Dice dice in scripts.statSummoner.addedEnemyDice[key]) {
                         StartCoroutine(dice.DecreaseDiceValue());
@@ -870,7 +875,7 @@ public class TurnManager : MonoBehaviour {
                     { "white", 0 },
                 };
             }
-            else {
+            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
                 scripts.statSummoner.addedEnemyStamina = new Dictionary<string, int>() {
                     { "green", 0 },
                     { "blue", 0 },
@@ -884,7 +889,7 @@ public class TurnManager : MonoBehaviour {
             if (appliedTo == "player") {
                 StartCoroutine(RemoveDice("white", "player"));
             }
-            else if (appliedTo == "enemy") {
+            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
                 StartCoroutine(RemoveDice("white", "enemy"));
             }
         }
@@ -893,13 +898,15 @@ public class TurnManager : MonoBehaviour {
             if (appliedTo == "player") {
                 StartCoroutine(RemoveDice("red", "player"));
             }
-            else if (appliedTo == "enemy") {
+            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
                 StartCoroutine(RemoveDice("red", "enemy"));
             }
         }
         else if (injury == "face") {
-            // if face, kill instantly
-            return true;
+            // if face, kill instantly, except lich
+            if (!(appliedTo == "enemy" && scripts.enemy.name == "lich")) {
+                return true;
+            }
         }
         scripts.statSummoner.SetDebugInformationFor("player");
         scripts.statSummoner.SetDebugInformationFor("enemy");
