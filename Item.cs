@@ -238,8 +238,10 @@ public class Item : MonoBehaviour {
             }
             else if (itemName == "scroll" && scripts.levelManager.sub != 4) {
                 // don't let scrolls be used at trader
-                scripts.soundManager.PlayClip("fwoosh");
-                // play sound clip
+                if (modifier != "challenge") {
+                    scripts.soundManager.PlayClip("fwoosh");
+                    // play sound clip (not for challenge)
+                }
                 if (modifier == "fury") {
                     if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
                     // prevent player from accidentally using two scrolls

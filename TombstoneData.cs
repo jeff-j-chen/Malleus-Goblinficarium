@@ -114,14 +114,21 @@ public class TombstoneData : MonoBehaviour
     }
 
     public void SpawnSavedItems() {
-        scripts.itemManager.lootText.text = "loot:";
         scripts = FindObjectOfType<Scripts>();
-        foreach (GameObject savedItem in items) {
+        // re-get scripts
+        for (int i = 0; i < items.Count; i++) {
+            GameObject savedItem = items[i];
+            // get the item temporarily
             savedItem.GetComponent<Item>().scripts = FindObjectOfType<Scripts>();
-            savedItem.transform.position = new Vector2(-2.75f + (scripts.itemManager.floorItems.Count - 1) * scripts.itemManager.itemSpacing, scripts.itemManager.itemY);
+            // re-get scripts of the itme
+            savedItem.transform.position = new Vector2(-2.75f + i * scripts.itemManager.itemSpacing, scripts.itemManager.itemY);
+            // create item with correct offset
             scripts.itemManager.floorItems.Add(savedItem);
+            // add the item to the flooritems
             savedItem.transform.parent = scripts.itemManager.transform;
+            // parent the item to the itemmanager
         }
-        scripts.itemManager.CreateItem("arrow", "arrow", 1);
+        scripts.itemManager.CreateItem("arrow", "arrow");
+        // create the next level arrow
     }
 }

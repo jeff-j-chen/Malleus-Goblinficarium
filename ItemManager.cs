@@ -115,22 +115,12 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("sword", "common", 10, 10, 10, 10);
+        CreateWeaponWithStats("sword", "common", 2, 2, 1, 2);
         MoveToInventory(0, true);
-        CreateItem("scroll", "common");
-        MoveToInventory(0, true);
-        CreateItem("scroll", "common");
-        MoveToInventory(0, true);
-        CreateItem("scroll", "common");
-        MoveToInventory(0, true);
-        CreateItem("scroll", "common");
-        MoveToInventory(0, true);
-        CreateItem("scroll", "common");
-        MoveToInventory(0, true);
-        CreateItem("scroll", "common");
+        CreateItem("phylactery", "phylactery");
         MoveToInventory(0, true);
         // move to the inventory
-        Select(curList, 0);
+        Select(curList, 0, playAudio:false);
         // select the first item
     }
 
@@ -356,11 +346,11 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <param name="index">The index from which to move the item.</param>
     /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
-    public void MoveToInventory(int index, bool starter=false) {
+    public void MoveToInventory(int index, bool starter=false, bool playAudio=false) {
         if (floorItems[index] != null) {
             if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
                 // if the player doesn't have 7 or more items or is trying to pick up weapon 
-                if (!starter) { scripts.soundManager.PlayClip("click"); }
+                if (!starter && playAudio) { scripts.soundManager.PlayClip("click"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
                     // if the item being moved is a weapon 
@@ -451,8 +441,8 @@ public class ItemManager : MonoBehaviour {
                         floorItems[i].transform.position = new Vector2(floorItems[i].transform.position.x - 1f, itemY);
                         // shift it over to the proper location
                     }
-                    Select(curList, index);
-                    
+                    if (playAudio) { Select(curList, index); }
+                    else { Select(curList, index, playAudio:false); }
                     // attempt toselect the next item of where it was
                 }
             }
@@ -469,18 +459,25 @@ public class ItemManager : MonoBehaviour {
     public void SpawnItems() {
         lootText.text = "loot:";
         // set the text 
-        int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
-        // count the number of torches
-        int spawnCount = 3 + torchCount * 2  + scripts.levelManager.level;
-        // create a spawn count 
-        CreateRandomWeapon();
-        // create a random weapon at index 0
-        for (int i = 0; i < UnityEngine.Random.Range(0, spawnCount); i++) {
-            CreateItem("common");
-            // create a random number of items based on the spawn count
+        if (scripts.enemy.enemyName.text == "Lich") {
+            CreateItem("phylactery", "phylactery");
+            // create phylactery
         }
-        if (UnityEngine.Random.Range(0, 10) == 0) { CreateItem("rare"); }
-        // low chance to produce rare
+        else {
+            // normal enemy
+            int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
+            // count the number of torches
+            int spawnCount = 3 + torchCount * 2  + scripts.levelManager.level;
+            // create a spawn count 
+            CreateRandomWeapon();
+            // create a random weapon at index 0
+            for (int i = 0; i < UnityEngine.Random.Range(0, spawnCount); i++) {
+                CreateItem("common");
+                // create a random number of items based on the spawn count
+            }
+            if (UnityEngine.Random.Range(0, 10) == 0) { CreateItem("rare"); }
+            // low chance to produce rare
+        }
         CreateItem("arrow", "arrow");
         // create an arrow to move to the next level
     }

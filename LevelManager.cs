@@ -117,7 +117,6 @@ public class LevelManager : MonoBehaviour {
             // return a stat preset based on the chances and the random number
         }
     }
-    // dice of slain heroes rattle around his neck
     // just use devil's head for his icon
     // name is devil
     // wound list is [cloaked]
@@ -144,6 +143,12 @@ public class LevelManager : MonoBehaviour {
 
     public IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
+            scripts.turnManager.ClearVariablesAfterRound();
+            // remove variables before going to next level
+            foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+                StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+            }
+            // fade out all die (die are only faded out upon kill normally)
             // yield return scripts.delays[1.5f]; // uncomment for tombstone tests
             scripts = FindObjectOfType<Scripts>();
             string toSpawn = "";
@@ -190,7 +195,7 @@ public class LevelManager : MonoBehaviour {
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
                     // add something here to make it really glitchy (like how it is in the actual game)
-                    levelText.text = "PLACEHOLDER TEXT";
+                    levelText.text = "dice of slain heroes rattle around his neck";
                     scripts.enemy.SpawnNewEnemy(0); 
                 }
                 else { 
@@ -221,6 +226,7 @@ public class LevelManager : MonoBehaviour {
             // clear the number of items player has dropped
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
+                scripts.itemManager.lootText.text = "loot:";
                 scripts.tombstoneData.SpawnSavedItems();
             }
             else if (toSpawn == "trader") {

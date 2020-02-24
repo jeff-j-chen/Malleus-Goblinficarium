@@ -73,8 +73,8 @@ public class Enemy : MonoBehaviour {
             // if there is more than 1 available to choose
             Dice chosenDie = availableDice[diceValuations.IndexOf(diceValuations.Min())];
             // select the die
-            if (woundList.Contains("guts")) { StartCoroutine(chosenDie.DecreaseDiceValue(false)); }
-            // decrase if necessary
+            if (woundList.Contains("guts") && enemyName.text != "Lich") { StartCoroutine(chosenDie.DecreaseDiceValue(false)); }
+            // decrease if necessary
             chosenDie.isAttached = true;
             chosenDie.moveable = false;
             chosenDie.isOnPlayerOrEnemy = "enemy";
@@ -87,7 +87,7 @@ public class Enemy : MonoBehaviour {
                 chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX(chosenDie.diceType), scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, chosenDie.diceType)] - 0.01f);
                 // set the correct transform position
                 if ((chosenDie.diceType == "red" && woundList.Contains("armpits")) || (chosenDie.diceType == "white" && woundList.Contains("hand"))) {
-                    StartCoroutine(chosenDie.FadeOut(false, true));
+                    if (enemyName.text != "Lich") { StartCoroutine(chosenDie.FadeOut(false, true)); }
                 }
                 // fade out if necessary 
             }
@@ -136,7 +136,12 @@ public class Enemy : MonoBehaviour {
         // try to display wounds
         Transform child = transform.GetChild(0);
         // get the child
-        child.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+        if (enemyNum != 0) {
+            child.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+        }
+        else {
+            print("only show devil's head");
+        }
         // set the sprite
         GetComponent<Animator>().enabled = true;
         // enable the animator (which is disabled frmo enemies dying)
@@ -166,13 +171,17 @@ public class Enemy : MonoBehaviour {
             stamina = 0;
             // tombstone and merchant don't have stamina
         }
+        else if (scripts.enemy.enemyName.text == "Lich") {
+            // if lich, has 5 stamina by default
+            stamina = 5;
+        }
         else {
             // normal enemy 
             stamina = scripts.levelManager.level + scripts.levelManager.sub <= 5 ? scripts.levelManager.level + scripts.levelManager.sub : 5;
             // assign stamina based on level and sub, up to a max of 5
         }
         staminaCounter.text = stamina.ToString();
-        // 
+        // show the amount of stamina the enemy has
     }
 
     /// <summary>

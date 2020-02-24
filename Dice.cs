@@ -131,7 +131,7 @@ public class Dice : MonoBehaviour {
                 }
             }
         }
-        if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && scripts.turnManager.discardDieBecauseCourage && !scripts.turnManager.isMoving) {
+        if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && scripts.turnManager.discardDieBecauseCourage) {
             // if discarding can and should discard die from courage
             DiscardFromPlayer();
             // do so 
@@ -285,18 +285,20 @@ public class Dice : MonoBehaviour {
     /// </summary>
     public IEnumerator FadeIn() {
         // very similar to fadeout
-        SpriteRenderer numSR = GetComponent<SpriteRenderer>();
         SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
-        Color numTemp = numSR.color;
+        Color numTemp = spriteRenderer.color;
         Color baseTemp = baseSR.color;
         numTemp.a = 0;
         baseTemp.a = 0;
+        spriteRenderer.color = numTemp;
+        baseSR.color = baseTemp;
+        yield return scripts.delays[0.005f];
         for (int i = 0; i < 40; i++) {
-            yield return scripts.delays[0.005f];
             numTemp.a += 0.025f;
-            numSR.color = numTemp;
+            spriteRenderer.color = numTemp;
             baseTemp.a += 0.025f;
             baseSR.color = baseTemp;
+            yield return scripts.delays[0.005f];
         }
     }
 }

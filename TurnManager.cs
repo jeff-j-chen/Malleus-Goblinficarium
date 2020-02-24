@@ -171,12 +171,10 @@ public class TurnManager : MonoBehaviour {
                     if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
                     // add an asterick if already injured
                     else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
-                    scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
+                    if (scripts.enemy.enemyName.text == "Lich") { scripts.player.targetInfo.text = "no effect since enemy is immune"; }
+                    // different text for lich (letting player know)
+                    else { scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex]; }
                 }
-            }
-            if (scripts.enemy.enemyName.text == "lich") {
-                // set lich info afterwards
-                scripts.player.targetInfo.text = "no effect since enemy is immune";
             }
         }
         else if (playerOrEnemy == "enemy") {
@@ -420,6 +418,10 @@ public class TurnManager : MonoBehaviour {
                 // allow actions
                 discardDieBecauseCourage = true;
                 // make sure the die will discard under the correct pretense
+                // foreach (GameObject yellowDie in (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached && a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" && a.GetComponent<Dice>().diceType == "yellow" select a).ToList()) {
+                //     yellowDie.GetComponent<Dice>().moveable = false;
+                // }
+                // make yellow die unmoveable (w/o this yellow die can't be discarded, only reposiitoned)
                 scripts.turnManager.SetStatusText("discard all your dice, except one");
                 // notify player
                 for (int i = 0; i < 50; i++) {
@@ -459,6 +461,13 @@ public class TurnManager : MonoBehaviour {
         }
         yield return scripts.delays[0.45f];
         // small delay
+        ClearVariablesAfterRound();
+    }
+
+    /// <summary>
+    /// Reset all variables used in preparation for the next round.
+    /// </summary>
+    public void ClearVariablesAfterRound() {
         scripts.player.SetPlayerStatusEffect("fury", false);
         scripts.player.SetPlayerStatusEffect("dodge", false);
         scripts.player.SetPlayerStatusEffect("leech", false);
@@ -470,7 +479,13 @@ public class TurnManager : MonoBehaviour {
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
         maceUsed = false;
         ClearPotionStats();
-        // reset all variables used in preparation for the next round
+        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5) {
+            scripts.enemy.stamina = 5;
+            // refresh lich's stamina
+            scripts.soundManager.PlayClip("blip");
+            // play sound clip
+            scripts.enemy.staminaCounter.text = scripts.enemy.stamina.ToString();
+        }
     }
     
     /// <summary>
@@ -721,6 +736,11 @@ public class TurnManager : MonoBehaviour {
                                 // notify player
                             }
                         }
+                        if (scripts.itemManager.PlayerHas("phylactery")) {
+                            // if player has phylactery
+                            StartCoroutine(GiveLeechAfterDelay());
+                            // give them leech buff after waiting, so it looks better
+                        }
                     }
                 }
             }
@@ -754,6 +774,11 @@ public class TurnManager : MonoBehaviour {
         // player hasn't died, so return false
     }
 
+    private IEnumerator GiveLeechAfterDelay() {
+        yield return scripts.delays[0.55f];
+        scripts.player.SetPlayerStatusEffect("leech", true);
+    }
+
     private bool PlayerAttacks(int playerAtt, int enemyDef) {
         scripts.soundManager.PlayClip("swing");
         // play sound clip
@@ -766,7 +791,7 @@ public class TurnManager : MonoBehaviour {
                 // play sound clip
             }
             else {
-                if (scripts.player.target.text == "face" || (scripts.enemy.woundList.Count == 2 && !scripts.player.target.text.Contains("*"))) {
+                if (scripts.player.target.text == "face" && scripts.enemy.enemyName.text != "Lich" || (scripts.enemy.woundList.Count == 2 && !scripts.player.target.text.Contains("*"))) {
                     // enemy is going to die
                     StartCoroutine(DoStuffForAttack("hit", "enemy", false));
                     // play sound but no animation
@@ -844,7 +869,6 @@ public class TurnManager : MonoBehaviour {
         if (appliedTo != "enemy" && appliedTo != "player") { print("invalid string passed into param. appliedTo in InstantlyApplyInjuries"); }
         // just checking
         if (scripts.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
-
         // return true immediately if maul
         if (injury == "guts") {
             // for guts, decrease all die
@@ -856,7 +880,7 @@ public class TurnManager : MonoBehaviour {
                 }
                 RecalculateMaxFor("player");
             }
-            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
+            else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
                 foreach (string key in scripts.statSummoner.addedEnemyDice.Keys) {
                     foreach (Dice dice in scripts.statSummoner.addedEnemyDice[key]) {
                         StartCoroutine(dice.DecreaseDiceValue());
@@ -875,7 +899,7 @@ public class TurnManager : MonoBehaviour {
                     { "white", 0 },
                 };
             }
-            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
+            else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
                 scripts.statSummoner.addedEnemyStamina = new Dictionary<string, int>() {
                     { "green", 0 },
                     { "blue", 0 },
@@ -889,7 +913,7 @@ public class TurnManager : MonoBehaviour {
             if (appliedTo == "player") {
                 StartCoroutine(RemoveDice("white", "player"));
             }
-            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
+            else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
                 StartCoroutine(RemoveDice("white", "enemy"));
             }
         }
@@ -898,13 +922,13 @@ public class TurnManager : MonoBehaviour {
             if (appliedTo == "player") {
                 StartCoroutine(RemoveDice("red", "player"));
             }
-            else if (appliedTo == "enemy" && scripts.enemy.name != "lich") {
+            else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
                 StartCoroutine(RemoveDice("red", "enemy"));
             }
         }
         else if (injury == "face") {
             // if face, kill instantly, except lich
-            if (!(appliedTo == "enemy" && scripts.enemy.name == "lich")) {
+            if (!(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) {
                 return true;
             }
         }
@@ -955,26 +979,20 @@ public class TurnManager : MonoBehaviour {
     /// Make the enemy evaluate the current stats and add stamina to attack/defend etc.
     /// </summary>
     private void RunEnemyCalculations() {
-        if (!scripts.enemy.woundList.Contains("hip")) {
+        if (!scripts.enemy.woundList.Contains("hip") || scripts.enemy.enemyName.text == "Lich") {
             InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
-            if (enemyAtt <= playerDef && enemyAtt + scripts.enemy.stamina > playerDef) {
-                // if enemy can hit player
+            if (enemyAtt >= playerDef) {
+                // if enemy can just straight up hit the player
+                AddSpeedAndAccuracy(enemyAim, playerSpd, enemySpd, playerAtt, enemyDef);
+                // add blue and green if needed
+            }
+            else if (enemyAtt <= playerDef && enemyAtt + scripts.enemy.stamina > playerDef)
+            {
+                // if enemy can hit player with the use of stamina
                 UseEnemyStaminaOn("red", (playerDef - enemyAtt) + 1);
                 // add stamina to hit player
-                if (playerSpd >= enemySpd && playerAtt > enemyDef) {
-                    // if player will attack first
-                    if (enemySpd + scripts.enemy.stamina > playerSpd) {
-                        // if enemy can attack first
-                        // add speed to go first
-                        UseEnemyStaminaOn("blue", (playerSpd - enemySpd) + 1);
-                    }
-                }
-                if (enemyAim < 7 && enemyAim + scripts.enemy.stamina > 6) {
-                    // if enemy can target face
-                    // add accuracy to target face
-                    UseEnemyStaminaOn("green", 7 - enemyAim);
-                    scripts.enemy.TargetBest();
-                }
+                AddSpeedAndAccuracy(enemyAim, playerSpd, enemySpd, playerAtt, enemyDef);
+                // and blue and green if needed
             }
             if (enemyDef < playerAtt && enemyDef + scripts.enemy.stamina >= playerAtt) {
                 // if enemy will be hit and can defend
@@ -984,6 +1002,27 @@ public class TurnManager : MonoBehaviour {
             }
             scripts.statSummoner.SetDebugInformationFor("enemy");
             // update the debug
+        }
+    }
+
+    private void AddSpeedAndAccuracy(int enemyAim, int playerSpd, int enemySpd, int playerAtt, int enemyDef)
+    {
+        if (playerSpd >= enemySpd && playerAtt > enemyDef)
+        {
+            // if player will attack first
+            if (enemySpd + scripts.enemy.stamina > playerSpd)
+            {
+                // if enemy can attack first
+                // add speed to go first
+                UseEnemyStaminaOn("blue", (playerSpd - enemySpd) + 1);
+            }
+        }
+        if (enemyAim < 7 && enemyAim + scripts.enemy.stamina > 6)
+        {
+            // if enemy can target face
+            // add accuracy to target face
+            UseEnemyStaminaOn("green", 7 - enemyAim);
+            scripts.enemy.TargetBest();
         }
     }
 

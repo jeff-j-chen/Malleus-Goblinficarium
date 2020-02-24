@@ -134,7 +134,7 @@ public class Player : MonoBehaviour {
             coroutine = StartCoroutine(HintFace());
             // hint the player
         }
-        else if (scripts.player.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString("hints") == "on") {
+        else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString("hints") == "on") {
             // if body part is already wounded
             coroutine = StartCoroutine(HintTargetingWounded());
             // hint the player
@@ -160,8 +160,8 @@ public class Player : MonoBehaviour {
     private IEnumerator HintFace() {
         scripts.turnManager.SetStatusText("note: you can aim to the face");
         // notify the player
-        for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.1f) {
-            yield return scripts.delays[0.1f];
+        for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.025f) {
+            yield return scripts.delays[0.025f];
             // start the timer (they can do actions here)
         }
         scripts.turnManager.RoundOne();
@@ -174,8 +174,8 @@ public class Player : MonoBehaviour {
     public IEnumerator HintTargetingWounded() {
         // pretty much the exact same thing has hintface
         scripts.turnManager.SetStatusText("note: you are targeting a wounded body part");
-        for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.1f) {
-            yield return scripts.delays[0.1f];
+        for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.025f) {
+            yield return scripts.delays[0.025f];
         }
         scripts.turnManager.RoundOne();
     }
@@ -234,13 +234,19 @@ public class Player : MonoBehaviour {
         }
         if (onOrOff == false) {
             // turning off
-            IEnumerable<GameObject> matchingIcons = from icon in statusEffectList where icon.GetComponent<SpriteRenderer>().sprite.name == statusEffect select icon;
-            // get matching icons (just in case.)
-            foreach (GameObject icon in matchingIcons.ToList()) {
-                statusEffectList.Remove(icon);
-                Destroy(icon); 
-                // remove any matching icons
+            GameObject matchingIcon = null;
+            try {
+                matchingIcon = (from icon in statusEffectList where icon.GetComponent<SpriteRenderer>().sprite.name == statusEffect select icon).ToList()[0];
+                // get the icon
+                int shiftFrom = statusEffectList.IndexOf(matchingIcon);
+                // try to shift each status effect over by 1
+                for (int i = shiftFrom; i < statusEffectList.Count; i++) {
+                    statusEffectList[i].transform.position = new Vector2(statusEffectList[i].transform.position.x - 1f, statusEffectList[i].transform.position.y);
+                }
+                statusEffectList.Remove(matchingIcon);
+                Destroy(matchingIcon); 
             }
+            catch {}
             if (statusEffectList.Count <= 0) { identifier.text = "You"; }
             // if no status effects, reset identifier text
         }
