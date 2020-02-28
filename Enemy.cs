@@ -22,8 +22,8 @@ public class Enemy : MonoBehaviour {
     public int targetIndex = 0;
     private Vector2 enemyPos = new Vector2(1.9f, -1.866667f);
     private Vector2 childPos = new Vector2(6.166667f, 3.333333f);
-
     private Scripts scripts;
+    public int spawnNum;
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -128,6 +128,7 @@ public class Enemy : MonoBehaviour {
             { "red", (int)temp[2] },
             { "white", (int)temp[3] },
         };
+        spawnNum = enemyNum;
         // set stats
         woundList.Clear();
         // make sure is not woudneds
@@ -136,12 +137,7 @@ public class Enemy : MonoBehaviour {
         // try to display wounds
         Transform child = transform.GetChild(0);
         // get the child
-        if (enemyNum != 0) {
-            child.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
-        }
-        else {
-            print("only show devil's head");
-        }
+        child.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
         // set the sprite
         GetComponent<Animator>().enabled = true;
         // enable the animator (which is disabled frmo enemies dying)
@@ -153,20 +149,21 @@ public class Enemy : MonoBehaviour {
         // try set the controller (none for tombstone), must use runtimeanimationcontroller here
         if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
             // devil needs to be in a different spot
-            transform.position = new Vector2(enemyPos.x, -1.3333f);
-            child.transform.position = new Vector2(childPos.x, childPos.y - 1.3333f / 4f);
+            MoveBy(0f, 1.3333f);
+        }
+        else if (enemyArr[enemyNum] == "Tombstone") {
+            // tombstone aso needs to be in a different 
+            MoveBy(0f, 0.251333f);
         }
         else {
             // set normal position
             transform.position = enemyPos;
             child.transform.position = childPos;
         }
-        if (enemyArr[enemyNum] == "Tombstone") {
-            MoveBy(0f, 0.251333f);
-            // adjust tombstone position afterwards
-        }
         // set stamina counter
-        enemyName.text = enemyArr[enemyNum];
+        if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
+        else { enemyName.text = enemyArr[enemyNum]; }
+        // set the name, when spawning the cloaked just set it to be "Devil"
         if (scripts.levelManager.sub == 4 || scripts.levelManager.level == scripts.tombstoneData.level && scripts.levelManager.sub == scripts.tombstoneData.sub) {
             stamina = 0;
             // tombstone and merchant don't have stamina

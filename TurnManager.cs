@@ -108,14 +108,21 @@ public class TurnManager : MonoBehaviour {
         }
         else { scripts.player.woundGUIElement.text = "[no wounds]"; }
         // 0 wounds, so display as such
-        if (scripts.enemy.woundList.Count > 0) {
-            scripts.enemy.woundGUIElement.text = "";
-            foreach (string wound in scripts.enemy.woundList) {
-                scripts.enemy.woundGUIElement.text += ("*" + wound + "\n");
-            }
+        if (scripts.enemy.spawnNum == 0) {
+            // is the cloaked devil
+            scripts.enemy.woundGUIElement.text = "[cloaked]";
         }
-        else { scripts.enemy.woundGUIElement.text = "[no wounds]"; }
-        // pretty much the same as the above block
+        else {
+            // any other enemy
+            if (scripts.enemy.woundList.Count > 0) {
+                scripts.enemy.woundGUIElement.text = "";
+                foreach (string wound in scripts.enemy.woundList) {
+                    scripts.enemy.woundGUIElement.text += ("*" + wound + "\n");
+                }
+            }
+            else { scripts.enemy.woundGUIElement.text = "[no wounds]"; }
+            // pretty much the same as the above block
+        }
     }
 
     /// <summary>
@@ -150,11 +157,7 @@ public class TurnManager : MonoBehaviour {
     /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            if (scripts.levelManager.sub == 4) { 
-                // trader
-                scripts.player.target.text = "PLACEHOLDER TEXT";
-            }
-            else if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
+            if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
                 // tombstone
                 scripts.player.target.text = "none";
                 scripts.player.targetInfo.text = "why would you try to wound a tombstone?";
@@ -167,13 +170,30 @@ public class TurnManager : MonoBehaviour {
                     scripts.player.targetInfo.text = "not enough accuracy to inflict any wound";
                 }
                 else {
-                    // set the player's attack indicator + description based on the target index
-                    if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
-                    // add an asterick if already injured
-                    else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
-                    if (scripts.enemy.enemyName.text == "Lich") { scripts.player.targetInfo.text = "no effect since enemy is immune"; }
-                    // different text for lich (letting player know)
-                    else { scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex]; }
+                    if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
+                        // if devil
+                        if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
+                        // add an asteriks if already injured
+                        else { 
+                            if (targetArr[scripts.player.targetIndex] == "face") {
+                                // can't aim at the devil's face, so notify player
+                                scripts.turnManager.SetStatusText("you cannot aim at his face");
+                            }
+                            else {
+                                scripts.player.target.text = targetArr[scripts.player.targetIndex]; 
+                            }
+                        }
+                        scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
+                    }
+                    else {
+                        // set the player's attack indicator + description based on the target index
+                        if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
+                        // add an asteriks if already injured
+                        else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
+                        if (scripts.enemy.enemyName.text == "Lich") { scripts.player.targetInfo.text = "no effect since enemy is immune"; }
+                        // different text for lich (letting player know)
+                        else { scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex]; }
+                    }
                 }
             }
         }

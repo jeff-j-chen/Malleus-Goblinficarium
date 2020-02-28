@@ -39,8 +39,8 @@ public class LevelManager : MonoBehaviour {
 
     void Start()
     {
-        level = 1;
-        sub = 1;
+        level = 3;
+        sub = 3;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -53,7 +53,6 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
-        // StartCoroutine(NextLevel());
     }
 
     /// <summary>
@@ -195,7 +194,7 @@ public class LevelManager : MonoBehaviour {
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
                     // add something here to make it really glitchy (like how it is in the actual game)
-                    levelText.text = "dice of slain heroes rattle around his neck";
+                    levelText.text = "PLACEHOLDER TEXT";
                     scripts.enemy.SpawnNewEnemy(0); 
                 }
                 else { 
@@ -251,6 +250,9 @@ public class LevelManager : MonoBehaviour {
             }
             else if (toSpawn == "lich") {
                 scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects");
+            }
+            else if (toSpawn == "devil") {
+                scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck");
             }
             // fade the level box back out
             scripts.itemManager.AttemptFadeTorches();

@@ -366,11 +366,18 @@ public class Item : MonoBehaviour {
                 Remove();
             }
             else if (itemName == "skeleton key" && scripts.levelManager.sub != 4) { 
-                scripts.levelManager.NextLevel();
-                // load next level
-                scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
-                Remove();
-                // add check so that it crumbles to dust when attempting use on devil
+                // don't allow usage on trader levels
+                if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
+                    // can't use skeleton key on the devil
+                    scripts.turnManager.SetStatusText("the key crumbles to dust");
+                }
+                else {
+                    // spawning a normal enemy
+                    scripts.levelManager.NextLevel();
+                    // load next level
+                    scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
+                    Remove();
+                }
             }
         }
     }
