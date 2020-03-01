@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour {
     [SerializeField] GameObject levelBox;
@@ -142,6 +142,10 @@ public class LevelManager : MonoBehaviour {
 
     public IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
+            if (level == 4 && sub == 1) {
+                // going to next level after having defeated devil
+                SceneManager.LoadScene("Credits");
+            }
             scripts.turnManager.ClearVariablesAfterRound();
             // remove variables before going to next level
             foreach (GameObject dice in scripts.diceSummoner.existingDice) {
@@ -194,7 +198,7 @@ public class LevelManager : MonoBehaviour {
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
                     // add something here to make it really glitchy (like how it is in the actual game)
-                    levelText.text = "PLACEHOLDER TEXT";
+                    levelText.text = "placeholder";
                     scripts.enemy.SpawnNewEnemy(0); 
                 }
                 else { 
@@ -239,7 +243,9 @@ public class LevelManager : MonoBehaviour {
                 // summon die and make sure the enemy's stats can be seen
             }
             // can spawn the items here because we have a deletion queue rather than just deleting all
-            scripts.turnManager.RecalculateMaxFor("player");
+            scripts.player.targetIndex = 0;
+            scripts.turnManager.SetTargetOf("player");
+            // make it so that the player auto targets chest, rather than their previous attack
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
                 temp.a -= 1f/15f;
@@ -252,7 +258,7 @@ public class LevelManager : MonoBehaviour {
                 scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects");
             }
             else if (toSpawn == "devil") {
-                scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck");
+               scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck");
             }
             // fade the level box back out
             scripts.itemManager.AttemptFadeTorches();

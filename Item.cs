@@ -109,6 +109,7 @@ public class Item : MonoBehaviour {
                     int t = scripts.itemManager.neckletCounter["arcane"];
                     if (modifier == "arcane") { scripts.itemManager.itemDesc.text = $"arcane necklet\nall necklets are more effective"; }
                     else if (modifier == "nothing") { scripts.itemManager.itemDesc.text = $"necklet of nothing\ndoes nothing"; }
+                    else if (modifier == "victory") { scripts.itemManager.itemDesc.text = $"necklet of victory"; }
                     else { scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{t} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; } 
                 }
                 else if (itemName == "cheese" || itemName == "steak") {

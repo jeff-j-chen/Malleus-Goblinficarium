@@ -47,13 +47,6 @@ public class DiceSummoner : MonoBehaviour
             );
             // create the die and add it to the player
         }
-        if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
-            // if devil
-            foreach (string typeToGen in scripts.itemManager.statArr) {
-                // generate a die for every stat
-                GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen);
-            }
-        }
         if (!initialSummon) {
             // delay is necessary
             yield return scripts.delays[0.25f];
@@ -66,6 +59,13 @@ public class DiceSummoner : MonoBehaviour
         }
         if (scripts.itemManager.PlayerHasWeapon("flail")) {
             GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red");
+        }
+        if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
+            // if devil
+            foreach (string typeToGen in scripts.itemManager.statArr) {
+                // generate a die for every stat
+                GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen);
+            }
         }
     }
 

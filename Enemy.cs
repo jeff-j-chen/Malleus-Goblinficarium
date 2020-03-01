@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -8,6 +9,7 @@ public class Enemy : MonoBehaviour {
     [SerializeField] private RuntimeAnimatorController[] controllers;
     [SerializeField] private Sprite[] icons;
     [SerializeField] private Sprite[] deathSprites;
+    [SerializeField] private GameObject iconGameobject;
     [SerializeField] public TextMeshProUGUI enemyName;
     [SerializeField] public TextMeshProUGUI woundGUIElement;
     [SerializeField] public TextMeshProUGUI staminaCounter;
@@ -20,15 +22,30 @@ public class Enemy : MonoBehaviour {
     private string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
     public int stamina = 1;
     public int targetIndex = 0;
-    private Vector2 enemyPos = new Vector2(1.9f, -1.866667f);
-    private Vector2 childPos = new Vector2(6.166667f, 3.333333f);
+    private Vector2 basePosition = new Vector2(1.9f, -1.866667f);
+    private Vector2 iconPosition = new Vector2(6.16667f, 3.333333f);
+    private Dictionary<string, Vector2> deathPositions = new Dictionary<string, Vector2>() {
+        {"Devil", new Vector2(2.24f, -2.783334f)},
+        {"Lich", new Vector2(1.9f, -1.865334f)},
+        {"Skeleton", new Vector2(2.1686665f, -2.117f)},
+        {"Kobold", new Vector2(2.03233367f, -2.52f)},
+        {"Gog", new Vector2(2.0360003f, -2.52f)},
+        {"Goblin", new Vector2(2.1f, -2.52f)},
+    };
+    private Dictionary<string, Vector2> offsetPositions = new Dictionary<string, Vector2>() {
+        {"Devil", new Vector2(1.9f, -1.33334f)},
+        {"Tombstone", new Vector2(1.9f, -2.118f)},
+    };
     private Scripts scripts;
     public int spawnNum;
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
+        // SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
         SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
         // spawn an enemy at the start of the round
+        iconGameobject.transform.position = iconPosition;
+        // set the position of the icon, enemy's is set in spawnnewenemy()
     }
 
     /// <summary>
@@ -135,10 +152,8 @@ public class Enemy : MonoBehaviour {
         // woundList = new List<string>() { "armpits" };
         try { scripts.turnManager.DisplayWounds(); } catch {}
         // try to display wounds
-        Transform child = transform.GetChild(0);
-        // get the child
-        child.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
-        // set the sprite
+        iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+        // set the sprite for the icon
         GetComponent<Animator>().enabled = true;
         // enable the animator (which is disabled frmo enemies dying)
         try {GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
@@ -147,18 +162,18 @@ public class Enemy : MonoBehaviour {
             GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
         }
         // try set the controller (none for tombstone), must use runtimeanimationcontroller here
+        // new Vector2(1.9f, -1.866667f)
         if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
             // devil needs to be in a different spot
-            MoveBy(0f, 1.3333f);
+            transform.position = offsetPositions["Devil"];
         }
         else if (enemyArr[enemyNum] == "Tombstone") {
-            // tombstone aso needs to be in a different 
-            MoveBy(0f, 0.251333f);
+            // tombstone also needs to be different
+            transform.position = offsetPositions["Tombstone"];
         }
         else {
             // set normal position
-            transform.position = enemyPos;
-            child.transform.position = childPos;
+            transform.position = basePosition;
         }
         // set stamina counter
         if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
@@ -174,7 +189,7 @@ public class Enemy : MonoBehaviour {
         }
         else {
             // normal enemy 
-            stamina = scripts.levelManager.level + scripts.levelManager.sub <= 5 ? scripts.levelManager.level + scripts.levelManager.sub : 5;
+            stamina = scripts.levelManager.level + scripts.levelManager.sub - 1 <= 5 ? scripts.levelManager.level + scripts.levelManager.sub - 1 : 5;
             // assign stamina based on level and sub, up to a max of 5
         }
         staminaCounter.text = stamina.ToString();
@@ -211,28 +226,7 @@ public class Enemy : MonoBehaviour {
     /// <summary>
     /// After death, move the enemy's corpse to the correct position on the gruond
     /// </summary>
-    public void SetEnemyPositionAfterDeath()
-    {
-        if (enemyName.text == "Devil") {
-            MoveBy(-0.073333f - 0.266667f, 0.916667f); }
-        else if (enemyName.text == "Lich") {
-            MoveBy(0f, -0.001333f); }
-        else if (enemyName.text == "Skeleton") {
-            MoveBy(-0.135333f - 0.266667f / 2f, 0.250333f); }
-        else if (enemyName.text == "Kobold") {
-            MoveBy(0.134333333f - 0.266667f, 0.653333f); }
-        else if (enemyName.text == "Gog") {
-            MoveBy(0.1306667f - 0.266667f, 0.653333f); }
-        else if (enemyName.text == "Goblin") {
-            MoveBy(-0.2f, 0.653333f); }
-        // different enemies need to be shifted different amounts in death. 
-        else { print("bad"); }
-    }
-
-    private void MoveBy(float x, float y) {
-        transform.position = new Vector2(transform.position.x - x, transform.position.y - y);
-        // move the enemy the specified amount
-        transform.GetChild(0).transform.position = new Vector2(transform.GetChild(0).transform.position.x + x, transform.GetChild(0).transform.position.y + y);
-        // move the child in the opposite direction (child is moved when parent is, so we need to move it back into position)
+    public void SetEnemyPositionAfterDeath() {
+        transform.position = deathPositions[enemyName.text];
     }
 }

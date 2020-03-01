@@ -117,7 +117,9 @@ public class ItemManager : MonoBehaviour {
         lootText.text = "";
         CreateWeaponWithStats("sword", "common", 12, 12, 12, 12);
         MoveToInventory(0, true);
-        CreateItem("phylactery", "phylactery");
+        CreateItem("necklet", "common", victory:true);
+        MoveToInventory(0, true);
+        CreateItem("necklet", "common");
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0, playAudio:false);
@@ -259,7 +261,7 @@ public class ItemManager : MonoBehaviour {
     private void SetItemStatsImmediately(GameObject instantiatedItem, bool victory) {
         // this needs to be done here rather than in Item.Start() or Awake() because the timing will be off and errors will be thrown
         if (instantiatedItem.GetComponent<Item>().itemName == "necklet") {
-            if (victory) {
+            if (!victory) {
                 instantiatedItem.GetComponent<Item>().modifier = neckletTypes[UnityEngine.Random.Range(0, 5)];
             }
             else {
@@ -353,7 +355,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <param name="index">The index from which to move the item.</param>
     /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
-    public void MoveToInventory(int index, bool starter=false, bool playAudio=false) {
+    public void MoveToInventory(int index, bool starter=false, bool playAudio=true) {
         if (floorItems[index] != null) {
             if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
                 // if the player doesn't have 7 or more items or is trying to pick up weapon 
@@ -420,8 +422,7 @@ public class ItemManager : MonoBehaviour {
                         else if (floorItems[index].GetComponent<Item>().modifier == "victory") {}
                         else { print("bad modifier"); }
                         // depending on the type of the necklet, modify the stats accordingly
-                        scripts.statSummoner.SetDebugInformationFor("player");
-                        scripts.statSummoner.SummonStats();
+                        StartCoroutine(UpdateUIAfterDelay());
                         // set the debug information and summon the new stats
                     }
                     if (!starter) 
@@ -459,6 +460,16 @@ public class ItemManager : MonoBehaviour {
             Destroy(floorItems[index]);
             floorItems.RemoveAt(index);
         }
+    }
+
+    /// <summary>
+    /// A coroutine to set the debug and summon stats after a delay (0.1s).
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator UpdateUIAfterDelay() {
+        yield return scripts.delays[0.1f];
+        scripts.statSummoner.SetDebugInformationFor("player");
+        scripts.statSummoner.SummonStats();
     }
 
     /// <summary>

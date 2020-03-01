@@ -16,6 +16,7 @@ public class Player : MonoBehaviour {
     [SerializeField] public List<GameObject> inventory = new List<GameObject>();
     [SerializeField] public TextMeshProUGUI identifier;
     [SerializeField] private GameObject statusEffectIcon;
+    [SerializeField] public GameObject iconGameobject;
     [SerializeField] public string[] statusEffectNames = new string[] { "dodge", "leech", "fury", "haste", "courage" };
     [SerializeField] public string[] statusEffectDescs = new string[] { "if you strike first, ignore all damage", "cure the same wound as inflicted", "all picked die turn yellow", "pick 3 dice, enemy gets the rest", "keep 1 of your die till next round" };
     [SerializeField] public Sprite[] statusEffectSprites;
@@ -47,12 +48,23 @@ public class Player : MonoBehaviour {
     public bool isHasty = false;
     public bool isBloodthirsty = false;
     public bool isCourageous;
+    private Vector2 basePosition = new Vector2(-2.166667f, -1.866667f);
+    private Vector2 iconPosition = new Vector2(-12.16667f, 3.333333f);
+    private Dictionary<int, Vector2> deathPositions = new Dictionary<int, Vector2>() {
+        {0, new Vector2(-2.04f, -2.53f)},
+        {1, new Vector2(-2.166667f, -2.53f)},
+        {2, new Vector2(-2.166667f, -2.53f)},
+        {3, new Vector2(-2.2233337f, -2.53f)},
+    };
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
+        transform.position = basePosition;
+        iconGameobject.transform.position = iconPosition;
+        // set the initial positions
         identifier.text = "You";
         // set the identifier text
-        transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = icons[charNum];
+        iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[charNum];
         // set the correct sprite
         GetComponent<Animator>().runtimeAnimatorController = controllers[charNum];
         // set the correct animation controller (using runtime so that it works in the actual game, and not only the editor)
@@ -129,29 +141,57 @@ public class Player : MonoBehaviour {
     /// Use the player's weapon. 
     /// </summary>
     public void UseWeapon() {
-        if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on") {
-            // if player wants hints, can aim for the face, but is not doing so
-            coroutine = StartCoroutine(HintFace());
-            // hint the player
+        List<Dice> availableDice = new List<Dice>();
+        // create an empty list to hold die in
+        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+            // for every die
+            if (dice.GetComponent<Dice>().isAttached == false) {
+                availableDice.Add(dice.GetComponent<Dice>());
+                // if the die has not been chosen, add it to the list 
+            }
         }
-        else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString("hints") == "on") {
-            // if body part is already wounded
-            coroutine = StartCoroutine(HintTargetingWounded());
-            // hint the player
+        if (availableDice.Count == 0) {
+            if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on") {
+                // if player wants hints, can aim for the face, but is not doing so
+                coroutine = StartCoroutine(HintFace());
+                // hint the player
+            }
+            else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString("hints") == "on") {
+                // if body part is already wounded
+                coroutine = StartCoroutine(HintTargetingWounded());
+                // hint the player
+            }
+            else if (hintTimer > 0.05f) {
+                // player hits enter again, so immediately start the round
+                StopCoroutine(coroutine);
+                coroutine = null;
+                // stop the existing coroutine
+                scripts.turnManager.statusText.text = "";
+                // clear the status text
+                hintTimer = 0f;
+                // reset the hint timer
+                scripts.turnManager.RoundOne();
+                // begin the round
+            }
+            else { scripts.turnManager.RoundOne(); }
         }
-        else if (hintTimer > 0.05f) {
-            // player hits enter again, so immediately start the round
-            StopCoroutine(coroutine);
-            coroutine = null;
-            // stop the existing coroutine
-            scripts.turnManager.statusText.text = "";
-            // clear the status text
-            hintTimer = 0f;
-            // reset the hint timer
-            scripts.turnManager.RoundOne();
-            // begin the round
+        else { 
+            // dice are available
+            if (scripts.itemManager.PlayerHasWeapon("mace") && !scripts.turnManager.maceUsed) {
+                // if player has mace
+                scripts.turnManager.maceUsed = true;
+                // prevent player from using mace again
+                foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
+                    // for every die that is not attached
+                    StartCoroutine(dice.RerollAnimation(false));
+                    // reroll the die
+                }
+            }
+            else {
+                scripts.turnManager.SetStatusText("choose a die"); 
+                // player doesn't have mace, so notify them to choose a die
+            }
         }
-        else { scripts.turnManager.RoundOne(); }
     }
 
     /// <summary>
@@ -192,23 +232,7 @@ public class Player : MonoBehaviour {
     /// Makes the player's corpse move to the correct position on the ground. 
     /// </summary>
     public void SetPlayerPositionAfterDeath() {
-        if (charNum == 0) { MoveBy(-0.1266667f, 0.6633333f); }
-        else if (charNum == 1) { MoveBy(0f, 0.6633333f); }
-        else if (charNum == 2) { MoveBy(0f, 0.6633333f); }
-        else if (charNum == 3) { MoveBy(0.0566667f, 0.6633333f); }
-        else { print("bad"); }
-    }
-
-    /// <summary>
-    /// Moves the player by the specified amount while keeping the icon in place. 
-    /// </summary>
-    /// <param name="x">Horizontal movement.</param>
-    /// <param name="y">Vertical movement.</param>
-    private void MoveBy(float x, float y) {
-        transform.position = new Vector2(transform.position.x - x, transform.position.y - y);
-        // move the player
-        transform.GetChild(0).transform.position = new Vector2(transform.GetChild(0).transform.position.x + x, transform.GetChild(0).transform.position.y + y);
-        // move the child in the opposite direction
+        transform.position = deathPositions[charNum];
     }
     
     /// <summary>

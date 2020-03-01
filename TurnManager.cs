@@ -22,6 +22,7 @@ public class TurnManager : MonoBehaviour {
     public bool maceUsed = false;
     public GameObject dieSavedFromLastRound = null;
     public bool discardDieBecauseCourage = false;
+    public bool dontRemoveLeechYet = false;
 
     private void Start() {
         blackBox.transform.position = offScreen;
@@ -275,73 +276,43 @@ public class TurnManager : MonoBehaviour {
         isMoving = true;
         // set the variable to true so that certain actions can check this and make sure actions are not taken when they shouldn't be
         List<Dice> availableDice = new List<Dice>();
-        // create an empty list to hold die in
-        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-            // for every die
-            if (dice.GetComponent<Dice>().isAttached == false) {
-                availableDice.Add(dice.GetComponent<Dice>());
-                // if the die has not been chosen, add it to the list 
-            }
+        RunEnemyCalculations();
+        // make enemy add stamina to stats as necessary
+        if (scripts.player.woundList.Contains("head")) {
+            scripts.enemy.DiscardBestPlayerDie();
+            // if the player has a head wound, make the enemy discard it
         }
-        if (availableDice.Count == 0) {
-            // if there are no available die
-            RunEnemyCalculations();
-            // make enemy add stamina to stats as necessary
-            if (scripts.player.woundList.Contains("head")) {
-                scripts.enemy.DiscardBestPlayerDie();
-                // if the player has a head wound, make the enemy discard it
-            }
-            InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
-            // get all the stats so we can use them
-            if (playerSpd >= enemySpd) {
-                // make player go first
-                if (!PlayerAttacks(playerAtt, enemyDef)) {
-                    // if enemy was not killed
-                    StartCoroutine(RoundTwo("enemy"));
-                    // begin the next round where the player will attadck
-                }
-                else {
-                    // enemy was killed
-                    SetTargetOf("player");
-                    // reset target
-                    StartCoroutine(Kill("enemy"));
-                    // make the enemy die
-                    // reset ismoving
-                }
+        InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
+        // get all the stats so we can use them
+        if (playerSpd >= enemySpd) {
+            // make player go first
+            if (!PlayerAttacks(playerAtt, enemyDef)) {
+                // if enemy was not killed
+                StartCoroutine(RoundTwo("enemy"));
+                // begin the next round where the player will attadck
             }
             else {
-                // enemy goes first
-                scripts.player.SetPlayerStatusEffect("dodge", false);
-                // enemy went first, so player can't be dodgy
-                if (!EnemyAttacks(enemyAtt, playerDef)) {
-                    // if player doesn't die
-                    StartCoroutine(RoundTwo("player"));
-                    // start next round with player going
-                }
-                else {
-                    // player was killed
-                    StartCoroutine(Kill("player"));
-                    // show animation
-                }
+                // enemy was killed
+                SetTargetOf("player");
+                // reset target
+                StartCoroutine(Kill("enemy"));
+                // make the enemy die
+                // reset ismoving
             }
         }
-        else { 
-            // dice are available
-            isMoving = false;
-            // stop moving
-            if (scripts.itemManager.PlayerHasWeapon("mace") && !maceUsed) {
-                // if player has mace
-                maceUsed = true;
-                // prevent player from using mace again
-                foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
-                    // for every die that is not attached
-                    StartCoroutine(dice.RerollAnimation(false));
-                    // reroll the die
-                }
+        else {
+            // enemy goes first
+            scripts.player.SetPlayerStatusEffect("dodge", false);
+            // enemy went first, so player can't be dodgy
+            if (!EnemyAttacks(enemyAtt, playerDef)) {
+                // if player doesn't die
+                StartCoroutine(RoundTwo("player"));
+                // start next round with player going
             }
             else {
-                SetStatusText("choose a die"); 
-                // player doesn't have mace, so notify them to choose a die
+                // player was killed
+                StartCoroutine(Kill("player"));
+                // show animation
             }
         }
     }
@@ -490,7 +461,10 @@ public class TurnManager : MonoBehaviour {
     public void ClearVariablesAfterRound() {
         scripts.player.SetPlayerStatusEffect("fury", false);
         scripts.player.SetPlayerStatusEffect("dodge", false);
-        scripts.player.SetPlayerStatusEffect("leech", false);
+        if (!dontRemoveLeechYet) {
+            // if we don't want to remove the leech yet (from phylactery, don't do so)
+            scripts.player.SetPlayerStatusEffect("leech", false);
+        }
         scripts.highlightCalculator.diceTakenByPlayer = 0;
         scripts.itemManager.discardableDieCounter = 0;
         scripts.itemManager.usedAnkh = false;
@@ -506,6 +480,8 @@ public class TurnManager : MonoBehaviour {
             // play sound clip
             scripts.enemy.staminaCounter.text = scripts.enemy.stamina.ToString();
         }
+        dontRemoveLeechYet = false;
+        // set it to be false regardless afterwards, because we only want it to persist for 1 round
     }
     
     /// <summary>
@@ -530,12 +506,12 @@ public class TurnManager : MonoBehaviour {
         yield return scripts.delays[0.55f];
         // short delay
         if (playerOrEnemy == "player") {
-            scripts.turnManager.SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you die");
+            SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you die");
             StartCoroutine(PlayDeathAnimation("player"));
             // set status text and play the animation
         }
         else if (playerOrEnemy == "enemy") {
-            scripts.turnManager.SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... he dies");
+            SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... he dies");
             StartCoroutine(PlayDeathAnimation("enemy"));
             // set status text and play the animation
         }
@@ -696,7 +672,7 @@ public class TurnManager : MonoBehaviour {
             }
             // player dodges
             else {
-                scripts.soundManager.PlayClip("hit");
+                if (!(playerOrEnemy == "player" && armor)) { scripts.soundManager.PlayClip("hit"); }
                 // play sound clip
                 if (showAnimation) {
                     // if showing an animation
@@ -704,6 +680,7 @@ public class TurnManager : MonoBehaviour {
                         // if NOT player is getting hit and has armor
                         StartCoroutine(PlayHitAnimation(playerOrEnemy)); 
                     }
+                    else { scripts.soundManager.PlayClip("armor"); } // play sound clip
                 }
             }
         }
@@ -731,7 +708,6 @@ public class TurnManager : MonoBehaviour {
             // if player dodges, notify 
             else {
                 if (scripts.itemManager.PlayerHas("armour")) {
-                    scripts.soundManager.PlayClip("armor");
                     armor = true;
                     // set armor to true
                     SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... your armour shatters");
@@ -817,49 +793,52 @@ public class TurnManager : MonoBehaviour {
                     // play sound but no animation
                 }
                 else {
-                    // enemy will not die
-                    StartCoroutine(DoStuffForAttack("hit", "enemy"));
-                    // play sound and animation
-                    if (scripts.player.target.text.Contains("*")) {
-                        // if already injured
-                        if (scripts.itemManager.PlayerHasWeapon("maul")) {}
-                        // don't say anything for maul (we want it to show that it is an instant kill)
-                        else {
-                            SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
-                        }
-                        // notify player if hitting injured
+                    if (scripts.enemy.spawnNum == 0) {
+                        // cloaked devil
+                        StartCoroutine(CloakShatter());
                     }
                     else {
-                        // not injured
-                        if (scripts.itemManager.PlayerHasWeapon("maul")) {}
-                        else {
-                            SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
+                        // enemy will not die
+                        StartCoroutine(DoStuffForAttack("hit", "enemy"));
+                        // play sound and animation
+                        if (scripts.player.target.text.Contains("*")) {
+                            SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
                         }
-                        // same as above
+                        else {
+                            // not injured
+                            if (scripts.itemManager.PlayerHasWeapon("maul")) {}
+                            // don't say anything for maul (we want it to show that it is an instant kill)
+                            else {
+                                SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
+                            }
+                            // same as above
+                        }
                     }
                 }
                 if (!scripts.player.target.text.Contains("*") && scripts.statSummoner.SumOfStat("green", "player") >= 0) {
-                    // if wound was not injurd and player has enough accuracy to hit
-                    scripts.enemy.woundList.Add(scripts.player.target.text);
-                    // add the wound
-                    if (scripts.player.isBloodthirsty) {
-                        // if player is wounded
-                        try { scripts.player.woundList.Remove(scripts.player.target.text); } catch { print("no need to heal"); }
-                        // try to heal the wound, else don't do anything
-                        StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
-                        // update the text
-                        scripts.player.SetPlayerStatusEffect("leech", false);
-                        // turn off bloodthirsty
+                    // if wound was not injured and player has enough accuracy to hit
+                    if (scripts.enemy.spawnNum != 0) {
+                        scripts.enemy.woundList.Add(scripts.player.target.text);
+                        // add the wound
+                        if (scripts.player.isBloodthirsty) {
+                            // if player is wounded
+                            try { scripts.player.woundList.Remove(scripts.player.target.text); } catch { print("no need to heal"); }
+                            // try to heal the wound, else don't do anything
+                            StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
+                            // update the text
+                            scripts.player.SetPlayerStatusEffect("leech", false);
+                            // turn off bloodthirsty
+                        }
+                        StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));
+                        // make the text change
+                        RecalculateMaxFor("enemy");
+                        // recalculate max
+                        return InstantlyApplyInjuries(scripts.player.target.text, "enemy");
+                        // return if the enemy dies and at the same time apply wounds instantly
                     }
-                    StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));
-                    // make the text change
-                    RecalculateMaxFor("enemy");
-                    // recalculate max
-                    return InstantlyApplyInjuries(scripts.player.target.text, "enemy");
-                    // return if the enemy dies and at the same time apply wounds instantly
                 }
-                if (scripts.itemManager.PlayerHasWeapon("maul")) { return true; }
-                // kill enemy instantly if player has a maul
+                if (scripts.itemManager.PlayerHasWeapon("maul") && scripts.enemy.spawnNum != 0) { return true; }
+                // kill enemy instantly if player has a maul, excluding cloaked devil
             }
         }
         else {
@@ -877,6 +856,13 @@ public class TurnManager : MonoBehaviour {
         }
         return false;
         // enemy has not died, so return false
+    }
+
+    private IEnumerator CloakShatter() {
+        yield return scripts.delays[0.55f];
+        print("shatter sfx");
+        print("change enemy sprite");
+        print("change spawnnum");
     }
 
     /// <summary>
@@ -961,6 +947,7 @@ public class TurnManager : MonoBehaviour {
         return false;
         // appliedto has ot been killed, so return as such
     }
+
 
     /// <summary>
     /// Coroutine to remove all of a dice type from the player or enemy.
