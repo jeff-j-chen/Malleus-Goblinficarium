@@ -151,17 +151,7 @@ public class Player : MonoBehaviour {
             }
         }
         if (availableDice.Count == 0) {
-            if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on") {
-                // if player wants hints, can aim for the face, but is not doing so
-                coroutine = StartCoroutine(HintFace());
-                // hint the player
-            }
-            else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString("hints") == "on") {
-                // if body part is already wounded
-                coroutine = StartCoroutine(HintTargetingWounded());
-                // hint the player
-            }
-            else if (hintTimer > 0.05f) {
+            if (hintTimer > 0.05f) {
                 // player hits enter again, so immediately start the round
                 StopCoroutine(coroutine);
                 coroutine = null;
@@ -172,6 +162,16 @@ public class Player : MonoBehaviour {
                 // reset the hint timer
                 scripts.turnManager.RoundOne();
                 // begin the round
+            }
+            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on") {
+                // if player wants hints, can aim for the face, but is not doing so
+                coroutine = StartCoroutine(HintFace());
+                // hint the player
+            }
+            else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString("hints") == "on") {
+                // if body part is already wounded
+                coroutine = StartCoroutine(HintTargetingWounded());
+                // hint the player
             }
             else { scripts.turnManager.RoundOne(); }
         }

@@ -286,7 +286,7 @@ public class TurnManager : MonoBehaviour {
         // get all the stats so we can use them
         if (playerSpd >= enemySpd) {
             // make player go first
-            if (!PlayerAttacks(playerAtt, enemyDef)) {
+            if (!PlayerAttacks()) {
                 // if enemy was not killed
                 StartCoroutine(RoundTwo("enemy"));
                 // begin the next round where the player will attadck
@@ -304,7 +304,7 @@ public class TurnManager : MonoBehaviour {
             // enemy goes first
             scripts.player.SetPlayerStatusEffect("dodge", false);
             // enemy went first, so player can't be dodgy
-            if (!EnemyAttacks(enemyAtt, playerDef)) {
+            if (!EnemyAttacks()) {
                 // if player doesn't die
                 StartCoroutine(RoundTwo("player"));
                 // start next round with player going
@@ -353,10 +353,8 @@ public class TurnManager : MonoBehaviour {
                 scimitarParry = false;
                 // reset the variable
             }
-            playerAtt = scripts.statSummoner.SumOfStat("red", "player");
-            enemyDef = scripts.statSummoner.SumOfStat("white", "enemy");
             // get necessary stats 
-            if (PlayerAttacks(playerAtt, enemyDef)) {
+            if (PlayerAttacks()) {
                 // if player kills the enemy
                 SetTargetOf("player");
                 // reset target
@@ -389,10 +387,8 @@ public class TurnManager : MonoBehaviour {
                 diceDiscarded = false;
                 // reset the available actions
             }
-            enemyAtt = scripts.statSummoner.SumOfStat("red", "enemy");
-            playerDef = scripts.statSummoner.SumOfStat("white", "player");
             // get necessary stats
-            if (EnemyAttacks(enemyAtt, playerDef)) {
+            if (EnemyAttacks()) {
                 // if enemy kills player
                 StartCoroutine(Kill("player"));
                 // play animation
@@ -444,7 +440,9 @@ public class TurnManager : MonoBehaviour {
             // summon the die again
             scripts.statSummoner.SummonStats();
             // summon the stats again
-            RecalculateMaxFor("player");
+            // RecalculateMaxFor("player");
+            scripts.player.targetIndex = 0;
+            SetTargetOf("player");
             RecalculateMaxFor("enemy");
             // make sure the player and enemy are aiming at the correct place
             DetermineMove(true);
@@ -697,7 +695,8 @@ public class TurnManager : MonoBehaviour {
     /// <param name="enemyAtt">The enemy's attack stat.</param>
     /// <param name="playerDef">The player's parry stat.</param>
     /// <returns>true if the player was killed, false otherwise</returns>
-    private bool EnemyAttacks(int enemyAtt, int playerDef) {
+    private bool EnemyAttacks() {
+        InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         bool armor = false;
         // set armor to false
         scripts.soundManager.PlayClip("swing");
@@ -775,7 +774,8 @@ public class TurnManager : MonoBehaviour {
         scripts.player.SetPlayerStatusEffect("leech", true);
     }
 
-    private bool PlayerAttacks(int playerAtt, int enemyDef) {
+    private bool PlayerAttacks() {
+        InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         scripts.soundManager.PlayClip("swing");
         // play sound clip
         if (playerAtt > enemyDef) {

@@ -26,12 +26,12 @@ public class ItemManager : MonoBehaviour {
         { "mace", new Dictionary<string, int>()     { { "green", 1 }, { "blue", 3 }, { "red", 2 }, { "white", 0 } } },
         { "maul", new Dictionary<string, int>()     { { "green", -1 }, { "blue", -1 }, { "red", 3 }, { "white", 1 } } },
         { "montante", new Dictionary<string, int>() { { "green", 1 }, { "blue", 1 }, { "red", 3 }, { "white", 2 } } },
-        { "scimitar", new Dictionary<string, int>() { { "green", 0 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
         { "rapier", new Dictionary<string, int>()   { { "green", 4 }, { "blue", 2 }, { "red", -1 }, { "white", 1 } } },
+        { "scimitar", new Dictionary<string, int>() { { "green", 0 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
         { "spear", new Dictionary<string, int>()    { { "green", 2 }, { "blue", -1 }, { "red", 3 }, { "white", 1 } } },
         { "sword", new Dictionary<string, int>()    { { "green", 1 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
     };  
-    private string[] weaponNames = new string[] { "dagger", "flail", "hatchet", "mace", "maul", "montante", "scimitar", "rapier", "spear", "sword" };
+    private string[] weaponNames = new string[] { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
     public Dictionary<string, Dictionary<string, int>> modifierDict = new Dictionary<string, Dictionary<string, int>>() {
         { "accurate0", new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
         { "accurate1", new Dictionary<string, int>() { { "green", 2 }, { "blue", -1 }, { "red", 0 }, { "white", 0 } } },
@@ -115,11 +115,9 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("sword", "common", 12, 12, 12, 12);
+        CreateWeaponWithStats("sword", "common", 2, 2, 1, 2);
         MoveToInventory(0, true);
-        CreateItem("necklet", "common", victory:true);
-        MoveToInventory(0, true);
-        CreateItem("necklet", "common");
+        CreateItem("steak", "common");
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0, playAudio:false);

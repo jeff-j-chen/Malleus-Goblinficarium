@@ -23,7 +23,7 @@ public class LevelManager : MonoBehaviour {
     private Dictionary<string, float[]> levelStats = new Dictionary<string, float[]>() {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
-        { "11", new float[] { 10f, 10f, 10f, 10f, 0f,    7f, 1f, 1f, 1f, 0f } },
+        { "11", new float[] { 10f, 10f, 10f, 10f, 0f,    10f, 0f, 0f, 0f, 0f } },
         { "12", new float[] { 10f, 10f, 10f, 10f, 0f,    4f, 2f, 2f, 1f, 1f } },
         { "13", new float[] { 10f, 10f, 10f, 10f, 0.75f, 3f, 2f, 2f, 2f, 1f } },
         { "21", new float[] { 10f, 10f, 10f, 10f, 1f,    3f, 2f, 2f, 2f, 1f} },
@@ -34,13 +34,14 @@ public class LevelManager : MonoBehaviour {
         { "33", new float[] { 15f, 15f, 15f, 15f, 3f,    2f, 2f, 2f, 2f, 2f  } }
         // something to make it more probable that genstats will gen more difficult enemies later
     };
-
     [SerializeField] public bool lockActions = false;
+    [SerializeField] private string characters = "";
+    [SerializeField] private float time = 0.03f;
+    private string newText = "";
 
-    void Start()
-    {
-        level = 3;
-        sub = 3;
+    void Start() {
+        level = 1;
+        sub = 1;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -197,8 +198,7 @@ public class LevelManager : MonoBehaviour {
                 else if (level == 4 && sub == 1) { 
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
-                    // add something here to make it really glitchy (like how it is in the actual game)
-                    levelText.text = "placeholder";
+                    StartCoroutine(GlitchyLevelText());
                     scripts.enemy.SpawnNewEnemy(0); 
                 }
                 else { 
@@ -210,7 +210,7 @@ public class LevelManager : MonoBehaviour {
             }
             else { 
                 toSpawn = "lich";
-                levelText.text = "level ???"; 
+                levelText.text = "level ???";
                 // going to the lich level, so notify player
                 scripts.enemy.SpawnNewEnemy(2);
             }
@@ -267,6 +267,27 @@ public class LevelManager : MonoBehaviour {
             scripts.turnManager.DetermineMove(false);
             // determine who moves
             lockActions = false;
+        }
+    }
+
+    private IEnumerator GlitchyLevelText() {
+        newText = "";
+        for (int i = 0; i < 10; i++) {
+            levelText.text += characters[Random.Range(0, characters.Length)];
+        }
+        // create the initial sequence
+        for (int k = 0; k < 50; k++) {
+            newText = "";
+            // make the string empty so we can store something new in it
+            foreach (char curChar in levelText.text) {
+                if (Random.Range(0, 3) == 0) { newText += characters[Random.Range(0, characters.Length)]; }
+                // replace character with random one
+                else { newText += curChar; };
+                // no change
+            }
+            levelText.text = newText;
+            // set the text to be the newly generated one
+            yield return new WaitForSeconds(time);
         }
     }
 }

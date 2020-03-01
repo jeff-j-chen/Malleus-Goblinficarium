@@ -370,6 +370,7 @@ public class Item : MonoBehaviour {
                 // don't allow usage on trader levels
                 if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
                     // can't use skeleton key on the devil
+                    scripts.soundManager.PlayClip("shuriken");
                     scripts.turnManager.SetStatusText("the key crumbles to dust");
                 }
                 else {
@@ -377,8 +378,8 @@ public class Item : MonoBehaviour {
                     scripts.levelManager.NextLevel();
                     // load next level
                     scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
-                    Remove();
                 }
+                Remove();
             }
         }
     }
