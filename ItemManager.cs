@@ -115,7 +115,9 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("sword", "common", -1, -1, -1, -1);
+        CreateWeaponWithStats("sword", "common", 2, 2, 1, 2);
+        MoveToInventory(0, true);
+        CreateItem("steak", "common");
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0, playAudio:false);

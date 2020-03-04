@@ -36,6 +36,17 @@ public class Enemy : MonoBehaviour {
         {"Devil", new Vector2(1.9f, -1.33334f)},
         {"Tombstone", new Vector2(1.9f, -2.118f)},
     };
+    private Dictionary<string, int> givenStamina = new Dictionary<string, int>() {
+        {"11", 1},
+        {"12", 1},
+        {"13", 2},
+        {"21", 2},
+        {"22", 2},
+        {"23", 3},
+        {"31", 3},
+        {"32", 3},
+        {"33", 3},
+    };
     private Scripts scripts;
     public int spawnNum;
 
@@ -189,8 +200,8 @@ public class Enemy : MonoBehaviour {
         }
         else {
             // normal enemy 
-            stamina = scripts.levelManager.level + scripts.levelManager.sub - 1 <= 5 ? scripts.levelManager.level + scripts.levelManager.sub - 1 : 5;
-            // assign stamina based on level and sub, up to a max of 5
+            stamina = givenStamina[$"{scripts.levelManager.level}{scripts.levelManager.sub}"];
+            // assign stamina based on level and sub
         }
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
