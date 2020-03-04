@@ -151,10 +151,19 @@ public class StatSummoner : MonoBehaviour {
                 SpawnGeneratedShape(i, statColor, k0, xCoord, xOffset, true, true);
             }
             // summon the positive stat squares at the proper place
-            for (int k1 = 0; k1 < scripts.itemManager.neckletStats[colorName]; k1++) {
-                SpawnGeneratedShape(i, statColor, k0 + k1, xCoord, xOffset, true, false);
+            if (scripts.player.stats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName] < 0) {
+                // if total without necklet is negative, but total with necklet is positive
+                for (int k1 = 0; k1 < 0 - scripts.player.stats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; k1++) {
+                    // create circles based on the number over the negative
+                    SpawnGeneratedShape(i, statColor, k0 + k1, xCoord, xOffset, true, false);
+                }
             }
-            // summon the positive stat circles at the proper place
+            else {
+                // spawn circles normally
+                for (int k2 = 0; k2 < scripts.itemManager.neckletStats[colorName]; k2++) {
+                    SpawnGeneratedShape(i, statColor, k0 + k2, xCoord, xOffset, true, false);
+                }
+            }
         }
         else {
             // stats are less than 0
@@ -168,7 +177,12 @@ public class StatSummoner : MonoBehaviour {
             if (scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] > 0) {
                 // if player's total stats (without stamina) are greater than 0
                 for (int j = scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName]; j < scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
-                    SpawnGeneratedShape(i, scripts.colors.yellow, j, xCoord, xOffset, true);
+                    GameObject addedStaminaSquare = SpawnGeneratedShape(i, scripts.colors.yellow, j, xCoord, xOffset, true);
+                    addedStaminaSquare.transform.position = new Vector2(addedStaminaSquare.transform.position.x - 0.01f, addedStaminaSquare.transform.position.y);
+                    // move it over a tiny bit
+                    addedStaminaSquare.GetComponent<SpriteRenderer>().sortingOrder = 1;
+                    // make sure the sorting order is higher than that of other squares
+                    // THIS IS THE EASY TO FIX A VISUAL GLITCH INVOLVING NECKLETS AND NEGATIVES, IT WORKS SO DON'T TOUCH IT
                 }
                 // make yellow squares in the correct places
             }
@@ -215,7 +229,7 @@ public class StatSummoner : MonoBehaviour {
     /// <param name="offset">The offset of which to apply between each square.</param>
     /// <param name="isPositive">true to make a positive square, false to make a negative square.</param>
     /// <param name="isSquare">true to create a square, false to create a circle.</param>
-    private void SpawnGeneratedShape(int i, Color statColor, int k, float coord, float offset, bool isPositive, bool isSquare=true) {
+    private GameObject SpawnGeneratedShape(int i, Color statColor, int k, float coord, float offset, bool isPositive, bool isSquare=true) {
         Vector3 instantationPos = new Vector2(coord + (k * offset), yCoords[i]);
         // set where the shape will be created
         GameObject spawnedShape = null;
@@ -237,6 +251,7 @@ public class StatSummoner : MonoBehaviour {
         // move to correct position
         existingStatSquares.Add(spawnedShape);
         // add it to the array
+        return spawnedShape;
     }
 
     /// <summary>

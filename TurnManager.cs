@@ -322,10 +322,6 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     /// <param name="toMove">Who should be the one attacking.</param>
     private IEnumerator RoundTwo(string toMove) {
-        int playerAtt;
-        int playerDef;
-        int enemyAtt;
-        int enemyDef;
         // variables to hold stats
         isMoving = true;
         // make the player ready to move

@@ -115,9 +115,7 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("sword", "common", 2, 2, 1, 2);
-        MoveToInventory(0, true);
-        CreateItem("steak", "common");
+        CreateWeaponWithStats("sword", "common", -1, -1, -1, -1);
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0, playAudio:false);
@@ -144,6 +142,10 @@ public class ItemManager : MonoBehaviour {
         else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) && !scripts.turnManager.isMoving) {
             highlightedItem.GetComponent<Item>().Use();
             // if pressing return or enter, use the item that is selected
+        }
+        else if (Input.GetKeyDown(KeyCode.N)) {
+            CreateRandomWeapon();
+            MoveToInventory(0);
         }
     } 
 
@@ -221,7 +223,7 @@ public class ItemManager : MonoBehaviour {
         instantiatedItem.GetComponent<Item>().itemName = sprite.name.Replace("_", " ");
         instantiatedItem.GetComponent<Item>().itemType = itemType;
         // assign the attributes for the name and the type of the item 
-        SetItemStatsImmediately(instantiatedItem, false);
+        SetItemStatsImmediately(instantiatedItem);
         // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);         
         // add the item to the array
@@ -234,8 +236,7 @@ public class ItemManager : MonoBehaviour {
     /// <param name="itemName">The name of the item of which to create.</param>
     /// <param name="itemType">The type of the item of which to create</param>
     /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
-    /// <param name="victory">true to create a necklet of victory, false otherwise.</param>
-    public GameObject CreateItem(string itemName, string itemType, int negativeOffset=0, bool victory=false) {
+    public GameObject CreateItem(string itemName, string itemType, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)];
@@ -245,7 +246,32 @@ public class ItemManager : MonoBehaviour {
         instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<SpriteRenderer>().sprite.name.Replace("_", " ");
         instantiatedItem.GetComponent<Item>().itemType = itemType;
         // assign the attributes for the name and the type of the item
-        SetItemStatsImmediately(instantiatedItem, victory);
+        SetItemStatsImmediately(instantiatedItem);
+        // if needed, immediately give the item its proper attributes
+        floorItems.Add(instantiatedItem);
+        // add the item to the array
+        return instantiatedItem;
+    }
+
+    /// <summary>
+    /// Create an item with the specified name and itemtype.
+    /// </summary>
+    /// <param name="itemName">The name of the item of which to create.</param>
+    /// <param name="itemType">The type of the item of which to create</param>
+    /// <param name="itemType">The modifier of the item of which to create</param>
+    /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
+    /// <param name="victory">true to create a necklet of victory, false otherwise.</param>
+    public GameObject CreateItem(string itemName, string itemType, string modifier, int negativeOffset=0, bool victory=false) {
+        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
+        // instantiate the item
+        instantiatedItem.GetComponent<SpriteRenderer>().sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)];
+        // give the item the proper sprite
+        instantiatedItem.transform.parent = gameObject.transform;
+        // make the item childed to this manager
+        instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<SpriteRenderer>().sprite.name.Replace("_", " ");
+        instantiatedItem.GetComponent<Item>().itemType = itemType;
+        // assign the attributes for the name and the type of the item
+        instantiatedItem.GetComponent<Item>().modifier = modifier;
         // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);
         // add the item to the array
@@ -256,15 +282,10 @@ public class ItemManager : MonoBehaviour {
     /// Instantly assign necessary attributes of items (like their modifier).
     /// </summary>
     /// <param name="instantiatedItem"></param>
-    private void SetItemStatsImmediately(GameObject instantiatedItem, bool victory) {
+    private void SetItemStatsImmediately(GameObject instantiatedItem) {
         // this needs to be done here rather than in Item.Start() or Awake() because the timing will be off and errors will be thrown
         if (instantiatedItem.GetComponent<Item>().itemName == "necklet") {
-            if (!victory) {
-                instantiatedItem.GetComponent<Item>().modifier = neckletTypes[UnityEngine.Random.Range(0, 5)];
-            }
-            else {
-                instantiatedItem.GetComponent<Item>().modifier = neckletTypes[6];
-            }
+            instantiatedItem.GetComponent<Item>().modifier = neckletTypes[UnityEngine.Random.Range(0, 5)];
         }
         else if (instantiatedItem.GetComponent<Item>().itemName == "scroll") {
             instantiatedItem.GetComponent<Item>().modifier = scrollTypes[UnityEngine.Random.Range(0, scrollTypes.Length)];
@@ -481,7 +502,7 @@ public class ItemManager : MonoBehaviour {
             // create phylactery
         }
         else if (scripts.enemy.enemyName.text == "Devil") {
-            CreateItem("common", "necklet", victory:true);
+            CreateItem("common", "necklet", "victory");
             // create necklet of victory for the player
         }
         else {
