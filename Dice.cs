@@ -207,9 +207,9 @@ public class Dice : MonoBehaviour {
             // wait for a set amount of time
             if (playSound) { scripts.soundManager.PlayClip("click"); }
             // play sound clip if necessary
-            int randNum = UnityEngine.Random.Range(0, 5);
+            int randNum = UnityEngine.Random.Range(1, 7);
             // get a random number for the dice 
-            spriteRenderer.sprite = scripts.diceSummoner.numArr[randNum].GetComponent<SpriteRenderer>().sprite;
+            spriteRenderer.sprite = scripts.diceSummoner.numArr[randNum - 1].GetComponent<SpriteRenderer>().sprite;
             // asisgn the sprite to be the necessary sprite with the new number
             diceNum = randNum;
             // reassign the die's number

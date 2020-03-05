@@ -76,7 +76,7 @@ Boid.prototype = {
             // get the distance
             if (curDist <= viewDist) {
                 // if the distance is within th
-                var angleTo = (boid.path.position - this.path.position).angle
+                var angleTo = (boid.path.position - this.path.position).angle;
                 // get the angle from this boid to the one we are iterating over
                 if (!(angleTo <= -135 || angleTo >= 135)) {
                     // limit the boid's view by filtering out others that are in a 90 degree cone behind it
@@ -135,7 +135,7 @@ Boid.prototype = {
     avoidNearby: function(nearest) {
         var moved = this.path.position + new Point({angle: this.path.rotation, length: viewDist * 2});
         // a point representing where the path would be 
-        var checker = (nearest.path.position.x - this.path.position.x) * (moved.y - this.path.position.y) - (nearest.path.position.y - this.path.position.y) * (moved.x - this.path.position.x)
+        var checker = (nearest.path.position.x - this.path.position.x) * (moved.y - this.path.position.y) - (nearest.path.position.y - this.path.position.y) * (moved.x - this.path.position.x);
         if (checker > 0) {
             this.path.rotate(rotationStrength);
         } else {
@@ -260,7 +260,7 @@ function setSpawnInterval() {
             clearInterval(spawnInterval);
             // clear the interval
         }
-    }, 150)
+    }, 150);
     // repeat the spawn interval every 30s
 }
 
@@ -369,6 +369,6 @@ function randChoice(arr) {
 }
 function distFormula(one, two) {
     // formula for getting the distance between two objects
-    return Math.sqrt(Math.pow(one.x - two.x, 2) + Math.pow(one.y - two.y, 2))
+    return Math.sqrt(Math.pow(one.x - two.x, 2) + Math.pow(one.y - two.y, 2));
 }
     

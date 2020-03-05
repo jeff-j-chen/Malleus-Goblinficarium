@@ -115,9 +115,9 @@ public class ItemManager : MonoBehaviour {
         curList = scripts.player.inventory;
         // assign the curlist variable for item selection navigation
         lootText.text = "";
-        CreateWeaponWithStats("sword", "common", 2, 2, 1, 2);
+        CreateWeaponWithStats("sword", "common", 20, 20, 20, 20);
         MoveToInventory(0, true);
-        CreateItem("steak", "common");
+        CreateItem("necklet", "common");
         MoveToInventory(0, true);
         // move to the inventory
         Select(curList, 0, playAudio:false);
@@ -504,7 +504,7 @@ public class ItemManager : MonoBehaviour {
             // create phylactery
         }
         else if (scripts.enemy.enemyName.text == "Devil") {
-            CreateItem("common", "necklet", "victory");
+            CreateItem("necklet", "common", "victory");
             // create necklet of victory for the player
         }
         else {

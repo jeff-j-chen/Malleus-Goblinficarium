@@ -179,12 +179,15 @@ public class TurnManager : MonoBehaviour {
                             if (targetArr[scripts.player.targetIndex] == "face") {
                                 // can't aim at the devil's face, so notify player
                                 scripts.turnManager.SetStatusText("you cannot aim at his face");
+                                scripts.player.targetIndex--;
                             }
                             else {
                                 scripts.player.target.text = targetArr[scripts.player.targetIndex]; 
                             }
                         }
-                        scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
+                        if (targetArr[scripts.player.targetIndex] != "face") {
+                            scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
+                        }
                     }
                     else {
                         // set the player's attack indicator + description based on the target index
@@ -500,7 +503,12 @@ public class TurnManager : MonoBehaviour {
         yield return scripts.delays[0.55f];
         // short delay
         if (playerOrEnemy == "player") {
-            SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you die");
+            if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
+                SetStatusText($"devil twists claws into you... you die");
+            }
+            else {
+                SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you die");
+            }
             StartCoroutine(PlayDeathAnimation("player"));
             // set status text and play the animation
         }
@@ -518,6 +526,7 @@ public class TurnManager : MonoBehaviour {
     /// Play the hit animation for the player or enemy.
     /// </summary>
     /// <param name="playerOrEnemy">Who to play the hit animation for.</param>
+    /// <param name="destroyDevilCloak">True to destroy the devil's cloak, false (default) otherwise.</param>
     private IEnumerator PlayHitAnimation(string playerOrEnemy) {
         SpriteRenderer spriteRenderer = playerOrEnemy == "player" ? scripts.player.GetComponent<SpriteRenderer>() : scripts.enemy.GetComponent<SpriteRenderer>();
         // get the proper spriterenderer
@@ -525,12 +534,22 @@ public class TurnManager : MonoBehaviour {
         Color temp = Color.white;
         temp.a = 0.5f;
         // white with 50% transparency
+        spriteRenderer.color = temp;
         for (int i = 0; i < 14; i++) {
             yield return scripts.delays[0.0125f];
             temp.a -= 1f / 28f;
             spriteRenderer.color = temp;
         }
         // fade out
+        if (scripts.enemy.spawnNum == 0) {
+            // if cloaked devil
+            scripts.enemy.spawnNum = 1;
+            scripts.enemy.GetComponent<Animator>().runtimeAnimatorController = scripts.enemy.controllers[1];
+            // turn the cloaked into devil
+            spriteRenderer.color = temp;
+            DisplayWounds();
+            // show the wounds (go from [cloaked] to [no wounds]).
+        }
         for (int i = 0; i < 28; i++) {
             yield return scripts.delays[0.0125f];
             temp.a += 1f / 28f;
@@ -641,6 +660,8 @@ public class TurnManager : MonoBehaviour {
         if (!(text == statusText.text))
         {
             // if the message is not already displayed
+            statusText.text = "";
+            // clear the status text
             try { StopCoroutine(coroutine); } catch {}
             // stop any existing status text coroutines
             coroutine = StartCoroutine(StatusTextCoroutine(text));
@@ -666,8 +687,14 @@ public class TurnManager : MonoBehaviour {
             }
             // player dodges
             else {
-                if (!(playerOrEnemy == "player" && armor)) { scripts.soundManager.PlayClip("hit"); }
-                // play sound clip
+                if (!(playerOrEnemy == "player" && armor || (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy"))) { 
+                    scripts.soundManager.PlayClip("hit"); 
+                }
+                // play sound clip if conditions apply (not hitting armored player or devil)
+                else if (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy") {
+                    scripts.soundManager.PlayClip("cloak");
+                }
+                // play cloak shatter here if needed
                 if (showAnimation) {
                     // if showing an animation
                     if (!(playerOrEnemy == "player" && armor)) { 
@@ -717,10 +744,16 @@ public class TurnManager : MonoBehaviour {
                         // if player is not targeting face
                         if (scripts.enemy.target.text.Contains("*")) {
                             // if previously wounded
+                            if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
+                                SetStatusText($"devil twists claws in your {scripts.enemy.target.text.Substring(1)}!");
+                            }
                             SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text.Substring(1)}!");
                             // notify player
                         }
                         else {
+                            if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
+                                SetStatusText($"devil twists claws in your {scripts.enemy.target.text}!");
+                            }
                             if (scripts.player.woundList.Count != 2) {
                                 // if player won't die
                                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text}!");
@@ -789,26 +822,25 @@ public class TurnManager : MonoBehaviour {
                     // play sound but no animation
                 }
                 else {
+                    // enemy will not die
+                    StartCoroutine(DoStuffForAttack("hit", "enemy"));
+                    // play sound and animation
                     if (scripts.enemy.spawnNum == 0) {
-                        // cloaked devil
-                        StartCoroutine(CloakShatter());
+                        SetStatusText("you hit devil... his cloak shatters");
+                    }
+                    if (scripts.player.target.text.Contains("*")) {
+                        SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
                     }
                     else {
-                        // enemy will not die
-                        StartCoroutine(DoStuffForAttack("hit", "enemy"));
-                        // play sound and animation
-                        if (scripts.player.target.text.Contains("*")) {
-                            SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
-                        }
+                        // not injured
+                        if (scripts.itemManager.PlayerHasWeapon("maul")) {}
+                        // don't say anything for maul (we want it to show that it is an instant kill)
+                        else if (scripts.enemy.spawnNum == 0) {}
+                        // don't say anything for cloaked devil (shattering his cloak handlded later on)
                         else {
-                            // not injured
-                            if (scripts.itemManager.PlayerHasWeapon("maul")) {}
-                            // don't say anything for maul (we want it to show that it is an instant kill)
-                            else {
-                                SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
-                            }
-                            // same as above
+                            SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
                         }
+                        // same as above
                     }
                 }
                 if (!scripts.player.target.text.Contains("*") && scripts.statSummoner.SumOfStat("green", "player") >= 0) {
@@ -818,7 +850,10 @@ public class TurnManager : MonoBehaviour {
                         // add the wound
                         if (scripts.player.isBloodthirsty) {
                             // if player is wounded
-                            try { scripts.player.woundList.Remove(scripts.player.target.text); } catch { print("no need to heal"); }
+                            try { 
+                                scripts.player.woundList.Remove(scripts.player.target.text); 
+                                scripts.soundManager.PlayClip("blip");
+                            } catch {}
                             // try to heal the wound, else don't do anything
                             StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
                             // update the text
@@ -852,13 +887,6 @@ public class TurnManager : MonoBehaviour {
         }
         return false;
         // enemy has not died, so return false
-    }
-
-    private IEnumerator CloakShatter() {
-        yield return scripts.delays[0.55f];
-        print("shatter sfx");
-        print("change enemy sprite");
-        print("change spawnnum");
     }
 
     /// <summary>

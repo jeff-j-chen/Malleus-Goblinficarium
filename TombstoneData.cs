@@ -8,6 +8,7 @@ public class TombstoneData : MonoBehaviour
     public List<GameObject> items;
     public int level;
     public int sub;
+    public int tempSub;
     Scripts scripts;
     Vector2 offScreen = new Vector2(0f, 15f);
 
@@ -36,8 +37,9 @@ public class TombstoneData : MonoBehaviour
         }
         // clear all existing items
         level = scripts.levelManager.level;
-        sub = scripts.levelManager.sub;
-        // set level according to th
+        tempSub = scripts.levelManager.sub;
+        sub = 0;
+        // set level according to the current existing one, use tempsub (sub assigned later) to avoid a weird bug where the enemy becomes the tombstone after player is killed
         if (level == 1 && sub == 1) {
             level = -1;
             sub = -1;

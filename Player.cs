@@ -104,6 +104,10 @@ public class Player : MonoBehaviour {
                 // or on tombstone
                 scripts.turnManager.SetStatusText("mind your manners");
             }
+            else if (scripts.enemy.enemyName.text == "Merchant") {
+                // or on tombstone
+                scripts.turnManager.SetStatusText("mind your manners");
+            }
             else {
                 if (!scripts.levelManager.lockActions) {
                     // don't let player restart while actions are lockedd
@@ -163,7 +167,7 @@ public class Player : MonoBehaviour {
                 scripts.turnManager.RoundOne();
                 // begin the round
             }
-            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on") {
+            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on" && scripts.enemy.enemyName.text != "Devil") {
                 // if player wants hints, can aim for the face, but is not doing so
                 coroutine = StartCoroutine(HintFace());
                 // hint the player
@@ -181,6 +185,7 @@ public class Player : MonoBehaviour {
                 // if player has mace
                 scripts.turnManager.maceUsed = true;
                 // prevent player from using mace again
+                scripts.soundManager.PlayClip("click");
                 foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
                     // for every die that is not attached
                     StartCoroutine(dice.RerollAnimation(false));

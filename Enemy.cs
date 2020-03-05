@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour {
-    [SerializeField] private RuntimeAnimatorController[] controllers;
+    [SerializeField] public RuntimeAnimatorController[] controllers;
     [SerializeField] private Sprite[] icons;
     [SerializeField] private Sprite[] deathSprites;
     [SerializeField] private GameObject iconGameobject;
@@ -25,7 +25,7 @@ public class Enemy : MonoBehaviour {
     private Vector2 basePosition = new Vector2(1.9f, -1.866667f);
     private Vector2 iconPosition = new Vector2(6.16667f, 3.333333f);
     private Dictionary<string, Vector2> deathPositions = new Dictionary<string, Vector2>() {
-        {"Devil", new Vector2(2.24f, -2.783334f)},
+        {"Devil", new Vector2(2.24f, -2.25f)},
         {"Lich", new Vector2(1.9f, -1.865334f)},
         {"Skeleton", new Vector2(2.1686665f, -2.117f)},
         {"Kobold", new Vector2(2.03233367f, -2.52f)},
@@ -46,9 +46,12 @@ public class Enemy : MonoBehaviour {
         {"31", 3},
         {"32", 3},
         {"33", 3},
+        {"41", 5},
     };
     private Scripts scripts;
     public int spawnNum;
+    List<Dice> availableDice = new List<Dice>();
+    List<int> diceValuations = new List<int>();
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -86,14 +89,13 @@ public class Enemy : MonoBehaviour {
     /// </summary>
     public void ChooseBestDie() {
         // create a more advanced system to value dice based on context
-        List<Dice> availableDice = new List<Dice>();
-        List<int> diceValuations = new List<int>();
-        // create lists to hold the data in so that we can compare
+        availableDice.Clear();
+        diceValuations.Clear();
+        // clear the data holding lists
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-            Dice diceScript = dice.GetComponent<Dice>();
-            if (diceScript.isAttached == false) {
-                availableDice.Add(diceScript);
-                diceValuations.Add(Array.IndexOf(valueArr, diceScript.diceType + diceScript.diceNum));
+            if (dice.GetComponent<Dice>().isAttached == false) {
+                availableDice.Add(dice.GetComponent<Dice>());
+                diceValuations.Add(Array.IndexOf(valueArr, dice.GetComponent<Dice>().diceType + dice.GetComponent<Dice>().diceNum));
                 // add values to the lists if the dice is not attached
             }
         }

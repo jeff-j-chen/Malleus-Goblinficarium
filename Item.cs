@@ -179,6 +179,9 @@ public class Item : MonoBehaviour {
                     // reload scene
                     scripts.soundManager.PlayClip("next");
                     // play sound clip
+                    scripts.tombstoneData.sub = scripts.tombstoneData.tempSub;
+                    scripts.tombstoneData.tempSub = 0;
+                    // set tombstone data up correctly
                 }
                 else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
                     // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS

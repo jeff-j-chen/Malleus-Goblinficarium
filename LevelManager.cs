@@ -40,8 +40,8 @@ public class LevelManager : MonoBehaviour {
     private string newText = "";
 
     void Start() {
-        level = 1;
-        sub = 1;
+        level = 3;
+        sub = 3;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -117,11 +117,6 @@ public class LevelManager : MonoBehaviour {
             // return a stat preset based on the chances and the random number
         }
     }
-    // just use devil's head for his icon
-    // name is devil
-    // wound list is [cloaked]
-    // his cloak shatters
-    // glass breaking sound
 
     /// <summary>
     /// Summon a trader.
@@ -143,9 +138,25 @@ public class LevelManager : MonoBehaviour {
 
     public IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
+            lockActions = true;
+            Color temp = boxSR.color;
+            temp.a = 0f;
+            boxSR.color = temp;
+            // hide the level loading box
+            scripts = FindObjectOfType<Scripts>();
+            // reget scripts
+            scripts.soundManager.PlayClip("next");
+            // play sound clip
             if (level == 4 && sub == 1) {
                 // going to next level after having defeated devil
+                for (int i = 0; i < 15; i++) {
+                    yield return scripts.delays[0.033f];
+                    temp.a += 1f/15f;
+                    boxSR.color = temp;
+                }
+                // fade in
                 SceneManager.LoadScene("Credits");
+                // load credits scene
             }
             scripts.turnManager.ClearVariablesAfterRound();
             // remove variables before going to next level
@@ -154,14 +165,7 @@ public class LevelManager : MonoBehaviour {
             }
             // fade out all die (die are only faded out upon kill normally)
             // yield return scripts.delays[1.5f]; // uncomment for tombstone tests
-            scripts = FindObjectOfType<Scripts>();
             string toSpawn = "";
-            lockActions = true;
-            Color temp = boxSR.color;
-            temp.a = 0f;
-            // hide the level loading box
-            scripts.soundManager.PlayClip("next");
-            // play sound clip
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
                 temp.a += 1f/15f;
@@ -272,7 +276,7 @@ public class LevelManager : MonoBehaviour {
 
     private IEnumerator GlitchyLevelText() {
         newText = "";
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             levelText.text += characters[Random.Range(0, characters.Length)];
         }
         // create the initial sequence

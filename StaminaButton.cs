@@ -16,8 +16,8 @@ public class StaminaButton : MonoBehaviour {
             // if situation allows
             if (name == "plus(Clone)") {
                 // if plus button
-                if (scripts.player.stamina > 0) {
-                    // if player has the stamina
+                if (scripts.player.stamina > 0 && scripts.statSummoner.addedPlayerStamina[stat] < 6) {
+                    // if player has the stamina and hasn't put 7 into the stat already
                     ShiftDiceAccordingly(stat, 1);
                     // move the die 
                     scripts.statSummoner.addedPlayerStamina[stat]++;
