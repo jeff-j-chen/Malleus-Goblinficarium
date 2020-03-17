@@ -11,16 +11,16 @@ public class CharacterSwapButton : MonoBehaviour {
         characterSelector = FindObjectOfType<CharacterSelector>();
     }
 
-    private void OnMouseDown() {
+    private void OnMouseOver() {
         characterSelector.ChangeToPressed(LeftOrRight);
     }
 
-    private void OnMouseUp() {
+    private void OnMouseExit() {
         characterSelector.ChangeToReleased(LeftOrRight);
     }
 
-    private void OnMouseUpAsButton() {
-        if (LeftOrRight == "Left") { characterSelector.MoveLeft(); }
-        else { characterSelector.MoveRight(); }
+    private void OnMouseDown() {
+        if (LeftOrRight == "Left") { characterSelector.SetSelection(characterSelector.selectionNum - 1); }
+        else { characterSelector.SetSelection(characterSelector.selectionNum + 1); }
     }
 }
