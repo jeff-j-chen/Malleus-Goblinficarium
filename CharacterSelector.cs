@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 
 public class CharacterSelector : MonoBehaviour {
+    // gitkraekn is amazing!
     [SerializeField] public int selectionNum;
     [SerializeField] private List<int> unlockedChars = new List<int>();
     [SerializeField] private bool easy;
