@@ -19,9 +19,8 @@ public class DiceSummoner : MonoBehaviour
     }
 
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // needed for testing purposes
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            // testing purposes only
             scripts.statSummoner.ResetDiceAndStamina();
             SummonDice(false);
             scripts.statSummoner.SummonStats();
