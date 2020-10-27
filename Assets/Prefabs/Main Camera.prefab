@@ -69,7 +69,7 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 0
-  m_HDR: 1
+  m_HDR: 0
   m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
@@ -96,3 +96,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ac9f4b93f2301748b59077f2d0f39a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  transitionMultiplier: 2.5
