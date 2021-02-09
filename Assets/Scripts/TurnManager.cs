@@ -52,7 +52,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Make the enemy choose die.
     /// </summary>
-    /// <param name="delay">true to have a 0.45s delay before choosing, false to instantly chhoose.</param>
+    /// <param name="delay">true to have a 0.45s delay before choosing, false to instantly choose.</param>
     /// <param name="selectAllRemaining"></param>
     /// <returns></returns>
     public IEnumerator EnemyMove(bool delay, bool selectAllRemaining=false) {

@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.unity.2d.pixel-perfect": {
-      "version": "3.0.2",
+      "version": "4.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -14,14 +14,14 @@
       "dependencies": {}
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.3",
+      "version": "2.0.5",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.vscode": {
-      "version": "1.2.2",
+      "version": "1.2.3",
       "depth": 0,
       "source": "registry",
       "dependencies": {},

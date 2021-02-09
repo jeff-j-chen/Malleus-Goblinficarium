@@ -12,8 +12,7 @@ public class TombstoneData : MonoBehaviour
     Scripts scripts;
     Vector2 offScreen = new Vector2(0f, 15f);
 
-    void Start()
-    {
+    void Start() {
         scripts = FindObjectOfType<Scripts>();
         SetUpSingleton();
         // make sure this object persists
