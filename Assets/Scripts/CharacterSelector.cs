@@ -5,7 +5,7 @@ using TMPro;
 
 public class CharacterSelector : MonoBehaviour {
     [SerializeField] public int selectionNum;
-    [SerializeField] private List<int> unlockedChars = new List<int>();
+    [SerializeField] private bool[] unlockedChars = new bool[4] { true, false, false, false };
     [SerializeField] private bool easy;
     [SerializeField] private Sprite[] icons; 
     private string[] quotes = new string[4] {
@@ -27,24 +27,20 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI quoteText;
     [SerializeField] private TextMeshProUGUI perkText;
     [SerializeField] public List<GameObject> inventory = new List<GameObject>();
+    private bool preventPlayingFX = true;
     private Scripts scripts;
     private void Start() {
-        unlockedChars.Add(1);
-        unlockedChars.Add(2);
-        unlockedChars.Add(3);
-        unlockedChars.Add(4);
-        // allow for seleection of 1
+        // allow for selection of 1
         scripts = FindObjectOfType<Scripts>();
-        selectionNum = 1;
-        // start off selecting character 1
-        GetComponent<SpriteRenderer>().sprite = icons[selectionNum - 1];
-        quoteText.text = quotes[selectionNum - 1];
-        perkText.text = perks[selectionNum - 1];
-        // set necessary items
+        selectionNum = 0;
         easy = false;
-        // set easy to false by default
-        leftButton.transform.position = new Vector2(-8.53f, 1f);
-        // start off with hiding the left button
+        SetSelection(selectionNum);
+        StartCoroutine(allowFX());
+    }
+    
+    private IEnumerator allowFX() { 
+        yield return new WaitForSeconds(0.45f);
+        preventPlayingFX = false;
     }
 
     private void Update() {
@@ -63,21 +59,21 @@ public class CharacterSelector : MonoBehaviour {
 
     // make this the main selection function, with checking for unlocked chars and setting arrows etc.
     public void SetSelection(int num) {
-        if (num == 1 || num == 2 || num == 3 || num == 4) {
+        if (0 <= num && num <= 3) {
             selectionNum = num;
-            if (unlockedChars.Contains(selectionNum)) {
-                quoteText.text = quotes[selectionNum - 1];
-                perkText.text = perks[selectionNum - 1];
+            if (unlockedChars[selectionNum]) {
+                quoteText.text = quotes[selectionNum];
+                perkText.text = perks[selectionNum];
             }
             else {
                 quoteText.text = "beat game on previous character to unlock";
                 perkText.text = "";
             }
-            GetComponent<SpriteRenderer>().sprite = icons[selectionNum - 1];
-            scripts.soundManager.PlayClip("click");
-            if (selectionNum == 1) { leftButton.transform.position = new Vector2(-8.53f, 20f); }
+            GetComponent<SpriteRenderer>().sprite = icons[selectionNum];
+            if (!preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+            if (selectionNum == 0) { leftButton.transform.position = new Vector2(-8.53f, 20f); }
             else { leftButton.transform.position = new Vector2(-8.53f, 1f); }
-            if (selectionNum == 4) { rightButton.transform.position = new Vector2(8.53f, 20f); }
+            if (selectionNum == 3) { rightButton.transform.position = new Vector2(8.53f, 20f); }
             else { rightButton.transform.position = new Vector2(8.53f, 1f); }
         }
     }

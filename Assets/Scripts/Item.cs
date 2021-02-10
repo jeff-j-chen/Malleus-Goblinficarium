@@ -10,9 +10,15 @@ public class Item : MonoBehaviour {
     public string itemType;
     public string modifier;
     public Dictionary<string, int> weaponStats = new Dictionary<string, int>();
+    private bool preventPlayingFX = true;
 
     void Awake() {
         scripts = FindObjectOfType<Scripts>();
+    }
+
+    private IEnumerator allowFX() { 
+        yield return new WaitForSeconds(0.45f);
+        preventPlayingFX = false;
     }
 
     void Start() {
@@ -152,7 +158,8 @@ public class Item : MonoBehaviour {
                 // update the highlighted item variable
                 scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
                 // update the col variable
-                if (playAudio) { scripts.soundManager.PlayClip("click"); }
+                if (playAudio && !preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+                // dont play this if we just came from menu scene
                 // play sound clip
             }
         }

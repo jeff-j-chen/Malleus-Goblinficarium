@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Linq;
 using TMPro;
 using System;
@@ -148,13 +149,15 @@ public class ItemManager : MonoBehaviour {
                 // something is wrong here
             }
         }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow)) {
+        else if (Input.GetKeyDown(KeyCode.LeftArrow) && SceneManager.GetActiveScene().name != "CharSelect") {
+            // if pressing left and not in the character select screen
             Select(curList, col - 1, false);
-            // if pressing left, move the selection left
+            // move the selection left
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) {
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && SceneManager.GetActiveScene().name != "CharSelect") {
+            // if pressing right and not in the character select screen
             Select(curList, col + 1, false);
-            // if moving right, move the selection right
+            // move the selection to the right 
         }
         else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) {
             // if pressing return or enter

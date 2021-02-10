@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections; 
 public class Arrow : MonoBehaviour {
     [SerializeField] public GameObject[] menuButtons;
     // serialized field of menubuttons 
@@ -9,13 +10,19 @@ public class Arrow : MonoBehaviour {
     // the current index of the menu item the arrow is selecting
     private Scripts scripts;
     // necessary for all files
+    private bool preventPlayingFX = true;
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // find scripts
         MoveToButtonPos(currentIndex);
         // immediately move to the correct button position
-        
+        StartCoroutine(allowFX());
+    }
+
+    private IEnumerator allowFX() { 
+        yield return new WaitForSeconds(0.1f);
+        preventPlayingFX = false;
     }
 
     private void Update() {
@@ -56,7 +63,7 @@ public class Arrow : MonoBehaviour {
         currentIndex = index;
         transform.position = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);
         // move the arrow to the menu icon at the index, with offset
-        scripts.soundManager.PlayClip("click");
+        if (!preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
         // play sound clip
     }
 

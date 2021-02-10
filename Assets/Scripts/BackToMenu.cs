@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BackToMenu : MonoBehaviour
 {
@@ -6,9 +7,9 @@ public class BackToMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Initiate.Fade("Menu", Color.black, transitionMultiplier);
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            SceneManager.LoadScene("Menu");
+            // Initiate.Fade("Menu", Color.black, transitionMultiplier);
         }
     }
 }

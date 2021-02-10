@@ -1,13 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SimpleFadeIn : MonoBehaviour
 {
     private SpriteRenderer boxSR;
+    private bool isCharSelect = false;
     void Start() {
         boxSR = FindObjectOfType<SpriteRenderer>();
-        StartCoroutine(FadeIn());
+        if (SceneManager.GetActiveScene().name == "CharSelect") { isCharSelect = true; }
+        else { StartCoroutine(FadeIn()); }
     }
 
     private IEnumerator FadeIn() {

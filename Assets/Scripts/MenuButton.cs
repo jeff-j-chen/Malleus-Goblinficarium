@@ -5,13 +5,14 @@ using UnityEngine;
 
 public class MenuButton : MonoBehaviour
 {
-    float transitionMultiplier;
-    SoundManager soundManager;
-    Arrow arrow;
+    private float transitionMultiplier;
+    private SoundManager soundManager;
+    private Arrow arrow;
     void Start() {
         transitionMultiplier = FindObjectOfType<BackToMenu>().transitionMultiplier;
         soundManager = FindObjectOfType<SoundManager>();
         arrow = FindObjectOfType<Arrow>();
+        
     }
 
     public void OnMouseEnter() {
