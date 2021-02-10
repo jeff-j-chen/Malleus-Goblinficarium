@@ -129,7 +129,7 @@ public class ItemManager : MonoBehaviour {
             // assign the curlist variable for item selection navigation
             CreateWeaponWithStats("sword", "common", 2, 2, 1, 2);
             MoveToInventory(0, true);
-            CreateItem("necklet", "common");
+            CreateItem("steak", "common");
             MoveToInventory(0, true);
         }
         Select(curList, 0, playAudio:false);

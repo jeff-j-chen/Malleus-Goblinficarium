@@ -207,6 +207,7 @@ public class Enemy : MonoBehaviour {
         }
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
+        try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
     }
 
     /// <summary>

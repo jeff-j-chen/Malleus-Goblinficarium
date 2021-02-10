@@ -202,11 +202,12 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else if (playerOrEnemy == "enemy") {
-            if (scripts.levelManager.sub == 4) { 
+            if (scripts.enemy.enemyName.text == "Merchant") { 
                 // trader
                 scripts.enemy.target.text = "barter";
             }
-            else if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
+            // else if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
+            else if (scripts.enemy.enemyName.text == "Tombstone") {
                 // tombstone
                 scripts.enemy.target.text = "serenity";
             }
@@ -363,10 +364,13 @@ public class TurnManager : MonoBehaviour {
         }
         else if (toMove == "enemy") {
             // enemy is the one attacking
-            if ((scripts.enemy.woundList.Contains("chest") && Rerollable() || scripts.enemy.woundList.Contains("head") && !diceDiscarded) && PlayerPrefs.GetString("hints") == "on") {
+            print($"enemy is attacking! chest wounded: " + scripts.enemy.woundList.Contains("chest") + $", rerollable: {Rerollable()}");
+            if (scripts.enemy.woundList.Contains("chest") && Rerollable() || scripts.enemy.woundList.Contains("head") && !diceDiscarded) {
                 // if player can reroll or discard enemy's die and hints are on
-                if (scripts.enemy.woundList.Contains("head")) { SetStatusText("note: you can discard enemy's die"); }
-                else if (scripts.enemy.woundList.Contains("chest")) { SetStatusText("note: you can reroll enemy's dice"); }
+                if (PlayerPrefs.GetString("hints") == "on") {
+                    if (scripts.enemy.woundList.Contains("head")) { SetStatusText("note: you can discard enemy's die"); }
+                    else if (scripts.enemy.woundList.Contains("chest")) { SetStatusText("note: you can reroll enemy's dice"); }
+                }
                 // notify the player
                 actionsAvailable = true;
                 // allow actions

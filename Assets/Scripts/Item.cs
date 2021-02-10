@@ -58,8 +58,13 @@ public class Item : MonoBehaviour {
             // right click
             if (scripts.itemManager.highlightedItem == gameObject)  { 
                 // if highlighted
-                if (itemType != "weapon" &&  !scripts.itemManager.floorItems.Contains(gameObject)) { Remove(true);  }
-                // if the item is not weapon and not on the floor, drop the item
+                if (itemType != "weapon" && !scripts.itemManager.floorItems.Contains(gameObject)) { 
+                    // if the item is not weapon and not on the floor
+                    if (scripts.levelManager.sub == 4 || scripts.enemy.isDead) {
+                        // only allow dropping of items if player is trading or the enemy is dead
+                        Remove(true); 
+                    }
+                }
             }
         }
     }
