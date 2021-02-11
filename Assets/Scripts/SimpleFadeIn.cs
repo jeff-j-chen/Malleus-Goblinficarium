@@ -5,11 +5,17 @@ using UnityEngine.SceneManagement;
 
 public class SimpleFadeIn : MonoBehaviour
 {
-    private SpriteRenderer boxSR;
-    private bool isCharSelect = false;
-    void Start() {
-        boxSR = FindObjectOfType<SpriteRenderer>();
-        if (SceneManager.GetActiveScene().name == "CharSelect") { isCharSelect = true; }
+    [SerializeField] public SpriteRenderer boxSR;
+    [SerializeField] public bool lockChanges = false;
+    Scripts scripts;
+    private void Start() {
+        scripts = FindObjectOfType<Scripts>();
+        boxSR = GetComponent<SpriteRenderer>();
+        if (SceneManager.GetActiveScene().name == "CharSelect") { 
+            Color temp = boxSR.color;
+            temp.a = 0;
+            boxSR.color = temp;
+        }
         else { StartCoroutine(FadeIn()); }
     }
 
@@ -17,13 +23,33 @@ public class SimpleFadeIn : MonoBehaviour
         Color temp = boxSR.color;
         temp.a = 1;
         boxSR.color = temp;
-        yield return new WaitForSeconds(0.25f);
+        yield return scripts.delays[0.25f];
         for (int i = 0; i < 15; i++) {
-            yield return new WaitForSeconds(0.033f);
+            yield return scripts.delays[0.033f];
             temp.a -= 1f/15f;
             boxSR.color = temp;
         }
         temp.a = 0;
         boxSR.color = temp;
+    }
+
+    public IEnumerator FadeHide() { 
+        lockChanges = true;
+        Color temp = boxSR.color;
+        temp.a = 0;
+        boxSR.color = temp;
+        for (int i = 0; i < 10; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a += 1f/10f;
+            boxSR.color = temp;
+        }
+        for (int i = 0; i < 10; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a -= 1f/10f;
+            boxSR.color = temp;
+        }
+        temp.a = 0;
+        boxSR.color = temp;
+        lockChanges = false;
     }
 }

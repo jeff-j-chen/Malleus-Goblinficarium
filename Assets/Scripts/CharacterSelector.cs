@@ -27,11 +27,13 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI quoteText;
     [SerializeField] private TextMeshProUGUI perkText;
     [SerializeField] public List<GameObject> inventory = new List<GameObject>();
+    [SerializeField] public SimpleFadeIn simpleFadeIn;
     private bool preventPlayingFX = true;
     private Scripts scripts;
     private void Start() {
         // allow for selection of 1
         scripts = FindObjectOfType<Scripts>();
+        simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         selectionNum = 0;
         easy = false;
         SetSelection(selectionNum);
@@ -89,7 +91,10 @@ public class CharacterSelector : MonoBehaviour {
     }
 
     private void ToggleEasy() {
-        scripts.soundManager.PlayClip("click1");
-        easy = !easy;
+        if (!simpleFadeIn.lockChanges) {
+            scripts.soundManager.PlayClip("click1");
+            easy = !easy;
+            StartCoroutine(simpleFadeIn.FadeHide());
+        }
     }
 }
