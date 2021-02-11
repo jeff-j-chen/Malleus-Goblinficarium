@@ -6,7 +6,7 @@ using TMPro;
 public class CharacterSelector : MonoBehaviour {
     [SerializeField] public int selectionNum;
     [SerializeField] private bool[] unlockedChars = new bool[4] { true, false, false, false };
-    [SerializeField] private bool easy;
+    [SerializeField] public bool easy = false;
     [SerializeField] private Sprite[] icons; 
     private string[] quotes = new string[4] {
         "- \"they say 68% of adventurers die of starvation...\"",
@@ -34,9 +34,9 @@ public class CharacterSelector : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         selectionNum = 0;
-        easy = false;
         SetSelection(selectionNum);
         StartCoroutine(allowFX());
+        // need to add a way to keep the easy between scene changes
     }
     
     private IEnumerator allowFX() { 
@@ -93,7 +93,8 @@ public class CharacterSelector : MonoBehaviour {
         if (!simpleFadeIn.lockChanges) {
             scripts.soundManager.PlayClip("click1");
             easy = !easy;
-            StartCoroutine(simpleFadeIn.FadeHide());
+            StartCoroutine(simpleFadeIn.FadeHide()); 
+            // change selection from the 3rd item -> 2nd one
         }
     }
 }

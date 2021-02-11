@@ -21,43 +21,45 @@ public class ItemManager : MonoBehaviour {
     public string[] statArr = new string[] { "green", "blue", "red", "white" };
     public string[] statArr1 = new string[] { "accuracy", "speed", "damage", "parry" };
     public Dictionary<string, Dictionary<string, int>> weaponDict = new Dictionary<string, Dictionary<string, int>>() {
-        { "dagger", new Dictionary<string, int>()   { { "green", 2 }, { "blue", 4 }, { "red", 0 }, { "white", 0 } } },
-        { "flail", new Dictionary<string, int>()    { { "green", 0 }, { "blue", 3 }, { "red", 1 }, { "white", 0 } } },
-        { "hatchet", new Dictionary<string, int>()  { { "green", 1 }, { "blue", 2 }, { "red", 2 }, { "white", 1 } } },
-        { "mace", new Dictionary<string, int>()     { { "green", 1 }, { "blue", 3 }, { "red", 2 }, { "white", 0 } } },
-        { "maul", new Dictionary<string, int>()     { { "green", -1 }, { "blue", -1 }, { "red", 3 }, { "white", 1 } } },
+        { "dagger",   new Dictionary<string, int>() { { "green", 2 }, { "blue", 4 }, { "red", 0 }, { "white", 0 } } },
+        { "flail",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 3 }, { "red", 1 }, { "white", 0 } } },
+        { "hatchet",  new Dictionary<string, int>() { { "green", 1 }, { "blue", 2 }, { "red", 2 }, { "white", 1 } } },
+        { "mace",     new Dictionary<string, int>() { { "green", 1 }, { "blue", 3 }, { "red", 2 }, { "white", 0 } } },
+        { "maul",     new Dictionary<string, int>() { { "green",-1 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
         { "montante", new Dictionary<string, int>() { { "green", 1 }, { "blue", 1 }, { "red", 3 }, { "white", 2 } } },
-        { "rapier", new Dictionary<string, int>()   { { "green", 4 }, { "blue", 2 }, { "red", -1 }, { "white", 1 } } },
+        { "rapier",   new Dictionary<string, int>() { { "green", 4 }, { "blue", 2 }, { "red",-1 }, { "white", 1 } } },
         { "scimitar", new Dictionary<string, int>() { { "green", 0 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
-        { "spear", new Dictionary<string, int>()    { { "green", 2 }, { "blue", -1 }, { "red", 3 }, { "white", 1 } } },
-        { "sword", new Dictionary<string, int>()    { { "green", 1 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
+        { "spear",    new Dictionary<string, int>() { { "green", 2 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
+        { "sword",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
     };  
     private string[] weaponNames = new string[] { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
     public Dictionary<string, Dictionary<string, int>> modifierDict = new Dictionary<string, Dictionary<string, int>>() {
         { "accurate0", new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "accurate1", new Dictionary<string, int>() { { "green", 2 }, { "blue", -1 }, { "red", 0 }, { "white", 0 } } },
-        { "brisk0", new Dictionary<string, int>()    { { "green", 0 }, { "blue", 1 }, { "red", -1 }, { "white", 0 } } },
-        { "brisk1", new Dictionary<string, int>()    { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white", -1 } } },
-        { "blunt0", new Dictionary<string, int>()    { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
-        { "blunt1", new Dictionary<string, int>()    { { "green", 0 }, { "blue", 0 }, { "red", -1 }, { "white", 1 } } },
-        { "common0", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common1", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common2", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common3", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common4", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common5", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "heavy0", new Dictionary<string, int>()    { { "green", 0 }, { "blue", -1 }, { "red", 1 }, { "white", 0 } } },
-        { "heavy1", new Dictionary<string, int>()    { { "green", 0 }, { "blue", -1 }, { "red", 0 }, { "white", 1 } } },
-        { "nimble0", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white", -1 } } },
-        { "nimble1", new Dictionary<string, int>()   { { "green", 0 }, { "blue", 1 }, { "red", -1 }, { "white", 1 } } },
-        { "precise0", new Dictionary<string, int>()  { { "green", 1 }, { "blue", 0 }, { "red", -1 }, { "white", 0 } } },
-        { "precise1", new Dictionary<string, int>()  { { "green", 1 }, { "blue", -1 }, { "red", 0 }, { "white", 0 } } },
-        { "ruthless0", new Dictionary<string, int>() { { "green", 1 }, { "blue", -1 }, { "red", 0 }, { "white", 1 } } },
-        { "ruthless1", new Dictionary<string, int>() { { "green", 0 }, { "blue", -1 }, { "red", 1 }, { "white", 0 } } },
-        { "stable0", new Dictionary<string, int>()   { { "green", -1 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
-        { "stable1", new Dictionary<string, int>()   { { "green", 0 }, { "blue", -1 }, { "red", 0 }, { "white", 1 } } },
-        { "sharp0", new Dictionary<string, int>()    { { "green", 0 }, { "blue", 0 }, { "red", 1 }, { "white", 0 } } },
-        { "sharp1", new Dictionary<string, int>()    { { "green", 1 }, { "blue", -1 }, { "red", 1 }, { "white", 0 } } },
+        { "accurate1", new Dictionary<string, int>() { { "green", 2 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
+        { "brisk0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red",-1 }, { "white", 0 } } },
+        { "brisk1",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white",-1 } } },
+        { "blunt0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
+        { "blunt1",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red",-1 }, { "white", 1 } } },
+        { "common0",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common1",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common2",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common3",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common4",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common5",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "heavy0",    new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
+        { "heavy1",    new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
+        { "nimble0",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white",-1 } } },
+        { "nimble1",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red",-1 }, { "white", 1 } } },
+        { "precise0",  new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red",-1 }, { "white", 0 } } },
+        { "precise1",  new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
+        { "ruthless0", new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
+        { "ruthless1", new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
+        { "stable0",   new Dictionary<string, int>() { { "green",-1 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
+        { "stable1",   new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
+        { "sharp0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 1 }, { "white", 0 } } },
+        { "sharp1",    new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
+        { "harsh0",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "harsh1",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
     };
     private string[] modifierNames = new string[] { "accurate0", "accurate1", "brisk0", "brisk1", "blunt0", "blunt1", "common0", "common1", "common2", "common3", "common4", "common5", "heavy0", "heavy1", "nimble0", "nimble1", "precise0", "precise1", "ruthless0", "ruthless1", "stable0", "stable1", "sharp0", "sharp1" };
     public Dictionary<string, string> descriptionDict = new Dictionary<string, string>() {
@@ -93,8 +95,10 @@ public class ItemManager : MonoBehaviour {
         {"torch", "find more loot"} 
     };
     public string[] neckletTypes = new string[] { "solidity", "rapidity", "strength", "defense", "arcane", "nothing", "victory" };
-    public Dictionary<string, int> neckletStats = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
-    public Dictionary<string, int> neckletCounter = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 }, { "arcane", 1 } };
+    public Dictionary<string, int> neckletStats = new Dictionary<string, int>() 
+        { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
+    public Dictionary<string, int> neckletCounter = new Dictionary<string, int>() 
+        { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 }, { "arcane", 0 } };
     private string[] scrollTypes = new string[] { "fury", "haste", "dodge", "leech", "courage", "challenge", "nothing" };
     private string[] potionTypes = new string[] { "accuracy", "speed", "strength", "defense", "might", "life", "nothing" };
     private Sprite[] allSprites;
@@ -110,6 +114,12 @@ public class ItemManager : MonoBehaviour {
     public int numItemsDroppedForTrade = 0;
     public bool isCharSelect = false;
     
+    // character item sets:
+    // 1st char: harsh sword + steak + torch
+    // 2nd char: common maul + armor + helm of might
+    // 3rd char: quick dagger + boots of dodge + ankh
+    // 4th char: ruthless mace + cheese + kapala
+
     void Start() {
         allSprites = commonItemSprites.ToArray().Concat(rareItemSprites.ToArray()).Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
         // create a list containing all of the sprites
@@ -118,10 +128,16 @@ public class ItemManager : MonoBehaviour {
             // in characer selection screen
             curList = floorItems;
             // assign the curlist variable for item selection navigation
-            CreateWeaponWithStats("sword", "harsh", 2, 1, 1, 2);
+            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
             MoveItemToDisplay();
             CreateItem("steak", "common");
             MoveItemToDisplay();
+            GameObject created = CreateItem("torch", "common");
+            MoveItemToDisplay();
+            if (scripts.characterSelector != null) { 
+                if (scripts.characterSelector.easy) { created.GetComponent<Item>().UnHide(); }
+                else { created.GetComponent<Item>().Hide(); }
+            }
         }
         else {
             // in game

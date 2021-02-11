@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : MonoBehaviour {
-    public Scripts scripts;
-    public string itemName;
-    public string itemType;
-    public string modifier;
-    public Dictionary<string, int> weaponStats = new Dictionary<string, int>();
+    [SerializeField] public Scripts scripts;
+    [SerializeField] public string itemName;
+    [SerializeField] public string itemType;
+    [SerializeField] public string modifier;
+    [SerializeField] public Dictionary<string, int> weaponStats = new Dictionary<string, int>();
+    [SerializeField] bool hidden = false;
     private bool preventPlayingFX = true;
 
     void Awake() {
@@ -22,7 +23,8 @@ public class Item : MonoBehaviour {
     }
 
     void Start() {
-        if (itemName == "torch")  {
+        gameObject.name = itemName;
+        if (itemName == "torch" && scripts.player != null)  {
             // if the item is a torch
             if (UnityEngine.Random.Range(0, 2) == 0)  { 
                 // 1/2 chance
@@ -74,6 +76,16 @@ public class Item : MonoBehaviour {
                 }
             }
         }
+    }
+
+    public void Hide() { 
+        hidden = true;
+        transform.localScale = new Vector2(0, 0);
+    }
+
+    public void UnHide() { 
+        hidden = false;
+        transform.localScale = new Vector2(1, 1);
     }
     
     /// <summary>
@@ -149,22 +161,19 @@ public class Item : MonoBehaviour {
                 // set the proper item descriptions for all items
             }
         }
-        // if (scripts.levelManager != null ){
-            // if not in character select
-            if (scripts.levelManager == null || itemType == "weapon" || 
-                scripts.levelManager != null && !scripts.levelManager.lockActions ) {
-                // only allow weapons to be used when unlocked
-                scripts.itemManager.highlight.transform.position = transform.position;
-                // move the highlight to the selected item
-                scripts.itemManager.highlightedItem = gameObject;
-                // update the highlighted item variable
-                scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
-                // update the col variable
-                if (playAudio && !preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
-                // dont play this if we just came from menu scene
-                // play sound clip
-            }
-        // }
+        if (scripts.levelManager == null || itemType == "weapon" || 
+            scripts.levelManager != null && !scripts.levelManager.lockActions ) {
+            // only allow weapons to be used when unlocked
+            scripts.itemManager.highlight.transform.position = transform.position;
+            // move the highlight to the selected item
+            scripts.itemManager.highlightedItem = gameObject;
+            // update the highlighted item variable
+            scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
+            // update the col variable
+            if (playAudio && !preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+            // dont play this if we just came from menu scene
+            // play sound clip
+        }
     }
 
     /// <summary>
