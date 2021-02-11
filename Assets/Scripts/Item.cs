@@ -93,7 +93,7 @@ public class Item : MonoBehaviour {
     /// </summary>
     public void Select(bool playAudio=true) {
         if (itemType == "weapon") {
-            // if the item is a weapon    
+            // if the item is a weapon
             if (scripts.itemManager.descriptionDict[itemName.Split(' ')[1]] == "") { scripts.itemManager.itemDesc.text = itemName; }
             // if no description, just display the itemname
             else { scripts.itemManager.itemDesc.text = $"{itemName}\n- {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"; }

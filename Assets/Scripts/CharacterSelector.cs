@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class CharacterSelector : MonoBehaviour {
@@ -56,6 +57,15 @@ public class CharacterSelector : MonoBehaviour {
             ChangeToReleased("Right");
         }
         else if (Input.GetKeyDown(KeyCode.Space)) { ToggleEasy(); }
+        else if (Input.GetKeyDown(KeyCode.Return)) { 
+            StartCoroutine(LoadMenuScene());
+        }
+    }
+
+    private IEnumerator LoadMenuScene() { 
+        scripts.soundManager.PlayClip("blip");
+        yield return scripts.delays[0.15f];
+        SceneManager.LoadScene("Menu");
     }
 
     // make this the main selection function, with checking for unlocked chars and setting arrows etc.
@@ -77,6 +87,43 @@ public class CharacterSelector : MonoBehaviour {
             if (selectionNum == 3) { rightButton.transform.position = new Vector2(8.53f, 20f); }
             else { rightButton.transform.position = new Vector2(8.53f, 1f); }
         }
+        if (num == 0) { 
+            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "harsh sword";
+            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "harsh";
+            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("sword");
+            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "steak";
+            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("steak");
+            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "torch";
+            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("torch");
+        }
+        else if (num == 1) { 
+            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "common maul";
+            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "common";
+            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("maul");
+            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "armour";
+            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("armour");
+            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "helm of might";
+            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("helm_of_might");
+        }
+        else if (num == 2) {
+            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "quick dagger";
+            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "quick";
+            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("dagger");
+            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "boots of dodge";
+            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("boots_of_dodge");
+            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "ankh";
+            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("ankh");
+        }
+        else if (num == 3) { 
+            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "ruthless mace";
+            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "ruthless";
+            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("mace");
+            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "cheese";
+            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("cheese");
+            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "kapala";
+            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("kapala");
+        }
+        scripts.itemManager.floorItems[0].GetComponent<Item>().Select(false);
     }
 
     public void ChangeToPressed(string LeftOrRight) {

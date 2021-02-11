@@ -14,7 +14,7 @@ public class ItemManager : MonoBehaviour {
     [SerializeField] public GameObject highlightedItem;
     [SerializeField] private Sprite[] commonItemSprites;
     [SerializeField] private Sprite[] rareItemSprites;
-    [SerializeField] private Sprite[] weaponSprites;
+    [SerializeField] public Sprite[] weaponSprites;
     [SerializeField] private Sprite[] otherSprites;
     [SerializeField] public List<GameObject> floorItems;
     public List<GameObject> deletionQueue = new List<GameObject>();
@@ -113,12 +113,6 @@ public class ItemManager : MonoBehaviour {
     public bool usedBoots = false;
     public int numItemsDroppedForTrade = 0;
     public bool isCharSelect = false;
-    
-    // character item sets:
-    // 1st char: harsh sword + steak + torch
-    // 2nd char: common maul + armor + helm of might
-    // 3rd char: quick dagger + boots of dodge + ankh
-    // 4th char: ruthless mace + cheese + kapala
 
     void Start() {
         allSprites = commonItemSprites.ToArray().Concat(rareItemSprites.ToArray()).Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
@@ -246,6 +240,10 @@ public class ItemManager : MonoBehaviour {
         }
     }
 
+    public Sprite GetItemSprite(string name) { 
+        return allSprites[(from a in allSprites select a.name).ToList().IndexOf(name)];
+    }
+
     /// <summary>
     /// Create an item with specified itemtype.
     /// </summary>
@@ -285,7 +283,7 @@ public class ItemManager : MonoBehaviour {
     public GameObject CreateItem(string itemName, string itemType, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
-        instantiatedItem.GetComponent<SpriteRenderer>().sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)];
+        instantiatedItem.GetComponent<SpriteRenderer>().sprite = GetItemSprite(itemName);
         // give the item the proper sprite
         instantiatedItem.transform.parent = gameObject.transform;
         // make the item childed to this manager
@@ -310,7 +308,7 @@ public class ItemManager : MonoBehaviour {
     public GameObject CreateItem(string itemName, string itemType, string modifier, int negativeOffset=0, bool victory=false) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
-        instantiatedItem.GetComponent<SpriteRenderer>().sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)];
+        instantiatedItem.GetComponent<SpriteRenderer>().sprite = GetItemSprite(itemName);
         // give the item the proper sprite
         instantiatedItem.transform.parent = gameObject.transform;
         // make the item childed to this manager
@@ -394,7 +392,7 @@ public class ItemManager : MonoBehaviour {
         // instantiaet the item
         Sprite sprite = null;
         // create an empty sprite variable to imprint on
-        sprite = allSprites[(from a in allSprites select a.name).ToList().IndexOf(weaponName)];
+        sprite = GetItemSprite(weaponName);
         // get the sprite based on the weapon name
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = sprite;
         // give the sprite based on the item name
