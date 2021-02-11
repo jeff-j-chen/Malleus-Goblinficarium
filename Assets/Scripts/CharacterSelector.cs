@@ -26,7 +26,6 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] private GameObject rightButton;
     [SerializeField] private TextMeshProUGUI quoteText;
     [SerializeField] private TextMeshProUGUI perkText;
-    [SerializeField] public List<GameObject> inventory = new List<GameObject>();
     [SerializeField] public SimpleFadeIn simpleFadeIn;
     private bool preventPlayingFX = true;
     private Scripts scripts;

@@ -37,6 +37,7 @@ public class Item : MonoBehaviour {
                 // set fade time to be slightly longer
             }
         }
+        StartCoroutine(allowFX());
     }
 
     void OnMouseOver() {
@@ -56,7 +57,7 @@ public class Item : MonoBehaviour {
                 }
                 else {
                     // in character select 
-                    scripts.itemManager.curList = scripts.player.inventory;
+                    scripts.itemManager.curList = scripts.itemManager.floorItems;
                 }
             }
         }
@@ -78,15 +79,15 @@ public class Item : MonoBehaviour {
     /// <summary>
     /// Select an item.
     /// </summary>
-    public void Select(bool playAudio=true)  {
+    public void Select(bool playAudio=true) {
         if (itemType == "weapon") {
             // if the item is a weapon    
             if (scripts.itemManager.descriptionDict[itemName.Split(' ')[1]] == "") { scripts.itemManager.itemDesc.text = itemName; }
             // if no description, just display the itemname
             else { scripts.itemManager.itemDesc.text = $"{itemName}\n- {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"; }
             // if description, then display it
-            if (scripts.itemManager.floorItems.Contains(gameObject)) {
-                // if item on the floor
+            if (scripts.itemManager.floorItems.Contains(gameObject) && scripts.player != null) {
+                // if item on the floor and not in character select
                 scripts.enemy.stats = weaponStats;
                 scripts.statSummoner.SummonStats();
                 scripts.statSummoner.SetDebugInformationFor("enemy");
@@ -103,9 +104,9 @@ public class Item : MonoBehaviour {
             }
         }
         else {
-            if (!scripts.levelManager.lockActions) {
+            if (scripts.levelManager == null || !scripts.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
-                if (scripts.enemy.isDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
+                if (scripts.levelManager != null && scripts.enemy.isDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
                 if (itemName == "potion")  {
                     if (modifier == "accuracy") {  scripts.itemManager.itemDesc.text = "potion of accuracy\n+3 accuracy"; }
@@ -134,7 +135,7 @@ public class Item : MonoBehaviour {
                     else { scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{t} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; } 
                 }
                 else if (itemName == "cheese" || itemName == "steak") {
-                    if (scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
+                    if (scripts.player == null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
                     else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
                 }
                 else if (itemName == "moldy cheese") {
@@ -148,10 +149,11 @@ public class Item : MonoBehaviour {
                 // set the proper item descriptions for all items
             }
         }
-        if (scripts.levelManager != null ){
+        // if (scripts.levelManager != null ){
             // if not in character select
-            if (!scripts.levelManager.lockActions || itemType == "weapon") {
-                // only allow weapons to be used when locked
+            if (scripts.levelManager == null || itemType == "weapon" || 
+                scripts.levelManager != null && !scripts.levelManager.lockActions ) {
+                // only allow weapons to be used when unlocked
                 scripts.itemManager.highlight.transform.position = transform.position;
                 // move the highlight to the selected item
                 scripts.itemManager.highlightedItem = gameObject;
@@ -162,14 +164,14 @@ public class Item : MonoBehaviour {
                 // dont play this if we just came from menu scene
                 // play sound clip
             }
-        }
+        // }
     }
 
     /// <summary>
     /// Pick up or use an item.
     /// </summary>
     public void Use() {
-        if (!scripts.levelManager.lockActions) {
+        if (scripts.levelManager != null && !scripts.levelManager.lockActions) {
             if (scripts.itemManager.floorItems.Contains(gameObject)) {
                 // if item is on the floor
                 if (itemType == "arrow")  { 

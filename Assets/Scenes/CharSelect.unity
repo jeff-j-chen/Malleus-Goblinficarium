@@ -467,7 +467,6 @@ MonoBehaviour:
   rightButton: {fileID: 1585155059}
   quoteText: {fileID: 1752788095}
   perkText: {fileID: 1369760196}
-  inventory: []
   simpleFadeIn: {fileID: 0}
 --- !u!4 &355223463
 Transform:
@@ -796,9 +795,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'common maul
-
-    - any wound is deadly'
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 153c2cc2c59f4064695fb26abfea98e2, type: 2}
   m_sharedMaterial: {fileID: -7047417035543559013, guid: 153c2cc2c59f4064695fb26abfea98e2,
@@ -834,7 +831,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0

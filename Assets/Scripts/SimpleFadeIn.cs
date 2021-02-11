@@ -38,14 +38,14 @@ public class SimpleFadeIn : MonoBehaviour
         Color temp = boxSR.color;
         temp.a = 0;
         boxSR.color = temp;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 7; i++) {
             yield return scripts.delays[0.033f];
-            temp.a += 1f/10f;
+            temp.a += 1f/7f;
             boxSR.color = temp;
         }
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 7; i++) {
             yield return scripts.delays[0.033f];
-            temp.a -= 1f/10f;
+            temp.a -= 1f/7f;
             boxSR.color = temp;
         }
         temp.a = 0;

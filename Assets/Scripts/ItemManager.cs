@@ -116,9 +116,9 @@ public class ItemManager : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         if (isCharSelect) {
             // in characer selection screen
-            curList = scripts.characterSelector.inventory;
+            curList = floorItems;
             // assign the curlist variable for item selection navigation
-            CreateWeaponWithStats("sword", "common", 2, 1, 1, 2);
+            CreateWeaponWithStats("sword", "harsh", 2, 1, 1, 2);
             MoveItemToDisplay();
             CreateItem("steak", "common");
             MoveItemToDisplay();
@@ -161,7 +161,7 @@ public class ItemManager : MonoBehaviour {
         }
         else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) {
             // if pressing return or enter
-            if (!scripts.turnManager.isMoving && !isCharSelect) {
+            if (scripts.turnManager != null && !scripts.turnManager.isMoving && !isCharSelect) {
                 // if not moving and in game
                 highlightedItem.GetComponent<Item>().Use();
                 // use the item
@@ -177,8 +177,8 @@ public class ItemManager : MonoBehaviour {
     /// Select an item from the given list at the given index. 
     /// </summary>
     /// <param name="itemList">The list of which to attempt to make a selection from.</param>
-    /// <param name="c">The column number of which to attempt to make a selection from.</param>
-    /// <param name="forceDifferentSelection">Whether or not to try to force a different selection if the column was not valid for the list.</param>
+    /// <param name="c">The index of which to attempt to make a selection from.</param>
+    /// <param name="forceDifferentSelection">Whether or not to try to force a different selection if the index was not valid for the list.</param>
     public void Select(List<GameObject> itemList, int c, bool forceDifferentSelection=true, bool playAudio=true) {
         if (c <= itemList.Count - 1 && c >= 0) {
             // if the column is within the bounds of the list
@@ -211,8 +211,14 @@ public class ItemManager : MonoBehaviour {
                 }
                 else {
                     // player only has weapon
-                    scripts.player.inventory[0].GetComponent<Item>().Select();
-                    curList = scripts.player.inventory;
+                    if (scripts.player != null) { 
+                        scripts.player.inventory[0].GetComponent<Item>().Select(); 
+                        curList = scripts.player.inventory;
+                    }
+                    else { 
+                        floorItems[0].GetComponent<Item>().Select(); 
+                        curList = floorItems;
+                    }
                     col = 0;
                     // select the weapon and update the variables used for selection.
                 }
@@ -399,12 +405,9 @@ public class ItemManager : MonoBehaviour {
     public void MoveItemToDisplay() {
         if (!isCharSelect) { print("This function should only be used in character select!"); }
         else {
-            if (floorItems[0] != null) {
-                floorItems[0].transform.position = new Vector2(-2.75f + itemSpacing * scripts.characterSelector.inventory.Count, 3.16f);
-                scripts.characterSelector.inventory.Add(floorItems[0]);
-                floorItems.RemoveAt(0);
+            for (int i = 0; i < floorItems.Count; i++) { 
+                floorItems[i].transform.position = new Vector2(-4.572f + itemSpacing * i, 6.612f);
             }
-            else { print("no item to move"); }
         }
     }
 
