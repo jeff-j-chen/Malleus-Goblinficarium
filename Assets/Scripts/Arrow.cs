@@ -49,8 +49,6 @@ public class Arrow : MonoBehaviour {
             // if the player presses return or the numpad enter
             scripts.menuButton.ButtonPress(menuButtons[currentIndex].name);
             // call the function for buttonpress
-            scripts.soundManager.PlayClip("click");
-            // play sound clip
         }
     }
 

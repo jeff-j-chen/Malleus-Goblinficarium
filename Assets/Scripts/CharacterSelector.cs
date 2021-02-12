@@ -58,12 +58,15 @@ public class CharacterSelector : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.Space)) { ToggleEasy(); }
         else if (Input.GetKeyDown(KeyCode.Return)) { 
-            StartCoroutine(LoadMenuScene());
+            if (unlockedChars[selectionNum]) {
+                StartCoroutine(LoadMenuScene());
+            }
         }
     }
 
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip");
+        SaveSystem.SaveData(scripts);
         yield return scripts.delays[0.15f];
         SceneManager.LoadScene("Menu");
     }

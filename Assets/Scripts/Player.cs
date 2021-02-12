@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 
 public class Player : MonoBehaviour {
+    [SerializeField] public int charNum;
     [SerializeField] private RuntimeAnimatorController[] controllers;
     [SerializeField] private Sprite[] icons;
     [SerializeField] private Sprite[] deathSprites;
@@ -39,7 +40,6 @@ public class Player : MonoBehaviour {
         { "red", 0 },
         { "white", 0 },
     };
-    public int charNum = 0;
     public int stamina = 3;
     public int targetIndex = 0;
     private Scripts scripts;
@@ -58,6 +58,10 @@ public class Player : MonoBehaviour {
     };
 
     private void Start() {
+        Data data = SaveSystem.LoadData();
+        // something here to check if we are continuing or starting a new game
+        if (true) { charNum = data.newCharNum; }
+        else { charNum = data.curCharNum; }
         scripts = FindObjectOfType<Scripts>();
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
