@@ -58,11 +58,10 @@ public class Player : MonoBehaviour {
     };
 
     private void Start() {
-        Data data = SaveSystem.LoadData();
-        // something here to check if we are continuing or starting a new game
-        if (true) { charNum = data.newCharNum; }
-        // else { charNum = data.curCharNum; }
         scripts = FindObjectOfType<Scripts>();
+        // something here to check if we are continuing or starting a new game
+        if (true) { charNum = scripts.data.newCharNum; }
+        // else { charNum = data.curCharNum; }
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
         // set the initial positions

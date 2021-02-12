@@ -4,10 +4,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 public static class SaveSystem {
     static string path = Application.persistentDataPath + "/save.data";
-    public static void SaveData(Scripts scripts) {
+    public static void SaveData(Scripts scripts, bool setTS) {
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream fileStream = new FileStream(path, FileMode.Create);
-        Data data = new Data(scripts);
+        Data data = new Data(scripts, setTS);
         formatter.Serialize(fileStream, data);
         fileStream.Close();
     }

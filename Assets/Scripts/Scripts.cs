@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Scripts : MonoBehaviour {
+    public Data data;
     public Dice dice;
     public Arrow arrow;
     public Enemy enemy;
@@ -25,6 +26,7 @@ public class Scripts : MonoBehaviour {
     public Dictionary<float, WaitForSeconds> delays = new Dictionary<float, WaitForSeconds>();
 
     private void Start() {
+        data = SaveSystem.LoadData();
         dice = FindObjectOfType<Dice>();
         arrow = FindObjectOfType<Arrow>();
         enemy = FindObjectOfType<Enemy>();

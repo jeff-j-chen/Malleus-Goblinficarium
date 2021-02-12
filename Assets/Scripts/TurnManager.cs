@@ -158,7 +158,7 @@ public class TurnManager : MonoBehaviour {
     /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
+            if (scripts.levelManager.sub == scripts.data.tsSub && scripts.levelManager.level == scripts.data.tsLevel && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
                 // tombstone
                 scripts.player.target.text = "none";
                 scripts.player.targetInfo.text = "why would you try to wound a tombstone?";
