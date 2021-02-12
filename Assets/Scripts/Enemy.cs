@@ -45,7 +45,7 @@ public class Enemy : MonoBehaviour {
         {"23", 3},
         {"31", 3},
         {"32", 3},
-        {"33", 3},
+        {"33", 4},
         {"41", 5},
     };
     private Scripts scripts;

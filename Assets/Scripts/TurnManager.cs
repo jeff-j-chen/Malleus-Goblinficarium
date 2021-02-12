@@ -1015,7 +1015,7 @@ public class TurnManager : MonoBehaviour {
     private void RunEnemyCalculations() {
         if (!scripts.enemy.woundList.Contains("hip") || scripts.enemy.enemyName.text == "Lich") {
             InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
-            if (enemyAtt >= playerDef) {
+            if (enemyAtt > playerDef) {
                 // if enemy can just straight up hit the player
                 AddSpeedAndAccuracy(enemyAim, playerSpd, enemySpd, playerAtt, enemyDef);
                 // add blue and green if needed
