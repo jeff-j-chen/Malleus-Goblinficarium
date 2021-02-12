@@ -180,7 +180,8 @@ public class LevelManager : MonoBehaviour {
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
-                if (sub == scripts.tombstoneData.sub && level == scripts.tombstoneData.level) {
+                if (sub == scripts.tombstoneData.sub && level == scripts.tombstoneData.level && !(sub == 1 && level == 1)) {
+                    // spawn tombstone if we are on the correct level and not on 1-1
                     toSpawn = "tombstone";
                     // level matches which level to add to
                     scripts.tombstoneData.sub = -1;

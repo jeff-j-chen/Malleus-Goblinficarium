@@ -158,7 +158,7 @@ public class TurnManager : MonoBehaviour {
     /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
+            if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
                 // tombstone
                 scripts.player.target.text = "none";
                 scripts.player.targetInfo.text = "why would you try to wound a tombstone?";
@@ -364,7 +364,6 @@ public class TurnManager : MonoBehaviour {
         }
         else if (toMove == "enemy") {
             // enemy is the one attacking
-            print($"enemy is attacking! chest wounded: " + scripts.enemy.woundList.Contains("chest") + $", rerollable: {Rerollable()}");
             if (scripts.enemy.woundList.Contains("chest") && Rerollable() || scripts.enemy.woundList.Contains("head") && !diceDiscarded) {
                 // if player can reroll or discard enemy's die and hints are on
                 if (PlayerPrefs.GetString("hints") == "on") {

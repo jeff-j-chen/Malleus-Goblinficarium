@@ -38,12 +38,6 @@ public class TombstoneData : MonoBehaviour {
         tempSub = scripts.levelManager.sub;
         sub = 0;
         // set level according to the current existing one, use tempsub (sub assigned later) to avoid a weird bug where the enemy becomes the tombstone after player is killed
-        if (level == 1 && sub == 1) {
-            level = -1;
-            sub = -1;
-        }
-        // save level data only if the player got past 1-1
-        // add the item to the list
         Item item;
         GameObject created;
         foreach (GameObject toSave in scripts.player.inventory) {
