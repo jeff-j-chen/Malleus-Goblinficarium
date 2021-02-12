@@ -179,13 +179,17 @@ public class LevelManager : MonoBehaviour {
                 sub++;
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
+                if (sub == scripts.data.tsSub && level == scripts.data.tsLevel && scripts.enemy.enemyName.text == "Tombstone") {
+                    print("resetting tombstone level!");
+                    scripts.data.resetTSLevel(scripts);
+                    // make tombstone inaccessible
+                    print($"scripts.data.tsLevel is now {scripts.data.tsLevel}");
+                }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
                 if (sub == scripts.data.tsSub && level == scripts.data.tsLevel && !(sub == 1 && level == 1)) {
                     // spawn tombstone if we are on the correct level and not on 1-1
                     toSpawn = "tombstone";
                     // level matches which level to add to
-                    scripts.data.resetTSLevel(scripts);
-                    // make tombstone inaccessible
                     levelText.text = "level " + level + "-" + sub + "*";
                     sub--;
                     // decrement sub (because we went up 1 level but aren't going to fight anything)

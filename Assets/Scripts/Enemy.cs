@@ -148,7 +148,7 @@ public class Enemy : MonoBehaviour {
         isDead = false;
         // make sure enemy is not dead
         float[] temp;
-        // array to hold tsats
+        // array to hold stats
         if (enemyNum == 2) { temp = scripts.levelManager.GenStats("lich"); }
         else if (enemyNum == 0) { temp = scripts.levelManager.GenStats("devil"); }
         else { temp = scripts.levelManager.GenStats(); }

@@ -58,6 +58,12 @@ public class TombstoneData : MonoBehaviour {
         //     savedItem.transform.parent = scripts.itemManager.transform;
         //     // parent the item to the itemmanager
         // }
+        scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], scripts.data.tsItemMods[0], scripts.data.tsWeaponAcc, scripts.data.tsWeaponSpd, scripts.data.tsWeaponDmg, scripts.data.tsWeaponSpd);
+        for (int i = 1; i < 9; i++) {  
+            if (scripts.data.tsItemNames[i] != null && scripts.data.tsItemNames[i] != "") { 
+                scripts.itemManager.CreateItem(scripts.data.tsItemNames[i], scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
+            }
+        }
         scripts.itemManager.CreateItem("arrow", "arrow");
         // create the next level arrow
     }
