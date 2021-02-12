@@ -98,7 +98,8 @@ public class ItemManager : MonoBehaviour {
     public Dictionary<string, int> neckletStats = new Dictionary<string, int>() 
         { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
     public Dictionary<string, int> neckletCounter = new Dictionary<string, int>() 
-        { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 }, { "arcane", 0 } };
+        { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 }, { "arcane", 1 } };
+    // start with 1 arcane necklet so we don't have to have +1s everywhere
     private string[] scrollTypes = new string[] { "fury", "haste", "dodge", "leech", "courage", "challenge", "nothing" };
     private string[] potionTypes = new string[] { "accuracy", "speed", "strength", "defense", "might", "life", "nothing" };
     private Sprite[] allSprites;
@@ -138,9 +139,17 @@ public class ItemManager : MonoBehaviour {
             lootText.text = "";
             curList = scripts.player.inventory;
             // assign the curlist variable for item selection navigation
-            CreateWeaponWithStats("sword", "common", 2, 2, 1, 2);
+            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
             MoveToInventory(0, true);
             CreateItem("steak", "common");
+            MoveToInventory(0, true);
+            CreateItem("necklet", "common", "solidity");
+            MoveToInventory(0, true);
+            CreateItem("necklet", "common", "rapidity");
+            MoveToInventory(0, true);
+            CreateItem("necklet", "common", "arcane");
+            MoveToInventory(0, true);
+            CreateItem("necklet", "common", "arcane");
             MoveToInventory(0, true);
         }
         Select(curList, 0, playAudio:false);
