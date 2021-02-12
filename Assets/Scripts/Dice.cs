@@ -171,6 +171,8 @@ public class Dice : MonoBehaviour {
     /// Called upon a die to discard it from the player.
     /// </summary>
     public void DiscardFromPlayer() {
+        print("started discarding from player!");
+        print($"die discarded: {diceType} {diceNum} ");
         // very similar to discardfromenemy, just doesn't set certain variables
         int index = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this);
         scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this);
@@ -182,6 +184,7 @@ public class Dice : MonoBehaviour {
             diceList[i].GetComponent<Dice>().instantiationPos = diceList[i].transform.position;
         }
         scripts.statSummoner.SetDebugInformationFor("player");
+        print("i got to here!");
     }
 
     /// <summary>

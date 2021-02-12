@@ -640,8 +640,9 @@ public class ItemManager : MonoBehaviour {
     /// Fade all torches that have ended their lifespan.
     /// </summary>
     public void AttemptFadeTorches() {
-        foreach (GameObject item in scripts.player.inventory) {
+        for (int i = 0; i < scripts.player.inventory.Count; i++) {
             // for every item
+            GameObject item = scripts.player.inventory[i];
             if (item.GetComponent<Item>().itemName == "torch") {
                 // if the item is a torch
                 if ($"{scripts.levelManager.level}-{scripts.levelManager.sub}" == item.GetComponent<Item>().modifier) {

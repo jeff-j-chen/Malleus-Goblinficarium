@@ -61,7 +61,7 @@ public class Player : MonoBehaviour {
         Data data = SaveSystem.LoadData();
         // something here to check if we are continuing or starting a new game
         if (true) { charNum = data.newCharNum; }
-        else { charNum = data.curCharNum; }
+        // else { charNum = data.curCharNum; }
         scripts = FindObjectOfType<Scripts>();
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
@@ -104,11 +104,7 @@ public class Player : MonoBehaviour {
                 // don't let player suicide when enemy is dead, because it is glitchy
                 scripts.turnManager.SetStatusText("you've killed him");
             }
-            else if (scripts.enemy.enemyName.text == "Tombstone") {
-                // or on tombstone
-                scripts.turnManager.SetStatusText("mind your manners");
-            }
-            else if (scripts.enemy.enemyName.text == "Merchant") {
+            else if (scripts.enemy.enemyName.text == "Tombstone" || scripts.enemy.enemyName.text == "Merchant") {
                 // or on tombstone
                 scripts.turnManager.SetStatusText("mind your manners");
             }

@@ -217,11 +217,13 @@ public class Enemy : MonoBehaviour {
         List<Dice> availableDice = new List<Dice>();
         List<int> diceValuations = new List<int>();
         // create lists to store the information in
-        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-            Dice diceScript = dice.GetComponent<Dice>();
-            availableDice.Add(diceScript);
-            diceValuations.Add(Array.IndexOf(valueArr, diceScript.diceType + diceScript.diceNum));
-            // add all the information (script and each die's valuation)
+        for (int i = 0; i < scripts.diceSummoner.existingDice.Count; i++) { 
+            Dice diceScript = scripts.diceSummoner.existingDice[i].GetComponent<Dice>();
+            if (scripts.diceSummoner.existingDice[i].GetComponent<Dice>().isOnPlayerOrEnemy == "player") { 
+                availableDice.Add(diceScript);
+                diceValuations.Add(Array.IndexOf(valueArr, diceScript.diceType + diceScript.diceNum));
+                // add all the information (script and each die's valuation), only if on player
+            }
         }
         Dice chosenDie = availableDice[diceValuations.IndexOf(diceValuations.Min())];
         // choose the best die (lowest valuation = best)

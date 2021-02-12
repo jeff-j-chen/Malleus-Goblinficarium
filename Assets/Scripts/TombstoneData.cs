@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Linq;
-public class TombstoneData : MonoBehaviour
-{
+public class TombstoneData : MonoBehaviour {
     public List<GameObject> items;
     public int level;
     public int sub;
@@ -115,6 +114,13 @@ public class TombstoneData : MonoBehaviour
     }
 
     public void SpawnSavedItems() {
+        print("make sure to degrade common/rare items!");
+        // helm of might -> broken helm
+        // boots of dodge -> ruined boots
+        // ankh -> shattered ankh
+        // kapala -> defiled kapala
+        // steak -> rotten steak
+        // cheese -> moldy cheese
         scripts = FindObjectOfType<Scripts>();
         // re-get scripts
         for (int i = 0; i < items.Count; i++) {
