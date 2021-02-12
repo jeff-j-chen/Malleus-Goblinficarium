@@ -69,8 +69,8 @@ public class Item : MonoBehaviour {
                 // if highlighted
                 if (itemType != "weapon" && !scripts.itemManager.floorItems.Contains(gameObject)) { 
                     // if the item is not weapon and not on the floor
-                    if (scripts.levelManager.sub == 4 || scripts.enemy.isDead) {
-                        // only allow dropping of items if player is trading or the enemy is dead
+                    if (scripts.levelManager.sub == 4 || scripts.enemy.isDead || scripts.enemy.enemyName.text == "Tombstone") {
+                        // only allow dropping of items if player is trading, enemy is dead, or we are on a tombstone
                         Remove(true); 
                     }
                 }
@@ -215,8 +215,8 @@ public class Item : MonoBehaviour {
                     // reload scene
                     scripts.soundManager.PlayClip("next");
                     // play sound clip
-                    scripts.tombstoneData.sub = scripts.tombstoneData.tempSub;
-                    scripts.tombstoneData.tempSub = 0;
+                    // scripts.tombstoneData.sub = scripts.tombstoneData.tempSub;
+                    // scripts.tombstoneData.tempSub = 0;
                     // set tombstone data up correctly
                 }
                 else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {

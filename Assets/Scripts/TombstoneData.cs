@@ -35,8 +35,9 @@ public class TombstoneData : MonoBehaviour {
         }
         // clear all existing items
         level = scripts.levelManager.level;
-        tempSub = scripts.levelManager.sub;
-        sub = 0;
+        // tempSub = scripts.levelManager.sub;
+        // sub = 0;
+        sub = scripts.levelManager.sub;
         // set level according to the current existing one, use tempsub (sub assigned later) to avoid a weird bug where the enemy becomes the tombstone after player is killed
         Item item;
         GameObject created;
