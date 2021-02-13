@@ -67,6 +67,7 @@ public class CharacterSelector : MonoBehaviour {
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip");
         SaveSystem.SaveData(scripts, false);
+        scripts.data = SaveSystem.LoadData();
         yield return scripts.delays[0.15f];
         SceneManager.LoadScene("Menu");
     }

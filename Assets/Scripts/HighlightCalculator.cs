@@ -154,7 +154,7 @@ public class HighlightCalculator : MonoBehaviour {
                     // do stuff for yellow die
                 }
                 else {
-                    // now yellow
+                    // not yellow
                     if (dice.diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger")) {
                         // if die is green and the player has dagger
                         HandleNormalDrop("red", dice, true);
@@ -252,6 +252,7 @@ public class HighlightCalculator : MonoBehaviour {
             StartCoroutine(dice.DecreaseDiceValue(false));
         }
         // decrease if gut wound
+        scripts.turnManager.SetTargetOf("player");
     }
 
     /// <summary>

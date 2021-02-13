@@ -52,16 +52,16 @@ public class ItemManager : MonoBehaviour {
         { "nimble1",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red",-1 }, { "white", 1 } } },
         { "precise0",  new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red",-1 }, { "white", 0 } } },
         { "precise1",  new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
-        { "ruthless0", new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
-        { "ruthless1", new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
+        { "ruthless0", new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red",-1 }, { "white", 1 } } },
+        { "ruthless1", new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red",-1 }, { "white", 0 } } },
         { "stable0",   new Dictionary<string, int>() { { "green",-1 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
         { "stable1",   new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
         { "sharp0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 1 }, { "white", 0 } } },
         { "sharp1",    new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
         { "harsh0",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "harsh1",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "quick0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white", 0 } } },
     };
-    private string[] modifierNames = new string[] { "accurate0", "accurate1", "brisk0", "brisk1", "blunt0", "blunt1", "common0", "common1", "common2", "common3", "common4", "common5", "heavy0", "heavy1", "nimble0", "nimble1", "precise0", "precise1", "ruthless0", "ruthless1", "stable0", "stable1", "sharp0", "sharp1" };
+    private string[] modifierNames = new string[] { "accurate0", "accurate1", "brisk0", "brisk1", "blunt0", "blunt1", "common0", "common1", "common2", "common3", "common4", "common5", "heavy0", "heavy1", "nimble0", "nimble1", "precise0", "precise1", "ruthless0", "ruthless1", "stable0", "stable1", "sharp0", "sharp1", "harsh0", "quick0" };
     public Dictionary<string, string> descriptionDict = new Dictionary<string, string>() {
         {"armour", "protects from one hit"}, 
         {"arrow", "proceed to the next level"}, 
@@ -139,21 +139,8 @@ public class ItemManager : MonoBehaviour {
             lootText.text = "";
             curList = scripts.player.inventory;
             // assign the curlist variable for item selection navigation
-            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-            MoveToInventory(0, true);
-            CreateItem("steak", "common");
-            MoveToInventory(0, true);
-            CreateItem("necklet", "common", "solidity");
-            MoveToInventory(0, true);
-            CreateItem("necklet", "common", "rapidity");
-            MoveToInventory(0, true);
-            CreateItem("necklet", "common", "arcane");
-            MoveToInventory(0, true);
-            CreateItem("necklet", "common", "arcane");
-            MoveToInventory(0, true);
+            // need to implement a check if continuing or new game
         }
-        Select(curList, 0, playAudio:false);
-        // select the first item
     }
 
     void Update() {
@@ -191,6 +178,51 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0);
         }
     } 
+
+    public void GiveClassItems(int charNum) {
+        if (scripts.player.charNum == 0) { 
+            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+            MoveToInventory(0, true);
+            CreateItem("steak", "common");
+            MoveToInventory(0, true);
+            if (scripts.data.easyMode) { 
+                CreateItem("torch", "common");
+                MoveToInventory(0, true);
+            }
+        }
+        else if (scripts.player.charNum == 1) { 
+            CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+            MoveToInventory(0, true);
+            CreateItem("armour", "common");
+            MoveToInventory(0, true);
+            if (scripts.data.easyMode) {
+                CreateItem("helm_of_might", "rare");
+                MoveToInventory(0, true);
+            }
+        }
+        else if (scripts.player.charNum == 2) { 
+            CreateWeaponWithStats("dagger", "quick", 2, 5, 0, 0);
+            MoveToInventory(0, true);
+            CreateItem("boots_of_dodge", "rare");
+            MoveToInventory(0, true);
+            if (scripts.data.easyMode) { 
+                CreateItem("ankh", "rare");
+                MoveToInventory(0, true);
+            }
+        }
+        else if (scripts.player.charNum == 3) {
+            CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
+            MoveToInventory(0, true);
+            CreateItem("cheese", "common");
+            MoveToInventory(0, true);
+            if (scripts.data.easyMode) { 
+                CreateItem("kapala", "rare");
+                MoveToInventory(0, true);
+            }
+        }
+        Select(curList, 0, playAudio:false);
+        // select the first item
+    }
 
     /// <summary>
     /// Select an item from the given list at the given index. 

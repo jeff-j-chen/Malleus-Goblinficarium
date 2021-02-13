@@ -1340,6 +1340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05a90830f70f699418eae1c5a87d67a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  charNum: 0
   controllers:
   - {fileID: 9100000, guid: c46bc5f0daaa6e14e9b52ca7f72d98d1, type: 2}
   - {fileID: 9100000, guid: 5db3cd00654ab2e429dd4faf56aa8349, type: 2}
@@ -1387,7 +1388,6 @@ MonoBehaviour:
   isDead: 0
   cancelMove: 0
   hintTimer: 0
-  charNum: 0
   stamina: 3
   targetIndex: 0
   isFurious: 0
@@ -1920,7 +1920,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9c895d75a43e7949a9e2e95bc50c66a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  items: []
   level: 0
   sub: 0
   tempSub: 0
@@ -3000,6 +2999,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e22bc23ef7ceb94ebe1445e03cc1586, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  data:
+    curCharNum: 0
+    newCharNum: 0
+    easyMode: 0
+    tsLevel: 0
+    tsSub: 0
+    tsWeaponAcc: 0
+    tsWeaponSpd: 0
+    tsWeaponDmg: 0
+    tsWeaponDef: 0
+    tsItemNames: []
+    tsItemTypes: []
+    tsItemMods: []
   dice: {fileID: 0}
   arrow: {fileID: 0}
   enemy: {fileID: 0}

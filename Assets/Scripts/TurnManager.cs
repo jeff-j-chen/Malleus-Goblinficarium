@@ -194,6 +194,7 @@ public class TurnManager : MonoBehaviour {
                         if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
                         // add an asteriks if already injured
                         else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
+                        
                         if (scripts.enemy.enemyName.text == "Lich") { scripts.player.targetInfo.text = "no effect since enemy is immune"; }
                         // different text for lich (letting player know)
                         else { scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex]; }
@@ -450,6 +451,8 @@ public class TurnManager : MonoBehaviour {
             DetermineMove(true);
             // make the next person go again
         }
+        SaveSystem.SaveData(scripts, false);
+        scripts.data = SaveSystem.LoadData();
         yield return scripts.delays[0.45f];
         // small delay
         ClearVariablesAfterRound();
@@ -514,6 +517,7 @@ public class TurnManager : MonoBehaviour {
             }
             StartCoroutine(PlayDeathAnimation("player"));
             // set status text and play the animation
+            //
         }
         else if (playerOrEnemy == "enemy") {
             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... he dies");
@@ -608,6 +612,8 @@ public class TurnManager : MonoBehaviour {
             // spawn items
             blackBox.transform.position = onScreen;
             // hide the enemy's tats
+            SaveSystem.SaveData(scripts, false);
+            scripts.data = SaveSystem.LoadData();
         }
         else { print("invalid string passed"); }
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {

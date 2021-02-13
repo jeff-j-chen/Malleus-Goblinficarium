@@ -15,9 +15,11 @@ public class TombstoneData : MonoBehaviour {
     }
 
     public void SetTombstoneData() {
+        print("make sure to clear player's saved items and shit here");
         scripts = FindObjectOfType<Scripts>();
         // re-assign scripts here, because as this is a singleton the scripts from the last round has literally everything gone        
         SaveSystem.SaveData(scripts, true);
+        scripts.data = SaveSystem.LoadData();
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true);
             // move all items on the floor to the player's inventory
@@ -44,24 +46,12 @@ public class TombstoneData : MonoBehaviour {
         // kapala -> defiled kapala
         // steak -> rotten steak
         // cheese -> moldy cheese
+        // __ weapon -> rusty weapon
         scripts = FindObjectOfType<Scripts>();
-        // re-get scripts
-        // for (int i = 0; i < items.Count; i++) {
-        //     GameObject savedItem = items[i];
-        //     // get the item temporarily
-        //     savedItem.GetComponent<Item>().scripts = FindObjectOfType<Scripts>();
-        //     // re-get scripts of the itme
-        //     savedItem.transform.position = new Vector2(-2.75f + i * scripts.itemManager.itemSpacing, scripts.itemManager.itemY);
-        //     // create item with correct offset
-        //     scripts.itemManager.floorItems.Add(savedItem);
-        //     // add the item to the flooritems
-        //     savedItem.transform.parent = scripts.itemManager.transform;
-        //     // parent the item to the itemmanager
-        // }
         scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], scripts.data.tsItemMods[0], scripts.data.tsWeaponAcc, scripts.data.tsWeaponSpd, scripts.data.tsWeaponDmg, scripts.data.tsWeaponSpd);
         for (int i = 1; i < 9; i++) {  
             if (scripts.data.tsItemNames[i] != null && scripts.data.tsItemNames[i] != "") { 
-                scripts.itemManager.CreateItem(scripts.data.tsItemNames[i], scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
+                scripts.itemManager.CreateItem(scripts.data.tsItemNames[i].Replace(' ', '_'), scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
             }
         }
         scripts.itemManager.CreateItem("arrow", "arrow");

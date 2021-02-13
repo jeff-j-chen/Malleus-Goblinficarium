@@ -62,6 +62,7 @@ public class Player : MonoBehaviour {
         // something here to check if we are continuing or starting a new game
         if (true) { charNum = scripts.data.newCharNum; }
         // else { charNum = data.curCharNum; }
+        scripts.itemManager.GiveClassItems(charNum);
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
         // set the initial positions

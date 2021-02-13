@@ -5,6 +5,7 @@ public class Data {
     // CHARACTER
     public int curCharNum;
     public int newCharNum;
+    public bool easyMode;
 
     // TOMBSTONE DATA
     public int tsLevel;
@@ -20,10 +21,14 @@ public class Data {
 
     public Data(Scripts scripts, bool setTS) { 
         if (scripts.characterSelector != null) {
+            curCharNum = scripts.data.curCharNum;
             newCharNum = scripts.characterSelector.selectionNum;
+            easyMode = scripts.characterSelector.easy;
         }
         if (scripts.player != null) { 
             curCharNum = scripts.player.charNum;
+            newCharNum = scripts.player.charNum;
+            easyMode = scripts.data.easyMode;
             for (int i = 0; i < scripts.player.inventory.Count; i++) {
                 // for every item after the weapon
                 Item item = scripts.player.inventory[i].GetComponent<Item>();
@@ -49,6 +54,11 @@ public class Data {
                 tsLevel = scripts.levelManager.level;
                 tsSub = scripts.levelManager.sub;
             }
+            else { 
+                tsLevel = scripts.data.tsLevel;
+                tsSub = scripts.data.tsSub;
+                // KEEP THIS HERE BECAUSE IT DOESN'T SAVE FOR SOME FUCKING REASON
+            }
         }
     }
 
@@ -56,5 +66,6 @@ public class Data {
         tsLevel = -1;
         tsSub = -1;
         SaveSystem.SaveData(scripts, false);
+        scripts.data = SaveSystem.LoadData();
     }
 }
