@@ -699,6 +699,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c907860b12acf45499eb0da8d4e00a5c, type: 3}
   - {fileID: 21300000, guid: 17b2b3e27c8bea84abba5b636d117691, type: 3}
   - {fileID: 21300000, guid: fd80fecb908b0cc4e8921028282090e5, type: 3}
+  tombstoneIcon: {fileID: 21300000, guid: ee0ae34af316ca3748fe707ce71997d1, type: 3}
   deathSprites:
   - {fileID: 0}
   - {fileID: 21300000, guid: 0c95fd055b22f36409a44d2234f88b7c, type: 3}

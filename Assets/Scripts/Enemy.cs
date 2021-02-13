@@ -8,6 +8,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour {
     [SerializeField] public RuntimeAnimatorController[] controllers;
     [SerializeField] private Sprite[] icons;
+    [SerializeField] private Sprite tombstoneIcon;
     [SerializeField] private Sprite[] deathSprites;
     [SerializeField] private GameObject iconGameobject;
     [SerializeField] public TextMeshProUGUI enemyName;
@@ -183,6 +184,7 @@ public class Enemy : MonoBehaviour {
         else if (enemyArr[enemyNum] == "Tombstone") {
             // tombstone also needs to be different
             transform.position = offsetPositions["Tombstone"];
+            iconGameobject.GetComponent<SpriteRenderer>().sprite = tombstoneIcon;
         }
         else {
             // set normal position
