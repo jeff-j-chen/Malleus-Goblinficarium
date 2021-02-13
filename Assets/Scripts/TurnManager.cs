@@ -689,36 +689,41 @@ public class TurnManager : MonoBehaviour {
     public IEnumerator DoStuffForAttack(string hitOrParry, string playerOrEnemy, bool showAnimation=true, bool armor=false) {
         yield return scripts.delays[0.55f];
         // wait
-        if (hitOrParry == "hit") {
-            if (scripts.player.isDodgy && playerOrEnemy == "player") {
-                scripts.soundManager.PlayClip("miss");
+        if (scripts.statSummoner.SumOfStat("green", "player") < 0 && playerOrEnemy == "enemy") { 
+            scripts.soundManager.PlayClip("miss");
+        }
+        else { 
+            if (hitOrParry == "hit") {
+                if (scripts.player.isDodgy && playerOrEnemy == "player") {
+                    scripts.soundManager.PlayClip("miss");
+                    // play sound clip
+                }
+                // player dodges
+                else {
+                    if (!(playerOrEnemy == "player" && armor || (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy"))) { 
+                        scripts.soundManager.PlayClip("hit"); 
+                    }
+                    // play sound clip if conditions apply (not hitting armored player or devil)
+                    else if (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy") {
+                        scripts.soundManager.PlayClip("cloak");
+                    }
+                    // play cloak shatter here if needed
+                    if (showAnimation) {
+                        // if showing an animation
+                        if (!(playerOrEnemy == "player" && armor)) { 
+                            // if NOT player is getting hit and has armor
+                            StartCoroutine(PlayHitAnimation(playerOrEnemy)); 
+                        }
+                        else { scripts.soundManager.PlayClip("armor"); } // play sound clip
+                    }
+                }
+            }
+            else if (hitOrParry == "parry") {
+                scripts.soundManager.PlayClip("parry");
                 // play sound clip
             }
-            // player dodges
-            else {
-                if (!(playerOrEnemy == "player" && armor || (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy"))) { 
-                    scripts.soundManager.PlayClip("hit"); 
-                }
-                // play sound clip if conditions apply (not hitting armored player or devil)
-                else if (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy") {
-                    scripts.soundManager.PlayClip("cloak");
-                }
-                // play cloak shatter here if needed
-                if (showAnimation) {
-                    // if showing an animation
-                    if (!(playerOrEnemy == "player" && armor)) { 
-                        // if NOT player is getting hit and has armor
-                        StartCoroutine(PlayHitAnimation(playerOrEnemy)); 
-                    }
-                    else { scripts.soundManager.PlayClip("armor"); } // play sound clip
-                }
-            }
+            else { Debug.LogError("invalid string passed"); }
         }
-        else if (hitOrParry == "parry") {
-            scripts.soundManager.PlayClip("parry");
-            // play sound clip
-        }
-        else { Debug.LogError("invalid string passed"); }
     }
 
     /// <summary>
@@ -821,8 +826,9 @@ public class TurnManager : MonoBehaviour {
             if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
                 // player doesn't have enough accuracy to hit, so notify
                 SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... you miss");
-                scripts.soundManager.PlayClip("miss");
+                // scripts.soundManager.PlayClip("miss");-
                 // play sound clip
+                StartCoroutine(DoStuffForAttack("hit", "enemy"));
             }
             else {
                 if (scripts.player.target.text == "face" && scripts.enemy.enemyName.text != "Lich" || (scripts.enemy.woundList.Count == 2 && !scripts.player.target.text.Contains("*"))) {
@@ -888,7 +894,7 @@ public class TurnManager : MonoBehaviour {
             if (playerAtt < 0) { SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... the attack is too weak"); }
             else if (scripts.statSummoner.SumOfStat("green", "player") < 0) {
                 SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... you miss");
-                scripts.soundManager.PlayClip("miss");
+                // scripts.soundManager.PlayClip("miss");
                 // play sound clip
             }
             else { SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}... he parries"); }

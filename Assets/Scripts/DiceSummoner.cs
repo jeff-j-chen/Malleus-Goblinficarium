@@ -59,11 +59,15 @@ public class DiceSummoner : MonoBehaviour
         if (scripts.itemManager.PlayerHasWeapon("flail")) {
             GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red");
         }
+        if (scripts.player.charNum == 1) { 
+            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+        }
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
             // if devil
             foreach (string typeToGen in scripts.itemManager.statArr) {
                 // generate a die for every stat
                 GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen);
+                // attach it to the devl
             }
         }
     }
