@@ -92,8 +92,8 @@ public class StatSummoner : MonoBehaviour {
         else {
             if (playerOrEnemy == "player") {
                 // get for player
-                if (scripts.enemy.woundList.Contains("knee") && stat == "blue") { return 99; }
-                // return 99 if enemy has knee wound
+                if (scripts.enemy.woundList.Contains("knee") && stat == "blue" && scripts.enemy.enemyName.text != "Lich") { return 99; }
+                // return 99 if enemy has knee wound (and is not lich)
                 int sum = scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];
                 // get the sum of base stats + potion + stamina + necklet
                 foreach (Dice dice in addedPlayerDice[stat]) {

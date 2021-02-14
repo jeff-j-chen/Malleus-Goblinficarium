@@ -365,7 +365,7 @@ public class TurnManager : MonoBehaviour {
         }
         else if (toMove == "enemy") {
             // enemy is the one attacking
-            if (scripts.enemy.woundList.Contains("chest") && Rerollable() || scripts.enemy.woundList.Contains("head") && !diceDiscarded) {
+            if (scripts.enemy.woundList.Contains("chest") && Rerollable() && scripts.enemy.enemyName.text != "Lich" || scripts.enemy.woundList.Contains("head") && !diceDiscarded && scripts.enemy.enemyName.text != "Lich") {
                 // if player can reroll or discard enemy's die and hints are on
                 if (PlayerPrefs.GetString("hints") == "on") {
                     if (scripts.enemy.woundList.Contains("head")) { SetStatusText("note: you can discard enemy's die"); }
@@ -476,7 +476,7 @@ public class TurnManager : MonoBehaviour {
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
         maceUsed = false;
         ClearPotionStats();
-        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5) {
+        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !scripts.enemy.isDead) {
             scripts.enemy.stamina = 5;
             // refresh lich's stamina
             scripts.soundManager.PlayClip("blip");

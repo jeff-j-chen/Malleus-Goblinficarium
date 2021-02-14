@@ -186,7 +186,7 @@ public class ItemManager : MonoBehaviour {
             CreateItem("steak", "common");
             MoveToInventory(0, true);
             if (scripts.data.easyMode) { 
-                CreateItem("torch", "common");
+                CreateItem("scroll", "common", "challenge");
                 MoveToInventory(0, true);
             }
         }

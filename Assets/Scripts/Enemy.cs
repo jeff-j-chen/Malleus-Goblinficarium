@@ -194,7 +194,7 @@ public class Enemy : MonoBehaviour {
         if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
         else { enemyName.text = enemyArr[enemyNum]; }
         // set the name, when spawning the cloaked just set it to be "Devil"
-        if (scripts.enemy.enemyName.text == "Lich" || scripts.enemy.enemyName.text == "Merchant") {
+        if (scripts.enemy.enemyName.text == "Tombstone" || scripts.enemy.enemyName.text == "Merchant") {
             stamina = 0;
             // tombstone and merchant don't have stamina
         }

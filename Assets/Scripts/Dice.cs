@@ -106,7 +106,7 @@ public class Dice : MonoBehaviour {
             childSpriteRenderer.sortingOrder = 0;
             // send the die to the background
         }
-        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy") {
+        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich") {
             // if an action can be performed on the dice (discard, reroll)
             if (!scripts.turnManager.isMoving || scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable) {
                 // if the situation allows for an action to be performed
