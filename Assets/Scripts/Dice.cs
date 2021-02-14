@@ -262,13 +262,13 @@ public class Dice : MonoBehaviour {
         baseTemp.a = 1;
         // set them to 1 here because for some reason sometimes alpha starts at 2 and nothing works right
         // assign the necessary variables to manipulate the color
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 12; i++) {
             // 40 times
             yield return scripts.delays[0.005f];
             // wait a small duration
-            numTemp.a -= 0.025f;
+            numTemp.a -= 1/12f;
             numSR.color = numTemp;
-            baseTemp.a -= 0.025f;
+            baseTemp.a -= 1/12f;
             baseSR.color = baseTemp;
             // decrease the colors of the die and base
         }

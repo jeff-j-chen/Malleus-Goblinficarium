@@ -52,6 +52,8 @@ public class HighlightCalculator : MonoBehaviour {
             // not yellow
             if (dice.diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger")) { ShowSingleHighlight("red"); }
             // if player is using dagger, show highlights for red
+            else if (dice.diceType == "white" && scripts.player.charNum == 3) { ShowSingleHighlight("red"); }
+            // if player is 4th char, show highlights for red
             else { ShowSingleHighlight(dice.diceType); }
             // else show highlights for the corresponding colors
         }
@@ -161,6 +163,11 @@ public class HighlightCalculator : MonoBehaviour {
                         // make the die drop for red
                         moveable = false;
                         // die can't be moved
+                    }
+                    else if (dice.diceType == "white" && scripts.player.charNum == 3) { 
+                        // white dice buff damage on 4th character
+                        HandleNormalDrop("red", dice);
+                        moveable = false;
                     }
                     else {
                         HandleNormalDrop(dice.diceType, dice);

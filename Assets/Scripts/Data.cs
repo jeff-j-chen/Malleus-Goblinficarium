@@ -6,6 +6,7 @@ public class Data {
     public int curCharNum;
     public int newCharNum;
     public bool easyMode;
+    public bool[] unlockedChars;
 
     // TOMBSTONE DATA
     public int tsLevel;
@@ -26,6 +27,7 @@ public class Data {
             easyMode = scripts.characterSelector.easy;
         }
         if (scripts.player != null) { 
+            unlockedChars = scripts.data.unlockedChars;
             curCharNum = scripts.player.charNum;
             newCharNum = scripts.player.charNum;
             easyMode = scripts.data.easyMode;

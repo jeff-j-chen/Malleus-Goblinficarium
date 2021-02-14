@@ -142,6 +142,10 @@ public class TurnManager : MonoBehaviour {
             text.color = temp;
         }
         // fade out
+        if (scripts.player.charNum == 3 && scripts.player.woundList.Count != 3 && scripts.enemy.target.text != "face") { 
+            // 4th char gets stamina refresh upon wound, assuming he doesn't get killed instantly
+            scripts.turnManager.ChangeStaminaOf("player", 3);
+        }
         DisplayWounds();
         // update the wound display
         for (int i = 0; i < 40; i++) {
@@ -262,6 +266,11 @@ public class TurnManager : MonoBehaviour {
             // update counter
             RecalculateMaxFor(playerOrEnemy);
             // recalculate max (in case stamina was taken from green)
+            if (scripts.player.stamina >= 10) { 
+                // heal wounds at 10 stamina
+                scripts.player.woundList.Clear();
+                StartCoroutine(HealAfterDelay());
+            }
         }
         else if (playerOrEnemy == "enemy") {
             scripts.enemy.stamina += amount;
@@ -749,7 +758,7 @@ public class TurnManager : MonoBehaviour {
                     // set armor to true
                     SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... your armor shatters");
                     // notify player
-                    StartCoroutine(removeArmorAfterDelay());
+                    StartCoroutine(RemoveArmorAfterDelay());
                     scripts.itemManager.Select(scripts.player.inventory, 0, playAudio: false);
                     // select weapon
                 }
@@ -785,14 +794,21 @@ public class TurnManager : MonoBehaviour {
             StartCoroutine(DoStuffForAttack("hit", "player", true, armor));
             // play animation + sound for the attack
             if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text.Substring(1)) || armor || scripts.player.isDodgy)) {
-                // if the player hasn't been injured before, doesn't have armor, and didnt' dodge:
+                // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
                 scripts.player.woundList.Add(scripts.enemy.target.text);
                 // add the hit
                 StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
                 // make it change
                 RecalculateMaxFor("player");
                 // reset stuff
-                return InstantlyApplyInjuries(scripts.enemy.target.text, "player");
+                if (scripts.player.woundList.Count > 0) { 
+                    // wounds were not healed, so apply them normally
+                    return InstantlyApplyInjuries(scripts.enemy.target.text, "player");
+                }
+                else {
+                    // wounds were healed, so don't apply them and don't kill the player
+                    return false;
+                }
                 // return if player died or not
             }
         }
@@ -812,9 +828,17 @@ public class TurnManager : MonoBehaviour {
         // player hasn't died, so return false
     }
 
-    public IEnumerator removeArmorAfterDelay() { 
+    public IEnumerator RemoveArmorAfterDelay() { 
         yield return scripts.delays[0.45f];
         scripts.itemManager.GetPlayerItem("armor").GetComponent<Item>().Remove(armorFade:true);
+    }
+
+    public IEnumerator HealAfterDelay() { 
+        yield return scripts.delays[1f];
+        scripts.turnManager.ChangeStaminaOf("player", -10);
+        // StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
+        scripts.soundManager.PlayClip("blip");
+        DisplayWounds();
     }
 
     private IEnumerator GiveLeechAfterDelay() {
