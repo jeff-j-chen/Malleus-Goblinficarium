@@ -519,7 +519,7 @@ public class Item : MonoBehaviour {
             }
         }
     }
-    public void Remove(bool drop=false, bool selectNew=true) {
+    public void Remove(bool drop=false, bool selectNew=true, bool armorFade=false, bool torchFade=false) {
         if (drop) { 
             if (!scripts.itemManager.floorItems.Contains(gameObject)) {
                 if (!scripts.turnManager.isMoving) {
@@ -581,6 +581,22 @@ public class Item : MonoBehaviour {
             scripts.statSummoner.SetDebugInformationFor("player");
             // update stuff
         }
+        if (armorFade) {
+            StartCoroutine(FadeArmor(index, selectNew));
+        }
+        else if (torchFade) { 
+            print("faded torch!");
+            StartCoroutine(FadeTorch(index, selectNew));
+        }
+        else { 
+            Destroy(gameObject);
+            // destroy the object
+            ShiftItems(index, selectNew);
+        }
+
+    }
+
+    private void ShiftItems(int index, bool selectNew) { 
         scripts.itemManager.curList.RemoveAt(index);
         // remove the item from the list
         for (int i = index; i < scripts.player.inventory.Count; i++)  {
@@ -590,7 +606,53 @@ public class Item : MonoBehaviour {
         }
         if (selectNew) { scripts.itemManager.Select(scripts.itemManager.curList, index); }
         // select the next item over if needed
+    }
+
+    private IEnumerator FadeArmor(int index, bool selectNew) {
+        yield return scripts.delays[0.05f];
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        Color temp = sr.color;
+        temp.a = 1;
+        sr.color = temp;
+        for (int i = 0; i < 5; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a -= 1f/5f;
+            sr.color = temp;
+        }
         Destroy(gameObject);
-        // destroy the object
+        ShiftItems(index, selectNew);
+    }
+    private IEnumerator FadeTorch(int index, bool selectNew) {
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        Color temp = sr.color;
+        temp.a = 1;
+        sr.color = temp;
+        for (int i = 0; i < 10; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a -= 1f/10f;
+            sr.color = temp;
+        }
+        for (int i = 0; i < 10; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a += 1f/10f;
+            sr.color = temp;
+        }
+        for (int i = 0; i < 8; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a -= 1f/8f;
+            sr.color = temp;
+        }
+        for (int i = 0; i < 8; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a += 1f/8f;
+            sr.color = temp;
+        }
+        for (int i = 0; i < 6; i++) {
+            yield return scripts.delays[0.033f];
+            temp.a -= 1f/6f;
+            sr.color = temp;
+        }
+        Destroy(gameObject);
+        ShiftItems(index, selectNew);
     }
 }

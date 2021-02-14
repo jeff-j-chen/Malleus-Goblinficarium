@@ -606,7 +606,7 @@ public class ItemManager : MonoBehaviour {
             // normal enemy
             int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
             // count the number of torches
-            int spawnCount = 3 + torchCount * 2  + scripts.levelManager.level;
+            int spawnCount = Mathf.Clamp(torchCount * 2 + scripts.levelManager.level, 0, 4) ;
             // create a spawn count 
             CreateRandomWeapon();
             // create a random weapon at index 0
@@ -690,9 +690,7 @@ public class ItemManager : MonoBehaviour {
                     // if the fade level matches the current level
                     scripts.turnManager.SetStatusText("your torch runs out");
                     // notify player
-                    Destroy(scripts.player.inventory[scripts.player.inventory.IndexOf(item)]);
-                    scripts.player.inventory[scripts.player.inventory.IndexOf(item)].GetComponent<Item>().Remove();
-                    // remove the torch. later come back an add an animation to this. 
+                    scripts.player.inventory[scripts.player.inventory.IndexOf(item)].GetComponent<Item>().Remove(torchFade:true);
                 }
             }
         }

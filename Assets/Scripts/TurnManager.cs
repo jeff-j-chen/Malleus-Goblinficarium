@@ -813,7 +813,7 @@ public class TurnManager : MonoBehaviour {
 
     public IEnumerator removeArmorAfterDelay() { 
         yield return scripts.delays[0.45f];
-        scripts.itemManager.GetPlayerItem("armor").GetComponent<Item>().Remove();
+        scripts.itemManager.GetPlayerItem("armor").GetComponent<Item>().Remove(armorFade:true);
     }
 
     private IEnumerator GiveLeechAfterDelay() {
