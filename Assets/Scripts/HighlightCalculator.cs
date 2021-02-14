@@ -157,7 +157,7 @@ public class HighlightCalculator : MonoBehaviour {
                     // not yellow
                     if (dice.diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger")) {
                         // if die is green and the player has dagger
-                        HandleNormalDrop("red", dice, true);
+                        HandleNormalDrop("red", dice);
                         // make the die drop for red
                         moveable = false;
                         // die can't be moved
@@ -219,8 +219,7 @@ public class HighlightCalculator : MonoBehaviour {
     /// </summary>
     /// <param name="addTo">Which stat to add the die to.</param>
     /// <param name="dice">The die's script.</param>
-    /// <param name="isGreenAndHasDagger">Whether or not the player has dagger and the die is green.</param>
-    private void HandleNormalDrop(string addTo, Dice dice, bool isGreenAndHasDagger=false) {
+    private void HandleNormalDrop(string addTo, Dice dice) {
         scripts.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to the player
         dice.statAddedTo = addTo;
@@ -233,6 +232,9 @@ public class HighlightCalculator : MonoBehaviour {
         }
         else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) {
             StartCoroutine(dice.FadeOut(decrease:true));
+        }
+        else if (dice.diceType == "white" && scripts.player.charNum == 2) {
+            dice.SetToOne();
         }
         // take actions depending on injuries and die types
     }

@@ -239,6 +239,12 @@ public class Dice : MonoBehaviour {
         scripts.statSummoner.SetDebugInformationFor("enemy");
         // set the debug information
     }
+
+    public void SetToOne() {
+        diceNum = 1;
+        GetComponent<SpriteRenderer>().sprite = scripts.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
+        scripts.statSummoner.SetDebugInformationFor("player");
+    }
     
     /// <summary>
     /// Coroutine for fading out a die.

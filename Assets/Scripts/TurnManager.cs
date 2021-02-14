@@ -408,10 +408,6 @@ public class TurnManager : MonoBehaviour {
                 // allow actions
                 discardDieBecauseCourage = true;
                 // make sure the die will discard under the correct pretense
-                // foreach (GameObject yellowDie in (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached && a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" && a.GetComponent<Dice>().diceType == "yellow" select a).ToList()) {
-                //     yellowDie.GetComponent<Dice>().moveable = false;
-                // }
-                // make yellow die unmoveable (w/o this yellow die can't be discarded, only reposiitoned)
                 scripts.turnManager.SetStatusText("discard all your dice, except one");
                 // notify player
                 for (int i = 0; i < 50; i++) {
@@ -872,6 +868,10 @@ public class TurnManager : MonoBehaviour {
                     if (scripts.enemy.spawnNum != 0) {
                         scripts.enemy.woundList.Add(scripts.player.target.text);
                         // add the wound
+                        if (scripts.player.charNum == 2) { 
+                            scripts.turnManager.ChangeStaminaOf("player", 1);
+                            // increment stamina if on 3rd character
+                        }
                         if (scripts.player.isBloodthirsty) {
                             // if player is wounded
                             try { 

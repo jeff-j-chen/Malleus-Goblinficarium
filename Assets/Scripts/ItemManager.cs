@@ -181,12 +181,12 @@ public class ItemManager : MonoBehaviour {
 
     public void GiveClassItems(int charNum) {
         if (scripts.player.charNum == 0) { 
-            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+            CreateWeaponWithStats("hatchet", "harsh", 2, 2, 1, 2);
             MoveToInventory(0, true);
             CreateItem("steak", "common");
             MoveToInventory(0, true);
             if (scripts.data.easyMode) { 
-                CreateItem("scroll", "common", "challenge");
+                CreateItem("torch", "common");
                 MoveToInventory(0, true);
             }
         }
