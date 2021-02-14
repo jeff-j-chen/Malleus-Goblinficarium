@@ -28,11 +28,12 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI quoteText;
     [SerializeField] private TextMeshProUGUI perkText;
     [SerializeField] public SimpleFadeIn simpleFadeIn;
+    [SerializeField] public GameObject itemHider;
     private bool preventPlayingFX = true;
     private Scripts scripts;
     private void Start() {
-        // allow for selection of 1
         scripts = FindObjectOfType<Scripts>();
+        print(unlockedChars);
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         selectionNum = 0;
         SetSelection(selectionNum);
@@ -77,10 +78,12 @@ public class CharacterSelector : MonoBehaviour {
         if (0 <= num && num <= 3) {
             selectionNum = num;
             if (unlockedChars[selectionNum]) {
+                itemHider.SetActive(false);
                 quoteText.text = quotes[selectionNum];
                 perkText.text = perks[selectionNum];
             }
             else {
+                itemHider.SetActive(true);
                 quoteText.text = "beat game on previous character to unlock";
                 perkText.text = "";
             }
