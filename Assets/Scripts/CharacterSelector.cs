@@ -104,8 +104,8 @@ public class CharacterSelector : MonoBehaviour {
             scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "common maul";
             scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "common";
             scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("maul");
-            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "armour";
-            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("armour");
+            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "armor";
+            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("armor");
             scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "helm of might";
             scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("helm_of_might");
         }

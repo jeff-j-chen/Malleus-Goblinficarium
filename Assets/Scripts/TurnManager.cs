@@ -735,7 +735,7 @@ public class TurnManager : MonoBehaviour {
     private bool EnemyAttacks() {
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         bool armor = false;
-        // set armor to false
+        // initialize armor as false
         scripts.soundManager.PlayClip("swing");
         // play sound clip
         if (enemyAtt > playerDef) {
@@ -743,13 +743,12 @@ public class TurnManager : MonoBehaviour {
             if (scripts.player.isDodgy) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you dodge"); }
             // if player dodges, notify 
             else {
-                if (scripts.itemManager.PlayerHas("armour")) {
+                if (scripts.itemManager.PlayerHas("armor")) {
                     armor = true;
                     // set armor to true
-                    SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... your armour shatters");
+                    SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... your armor shatters");
                     // notify player
-                    scripts.itemManager.GetPlayerItem("armour").GetComponent<Item>().Remove();
-                    // remove armor from the player's inventory
+                    StartCoroutine(removeArmorAfterDelay());
                     scripts.itemManager.Select(scripts.player.inventory, 0, playAudio: false);
                     // select weapon
                 }
@@ -810,6 +809,11 @@ public class TurnManager : MonoBehaviour {
         }
         return false;
         // player hasn't died, so return false
+    }
+
+    public IEnumerator removeArmorAfterDelay() { 
+        yield return scripts.delays[0.45f];
+        scripts.itemManager.GetPlayerItem("armor").GetComponent<Item>().Remove();
     }
 
     private IEnumerator GiveLeechAfterDelay() {

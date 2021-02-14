@@ -63,7 +63,7 @@ public class ItemManager : MonoBehaviour {
     };
     private string[] modifierNames = new string[] { "accurate0", "accurate1", "brisk0", "brisk1", "blunt0", "blunt1", "common0", "common1", "common2", "common3", "common4", "common5", "heavy0", "heavy1", "nimble0", "nimble1", "precise0", "precise1", "ruthless0", "ruthless1", "stable0", "stable1", "sharp0", "sharp1", "harsh0", "quick0" };
     public Dictionary<string, string> descriptionDict = new Dictionary<string, string>() {
-        {"armour", "protects from one hit"}, 
+        {"armor", "protects from one hit"}, 
         {"arrow", "proceed to the next level"}, 
         {"ankh", "force new draft"}, 
         {"boots of dodge", "pay 1 stamina to become dodgy"}, 
@@ -193,7 +193,7 @@ public class ItemManager : MonoBehaviour {
         else if (scripts.player.charNum == 1) { 
             CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
             MoveToInventory(0, true);
-            CreateItem("armour", "common");
+            CreateItem("armor", "common");
             MoveToInventory(0, true);
             if (scripts.data.easyMode) {
                 CreateItem("helm_of_might", "rare");
