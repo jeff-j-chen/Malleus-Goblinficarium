@@ -157,6 +157,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: a943e29e8b01d074398a156059b44a6e, type: 3}
   - {fileID: 8300000, guid: 17ab9ffc20b30e548bf29f0ab8320979, type: 3}
   - {fileID: 8300000, guid: 1755c099bc93a7c47af93783796473bb, type: 3}
+  - {fileID: 8300000, guid: 1b0fa96e4dac95f099e0027074fec707, type: 3}
   audioClipNames:
   - armor
   - click
@@ -174,3 +175,4 @@ MonoBehaviour:
   - swing
   - blip
   - cloak
+  - skeletonDeath

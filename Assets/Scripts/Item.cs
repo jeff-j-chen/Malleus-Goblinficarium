@@ -69,8 +69,8 @@ public class Item : MonoBehaviour {
                 // if highlighted
                 if (itemType != "weapon" && !scripts.itemManager.floorItems.Contains(gameObject)) { 
                     // if the item is not weapon and not on the floor
-                    if (scripts.levelManager.sub == 4 || scripts.enemy.isDead || scripts.enemy.enemyName.text == "Tombstone") {
-                        // only allow dropping of items if player is trading, enemy is dead, or we are on a tombstone
+                    if (scripts.levelManager.sub == 4 || scripts.enemy.isDead || scripts.enemy.enemyName.text == "Tombstone" || scripts.itemManager.PlayerHas("kapala")) {
+                        // only allow dropping of items if player is trading, enemy is dead, we are on a tombstone, or are offering to kapala
                         Remove(true); 
                     }
                 }
@@ -585,7 +585,6 @@ public class Item : MonoBehaviour {
             StartCoroutine(FadeArmor(index, selectNew));
         }
         else if (torchFade) { 
-            print("faded torch!");
             StartCoroutine(FadeTorch(index, selectNew));
         }
         else { 
@@ -604,7 +603,7 @@ public class Item : MonoBehaviour {
             scripts.player.inventory[i].transform.position = new Vector2(scripts.player.inventory[i].transform.position.x - 1f, 3.16f);
             // shift over each item
         }
-        if (selectNew) { scripts.itemManager.Select(scripts.itemManager.curList, index); }
+        if (selectNew) { scripts.itemManager.Select(scripts.itemManager.curList, index, playAudio:false); }
         // select the next item over if needed
     }
 

@@ -593,7 +593,12 @@ public class TurnManager : MonoBehaviour {
         // fade back in
         yield return scripts.delays[0.8f];
         // pause (animation is not playing so it looks like they are just standing there)
-        scripts.soundManager.PlayClip("death");
+        if (playerOrEnemy == "enemy" && scripts.enemy.enemyName.text == "Skeleton") { 
+            scripts.soundManager.PlayClip("skeletonDeath");
+        }
+        else { 
+            scripts.soundManager.PlayClip("death");
+        }
         // play sound clip
         if (scripts.itemManager.PlayerHasWeapon("rapier") && playerOrEnemy == "enemy") { ChangeStaminaOf("player", 3); }
         // if player has rapier and the enemy dies, add to their stamina

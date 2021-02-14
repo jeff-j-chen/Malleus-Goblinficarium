@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.Animations;
 
 public class LevelManager : MonoBehaviour {
     [SerializeField] GameObject levelBox;
@@ -222,6 +223,11 @@ public class LevelManager : MonoBehaviour {
             }
             scripts.itemManager.DestroyItems();
             // remove all items from the floor
+            // scripts.player.GetComponent<Animation>().Rewind();
+            scripts.enemy.GetComponent<Animator>().Rebind();
+            scripts.enemy.GetComponent<Animator>().Update(0f);
+            scripts.player.GetComponent<Animator>().Rebind();
+            scripts.player.GetComponent<Animator>().Update(0f);
             yield return scripts.delays[1.5f];
             // wait 1.5s
             scripts.statSummoner.SummonStats();
