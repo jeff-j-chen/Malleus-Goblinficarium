@@ -99,7 +99,7 @@ public class Player : MonoBehaviour {
                 scripts.turnManager.SetTargetOf("player");
             }
         }
-        else if (Input.GetKeyDown(KeyCode.R) && !isDead) {
+        else if (Input.GetKeyDown(KeyCode.R) && !isDead && !scripts.turnManager.isMoving) {
             if (scripts.enemy.isDead) {
                 // don't let player suicide when enemy is dead, because it is glitchy
                 scripts.turnManager.SetStatusText("you've killed him");

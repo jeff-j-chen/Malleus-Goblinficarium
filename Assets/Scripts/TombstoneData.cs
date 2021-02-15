@@ -48,10 +48,24 @@ public class TombstoneData : MonoBehaviour {
         // cheese -> moldy cheese
         // __ weapon -> rusty weapon
         scripts = FindObjectOfType<Scripts>();
-        scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], scripts.data.tsItemMods[0], scripts.data.tsWeaponAcc, scripts.data.tsWeaponSpd, scripts.data.tsWeaponDmg, scripts.data.tsWeaponSpd);
+        scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], "rusty", scripts.data.tsWeaponAcc, scripts.data.tsWeaponSpd, scripts.data.tsWeaponDmg, scripts.data.tsWeaponSpd);
         for (int i = 1; i < 9; i++) {  
             if (scripts.data.tsItemNames[i] != null && scripts.data.tsItemNames[i] != "") { 
-                scripts.itemManager.CreateItem(scripts.data.tsItemNames[i].Replace(' ', '_'), scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
+                GameObject created = scripts.itemManager.CreateItem(scripts.data.tsItemNames[i].Replace(' ', '_'), scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
+                switch (created.GetComponent<Item>().itemName) { 
+                    case "helm of might":
+                        created.GetComponent<Item>().itemName = "broken helm"; break;
+                    case "boots of dodge":
+                        created.GetComponent<Item>().itemName = "ruined boots"; break;
+                    case "ankh":
+                        created.GetComponent<Item>().itemName = "shattered ankh"; break;
+                    case "kapala":
+                        created.GetComponent<Item>().itemName = "defiled kapala"; break;
+                    case "steak":
+                        created.GetComponent<Item>().itemName = "rotten steak"; break;
+                    case "cheese":
+                        created.GetComponent<Item>().itemName = "moldy cheese"; break;
+                }
             }
         }
         scripts.itemManager.CreateItem("arrow", "arrow");

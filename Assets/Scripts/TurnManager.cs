@@ -557,6 +557,14 @@ public class TurnManager : MonoBehaviour {
             // if cloaked devil
             scripts.enemy.spawnNum = 1;
             scripts.enemy.GetComponent<Animator>().runtimeAnimatorController = scripts.enemy.controllers[1];
+            if (playerOrEnemy == "enemy") { 
+                print("syncing up!");
+                scripts.player.GetComponent<Animator>().Rebind();
+                scripts.player.GetComponent<Animator>().Update(0f);
+                scripts.enemy.GetComponent<Animator>().Rebind();
+                scripts.enemy.GetComponent<Animator>().Update(0f);
+                // reset devil animation after his cloak shatters, so it stays synced up
+            }
             // turn the cloaked into devil
             spriteRenderer.color = temp;
             DisplayWounds();
@@ -568,13 +576,6 @@ public class TurnManager : MonoBehaviour {
             spriteRenderer.color = temp;
         }
         // fade back in
-        if (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy") { 
-            scripts.player.GetComponent<Animator>().Rebind();
-            scripts.player.GetComponent<Animator>().Update(0f);
-            scripts.enemy.GetComponent<Animator>().Rebind();
-            scripts.enemy.GetComponent<Animator>().Update(0f);
-            // reset devil animation after his cloak shatters, so it stays synced up
-        }
     }
 
     /// <summary>

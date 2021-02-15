@@ -181,8 +181,8 @@ public class ItemManager : MonoBehaviour {
 
     public void GiveClassItems(int charNum) {
         if (scripts.player.charNum == 0) { 
-            CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
-            // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+            // CreateWeaponWithStats("maul", "admin", 10, 10, 10, 10);
             MoveToInventory(0, true);
             CreateItem("steak", "common");
             MoveToInventory(0, true);
@@ -495,6 +495,7 @@ public class ItemManager : MonoBehaviour {
                         scripts.statSummoner.SummonStats();
                         scripts.statSummoner.SetDebugInformationFor("player");
                         // update debug, because player just took a new weapon
+                        scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
                     }
                     else {
                         scripts.player.inventory.Add(floorItems[index]);

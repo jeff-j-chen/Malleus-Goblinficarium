@@ -429,10 +429,10 @@ public class Item : MonoBehaviour {
     private void UseRare() {
         // these are pretty self explanatory
         if (!scripts.levelManager.lockActions) {
-            if (itemName == "helm of might" && scripts.levelManager.sub != 4) {
+            if (itemName == "helm of might" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") {
                 if (!scripts.itemManager.usedHelm) {
-                    scripts.soundManager.PlayClip("fwoosh");
                     if (scripts.player.stamina >= 3) {
+                        scripts.soundManager.PlayClip("fwoosh");
                         // need 3 stamina
                         scripts.itemManager.usedHelm = true;
                         // set variable
@@ -450,11 +450,11 @@ public class Item : MonoBehaviour {
                 // notfiy player
             }
             // these are pretty self explanatory
-            else if (itemName == "kapala" && scripts.levelManager.sub != 4) { scripts.turnManager.SetStatusText("offer an item to become furious"); }
-            else if (itemName == "boots of dodge" && scripts.levelManager.sub != 4) {
+            else if (itemName == "kapala" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") { scripts.turnManager.SetStatusText("offer an item to become furious"); }
+            else if (itemName == "boots of dodge" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") {
                 if (!scripts.itemManager.usedBoots) {
-                    scripts.soundManager.PlayClip("fwoosh");
                     if (scripts.player.stamina >= 1) {
+                        scripts.soundManager.PlayClip("fwoosh");
                         scripts.turnManager.SetStatusText("you feel dodgy");
                         scripts.itemManager.usedBoots = true;
                         scripts.turnManager.ChangeStaminaOf("player", -1);
@@ -464,7 +464,7 @@ public class Item : MonoBehaviour {
                 }
                 else { scripts.turnManager.SetStatusText("boots can help you no further"); }
             }
-            else if (itemName == "ankh" && scripts.levelManager.sub != 4) {
+            else if (itemName == "ankh" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") {
                 if (!scripts.itemManager.usedAnkh) {
                     scripts.soundManager.PlayClip("click");
                     scripts.itemManager.usedAnkh = true;
