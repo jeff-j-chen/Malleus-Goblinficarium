@@ -38,6 +38,7 @@ public class MenuButton : MonoBehaviour
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             case "New Game":
+                // clear all data here
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             default:

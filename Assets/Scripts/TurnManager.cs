@@ -32,7 +32,8 @@ public class TurnManager : MonoBehaviour {
         SetTargetOf("enemy");
         scripts.enemy.TargetBest();
         scripts.statSummoner.ResetDiceAndStamina();
-        scripts.diceSummoner.SummonDice(true);
+        if (!(scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub)) { scripts.diceSummoner.SummonDice(true); }
+        else { blackBox.transform.position = onScreen; }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
     }

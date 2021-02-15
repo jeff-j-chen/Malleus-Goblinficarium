@@ -25,13 +25,13 @@ public class LevelManager : MonoBehaviour {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
         { "11", new float[] { 10f, 10f, 10f, 10f, 0f,    10f, 0f, 0f, 0f, 0f } },
-        { "12", new float[] { 10f, 10f, 10f, 10f, 0f,    4f, 2f, 2f, 1f, 1f } },
-        { "13", new float[] { 10f, 10f, 10f, 10f, 0.75f, 3f, 2f, 2f, 2f, 1f } },
-        { "21", new float[] { 10f, 10f, 10f, 10f, 1f,    3f, 2f, 2f, 2f, 1f} },
-        { "22", new float[] { 10f, 15f, 10f, 10f, 1f,    2f, 2f, 2f, 2f, 2f } },
-        { "23", new float[] { 10f, 10f, 11f, 11f, 1.25f, 2f, 2f, 2f, 2f, 2f } },
-        { "31", new float[] { 10f, 10f, 12f, 12f, 1.25f, 1f, 3f, 2f, 2f, 2f } },
-        { "32", new float[] { 12f, 15f, 14f, 14f, 1.5f,  0f, 2f, 3f, 2f, 3f } },
+        { "12", new float[] { 10f, 10f, 10f, 10f, 0f,    4f, 2f, 2f, 1f, 1f  } },
+        { "13", new float[] { 10f, 10f, 10f, 10f, 0.75f, 3f, 2f, 2f, 2f, 1f  } },
+        { "21", new float[] { 10f, 10f, 10f, 10f, 1f,    3f, 2f, 2f, 2f, 1f  } },
+        { "22", new float[] { 10f, 15f, 10f, 10f, 1f,    2f, 2f, 2f, 2f, 2f  } },
+        { "23", new float[] { 10f, 10f, 11f, 11f, 1.25f, 2f, 2f, 2f, 2f, 2f  } },
+        { "31", new float[] { 10f, 10f, 12f, 12f, 1.25f, 1f, 3f, 2f, 2f, 2f  } },
+        { "32", new float[] { 12f, 15f, 14f, 14f, 1.5f,  0f, 2f, 3f, 2f, 3f  } },
         { "33", new float[] { 15f, 15f, 15f, 15f, 3f,    2f, 2f, 2f, 2f, 2f  } }
         // something to make it more probable that genstats will gen more difficult enemies later
     };
@@ -191,7 +191,8 @@ public class LevelManager : MonoBehaviour {
                 sub++;
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
-                if (sub == scripts.data.tsSub && level == scripts.data.tsLevel && scripts.enemy.enemyName.text == "Tombstone") {
+                if (scripts.enemy.enemyName.text == "Tombstone") {
+                    print("resetting ts level!");
                     scripts.data.resetTSLevel(scripts);
                     // make tombstone inaccessible
                 }

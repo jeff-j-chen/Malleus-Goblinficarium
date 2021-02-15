@@ -57,7 +57,21 @@ public class Enemy : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
-        SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
+        if (scripts.levelManager.level == 4) { 
+            if (scripts.enemy.woundGUIElement.text == "[cloaked]") { SpawnNewEnemy(0); }
+            else { SpawnNewEnemy(1); }
+            scripts.itemManager.lootText.text = "";
+        }
+        else if (scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub) {
+            SpawnNewEnemy(8);
+            scripts.itemManager.lootText.text = "loot:";
+            scripts.tombstoneData.SpawnSavedItems(true);
+        }
+        else { 
+            print("spawn based on enemy name!");
+            SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
+            scripts.itemManager.lootText.text = "";
+        }
         // spawn an enemy at the start of the round
         iconGameobject.transform.position = iconPosition;
         // set the position of the icon, enemy's is set in spawnnewenemy()

@@ -273,6 +273,7 @@ public class StatSummoner : MonoBehaviour {
     /// Remove all attached die and stamina.
     /// </summary>
     public void ResetDiceAndStamina() {
+        print("assign stamina and dice based on save here!");
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
             // fade out every die
             StartCoroutine(dice.GetComponent<Dice>().FadeOut());

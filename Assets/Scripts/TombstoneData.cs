@@ -4,11 +4,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 public class TombstoneData : MonoBehaviour {
-    public int level;
-    public int sub;
-    public int tempSub;
     Scripts scripts;
-    Vector2 offScreen = new Vector2(0f, 15f);
 
     void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -38,17 +34,15 @@ public class TombstoneData : MonoBehaviour {
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
     }
 
-    public void SpawnSavedItems() {
-        print("make sure to degrade common/rare items!");
-        // helm of might -> broken helm
-        // boots of dodge -> ruined boots
-        // ankh -> shattered ankh
-        // kapala -> defiled kapala
-        // steak -> rotten steak
-        // cheese -> moldy cheese
-        // __ weapon -> rusty weapon
+    public void SpawnSavedItems(bool delay=false) {
+        StartCoroutine(SpawnSavedItemsCoro(delay));
+    }
+
+    public IEnumerator SpawnSavedItemsCoro(bool delay) { 
+        if (delay) { yield return new WaitForSeconds(0f); }
+        // optional slight delay so that resuming on a tombstone level doesn't mess things up
         scripts = FindObjectOfType<Scripts>();
-        scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], "rusty", scripts.data.tsWeaponAcc, scripts.data.tsWeaponSpd, scripts.data.tsWeaponDmg, scripts.data.tsWeaponSpd);
+        scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], "rusty", scripts.data.tsWeaponAcc - 1, scripts.data.tsWeaponSpd - 1, scripts.data.tsWeaponDmg - 1, scripts.data.tsWeaponDef - 1);
         for (int i = 1; i < 9; i++) {  
             if (scripts.data.tsItemNames[i] != null && scripts.data.tsItemNames[i] != "") { 
                 GameObject created = scripts.itemManager.CreateItem(scripts.data.tsItemNames[i].Replace(' ', '_'), scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
