@@ -181,7 +181,8 @@ public class ItemManager : MonoBehaviour {
 
     public void GiveClassItems(int charNum) {
         if (scripts.player.charNum == 0) { 
-            CreateWeaponWithStats("hatchet", "harsh", 2, 2, 1, 2);
+            CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
+            // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
             MoveToInventory(0, true);
             CreateItem("steak", "common");
             MoveToInventory(0, true);
@@ -606,11 +607,14 @@ public class ItemManager : MonoBehaviour {
             // normal enemy
             int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
             // count the number of torches
-            int spawnCount = Mathf.Clamp(torchCount * 2 + scripts.levelManager.level, 0, 4) ;
+            int spawnCount = torchCount * 2 + scripts.levelManager.level;
+            int chosenNum = UnityEngine.Random.Range(0, spawnCount);
+            if (chosenNum > 4) { chosenNum = 4; }
+            else if (scripts.levelManager.level == 3 && chosenNum == 0) { chosenNum = 2; }
             // create a spawn count 
             CreateRandomWeapon();
             // create a random weapon at index 0
-            for (int i = 0; i < UnityEngine.Random.Range(0, spawnCount); i++) {
+            for (int i = 0; i < chosenNum; i++) {
                 CreateItem("common");
                 // create a random number of items based on the spawn count
             }

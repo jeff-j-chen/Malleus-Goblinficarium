@@ -266,7 +266,7 @@ public class TurnManager : MonoBehaviour {
             // update counter
             RecalculateMaxFor(playerOrEnemy);
             // recalculate max (in case stamina was taken from green)
-            if (scripts.player.stamina >= 10) { 
+            if (scripts.player.stamina >= 10 && scripts.player.charNum == 3) { 
                 // heal wounds at 10 stamina
                 scripts.player.woundList.Clear();
                 StartCoroutine(HealAfterDelay());
@@ -568,6 +568,13 @@ public class TurnManager : MonoBehaviour {
             spriteRenderer.color = temp;
         }
         // fade back in
+        if (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy") { 
+            scripts.player.GetComponent<Animator>().Rebind();
+            scripts.player.GetComponent<Animator>().Update(0f);
+            scripts.enemy.GetComponent<Animator>().Rebind();
+            scripts.enemy.GetComponent<Animator>().Update(0f);
+            // reset devil animation after his cloak shatters, so it stays synced up
+        }
     }
 
     /// <summary>

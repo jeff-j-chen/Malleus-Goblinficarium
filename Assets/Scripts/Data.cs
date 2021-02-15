@@ -20,14 +20,14 @@ public class Data {
     public string[] tsItemMods = new string[9];
 
 
-    public Data(Scripts scripts, bool setTS) { 
+    public Data(Scripts scripts, bool setTS) {
+        unlockedChars = scripts.data.unlockedChars;
         if (scripts.characterSelector != null) {
             curCharNum = scripts.data.curCharNum;
             newCharNum = scripts.characterSelector.selectionNum;
             easyMode = scripts.characterSelector.easy;
         }
         if (scripts.player != null) { 
-            unlockedChars = scripts.data.unlockedChars;
             curCharNum = scripts.player.charNum;
             newCharNum = scripts.player.charNum;
             easyMode = scripts.data.easyMode;
@@ -53,8 +53,15 @@ public class Data {
             }
             // save tombstone data
             if (setTS) { 
-                tsLevel = scripts.levelManager.level;
-                tsSub = scripts.levelManager.sub;
+                if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
+                    tsLevel = 3;
+                    tsSub = 3;
+                    // game will crash if we go to 4-1*, easy solution here
+                }
+                else { 
+                    tsLevel = scripts.levelManager.level;
+                    tsSub = scripts.levelManager.sub;
+                }
             }
             else { 
                 tsLevel = scripts.data.tsLevel;

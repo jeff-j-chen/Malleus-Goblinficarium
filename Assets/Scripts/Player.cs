@@ -167,8 +167,8 @@ public class Player : MonoBehaviour {
                 scripts.turnManager.RoundOne();
                 // begin the round
             }
-            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on" && scripts.enemy.enemyName.text != "Devil" && scripts.enemy.enemyName.text != "Lich") {
-                // if player wants hints, can aim for the face, but is not doing so
+            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on" && scripts.enemy.enemyName.text != "Devil" && scripts.enemy.enemyName.text != "Lich" && !scripts.itemManager.PlayerHasWeapon("maul")) {
+                // if player wants hints, can aim for the face, but is not doing so, and doesn't have a maul
                 coroutine = StartCoroutine(HintFace());
                 // hint the player
             }

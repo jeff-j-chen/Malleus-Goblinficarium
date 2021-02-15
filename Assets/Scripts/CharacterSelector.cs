@@ -6,7 +6,7 @@ using TMPro;
 
 public class CharacterSelector : MonoBehaviour {
     [SerializeField] public int selectionNum;
-    [SerializeField] private bool[] unlockedChars = new bool[4] { true, false, false, false };
+    [SerializeField] public bool[] unlockedChars = new bool[4] { true, false, false, false };
     [SerializeField] public bool easy = false;
     [SerializeField] private Sprite[] icons; 
     private string[] quotes = new string[4] {
@@ -33,8 +33,8 @@ public class CharacterSelector : MonoBehaviour {
     private Scripts scripts;
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
-        print(unlockedChars);
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
+        unlockedChars = scripts.data.unlockedChars;
         selectionNum = 0;
         SetSelection(selectionNum);
         StartCoroutine(allowFX());

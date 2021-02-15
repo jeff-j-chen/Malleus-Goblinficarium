@@ -7,6 +7,9 @@ public class SimpleFadeIn : MonoBehaviour
 {
     [SerializeField] public SpriteRenderer boxSR;
     [SerializeField] public bool lockChanges = false;
+    private WaitForSeconds zeroPointTwoFive = new WaitForSeconds(0.25f);
+    private WaitForSeconds pointZeroThreeThree = new WaitForSeconds(0.033f);
+    // can't use scripts.delays because its weird
     Scripts scripts;
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -23,9 +26,9 @@ public class SimpleFadeIn : MonoBehaviour
         Color temp = boxSR.color;
         temp.a = 1;
         boxSR.color = temp;
-        yield return scripts.delays[0.25f];
+        yield return zeroPointTwoFive;
         for (int i = 0; i < 15; i++) {
-            yield return scripts.delays[0.033f];
+            yield return pointZeroThreeThree;
             temp.a -= 1f/15f;
             boxSR.color = temp;
         }
@@ -39,7 +42,7 @@ public class SimpleFadeIn : MonoBehaviour
         temp.a = 0;
         boxSR.color = temp;
         for (int i = 0; i < 7; i++) {
-            yield return scripts.delays[0.033f];
+            yield return pointZeroThreeThree;
             temp.a += 1f/7f;
             boxSR.color = temp;
         }
@@ -47,7 +50,7 @@ public class SimpleFadeIn : MonoBehaviour
         else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
         scripts.itemManager.floorItems[1].GetComponent<Item>().Select(false);
         for (int i = 0; i < 7; i++) {
-            yield return scripts.delays[0.033f];
+            yield return pointZeroThreeThree;
             temp.a -= 1f/7f;
             boxSR.color = temp;
         }

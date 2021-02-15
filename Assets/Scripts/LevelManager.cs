@@ -150,6 +150,17 @@ public class LevelManager : MonoBehaviour {
             // play sound clip
             if (level == 4 && sub == 1) {
                 // going to next level after having defeated devil
+                if (scripts.player.charNum != 3) { 
+                    // give player the next character, as long as they aren't on the last one\
+                    scripts.data.unlockedChars[scripts.player.charNum + 1] = true;
+                    print(scripts.data.unlockedChars[scripts.player.charNum + 1]);
+                    // update it on our side
+                    SaveSystem.SaveData(scripts, false);
+                    // save it to the computer
+                    scripts.data = SaveSystem.LoadData();
+                    print(scripts.data.unlockedChars[scripts.player.charNum + 1]);
+                    // grab it back 
+                }
                 for (int i = 0; i < 15; i++) {
                     yield return scripts.delays[0.033f];
                     temp.a += 1f/15f;
