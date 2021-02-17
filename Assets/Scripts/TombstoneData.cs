@@ -11,7 +11,7 @@ public class TombstoneData : MonoBehaviour {
     }
 
     public void SetTombstoneData() {
-        print("make sure to clear player's saved items and shit here");
+        print("make sure to clear player's saved items and stuff here");
         scripts = FindObjectOfType<Scripts>();
         // re-assign scripts here, because as this is a singleton the scripts from the last round has literally everything gone        
         SaveSystem.SaveData(scripts, true);
@@ -34,12 +34,16 @@ public class TombstoneData : MonoBehaviour {
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
     }
 
-    public void SpawnSavedItems(bool delay=false) {
-        StartCoroutine(SpawnSavedItemsCoro(delay));
+    public void SpawnSavedTSItems(bool delay=false) {
+        StartCoroutine(SpawnSavedTSItemsCoro(delay));
     }
 
-    public IEnumerator SpawnSavedItemsCoro(bool delay) { 
-        if (delay) { yield return new WaitForSeconds(0f); }
+    public void SpawnSavedMerchantItems(bool delay=false) {
+        StartCoroutine(SpawnSavedMerchantItemsCoro(delay));
+    }
+
+    public IEnumerator SpawnSavedTSItemsCoro(bool delay) { 
+        if (delay) { yield return new WaitForSeconds(0.01f); }
         // optional slight delay so that resuming on a tombstone level doesn't mess things up
         scripts = FindObjectOfType<Scripts>();
         scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], "rusty", scripts.data.tsWeaponAcc - 1, scripts.data.tsWeaponSpd - 1, scripts.data.tsWeaponDmg - 1, scripts.data.tsWeaponDef - 1);
@@ -64,5 +68,16 @@ public class TombstoneData : MonoBehaviour {
         }
         scripts.itemManager.CreateItem("arrow", "arrow");
         // create the next level arrow
+    }
+
+    public IEnumerator SpawnSavedMerchantItemsCoro(bool delay) { 
+        if (delay) { yield return new WaitForSeconds(0.01f); }
+        scripts = FindObjectOfType<Scripts>();
+        for (int i = 0; i < 9; i++) {  
+            if (scripts.data.merchantItemNames[i] != null && scripts.data.merchantItemNames[i] != "") { 
+                print($"creating a {scripts.data.merchantItemNames[i]}");
+                GameObject created = scripts.itemManager.CreateItem(scripts.data.merchantItemNames[i], scripts.data.merchantItemTypes[i], scripts.data.merchantItemMods[i]);
+            }
+        }
     }
 }

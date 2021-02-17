@@ -57,6 +57,7 @@ public class Enemy : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
+        scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
         if (scripts.levelManager.level == 4) { 
             if (scripts.enemy.woundGUIElement.text == "[cloaked]") { SpawnNewEnemy(0); }
             else { SpawnNewEnemy(1); }
@@ -65,7 +66,14 @@ public class Enemy : MonoBehaviour {
         else if (scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub) {
             SpawnNewEnemy(8);
             scripts.itemManager.lootText.text = "loot:";
-            scripts.tombstoneData.SpawnSavedItems(true);
+            scripts.tombstoneData.SpawnSavedTSItems(true);
+            scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
+        }
+        else if (scripts.levelManager.sub == 4) {
+            SpawnNewEnemy(7);
+            scripts.itemManager.lootText.text = "goods:";
+            scripts.tombstoneData.SpawnSavedMerchantItems(true);
+            scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
         }
         else { 
             print("spawn based on enemy name!");
@@ -208,11 +216,11 @@ public class Enemy : MonoBehaviour {
         if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
         else { enemyName.text = enemyArr[enemyNum]; }
         // set the name, when spawning the cloaked just set it to be "Devil"
-        if (scripts.enemy.enemyName.text == "Tombstone" || scripts.enemy.enemyName.text == "Merchant") {
+        if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") {
             stamina = 0;
             // tombstone and merchant don't have stamina
         }
-        else if (scripts.enemy.enemyName.text == "Lich") {
+        else if (enemyArr[enemyNum] == "Lich") {
             // if lich, has 5 stamina by default
             stamina = 5;
         }

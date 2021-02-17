@@ -26,6 +26,7 @@ public class Scripts : MonoBehaviour {
     public Dictionary<float, WaitForSeconds> delays = new Dictionary<float, WaitForSeconds>();
 
     private void Start() {
+        SaveSystem.SaveData(this, false);
         data = SaveSystem.LoadData();
         dice = FindObjectOfType<Dice>();
         arrow = FindObjectOfType<Arrow>();
@@ -48,5 +49,6 @@ public class Scripts : MonoBehaviour {
         foreach (float delay in delayArr) {
             delays.Add(delay, new WaitForSeconds(delay));
         }
+        print($"data loaded, easyMode: {data.easyMode}");
     }
 }

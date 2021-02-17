@@ -25,15 +25,13 @@ public class TurnManager : MonoBehaviour {
     public bool dontRemoveLeechYet = false;
 
     private void Start() {
-        blackBox.transform.position = offScreen;
         scripts = FindObjectOfType<Scripts>();
         DisplayWounds();
         SetTargetOf("player");
         SetTargetOf("enemy");
         scripts.enemy.TargetBest();
         scripts.statSummoner.ResetDiceAndStamina();
-        if (!(scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub)) { scripts.diceSummoner.SummonDice(true); }
-        else { blackBox.transform.position = onScreen; }
+        if (!(scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub) && scripts.levelManager.sub != 4) { scripts.diceSummoner.SummonDice(true); }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
     }
@@ -210,7 +208,7 @@ public class TurnManager : MonoBehaviour {
         else if (playerOrEnemy == "enemy") {
             if (scripts.enemy.enemyName.text == "Merchant") { 
                 // trader
-                scripts.enemy.target.text = "barter";
+                scripts.enemy.target.text = "bargain";
             }
             // else if (scripts.levelManager.sub == scripts.tombstoneData.sub && scripts.levelManager.level == scripts.tombstoneData.level) {
             else if (scripts.enemy.enemyName.text == "Tombstone") {

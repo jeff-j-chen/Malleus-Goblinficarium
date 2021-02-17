@@ -578,6 +578,8 @@ public class ItemManager : MonoBehaviour {
             Destroy(floorItems[index]);
             floorItems.RemoveAt(index);
         }
+        SaveSystem.SaveData(scripts, false);
+        scripts.data = SaveSystem.LoadData();
     }
 
     /// <summary>
@@ -638,6 +640,9 @@ public class ItemManager : MonoBehaviour {
         // create 3 common items, negativelyoffesting by the deletionq
         CreateItem("arrow", "arrow", tempOffset);
         // create the next level arrow
+        print("spawn trader items! saving data now...");
+        SaveSystem.SaveData(scripts, false);
+        scripts.data = SaveSystem.LoadData();
     }
     
     /// <summary>

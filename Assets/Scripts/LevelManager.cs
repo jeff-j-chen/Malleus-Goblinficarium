@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour {
 
     void Start() {
         level = 1;
-        sub = 1;
+        sub = 3;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -120,16 +120,6 @@ public class LevelManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Summon a trader.
-    /// </summary>
-    private void SummonTrader() {
-        scripts.enemy.SpawnNewEnemy(7);
-        // create the trader enemy
-        scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
-        // hide the trader's stats (which are given to enemies by default)
-    }
-
-    /// <summary>
     /// Go to the next level, or the lich. Call this instead of the coroutine (more stable).
     /// </summary>
     /// <param name="isLich">true to go to the lich, false otherwise.</param>
@@ -196,6 +186,10 @@ public class LevelManager : MonoBehaviour {
                     scripts.data.resetTSLevel(scripts);
                     // make tombstone inaccessible
                 }
+                else if (scripts.enemy.enemyName.text == "Merchant") {
+                    print("cleared merchant wares!"); 
+                    scripts.data.ClearMerchantWares(scripts);
+                }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
                 if (sub == scripts.data.tsSub && level == scripts.data.tsLevel && !(sub == 1 && level == 1)) {
                     // spawn tombstone if we are on the correct level and not on 1-1
@@ -209,7 +203,9 @@ public class LevelManager : MonoBehaviour {
                 }
                 else if (sub == 4) { 
                     toSpawn = "trader";
-                    SummonTrader();
+                    scripts.enemy.SpawnNewEnemy(7);
+                    // create the trader enemy
+                    scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
                     // summon trader if necessary
                     levelText.text = "level " + level + "-3+"; 
                     // set the correct level loading text
@@ -254,7 +250,7 @@ public class LevelManager : MonoBehaviour {
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
                 scripts.itemManager.lootText.text = "loot:";
-                scripts.tombstoneData.SpawnSavedItems();
+                scripts.tombstoneData.SpawnSavedTSItems();
             }
             else if (toSpawn == "trader") {
                 // going to trader, so spawn trader items

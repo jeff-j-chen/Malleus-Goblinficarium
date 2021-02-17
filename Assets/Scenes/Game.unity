@@ -479,7 +479,7 @@ MonoBehaviour:
   loadingCircle: {fileID: 628028891}
   levelText: {fileID: 1444069972}
   level: 1
-  sub: 1
+  sub: 4
   lockActions: 0
   characters: .:!il.:!il.:!il\/'`,\/'`,-_=()[]{}Ymzl
   time: 0.03
@@ -1889,7 +1889,7 @@ GameObject:
   - component: {fileID: 945574498}
   - component: {fileID: 945574499}
   m_Layer: 0
-  m_Name: TombstoneDataHolder
+  m_Name: Tombstone Data Setter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1902,12 +1902,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 945574497}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_Father: {fileID: 1671121160}
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &945574499
 MonoBehaviour:
@@ -1921,9 +1921,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9c895d75a43e7949a9e2e95bc50c66a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 0
-  sub: 0
-  tempSub: 0
 --- !u!1001 &1039242653
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2985,6 +2982,7 @@ Transform:
   - {fileID: 1971228520}
   - {fileID: 1185943114}
   - {fileID: 1546929060}
+  - {fileID: 945574498}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3004,6 +3002,7 @@ MonoBehaviour:
     curCharNum: 0
     newCharNum: 0
     easyMode: 0
+    unlockedChars: 
     tsLevel: 0
     tsSub: 0
     tsWeaponAcc: 0
@@ -3013,6 +3012,19 @@ MonoBehaviour:
     tsItemNames: []
     tsItemTypes: []
     tsItemMods: []
+    merchantItemNames: []
+    merchantItemTypes: []
+    merchantItemMods: []
+    resumeLevel: 0
+    resumeSub: 0
+    resumeAcc: 0
+    resumeSpd: 0
+    resumeDmg: 0
+    resumeDef: 0
+    resumeStamina: 0
+    resumeItemNames: []
+    resumeItemTypes: []
+    resumeItemMods: []
   dice: {fileID: 0}
   arrow: {fileID: 0}
   enemy: {fileID: 0}
