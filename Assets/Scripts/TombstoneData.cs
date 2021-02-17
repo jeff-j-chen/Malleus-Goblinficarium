@@ -14,8 +14,7 @@ public class TombstoneData : MonoBehaviour {
         print("make sure to clear player's saved items and stuff here");
         scripts = FindObjectOfType<Scripts>();
         // re-assign scripts here, because as this is a singleton the scripts from the last round has literally everything gone        
-        SaveSystem.SaveData(scripts, true);
-        scripts.data = SaveSystem.LoadData();
+        scripts.SetTSAndSave();
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true);
             // move all items on the floor to the player's inventory

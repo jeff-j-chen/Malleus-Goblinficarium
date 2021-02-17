@@ -455,8 +455,7 @@ public class TurnManager : MonoBehaviour {
             DetermineMove(true);
             // make the next person go again
         }
-        SaveSystem.SaveData(scripts, false);
-        scripts.data = SaveSystem.LoadData();
+        scripts.NormalSaveData();
         yield return scripts.delays[0.45f];
         // small delay
         ClearVariablesAfterRound();
@@ -629,8 +628,7 @@ public class TurnManager : MonoBehaviour {
             // spawn items
             blackBox.transform.position = onScreen;
             // hide the enemy's tats
-            SaveSystem.SaveData(scripts, false);
-            scripts.data = SaveSystem.LoadData();
+            scripts.NormalSaveData();
         }
         else { print("invalid string passed"); }
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {

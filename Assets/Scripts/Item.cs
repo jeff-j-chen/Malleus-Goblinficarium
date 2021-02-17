@@ -592,8 +592,7 @@ public class Item : MonoBehaviour {
             // destroy the object
             ShiftItems(index, selectNew);
         }
-        SaveSystem.SaveData(scripts, false);
-        scripts.data = SaveSystem.LoadData();
+        scripts.NormalSaveData();
     }
 
     private void ShiftItems(int index, bool selectNew) { 

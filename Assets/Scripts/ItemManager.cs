@@ -183,42 +183,42 @@ public class ItemManager : MonoBehaviour {
         if (scripts.player.charNum == 0) { 
             CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
             // CreateWeaponWithStats("maul", "admin", 10, 10, 10, 10);
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             CreateItem("steak", "common");
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             if (scripts.data.easyMode) { 
                 CreateItem("torch", "common");
-                MoveToInventory(0, true);
+                MoveToInventory(0, true, false, false);
             }
         }
         else if (scripts.player.charNum == 1) { 
             CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             CreateItem("armor", "common");
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             if (scripts.data.easyMode) {
                 CreateItem("helm_of_might", "rare");
-                MoveToInventory(0, true);
+                MoveToInventory(0, true, false, false);
             }
         }
         else if (scripts.player.charNum == 2) { 
             CreateWeaponWithStats("dagger", "quick", 2, 5, 0, 0);
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             CreateItem("boots_of_dodge", "rare");
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             if (scripts.data.easyMode) { 
                 CreateItem("ankh", "rare");
-                MoveToInventory(0, true);
+                MoveToInventory(0, true, false, false);
             }
         }
         else if (scripts.player.charNum == 3) {
             CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             CreateItem("cheese", "common");
-            MoveToInventory(0, true);
+            MoveToInventory(0, true, false, false);
             if (scripts.data.easyMode) { 
                 CreateItem("kapala", "rare");
-                MoveToInventory(0, true);
+                MoveToInventory(0, true, false, false);
             }
         }
         Select(curList, 0, playAudio:false);
@@ -472,7 +472,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <param name="index">The index from which to move the item.</param>
     /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
-    public void MoveToInventory(int index, bool starter=false, bool playAudio=true) {
+    public void MoveToInventory(int index, bool starter=false, bool playAudio=true, bool saveData=true) {
         if (floorItems[index] != null) {
             if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
                 // if the player doesn't have 7 or more items or is trying to pick up weapon 
@@ -578,8 +578,9 @@ public class ItemManager : MonoBehaviour {
             Destroy(floorItems[index]);
             floorItems.RemoveAt(index);
         }
-        SaveSystem.SaveData(scripts, false);
-        scripts.data = SaveSystem.LoadData();
+        if (saveData) { 
+            scripts.NormalSaveData();
+        }
     }
 
     /// <summary>
@@ -640,9 +641,7 @@ public class ItemManager : MonoBehaviour {
         // create 3 common items, negativelyoffesting by the deletionq
         CreateItem("arrow", "arrow", tempOffset);
         // create the next level arrow
-        print("spawn trader items! saving data now...");
-        SaveSystem.SaveData(scripts, false);
-        scripts.data = SaveSystem.LoadData();
+        scripts.NormalSaveData();
     }
     
     /// <summary>

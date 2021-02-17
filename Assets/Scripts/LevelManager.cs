@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour {
 
     void Start() {
         level = 1;
-        sub = 3;
+        sub = 4;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -143,12 +143,7 @@ public class LevelManager : MonoBehaviour {
                 if (scripts.player.charNum != 3) { 
                     // give player the next character, as long as they aren't on the last one\
                     scripts.data.unlockedChars[scripts.player.charNum + 1] = true;
-                    print(scripts.data.unlockedChars[scripts.player.charNum + 1]);
-                    // update it on our side
-                    SaveSystem.SaveData(scripts, false);
-                    // save it to the computer
-                    scripts.data = SaveSystem.LoadData();
-                    print(scripts.data.unlockedChars[scripts.player.charNum + 1]);
+                    scripts.NormalSaveData();
                     // grab it back 
                 }
                 for (int i = 0; i < 15; i++) {
@@ -183,12 +178,12 @@ public class LevelManager : MonoBehaviour {
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
                     print("resetting ts level!");
-                    scripts.data.resetTSLevel(scripts);
+                    scripts.ResetTSLevelAndSave();
                     // make tombstone inaccessible
                 }
                 else if (scripts.enemy.enemyName.text == "Merchant") {
                     print("cleared merchant wares!"); 
-                    scripts.data.ClearMerchantWares(scripts);
+                    scripts.ClearMerchantWaresAndSave();
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
                 if (sub == scripts.data.tsSub && level == scripts.data.tsLevel && !(sub == 1 && level == 1)) {
