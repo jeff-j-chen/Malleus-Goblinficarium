@@ -181,7 +181,7 @@ public class ItemManager : MonoBehaviour {
 
     public void GiveClassItems(int charNum) {
         if (scripts.player.charNum == 0) { 
-            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+            CreateWeaponWithStats("flail", "harsh", 2, 2, 1, 2);
             // CreateWeaponWithStats("maul", "admin", 10, 10, 10, 10);
             MoveToInventory(0, true, false, false);
             CreateItem("steak", "common");
@@ -484,6 +484,10 @@ public class ItemManager : MonoBehaviour {
                     // move the item to the weapon slot
                     scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
                     // set the player's stats to be equal to that of the weapon
+                    scripts.data.resumeAcc = scripts.player.stats["green"];
+                    scripts.data.resumeSpd = scripts.player.stats["blue"];
+                    scripts.data.resumeDmg = scripts.player.stats["red"];
+                    scripts.data.resumeDef = scripts.player.stats["white"];
                     if (!starter) {
                         // if the weapon is not a starter (so player already has a weapon)
                         scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
@@ -570,7 +574,7 @@ public class ItemManager : MonoBehaviour {
                     }
                     if (playAudio) { Select(curList, index); }
                     else { Select(curList, index, playAudio:false); }
-                    // attempt toselect the next item of where it was
+                    // attempt to select the next item of where it was
                 }
             }
         }
@@ -579,7 +583,7 @@ public class ItemManager : MonoBehaviour {
             floorItems.RemoveAt(index);
         }
         if (saveData) { 
-            scripts.NormalSaveData();
+            scripts.SaveDataToFile();
         }
     }
 
@@ -627,6 +631,7 @@ public class ItemManager : MonoBehaviour {
         }
         CreateItem("arrow", "arrow");
         // create an arrow to move to the next level
+        SaveFloorItems();
     }
 
     /// <summary>
@@ -641,7 +646,7 @@ public class ItemManager : MonoBehaviour {
         // create 3 common items, negativelyoffesting by the deletionq
         CreateItem("arrow", "arrow", tempOffset);
         // create the next level arrow
-        scripts.NormalSaveData();
+        SaveMerchantItems();
     }
     
     /// <summary>
@@ -710,5 +715,56 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     public void GivePlayerRetry() {
         scripts.tombstoneData.SetTombstoneData();
+    }
+
+    public void SaveInventoryItems() {
+        for (int i = 0; i < scripts.player.inventory.Count; i++) {
+            Item item = scripts.player.inventory[i].GetComponent<Item>();
+            scripts.data.resumeItemNames[i] = scripts.player.inventory[i].GetComponent<Item>().itemName;
+            scripts.data.resumeItemTypes[i] = scripts.player.inventory[i].GetComponent<Item>().itemType;
+            scripts.data.resumeItemMods[i] = scripts.player.inventory[i].GetComponent<Item>().modifier;
+        }
+        scripts.SaveDataToFile();
+        print("successfully saved data!");
+    }
+
+    public void SaveFloorItems() { 
+        bool arrowFound = false;
+        for (int i = 0; i < 9; i++) {
+            if (!arrowFound) { 
+                Item item = floorItems[i].GetComponent<Item>();
+                scripts.data.floorItemNames[i] = floorItems[i].GetComponent<Item>().itemName;
+                scripts.data.floorItemTypes[i] = floorItems[i].GetComponent<Item>().itemType;
+                scripts.data.floorItemMods[i] = floorItems[i].GetComponent<Item>().modifier;
+                if (scripts.data.floorItemNames[i] == "arrow") { arrowFound = true; }
+            }
+            else {
+                Debug.Log($"clearing {i}");
+                scripts.data.floorItemNames[i] = "";
+                scripts.data.floorItemTypes[i] = "";
+                scripts.data.floorItemMods[i] = "";
+            }
+        }
+        scripts.SaveDataToFile();
+    }
+
+    public void SaveMerchantItems() { 
+        bool arrowFound = false;
+        for (int i = 0; i < 9; i++) {
+            if (!arrowFound) { 
+                Item item = floorItems[i].GetComponent<Item>();
+                Debug.Log($"saved {floorItems[i].GetComponent<Item>().itemName}");
+                scripts.data.merchantItemNames[i] = floorItems[i].GetComponent<Item>().itemName;
+                scripts.data.merchantItemTypes[i] = floorItems[i].GetComponent<Item>().itemType;
+                scripts.data.merchantItemMods[i] = floorItems[i].GetComponent<Item>().modifier;
+                if (scripts.data.merchantItemNames[i] == "arrow") { arrowFound = true; }
+            }
+            else {
+                scripts.data.merchantItemNames[i] = "";
+                scripts.data.merchantItemTypes[i] = "";
+                scripts.data.merchantItemMods[i] = "";
+            }
+        }
+        scripts.SaveDataToFile();
     }
 }

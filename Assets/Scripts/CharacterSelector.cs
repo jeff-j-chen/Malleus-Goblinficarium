@@ -67,8 +67,9 @@ public class CharacterSelector : MonoBehaviour {
 
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip");
-        scripts.NormalSaveData();
-        yield return scripts.delays[0.15f];
+        scripts.data.newCharNum = selectionNum;
+        scripts.SaveDataToFile();
+        yield return scripts.delays[0.1f];
         SceneManager.LoadScene("Menu");
     }
 
@@ -147,7 +148,8 @@ public class CharacterSelector : MonoBehaviour {
             scripts.soundManager.PlayClip("click1");
             easy = !easy;
             StartCoroutine(simpleFadeIn.FadeHide()); 
-            // change selection from the 3rd item -> 2nd one
+            scripts.data.easyMode = easy;
+            scripts.SaveDataToFile();
         }
     }
 }

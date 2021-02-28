@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour {
 
     void Start() {
         level = 1;
-        sub = 4;
+        sub = 1;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -143,7 +143,7 @@ public class LevelManager : MonoBehaviour {
                 if (scripts.player.charNum != 3) { 
                     // give player the next character, as long as they aren't on the last one\
                     scripts.data.unlockedChars[scripts.player.charNum + 1] = true;
-                    scripts.NormalSaveData();
+                    scripts.SaveDataToFile();
                     // grab it back 
                 }
                 for (int i = 0; i < 15; i++) {
@@ -178,12 +178,17 @@ public class LevelManager : MonoBehaviour {
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
                     print("resetting ts level!");
-                    scripts.ResetTSLevelAndSave();
+                    scripts.data.tsLevel = -1;
+                    scripts.data.tsSub = -1;
+                    scripts.SaveDataToFile();
                     // make tombstone inaccessible
                 }
                 else if (scripts.enemy.enemyName.text == "Merchant") {
                     print("cleared merchant wares!"); 
-                    scripts.ClearMerchantWaresAndSave();
+                    scripts.data.merchantItemNames = new string[9];
+                    scripts.data.merchantItemTypes = new string[9];
+                    scripts.data.merchantItemMods  = new string[9];
+                    scripts.SaveDataToFile();
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
                 if (sub == scripts.data.tsSub && level == scripts.data.tsLevel && !(sub == 1 && level == 1)) {
@@ -242,6 +247,8 @@ public class LevelManager : MonoBehaviour {
             // clear the loading text and move the box offscreen
             scripts.itemManager.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
+            scripts.data.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+            scripts.SaveDataToFile();
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
                 scripts.itemManager.lootText.text = "loot:";
@@ -282,6 +289,8 @@ public class LevelManager : MonoBehaviour {
             scripts.turnManager.DetermineMove(false);
             // determine who moves
             lockActions = false;
+            scripts.data.resumeSub = scripts.levelManager.sub;
+            scripts.data.resumeLevel = scripts.levelManager.sub;
         }
     }
 

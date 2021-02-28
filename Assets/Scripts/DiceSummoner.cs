@@ -80,8 +80,7 @@ public class DiceSummoner : MonoBehaviour
     /// <param name="attachToPlayerOrEnemy">If attaching the die to the player, enemy, or none. Default none.</param>
     /// <param name="statToAttachTo">The string of the stat to add the die to. Default null.</param>
     /// <param name="i">The integer representing the number of die spawned if spawned in a chain. Default 0.</param>
-    public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0)
-    {
+    public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0) {
         Vector2 instantiationPos;
         // reference variable for the die's attribute.
         if (attachToPlayerOrEnemy == "none") { instantiationPos = new Vector2(xCoords[i], yCoord); }
@@ -144,6 +143,24 @@ public class DiceSummoner : MonoBehaviour
         if (attachToPlayerOrEnemy == "player") { scripts.statSummoner.SetDebugInformationFor("player"); }
         else if (attachToPlayerOrEnemy == "enemy") { scripts.statSummoner.SetDebugInformationFor("enemy"); }
         // set the necessary debug information
+        SaveDiceValues();
+    }
+
+    public void SaveDiceValues() { 
+        scripts.data.diceNumbers.Clear();
+        scripts.data.diceTypes.Clear();
+        scripts.data.diceAttachedToStat.Clear();
+        scripts.data.dicePlayerOrEnemy.Clear();
+        scripts.data.diceRerolled.Clear();
+        for (int i = 0; i < existingDice.Count; i++) { 
+            Dice dice = existingDice[i].GetComponent<Dice>();
+            scripts.data.diceNumbers.Add(dice.diceNum);
+            scripts.data.diceTypes.Add(dice.diceType);
+            scripts.data.diceAttachedToStat.Add(dice.statAddedTo);
+            scripts.data.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
+            scripts.data.diceRerolled.Add(dice.isRerolled);
+        }
+        scripts.SaveDataToFile();
     }
 
     /// <summary>

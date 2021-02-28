@@ -123,6 +123,8 @@ public class Dice : MonoBehaviour {
                     // discard from the enemy
                     scripts.itemManager.discardableDieCounter--;
                     // decrease the counter for the number of die 
+                    scripts.data.discardableDieCounter = scripts.itemManager.discardableDieCounter;
+                    scripts.SaveDataToFile();
                 }
                 else if (scripts.enemy.woundList.Contains("chest")) {
                     // if enemy is wounded in the chest
@@ -165,6 +167,8 @@ public class Dice : MonoBehaviour {
         }
         scripts.statSummoner.SetDebugInformationFor("enemy");
         // set the debug information
+        
+        
     }
 
     /// <summary>
@@ -182,6 +186,7 @@ public class Dice : MonoBehaviour {
             diceList[i].GetComponent<Dice>().instantiationPos = diceList[i].transform.position;
         }
         scripts.statSummoner.SetDebugInformationFor("player");
+        scripts.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
@@ -192,6 +197,7 @@ public class Dice : MonoBehaviour {
         scripts.turnManager.alterationDuringMove = true;
         StartCoroutine(RerollAnimation());
         isRerolled = true;
+        scripts.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
@@ -219,6 +225,7 @@ public class Dice : MonoBehaviour {
         scripts.turnManager.RecalculateMaxFor("player");
         scripts.turnManager.RecalculateMaxFor("enemy");
         // set debug information and make sure that the player/enemy isn't aiming at something that they shouldn't be able to hit
+        scripts.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
@@ -238,12 +245,14 @@ public class Dice : MonoBehaviour {
         scripts.statSummoner.SetDebugInformationFor("player");
         scripts.statSummoner.SetDebugInformationFor("enemy");
         // set the debug information
+        scripts.diceSummoner.SaveDiceValues();
     }
 
     public void SetToOne() {
         diceNum = 1;
         GetComponent<SpriteRenderer>().sprite = scripts.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
         scripts.statSummoner.SetDebugInformationFor("player");
+        scripts.diceSummoner.SaveDiceValues();
     }
     
     /// <summary>
@@ -284,6 +293,7 @@ public class Dice : MonoBehaviour {
             scripts.statSummoner.SetDebugInformationFor("player");
             // display the debug information if needed
         }
+        scripts.diceSummoner.SaveDiceValues();
     }
     
     /// <summary>

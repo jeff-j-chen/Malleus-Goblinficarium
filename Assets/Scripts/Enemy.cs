@@ -169,6 +169,7 @@ public class Enemy : MonoBehaviour {
     /// <param name="enemyNum"></param>
     public void SpawnNewEnemy(int enemyNum) {
         isDead = false;
+        scripts.data.enemyIsDead = false;
         // make sure enemy is not dead
         float[] temp;
         // array to hold stats
@@ -181,6 +182,10 @@ public class Enemy : MonoBehaviour {
             { "red", (int)temp[2] },
             { "white", (int)temp[3] },
         };
+        scripts.data.enemyAcc = stats["green"];
+        scripts.data.enemySpd = stats["blue"];
+        scripts.data.enemyDmg = stats["red"];
+        scripts.data.enemyDef = stats["white"];
         spawnNum = enemyNum;
         // set stats
         woundList.Clear();
@@ -232,6 +237,8 @@ public class Enemy : MonoBehaviour {
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
         try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
+        scripts.data.enemyNum = enemyNum;
+        scripts.SaveDataToFile();
     }
 
     /// <summary>

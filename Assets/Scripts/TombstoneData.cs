@@ -14,7 +14,18 @@ public class TombstoneData : MonoBehaviour {
         print("make sure to clear player's saved items and stuff here");
         scripts = FindObjectOfType<Scripts>();
         // re-assign scripts here, because as this is a singleton the scripts from the last round has literally everything gone        
-        scripts.SetTSAndSave();
+        if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
+            scripts.data.tsLevel = 3;
+            scripts.data.tsSub = 3;
+            // game will crash if we go to 4-1*, easy solution here
+        }
+        else { 
+            if (scripts.levelManager.sub == 4) { scripts.data.tsSub = 3; }
+            else { scripts.data.tsSub = scripts.levelManager.sub; }
+            scripts.data.tsLevel = scripts.levelManager.level;
+        }
+        scripts.data.newGame = true;
+        scripts.SaveDataToFile();
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true);
             // move all items on the floor to the player's inventory

@@ -197,6 +197,8 @@ public class Item : MonoBehaviour {
                         if (scripts.itemManager.numItemsDroppedForTrade > 0)  { 
                             // if player has dropped items for trading
                             scripts.itemManager.numItemsDroppedForTrade--;
+                            scripts.data.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                            scripts.SaveDataToFile();
                             // decrement counter
                             scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
                             // move the selected item into the player's inventory
@@ -239,6 +241,7 @@ public class Item : MonoBehaviour {
                 }
             }
         }
+        scripts.itemManager.SaveInventoryItems();
     }
 
     /// <summary>
@@ -367,18 +370,22 @@ public class Item : MonoBehaviour {
                 if (modifier == "accuracy") {
                     scripts.player.potionStats["green"] += 3;
                     ShiftDiceAccordingly("green", 3);
+                    scripts.data.potionAcc = scripts.player.potionStats["green"];
                 }
                 else if (modifier == "speed") {
                     scripts.player.potionStats["blue"] += 3;
                     ShiftDiceAccordingly("blue", 3);
+                    scripts.data.potionSpd = scripts.player.potionStats["blue"];
                 }
                 else if (modifier == "strength") {
                     scripts.player.potionStats["red"] += 3;
                     ShiftDiceAccordingly("red", 3);
+                    scripts.data.potionDmg = scripts.player.potionStats["red"];
                 }
                 else if (modifier == "defense") {
                     scripts.player.potionStats["white"] += 3;
                     ShiftDiceAccordingly("white", 3);
+                    scripts.data.potionDef = scripts.player.potionStats["white"];
                 }
                 // increase stat temporarily via scripts.player.potionStats if it is a stat potion
                 else if (modifier == "might") {
@@ -394,6 +401,7 @@ public class Item : MonoBehaviour {
                 }
                 else if (modifier == "nothing") {}
                 else { print("invalid potion modifier detected"); }
+                scripts.SaveDataToFile();
                 scripts.statSummoner.SummonStats();
                 scripts.statSummoner.SetDebugInformationFor("player");
                 Remove();
@@ -403,6 +411,8 @@ public class Item : MonoBehaviour {
                 // play sound clip
                 scripts.itemManager.discardableDieCounter++;
                 // increment counter
+                scripts.data.discardableDieCounter = scripts.itemManager.discardableDieCounter;
+                scripts.SaveDataToFile();
                 Remove();
             }
             else if (itemName == "skeleton key" && scripts.levelManager.sub != 4) { 
@@ -435,6 +445,8 @@ public class Item : MonoBehaviour {
                         scripts.soundManager.PlayClip("fwoosh");
                         // need 3 stamina
                         scripts.itemManager.usedHelm = true;
+                        scripts.data.usedMace = true;
+                        scripts.SaveDataToFile();
                         // set variable
                         scripts.turnManager.SetStatusText("you feel mighty");
                         // notify player
@@ -457,6 +469,8 @@ public class Item : MonoBehaviour {
                         scripts.soundManager.PlayClip("fwoosh");
                         scripts.turnManager.SetStatusText("you feel dodgy");
                         scripts.itemManager.usedBoots = true;
+                        scripts.data.usedMace = true;
+                        scripts.SaveDataToFile();
                         scripts.turnManager.ChangeStaminaOf("player", -1);
                         scripts.player.SetPlayerStatusEffect("dodge", true);
                     }
@@ -468,6 +482,8 @@ public class Item : MonoBehaviour {
                 if (!scripts.itemManager.usedAnkh) {
                     scripts.soundManager.PlayClip("click");
                     scripts.itemManager.usedAnkh = true;
+                    scripts.data.usedAnkh = true;
+                    scripts.SaveDataToFile();
                     foreach (string key in scripts.itemManager.statArr) {
                         scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
                         scripts.statSummoner.addedPlayerStamina[key] = 0;
@@ -519,6 +535,7 @@ public class Item : MonoBehaviour {
             }
         }
     }
+   
     public void Remove(bool drop=false, bool selectNew=true, bool armorFade=false, bool torchFade=false) {
         if (drop) { 
             if (!scripts.itemManager.floorItems.Contains(gameObject)) {
@@ -539,6 +556,8 @@ public class Item : MonoBehaviour {
                     }
                     else {
                         if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
+                        scripts.data.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                        scripts.SaveDataToFile();
                         // if trader level increment the number of items dropped for trading
                         if (itemType == "weapon") { 
                             scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 
@@ -592,7 +611,7 @@ public class Item : MonoBehaviour {
             // destroy the object
             ShiftItems(index, selectNew);
         }
-        scripts.NormalSaveData();
+        scripts.itemManager.SaveInventoryItems();
     }
 
     private void ShiftItems(int index, bool selectNew) { 
