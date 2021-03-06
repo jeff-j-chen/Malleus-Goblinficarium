@@ -989,6 +989,12 @@ public class TurnManager : MonoBehaviour {
         else if (injury == "hip") {
             // if hip, remove all applied stamina
             if (appliedTo == "player") {
+                foreach (String stat in scripts.itemManager.statArr) { 
+                    foreach (Dice dice in scripts.statSummoner.addedPlayerDice[stat]) {
+                        dice.transform.position = new Vector2(dice.transform.position.x + scripts.statSummoner.xOffset * -scripts.statSummoner.addedPlayerStamina[stat], dice.transform.position.y);
+                        dice.instantiationPos = dice.transform.position;
+                    }
+                }
                 scripts.statSummoner.addedPlayerStamina = new Dictionary<string, int>() {
                     { "green", 0 },
                     { "blue", 0 },
@@ -997,6 +1003,12 @@ public class TurnManager : MonoBehaviour {
                 };
             }
             else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
+                foreach (String stat in scripts.itemManager.statArr) { 
+                    foreach (Dice dice in scripts.statSummoner.addedEnemyDice[stat]) {
+                        dice.transform.position = new Vector2(dice.transform.position.x + scripts.statSummoner.xOffset * -scripts.statSummoner.addedEnemyStamina[stat], dice.transform.position.y);
+                        dice.instantiationPos = dice.transform.position;
+                    }
+                }
                 scripts.statSummoner.addedEnemyStamina = new Dictionary<string, int>() {
                     { "green", 0 },
                     { "blue", 0 },
@@ -1004,6 +1016,7 @@ public class TurnManager : MonoBehaviour {
                     { "white", 0 },
                 };
             }
+            scripts.statSummoner.SummonStats();
         }
         else if (injury == "hand") {
             // if hand, remove white die

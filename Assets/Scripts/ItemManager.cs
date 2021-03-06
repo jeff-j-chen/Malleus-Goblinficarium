@@ -186,6 +186,14 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("steak", "common");
             MoveToInventory(0, true, false, false);
+            CreateItem("shuriken", "common");
+            MoveToInventory(0, true, false, false);
+            CreateItem("shuriken", "common");
+            MoveToInventory(0, true, false, false);
+            CreateItem("shuriken", "common");
+            MoveToInventory(0, true, false, false);
+            CreateItem("shuriken", "common");
+            MoveToInventory(0, true, false, false);
             if (scripts.data.easyMode) { 
                 CreateItem("torch", "common");
                 MoveToInventory(0, true, false, false);
@@ -615,14 +623,11 @@ public class ItemManager : MonoBehaviour {
             // normal enemy
             int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
             // count the number of torches
-            int spawnCount = torchCount * 2 + scripts.levelManager.level;
-            int chosenNum = UnityEngine.Random.Range(0, spawnCount);
-            if (chosenNum > 4) { chosenNum = 4; }
-            else if (scripts.levelManager.level == 3 && chosenNum == 0) { chosenNum = 2; }
+            int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + UnityEngine.Random.Range(-2, 0), 0, 5);
             // create a spawn count 
             CreateRandomWeapon();
             // create a random weapon at index 0
-            for (int i = 0; i < chosenNum; i++) {
+            for (int i = 0; i < spawnCount; i++) {
                 CreateItem("common");
                 // create a random number of items based on the spawn count
             }
