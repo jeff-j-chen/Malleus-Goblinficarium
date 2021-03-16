@@ -13,7 +13,15 @@ public class TombstoneData : MonoBehaviour {
     public void SetTombstoneData() {
         print("make sure to clear player's saved items and stuff here");
         scripts = FindObjectOfType<Scripts>();
+        scripts.data.tsItemNames = new string[9];
+        scripts.data.tsItemNames = new string[9];
+        scripts.data.tsItemNames = new string[9];
+        // clear data before placing in new stuff
         Item item = scripts.player.inventory[0].GetComponent<Item>();
+        scripts.data.tsWeaponAcc = item.weaponStats["green"];
+        scripts.data.tsWeaponSpd = item.weaponStats["blue"];
+        scripts.data.tsWeaponDmg = item.weaponStats["red"];
+        scripts.data.tsWeaponDef = item.weaponStats["white"];
         scripts.data.tsItemNames[0] = item.itemName.Split(' ')[1];
         scripts.data.tsItemTypes[0] = item.itemType;
         scripts.data.tsItemMods[0] = item.modifier;

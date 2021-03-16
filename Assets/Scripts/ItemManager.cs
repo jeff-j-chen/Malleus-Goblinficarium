@@ -740,7 +740,10 @@ public class ItemManager : MonoBehaviour {
 
     public void SaveFloorItems() { 
         bool arrowFound = false;
-        for (int i = 0; i < 9; i++) {
+        scripts.data.floorItemNames = new string[9];
+        scripts.data.floorItemTypes = new string[9];
+        scripts.data.floorItemMods = new string[9];
+        for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
                 scripts.data.floorItemNames[i] = item.itemName;
@@ -760,7 +763,10 @@ public class ItemManager : MonoBehaviour {
 
     public void SaveMerchantItems() { 
         bool arrowFound = false;
-        for (int i = 0; i < 9; i++) {
+        scripts.data.merchantItemNames = new string[9];
+        scripts.data.merchantItemTypes = new string[9];
+        scripts.data.merchantItemMods = new string[9];
+        for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
                 Debug.Log($"saved {floorItems[i].GetComponent<Item>().itemName}");

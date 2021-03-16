@@ -178,7 +178,6 @@ public class LevelManager : MonoBehaviour {
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
-                    print("resetting ts level!");
                     scripts.data.tsLevel = -1;
                     scripts.data.tsSub = -1;
                     scripts.data.tsWeaponAcc = -1;
