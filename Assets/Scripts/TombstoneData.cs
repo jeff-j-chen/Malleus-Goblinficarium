@@ -13,7 +13,17 @@ public class TombstoneData : MonoBehaviour {
     public void SetTombstoneData() {
         print("make sure to clear player's saved items and stuff here");
         scripts = FindObjectOfType<Scripts>();
-        // re-assign scripts here, because as this is a singleton the scripts from the last round has literally everything gone        
+        Item item = scripts.player.inventory[0].GetComponent<Item>();
+        scripts.data.tsItemNames[0] = item.itemName.Split(' ')[1];
+        scripts.data.tsItemTypes[0] = item.itemType;
+        scripts.data.tsItemMods[0] = item.modifier;
+        for (int i = 1; i < scripts.player.inventory.Count; i++) {
+            item = scripts.player.inventory[i].GetComponent<Item>();
+            scripts.data.tsItemNames[i] = item.itemName;
+            scripts.data.tsItemTypes[i] = item.itemType;
+            scripts.data.tsItemMods[i] = item.modifier;
+        }
+        scripts.SaveDataToFile();
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
             scripts.data.tsLevel = 3;
             scripts.data.tsSub = 3;
@@ -21,8 +31,14 @@ public class TombstoneData : MonoBehaviour {
         }
         else { 
             if (scripts.levelManager.sub == 4) { scripts.data.tsSub = 3; }
-            else { scripts.data.tsSub = scripts.levelManager.sub; }
-            scripts.data.tsLevel = scripts.levelManager.level;
+            else if (scripts.levelManager.sub == 1 && scripts.levelManager.level == 1){ 
+                scripts.data.tsSub = -1;
+                scripts.data.tsLevel = -1;
+            }
+            else { 
+                scripts.data.tsSub = scripts.levelManager.sub; 
+                scripts.data.tsLevel = scripts.levelManager.level;
+            }
         }
         scripts.data.newGame = true;
         scripts.SaveDataToFile();
@@ -32,7 +48,7 @@ public class TombstoneData : MonoBehaviour {
         }
         foreach (GameObject toBeDeleted in scripts.player.inventory.ToList()) {
             if (toBeDeleted.GetComponent<Item>().itemName != "retry") {
-                toBeDeleted.GetComponent<Item>().Remove(selectNew:false);
+                toBeDeleted.GetComponent<Item>().Remove(selectNew:false, dontSave:true);
                 // remove all items except for the retry button
                 // .ToList() is a trick to prevent ienumerator from acting up
             }
@@ -53,11 +69,12 @@ public class TombstoneData : MonoBehaviour {
     }
 
     public IEnumerator SpawnSavedTSItemsCoro(bool delay) { 
+        print("spawning saved ts items!");
         if (delay) { yield return new WaitForSeconds(0.01f); }
         // optional slight delay so that resuming on a tombstone level doesn't mess things up
         scripts = FindObjectOfType<Scripts>();
         scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], "rusty", scripts.data.tsWeaponAcc - 1, scripts.data.tsWeaponSpd - 1, scripts.data.tsWeaponDmg - 1, scripts.data.tsWeaponDef - 1);
-        for (int i = 1; i < 9; i++) {  
+        for (int i = 1; i < scripts.data.tsItemNames.Length; i++) {
             if (scripts.data.tsItemNames[i] != null && scripts.data.tsItemNames[i] != "") { 
                 GameObject created = scripts.itemManager.CreateItem(scripts.data.tsItemNames[i].Replace(' ', '_'), scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
                 switch (created.GetComponent<Item>().itemName) { 

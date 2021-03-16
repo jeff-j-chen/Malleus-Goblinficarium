@@ -135,7 +135,7 @@ public class Player : MonoBehaviour {
                     // set debug (only player needed here)
                     scripts.turnManager.RecalculateMaxFor("player");
                     // reset target
-                    scripts.itemManager.GivePlayerRetry();
+                    scripts.itemManager.SaveTombstoneItems();
                     // allow player to retry
                 }
             }

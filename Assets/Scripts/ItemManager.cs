@@ -192,7 +192,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("shuriken", "common");
             MoveToInventory(0, true, false, false);
-            CreateItem("shuriken", "common");
+            CreateItem("potion", "common", "might");
             MoveToInventory(0, true, false, false);
             if (scripts.data.easyMode) { 
                 CreateItem("torch", "common");
@@ -718,16 +718,21 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Save tombstone data, clear player's inventory, and give them the retry button.
     /// </summary>
-    public void GivePlayerRetry() {
+    public void SaveTombstoneItems() {
         scripts.tombstoneData.SetTombstoneData();
     }
 
     public void SaveInventoryItems() {
-        for (int i = 0; i < scripts.player.inventory.Count; i++) {
-            Item item = scripts.player.inventory[i].GetComponent<Item>();
-            scripts.data.resumeItemNames[i] = scripts.player.inventory[i].GetComponent<Item>().itemName;
-            scripts.data.resumeItemTypes[i] = scripts.player.inventory[i].GetComponent<Item>().itemType;
-            scripts.data.resumeItemMods[i] = scripts.player.inventory[i].GetComponent<Item>().modifier;
+        Item item = scripts.player.inventory[0].GetComponent<Item>();
+        print("resume item name was " + item.itemName);
+        scripts.data.resumeItemNames[0] = item.itemName;
+        scripts.data.resumeItemTypes[0] = item.itemType;
+        scripts.data.resumeItemMods[0] = item.modifier;
+        for (int i = 1; i < scripts.player.inventory.Count; i++) {
+            item = scripts.player.inventory[i].GetComponent<Item>();
+            scripts.data.resumeItemNames[i] = item.itemName;
+            scripts.data.resumeItemTypes[i] = item.itemType;
+            scripts.data.resumeItemMods[i] = item.modifier;
         }
         scripts.SaveDataToFile();
         print("successfully saved data!");
@@ -738,9 +743,9 @@ public class ItemManager : MonoBehaviour {
         for (int i = 0; i < 9; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                scripts.data.floorItemNames[i] = floorItems[i].GetComponent<Item>().itemName;
-                scripts.data.floorItemTypes[i] = floorItems[i].GetComponent<Item>().itemType;
-                scripts.data.floorItemMods[i] = floorItems[i].GetComponent<Item>().modifier;
+                scripts.data.floorItemNames[i] = item.itemName;
+                scripts.data.floorItemTypes[i] = item.itemType;
+                scripts.data.floorItemMods[i] = item.modifier;
                 if (scripts.data.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
@@ -759,9 +764,9 @@ public class ItemManager : MonoBehaviour {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
                 Debug.Log($"saved {floorItems[i].GetComponent<Item>().itemName}");
-                scripts.data.merchantItemNames[i] = floorItems[i].GetComponent<Item>().itemName;
-                scripts.data.merchantItemTypes[i] = floorItems[i].GetComponent<Item>().itemType;
-                scripts.data.merchantItemMods[i] = floorItems[i].GetComponent<Item>().modifier;
+                scripts.data.merchantItemNames[i] = item.itemName;
+                scripts.data.merchantItemTypes[i] = item.itemType;
+                scripts.data.merchantItemMods[i] = item.modifier;
                 if (scripts.data.merchantItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {

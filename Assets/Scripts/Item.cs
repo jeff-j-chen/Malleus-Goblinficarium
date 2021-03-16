@@ -536,7 +536,7 @@ public class Item : MonoBehaviour {
         }
     }
    
-    public void Remove(bool drop=false, bool selectNew=true, bool armorFade=false, bool torchFade=false) {
+    public void Remove(bool drop=false, bool selectNew=true, bool armorFade=false, bool torchFade=false, bool dontSave = false) {
         if (drop) { 
             if (!scripts.itemManager.floorItems.Contains(gameObject)) {
                 if (!scripts.turnManager.isMoving) {
@@ -611,7 +611,7 @@ public class Item : MonoBehaviour {
             // destroy the object
             ShiftItems(index, selectNew);
         }
-        scripts.itemManager.SaveInventoryItems();
+        if (!dontSave) { scripts.itemManager.SaveInventoryItems(); }
     }
 
     private void ShiftItems(int index, bool selectNew) { 

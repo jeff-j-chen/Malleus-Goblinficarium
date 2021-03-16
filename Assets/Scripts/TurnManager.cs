@@ -628,7 +628,7 @@ public class TurnManager : MonoBehaviour {
             scripts.player.GetComponent<SpriteRenderer>().sprite = scripts.player.GetDeathSprite();
             scripts.player.SetPlayerPositionAfterDeath();
             // if player dies, set sprite and proper position
-            scripts.itemManager.GivePlayerRetry();
+            scripts.itemManager.SaveTombstoneItems();
             // allow the player to retry
         }
         else if (playerOrEnemy == "enemy") {
@@ -820,7 +820,7 @@ public class TurnManager : MonoBehaviour {
                 // reset stuff
                 if (scripts.player.woundList.Count > 0) { 
                     // wounds were not healed, so apply them normally
-                    return InstantlyApplyInjuries(scripts.enemy.target.text, "player");
+                    return ApplyInjuriesDuringMove(scripts.enemy.target.text, "player");
                 }
                 else {
                     // wounds were healed, so don't apply them and don't kill the player
@@ -931,7 +931,7 @@ public class TurnManager : MonoBehaviour {
                         // make the text change
                         RecalculateMaxFor("enemy");
                         // recalculate max
-                        return InstantlyApplyInjuries(scripts.player.target.text, "enemy");
+                        return ApplyInjuriesDuringMove(scripts.player.target.text, "enemy");
                         // return if the enemy dies and at the same time apply wounds instantly
                     }
                 }
@@ -962,10 +962,23 @@ public class TurnManager : MonoBehaviour {
     /// <param name="injury">The injury name to apply the effects of.</param>
     /// <param name="appliedTo">Who the injury was applied to.</param>
     /// <returns>true if who the injury was applied to dies, false otherwise.</returns>
-    private bool InstantlyApplyInjuries(string injury, string appliedTo) {
-        if (appliedTo != "enemy" && appliedTo != "player") { print("invalid string passed into param. appliedTo in InstantlyApplyInjuries"); }
-        // just checking
+    private bool ApplyInjuriesDuringMove(string injury, string appliedTo) {
+        StartCoroutine(ApplyInjuriesDuringMoveCoro(injury, appliedTo));
         if (scripts.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
+        else if (injury == "face" && !(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) {
+            return true;
+        }
+        else if (appliedTo == "player" && scripts.player.woundList.Count == 3) { return true; }
+        else if (appliedTo == "enemy" && scripts.enemy.woundList.Count == 3) { return true; }
+        else { return false; }
+    }
+
+    private IEnumerator ApplyInjuriesDuringMoveCoro(string injury, string appliedTo) {
+        yield return scripts.delays[0.45f];
+        // 0.5 instead of 0.55 just in case
+        if (appliedTo != "enemy" && appliedTo != "player") { print("invalid string passed into param. appliedTo in ApplyInjuriesDuringMove"); }
+        // just checking
+        
         // return true immediately if maul
         if (injury == "guts") {
             // for guts, decrease all die
@@ -1036,20 +1049,9 @@ public class TurnManager : MonoBehaviour {
                 StartCoroutine(RemoveDice("red", "enemy"));
             }
         }
-        else if (injury == "face") {
-            // if face, kill instantly, except lich
-            if (!(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) {
-                return true;
-            }
-        }
         scripts.statSummoner.SetDebugInformationFor("player");
         scripts.statSummoner.SetDebugInformationFor("enemy");
         // update debug information
-        if (appliedTo == "player" && scripts.player.woundList.Count == 3) { return true; }
-        else if (appliedTo == "enemy" && scripts.enemy.woundList.Count == 3) { return true; }
-        // if 3 wounds, return killed
-        return false;
-        // appliedto has ot been killed, so return as such
     }
 
 

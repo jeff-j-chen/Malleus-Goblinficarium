@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -180,6 +181,13 @@ public class LevelManager : MonoBehaviour {
                     print("resetting ts level!");
                     scripts.data.tsLevel = -1;
                     scripts.data.tsSub = -1;
+                    scripts.data.tsWeaponAcc = -1;
+                    scripts.data.tsWeaponSpd = -1;
+                    scripts.data.tsWeaponDmg = -1;
+                    scripts.data.tsWeaponDef = -1;
+                    scripts.data.tsItemNames = new string[9];
+                    scripts.data.tsItemNames = new string[9];
+                    scripts.data.tsItemNames = new string[9];
                     scripts.SaveDataToFile();
                     // make tombstone inaccessible
                 }
@@ -297,14 +305,14 @@ public class LevelManager : MonoBehaviour {
     private IEnumerator GlitchyLevelText() {
         newText = "";
         for (int i = 0; i < 5; i++) {
-            levelText.text += characters[Random.Range(0, characters.Length)];
+            levelText.text += characters[UnityEngine.Random.Range(0, characters.Length)];
         }
         // create the initial sequence
         for (int k = 0; k < 50; k++) {
             newText = "";
             // make the string empty so we can store something new in it
             foreach (char curChar in levelText.text) {
-                if (Random.Range(0, 3) == 0) { newText += characters[Random.Range(0, characters.Length)]; }
+                if (UnityEngine.Random.Range(0, 3) == 0) { newText += characters[UnityEngine.Random.Range(0, characters.Length)]; }
                 // replace character with random one
                 else { newText += curChar; };
                 // no change
