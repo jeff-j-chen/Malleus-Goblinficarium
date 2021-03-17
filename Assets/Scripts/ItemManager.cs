@@ -231,6 +231,7 @@ public class ItemManager : MonoBehaviour {
         }
         Select(curList, 0, playAudio:false);
         // select the first item
+        scripts.SaveDataToFile();
     }
 
     /// <summary>
@@ -723,9 +724,11 @@ public class ItemManager : MonoBehaviour {
     }
 
     public void SaveInventoryItems() {
+        scripts.data.resumeItemNames = new string[9];
+        scripts.data.resumeItemTypes = new string[9];
+        scripts.data.resumeItemMods = new string[9];
         Item item = scripts.player.inventory[0].GetComponent<Item>();
-        print("resume item name was " + item.itemName);
-        scripts.data.resumeItemNames[0] = item.itemName;
+        scripts.data.resumeItemNames[0] = item.itemName.Split(' ')[1];
         scripts.data.resumeItemTypes[0] = item.itemType;
         scripts.data.resumeItemMods[0] = item.modifier;
         for (int i = 1; i < scripts.player.inventory.Count; i++) {
@@ -735,18 +738,19 @@ public class ItemManager : MonoBehaviour {
             scripts.data.resumeItemMods[i] = item.modifier;
         }
         scripts.SaveDataToFile();
-        print("successfully saved data!");
     }
 
     public void SaveFloorItems() { 
-        bool arrowFound = false;
         scripts.data.floorItemNames = new string[9];
         scripts.data.floorItemTypes = new string[9];
         scripts.data.floorItemMods = new string[9];
+        bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                scripts.data.floorItemNames[i] = item.itemName;
+                if (item.itemType == "weapon") { scripts.data.floorItemNames[i] = item.itemName.Split(' ')[1]; }
+                else { scripts.data.floorItemNames[i] = item.itemName; }
+                
                 scripts.data.floorItemTypes[i] = item.itemType;
                 scripts.data.floorItemMods[i] = item.modifier;
                 if (scripts.data.floorItemNames[i] == "arrow") { arrowFound = true; }
@@ -769,7 +773,6 @@ public class ItemManager : MonoBehaviour {
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                Debug.Log($"saved {floorItems[i].GetComponent<Item>().itemName}");
                 scripts.data.merchantItemNames[i] = item.itemName;
                 scripts.data.merchantItemTypes[i] = item.itemType;
                 scripts.data.merchantItemMods[i] = item.modifier;

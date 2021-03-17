@@ -211,37 +211,39 @@ public class Item : MonoBehaviour {
                 }
             }
             else {
-                if (itemType == "retry") {
-                    scripts.levelManager.lockActions = true;
-                    Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
-                    // reload scene
-                    scripts.soundManager.PlayClip("next");
-                    // play sound clip
-                    // scripts.tombstoneData.sub = scripts.tombstoneData.tempSub;
-                    // scripts.tombstoneData.tempSub = 0;
-                    // set tombstone data up correctly
-                }
-                else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
-                    // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
-                    if (itemType == "weapon")  { 
-                        // if player is trying to use weapon
-                        if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
-                            // if conditions allow for attack
-                            if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
-                            else if (scripts.levelManager.sub == 4 || scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.SetStatusText("mind your manners"); }
-                            // send reminders accordingly
-                            else if (!scripts.enemy.isDead) { scripts.player.UseWeapon(); }
-                            // attack if enemy is not dead or tombstone
-                            else { print("error!"); }
-                        }
+                if (scripts.enemy.enemyName.text != "Tombstone") {
+                    if (itemType == "retry") {
+                        scripts.levelManager.lockActions = true;
+                        Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
+                        // reload scene
+                        scripts.soundManager.PlayClip("next");
+                        // play sound clip
+                        // scripts.tombstoneData.sub = scripts.tombstoneData.tempSub;
+                        // scripts.tombstoneData.tempSub = 0;
+                        // set tombstone data up correctly
                     }
-                    else if (itemType == "common") { UseCommon(); }
-                    else if (itemType == "rare") { UseRare(); }
-                    // not item, so use corresponding item type
+                    else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
+                        // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
+                        if (itemType == "weapon")  { 
+                            // if player is trying to use weapon
+                            if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
+                                // if conditions allow for attack
+                                if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
+                                else if (scripts.levelManager.sub == 4 || scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.SetStatusText("mind your manners"); }
+                                // send reminders accordingly
+                                else if (!scripts.enemy.isDead) { scripts.player.UseWeapon(); }
+                                // attack if enemy is not dead or tombstone
+                                else { print("error!"); }
+                            }
+                        }
+                        else if (itemType == "common") { UseCommon(); }
+                        else if (itemType == "rare") { UseRare(); }
+                        // not item, so use corresponding item type
+                    }
                 }
             }
         }
-        scripts.itemManager.SaveInventoryItems();
+        if (itemType != "retry") { scripts.itemManager.SaveInventoryItems(); }
     }
 
     /// <summary>
