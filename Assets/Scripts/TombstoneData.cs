@@ -31,6 +31,7 @@ public class TombstoneData : MonoBehaviour {
             scripts.data.tsItemTypes[i] = item.itemType;
             scripts.data.tsItemMods[i] = item.modifier;
         }
+        // set the tombstone data to whatever the player currently has
         scripts.SaveDataToFile();
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
             scripts.data.tsLevel = 3;
@@ -48,7 +49,9 @@ public class TombstoneData : MonoBehaviour {
                 scripts.data.tsLevel = scripts.levelManager.level;
             }
         }
+        // assign the level of which the tombstone will appear on
         scripts.data.newGame = true;
+        // player died, so make the next game a new one
         scripts.SaveDataToFile();
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true);
@@ -82,6 +85,7 @@ public class TombstoneData : MonoBehaviour {
         // optional slight delay so that resuming on a tombstone level doesn't mess things up
         scripts = FindObjectOfType<Scripts>();
         scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], "rusty", scripts.data.tsWeaponAcc - 1, scripts.data.tsWeaponSpd - 1, scripts.data.tsWeaponDmg - 1, scripts.data.tsWeaponDef - 1);
+        // make the item with worse stats
         for (int i = 1; i < scripts.data.tsItemNames.Length; i++) {
             if (scripts.data.tsItemNames[i] != null && scripts.data.tsItemNames[i] != "") { 
                 GameObject created = scripts.itemManager.CreateItem(scripts.data.tsItemNames[i].Replace(' ', '_'), scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
@@ -100,6 +104,7 @@ public class TombstoneData : MonoBehaviour {
                         created.GetComponent<Item>().itemName = "moldy cheese"; break;
                 }
             }
+            // decrease 
         }
         scripts.itemManager.CreateItem("arrow", "arrow");
         // create the next level arrow
@@ -114,5 +119,6 @@ public class TombstoneData : MonoBehaviour {
                 GameObject created = scripts.itemManager.CreateItem(scripts.data.merchantItemNames[i], scripts.data.merchantItemTypes[i], scripts.data.merchantItemMods[i]);
             }
         }
+        // just spawn in the goods 
     }
 }

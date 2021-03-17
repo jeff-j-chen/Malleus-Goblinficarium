@@ -46,53 +46,77 @@ public class CharacterSelector : MonoBehaviour {
         preventPlayingFX = false;
     }
 
+
     private void Update() {
         if (Input.GetKeyDown(KeyCode.LeftArrow)) { ChangeToPressed("Left"); }
+        // holding down left, so press down the button
         else if (Input.GetKeyDown(KeyCode.RightArrow)) { ChangeToPressed("Right"); }
+        // holding down right, so press down the button
         else if (Input.GetKeyUp(KeyCode.LeftArrow)) { 
+            // left arrow released, so move the selection left
             SetSelection(selectionNum - 1);
             ChangeToReleased("Left");
         }
         else if (Input.GetKeyUp(KeyCode.RightArrow)) { 
+            // right arrow released, so move the selection right
             SetSelection(selectionNum + 1);
             ChangeToReleased("Right");
         }
         else if (Input.GetKeyDown(KeyCode.Space)) { ToggleEasy(); }
+        // space toggles easy mode
         else if (Input.GetKeyDown(KeyCode.Return)) { 
-            if (unlockedChars[selectionNum]) {
-                StartCoroutine(LoadMenuScene());
-            }
+            // enter selects the character
+            if (unlockedChars[selectionNum]) { StartCoroutine(LoadMenuScene()); }
+            // but only if its already unlocked
         }
     }
 
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip");
+        // play sfx (this is when selected)
         scripts.data.newCharNum = selectionNum;
+        // set the selection num
         scripts.SaveDataToFile();
+        // save the selection num
         yield return scripts.delays[0.1f];
+        // delay here, because i don't want a singleton and this allows blip to complete playing
         SceneManager.LoadScene("Menu");
+        // load the menu scene after the delay
     }
 
     // make this the main selection function, with checking for unlocked chars and setting arrows etc.
     public void SetSelection(int num) {
         if (0 <= num && num <= 3) {
+            // only allow selections between the number of available characters
             selectionNum = num;
+            // set the current selection num
             if (unlockedChars[selectionNum]) {
+                // if the current selected character is unlocked
                 itemHider.SetActive(false);
+                // show that character's items
                 quoteText.text = quotes[selectionNum];
                 perkText.text = perks[selectionNum];
+                // show that character's quote and perk
             }
             else {
+                // current selected character is not unlocked
                 itemHider.SetActive(true);
+                // make sure to hide items
                 quoteText.text = "beat game on previous character to unlock";
                 perkText.text = "";
+                // let player knmow that it's locked
             }
             GetComponent<SpriteRenderer>().sprite = icons[selectionNum];
+            // set the character icon
             if (!preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+            // only play sfx if we want it 
             if (selectionNum == 0) { leftButton.transform.position = new Vector2(-8.53f, 20f); }
+            // hide left button if we are the leftmost (first) character
             else { leftButton.transform.position = new Vector2(-8.53f, 1f); }
+            // otherwise show the left button
             if (selectionNum == 3) { rightButton.transform.position = new Vector2(8.53f, 20f); }
             else { rightButton.transform.position = new Vector2(8.53f, 1f); }
+            // same for the right button, but 
         }
         if (num == 0) { 
             scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "harsh sword";
@@ -130,26 +154,35 @@ public class CharacterSelector : MonoBehaviour {
             scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "kapala";
             scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("kapala");
         }
+        // give the character items based on their class, even if its not unlocked because it will be hidden regardless
         scripts.itemManager.floorItems[0].GetComponent<Item>().Select(false);
+        // make sure to select the first item
     }
 
     public void ChangeToPressed(string LeftOrRight) {
+        // set the button to be pressed down 
         if (LeftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = pressedButton; }
         else { rightButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = pressedButton; }
     }
 
     public void ChangeToReleased(string LeftOrRight) {
+        // make the button pop up
         if (LeftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = releasedButton; }
         else { rightButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = releasedButton; }
     }
 
     private void ToggleEasy() {
         if (!simpleFadeIn.lockChanges) {
+            // don't allow toggle of easy if we are fading rn
             scripts.soundManager.PlayClip("click1");
+            // play clip
             easy = !easy;
+            // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
-            scripts.data.easyMode = easy;
+            // fade to black and then back
+            scripts.data.easyMode = easy; 
             scripts.SaveDataToFile();
+            // apply it to our save file so the next game will have the correct character
         }
     }
 }

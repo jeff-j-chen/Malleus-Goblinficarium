@@ -1008,6 +1008,7 @@ public class TurnManager : MonoBehaviour {
                         dice.instantiationPos = dice.transform.position;
                     }
                 }
+                // for every stat (g b r w), shift the die over by the amount of stamina added
                 scripts.statSummoner.addedPlayerStamina = new Dictionary<string, int>() {
                     { "green", 0 },
                     { "blue", 0 },
@@ -1018,7 +1019,7 @@ public class TurnManager : MonoBehaviour {
             else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
                 foreach (String stat in scripts.itemManager.statArr) { 
                     foreach (Dice dice in scripts.statSummoner.addedEnemyDice[stat]) {
-                        dice.transform.position = new Vector2(dice.transform.position.x + scripts.statSummoner.xOffset * -scripts.statSummoner.addedEnemyStamina[stat], dice.transform.position.y);
+                        dice.transform.position = new Vector2(dice.transform.position.x + scripts.statSummoner.xOffset * scripts.statSummoner.addedEnemyStamina[stat], dice.transform.position.y);
                         dice.instantiationPos = dice.transform.position;
                     }
                 }
@@ -1028,6 +1029,7 @@ public class TurnManager : MonoBehaviour {
                     { "red", 0 },
                     { "white", 0 },
                 };
+                // same as player, except in the opposite direction
             }
             scripts.statSummoner.SummonStats();
         }

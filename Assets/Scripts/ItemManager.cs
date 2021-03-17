@@ -182,7 +182,7 @@ public class ItemManager : MonoBehaviour {
     public void GiveClassItems(int charNum) {
         if (scripts.player.charNum == 0) { 
             CreateWeaponWithStats("rapier", "common", 4, 2, -1, 1);
-            // CreateWeaponWithStats("maul", "admin", 10, 10, 10, 10);
+            // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
             MoveToInventory(0, true, false, false);
             CreateItem("necklet", "common", "arcane");
             MoveToInventory(0, true, false, false);
@@ -727,23 +727,28 @@ public class ItemManager : MonoBehaviour {
         scripts.data.resumeItemNames = new string[9];
         scripts.data.resumeItemTypes = new string[9];
         scripts.data.resumeItemMods = new string[9];
+        // clear the data before placing in new
         Item item = scripts.player.inventory[0].GetComponent<Item>();
         scripts.data.resumeItemNames[0] = item.itemName.Split(' ')[1];
         scripts.data.resumeItemTypes[0] = item.itemType;
         scripts.data.resumeItemMods[0] = item.modifier;
+        // add the player's weapon first
         for (int i = 1; i < scripts.player.inventory.Count; i++) {
             item = scripts.player.inventory[i].GetComponent<Item>();
             scripts.data.resumeItemNames[i] = item.itemName;
             scripts.data.resumeItemTypes[i] = item.itemType;
             scripts.data.resumeItemMods[i] = item.modifier;
+            // add all the remaining items
         }
         scripts.SaveDataToFile();
+        // save to file
     }
 
     public void SaveFloorItems() { 
         scripts.data.floorItemNames = new string[9];
         scripts.data.floorItemTypes = new string[9];
         scripts.data.floorItemMods = new string[9];
+        // clear the data before placing in new 
         bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
@@ -762,6 +767,7 @@ public class ItemManager : MonoBehaviour {
                 scripts.data.floorItemMods[i] = "";
             }
         }
+        // funky workaround to make it so that the player doesn't get duplicate arrows
         scripts.SaveDataToFile();
     }
 
@@ -785,5 +791,6 @@ public class ItemManager : MonoBehaviour {
             }
         }
         scripts.SaveDataToFile();
+        // pretty much same as above
     }
 }

@@ -118,49 +118,55 @@ public class Item : MonoBehaviour {
         else {
             if (scripts.levelManager == null || !scripts.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
-                if (scripts.levelManager != null && scripts.enemy.isDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { 
-                    scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; 
-                }
+                if (scripts.levelManager != null && scripts.enemy.isDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
-                if (itemName == "potion")  {
-                    if (modifier == "accuracy") {  scripts.itemManager.itemDesc.text = "potion of accuracy\n+3 accuracy"; }
-                    else if (modifier == "speed") {  scripts.itemManager.itemDesc.text = "potion of speed\n+3 speed"; }
-                    else if (modifier == "strength") {  scripts.itemManager.itemDesc.text = "potion of strength\n+3 damage"; }
-                    else if (modifier == "defense") {  scripts.itemManager.itemDesc.text = "potion of parry\n+3 parry"; }
-                    else if (modifier == "might") {  scripts.itemManager.itemDesc.text = "potion of might\ngain a yellow die"; }
-                    else if (modifier == "life") {  scripts.itemManager.itemDesc.text = "potion of life\nheal all wounds"; }
-                    else if (modifier == "nothing") {  scripts.itemManager.itemDesc.text = "potion of nothing\ndoes nothing"; }
-                    else { print("invalid potion modifier detected"); }
+                switch (itemName) { 
+                    case "potion":
+                        switch (modifier) {
+                            case "accuracy": scripts.itemManager.itemDesc.text = "potion of accuracy\n+3 accuracy"; break;
+                            case "speed": scripts.itemManager.itemDesc.text = "potion of speed\n+3 speed"; break;
+                            case "strength": scripts.itemManager.itemDesc.text = "potion of strength\n+3 damage"; break;
+                            case "defense": scripts.itemManager.itemDesc.text = "potion of parry\n+3 parry"; break;
+                            case "might": scripts.itemManager.itemDesc.text = "potion of might\ngain a yellow die"; break;
+                            case "life": scripts.itemManager.itemDesc.text = "potion of life\nheal all wounds"; break;
+                            case "nothing": scripts.itemManager.itemDesc.text = "potion of nothing\ndoes nothing"; break;
+                            default: print("invalid potion modifier"); break;
+                        }
+                        break;
+                    case "scroll":
+                        switch (modifier) {
+                            case "fury": scripts.itemManager.itemDesc.text = "scroll of fury\nall picked dice turn yellow"; break;
+                            case "haste": scripts.itemManager.itemDesc.text = "scroll of haste\npick 3 dice, enemy gets the rest"; break; 
+                            case "dodge": scripts.itemManager.itemDesc.text = "scroll of dodge\nif you strike first, ignore all damage"; break;
+                            case "leech": scripts.itemManager.itemDesc.text = "scroll of leech\ncure the same wound as inflicted"; break; 
+                            case "courage": scripts.itemManager.itemDesc.text = "scroll of courage\nkeep 1 of your die till next round"; break;
+                            case "challenge":scripts.itemManager.itemDesc.text = "scroll of challenge\n???"; break;
+                            case "nothing": scripts.itemManager.itemDesc.text = "scroll of nothing\ndoes nothing"; break;
+                            default: print("invalid scroll modifier"); break; 
+                        }
+                        break;
+                    case "necklet":
+                        switch (modifier) { 
+                            case "arcane": scripts.itemManager.itemDesc.text = $"arcane necklet\nall necklets are more effective"; break; 
+                            case "nothing": scripts.itemManager.itemDesc.text = $"necklet of nothing\ndoes nothing"; break; 
+                            case "victory": scripts.itemManager.itemDesc.text = $"necklet of victory"; break;
+                            default: scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{scripts.itemManager.neckletCounter["arcane"]} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; break;
+                        }
+                        break;
+                    case "cheese": case "steak":
+                        if (scripts.player == null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
+                        else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
+                        break;
+                    case "moldy cheese":
+                        scripts.itemManager.itemDesc.text = "moldy cheese\n+0 stamina"; break;
+                    case "rotten steak":
+                        scripts.itemManager.itemDesc.text = "rotten steak\n+0 stamina"; break;
+                    case "arrow": case "retry":  
+                        scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; break;
+                    default: 
+                        scripts.itemManager.itemDesc.text = $"{itemName}\n{scripts.itemManager.descriptionDict[itemName]}"; break;
+                    // set the proper item descriptions based on their item descriptions
                 }
-                else if (itemName == "scroll")  { 
-                    if (modifier == "fury") { scripts.itemManager.itemDesc.text = "scroll of fury\nall picked dice turn yellow"; }
-                    else if (modifier == "haste") { scripts.itemManager.itemDesc.text = "scroll of haste\npick 3 dice, enemy gets the rest"; }
-                    else if (modifier == "dodge") { scripts.itemManager.itemDesc.text = "scroll of dodge\nif you strike first, ignore all damage"; }
-                    else if (modifier == "leech") { scripts.itemManager.itemDesc.text = "scroll of leech\ncure the same wound as inflicted"; }
-                    else if (modifier == "courage") { scripts.itemManager.itemDesc.text = "scroll of courage\nkeep 1 of your die till next round"; }
-                    else if (modifier == "challenge") { scripts.itemManager.itemDesc.text = "scroll of challenge\n???"; }
-                    else if (modifier == "nothing") { scripts.itemManager.itemDesc.text = "scroll of nothing\ndoes nothing"; }
-                }
-                else if (itemName == "necklet") {
-                    int t = scripts.itemManager.neckletCounter["arcane"];
-                    if (modifier == "arcane") { scripts.itemManager.itemDesc.text = $"arcane necklet\nall necklets are more effective"; }
-                    else if (modifier == "nothing") { scripts.itemManager.itemDesc.text = $"necklet of nothing\ndoes nothing"; }
-                    else if (modifier == "victory") { scripts.itemManager.itemDesc.text = $"necklet of victory"; }
-                    else { scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{t} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; } 
-                }
-                else if (itemName == "cheese" || itemName == "steak") {
-                    if (scripts.player == null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
-                    else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
-                }
-                else if (itemName == "moldy cheese") {
-                    scripts.itemManager.itemDesc.text = "moldy cheese\n+0 stamina";
-                }
-                else if (itemName == "rotten steak") {
-                    scripts.itemManager.itemDesc.text = "rotten steak\n+0 stamina";
-                }
-                else if (itemName == "arrow" || itemName == "retry") { scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; }
-                else { scripts.itemManager.itemDesc.text = $"{itemName}\n{scripts.itemManager.descriptionDict[itemName]}"; }
-                // set the proper item descriptions for all items
             }
         }
         if (scripts.levelManager == null || itemType == "weapon" || 
@@ -246,6 +252,7 @@ public class Item : MonoBehaviour {
             }
         }
         if (itemType != "retry") { scripts.itemManager.SaveInventoryItems(); }
+        // save the items as long as we didn't use the retry button
     }
 
     /// <summary>
@@ -254,185 +261,181 @@ public class Item : MonoBehaviour {
     private void UseCommon() {
         if (!scripts.levelManager.lockActions) {
             // don't use items when locked
-            if (itemName == "steak")  {
-                scripts.soundManager.PlayClip("eat");
-                // play sound clip
-                if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 7); }
-                else { scripts.turnManager.ChangeStaminaOf("player", 5); }
-                // change stamina based on the character
-                scripts.turnManager.SetStatusText("you swallow steak");
-                // status text
-                Remove();
-                // remove from player inventory
-            }
-            else if (itemName == "rotten steak") {
-                // don't change stamina for rotten foods
-                scripts.soundManager.PlayClip("eat");
-                scripts.turnManager.SetStatusText("you swallow rotten steak");
-                Remove();
-            }
-            else if (itemName == "cheese")  {
-                scripts.soundManager.PlayClip("eat");
-                if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 5); }
-                else { scripts.turnManager.ChangeStaminaOf("player", 3); }
-                scripts.turnManager.SetStatusText("you swallow cheese");
-                Remove();
-            }
-            else if (itemName == "moldy cheese") {
-                scripts.soundManager.PlayClip("eat");
-                scripts.turnManager.SetStatusText("you swallow moldy cheese");
-                Remove();
-            }
-            else if (itemName == "scroll" && scripts.levelManager.sub != 4) {
-                // don't let scrolls be used at trader
-                if (modifier != "challenge") {
-                    scripts.soundManager.PlayClip("fwoosh");
-                    // play sound clip (not for challenge)
-                }
-                if (modifier == "fury") {
-                    if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
-                    // prevent player from accidentally using two scrolls
-                    else
-                    {
-                        scripts.player.SetPlayerStatusEffect("fury", true);
-                        // turn on fury
-                        scripts.turnManager.SetStatusText("you read scroll of fury... you feel furious");
-                        MakeAllAttachedYellow();
-                        Remove();
-                        // consume the scroll
-                    }
-                }
-                else if (modifier == "dodge") {
-                    if (scripts.player.isDodgy) { scripts.turnManager.SetStatusText("you are already dodgy"); }
-                    // prevent player from accidentally using two scrolls
-                    else {
-                        scripts.player.SetPlayerStatusEffect("dodge", true);
-                        // turn on dodge
-                        scripts.turnManager.SetStatusText("you read scroll of dodge... you feel dodgy");
-                        Remove();
-                        // consume and notify player
-                    }
-                }
-                else if (modifier == "haste") {
-                    if ((from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a).ToList().Count == 0) {
-                        scripts.turnManager.SetStatusText("all dice have been chosen");
-                        // prevent player from wasting scroll
-                    }
-                    else {
-                        if (scripts.player.isHasty) { scripts.turnManager.SetStatusText("you are already winged"); }
-                        // prevent player from accidentally using two scrolls
-                        else
-                        {
-                            scripts.player.SetPlayerStatusEffect("haste", true);
-                            // turn on haste
-                            scripts.turnManager.SetStatusText("you read scroll of haste... you feel winged");
+            switch (itemName) { 
+                case "steak":
+                    scripts.soundManager.PlayClip("eat");
+                    // play sound clip
+                    if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 7); }
+                    else { scripts.turnManager.ChangeStaminaOf("player", 5); }
+                    // change stamina based on the character
+                    scripts.turnManager.SetStatusText("you swallow steak");
+                    // status text
+                    Remove();
+                    // remove from player inventory
+                    break;
+                case "rotten steak": 
+                    // don't change stamina for rotten foods
+                    scripts.soundManager.PlayClip("eat");
+                    scripts.turnManager.SetStatusText("you swallow rotten steak");
+                    Remove();
+                    break;
+                case "cheese":
+                    scripts.soundManager.PlayClip("eat");
+                    if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 5); }
+                    else { scripts.turnManager.ChangeStaminaOf("player", 3); }
+                    scripts.turnManager.SetStatusText("you swallow cheese");
+                    Remove();
+                    break;
+                case "moldy cheese":
+                    scripts.soundManager.PlayClip("eat");
+                    scripts.turnManager.SetStatusText("you swallow moldy cheese");
+                    Remove();
+                    break;
+                case "scroll" when scripts.levelManager.sub != 4:
+                    if (modifier != "challenge") { scripts.soundManager.PlayClip("fwoosh"); }
+                    switch (modifier) {
+                        case "fury": 
+                            if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
+                            // prevent player from accidentally using two scrolls
+                            else
+                            {
+                                scripts.player.SetPlayerStatusEffect("fury", true);
+                                // turn on fury
+                                scripts.turnManager.SetStatusText("you read scroll of fury... you feel furious");
+                                MakeAllAttachedYellow();
+                                Remove();
+                                // consume the scroll
+                            }
+                            break;
+                        case "dodge": 
+                            if (scripts.player.isDodgy) { scripts.turnManager.SetStatusText("you are already dodgy"); }
+                            // prevent player from accidentally using two scrolls
+                            else {
+                                scripts.player.SetPlayerStatusEffect("dodge", true);
+                                // turn on dodge
+                                scripts.turnManager.SetStatusText("you read scroll of dodge... you feel dodgy");
+                                Remove();
+                                // consume and notify player
+                            }
+                            break;
+                        case "haste":
+                            if ((from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a).ToList().Count == 0) {
+                            scripts.turnManager.SetStatusText("all dice have been chosen");
+                            // prevent player from wasting scroll
+                            }
+                            else {
+                                if (scripts.player.isHasty) { scripts.turnManager.SetStatusText("you are already winged"); }
+                                // prevent player from accidentally using two scrolls
+                                else
+                                {
+                                    scripts.player.SetPlayerStatusEffect("haste", true);
+                                    // turn on haste
+                                    scripts.turnManager.SetStatusText("you read scroll of haste... you feel winged");
+                                    Remove();
+                                    // consume and notify player
+                                }
+                            }
+                            break;
+                        case "leech":
+                            if (scripts.player.isBloodthirsty) { scripts.turnManager.SetStatusText("you are already bloodthirsty"); }
+                            // prevent player from accidentally using two scrolls
+                            else {
+                                scripts.player.SetPlayerStatusEffect("leech", true);
+                                // turn on leech
+                                scripts.turnManager.SetStatusText("you read scroll of leech... you feel bloodthirsty");
+                                Remove();
+                                // consume and notify player
+                            }
+                            break;
+                        case "courage":
+                            if (scripts.player.isCourageous) { scripts.turnManager.SetStatusText("you are already courageous"); }
+                            // prevent player from accidentally using two scrolls
+                            else {
+                                scripts.player.SetPlayerStatusEffect("courage", true);
+                                // turn on courage
+                                scripts.turnManager.SetStatusText("you read scroll of courage... you feel courageous");
+                                Remove();
+                                // consume and notify player
+                            }
+                            break;
+                        case "challenge":
+                            scripts.levelManager.NextLevel(true);
+                            // load lich level
+                            scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                             Remove();
-                            // consume and notify player
-                        }
+                            break;
+                        case "nothing":
+                            scripts.turnManager.SetStatusText("you read scroll of nothing... nothing happens");
+                            Remove();
+                            break;
                     }
-                    
-                }
-                else if (modifier == "leech") {
-                    if (scripts.player.isBloodthirsty) { scripts.turnManager.SetStatusText("you are already bloodthirsty"); }
-                    // prevent player from accidentally using two scrolls
-                    else {
-                        scripts.player.SetPlayerStatusEffect("leech", true);
-                        // turn on leech
-                        scripts.turnManager.SetStatusText("you read scroll of leech... you feel bloodthirsty");
-                        Remove();
-                        // consume and notify player
+                    break;
+                case "potion" when scripts.levelManager.sub != 4:
+                    // don't let potions be used at merchant
+                    scripts.soundManager.PlayClip("gulp");
+                    scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
+                    // notify player
+                    switch (modifier) {
+                        case "accuracy":
+                            scripts.player.potionStats["green"] += 3;
+                            ShiftDiceAccordingly("green", 3);
+                            scripts.data.potionAcc = scripts.player.potionStats["green"];
+                            break;
+                        case "speed":
+                            scripts.player.potionStats["blue"] += 3;
+                            ShiftDiceAccordingly("blue", 3);
+                            scripts.data.potionAcc = scripts.player.potionStats["blue"];
+                            break;
+                        case "strength":
+                            scripts.player.potionStats["red"] += 3;
+                            ShiftDiceAccordingly("red", 3);
+                            scripts.data.potionAcc = scripts.player.potionStats["red"];
+                            break;
+                        case "defense":
+                            scripts.player.potionStats["white"] += 3;
+                            ShiftDiceAccordingly("white", 3);
+                            scripts.data.potionAcc = scripts.player.potionStats["white"];
+                            break;
+                        case "might":
+                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+                            break;
+                        case "life":
+                            scripts.player.woundList.Clear();
+                            scripts.turnManager.DisplayWounds();
+                            // heal and display the wounds
+                            // injuredtextchange does not want to work for some reason
+                            break;
+                        case "nothing": break;
+                        default: print("invalid potion modifier detected"); break;
                     }
-                }
-                else if (modifier == "courage")  {
-                    if (scripts.player.isCourageous) { scripts.turnManager.SetStatusText("you are already courageous"); }
-                    // prevent player from accidentally using two scrolls
-                    else {
-                        scripts.player.SetPlayerStatusEffect("courage", true);
-                        // turn on courage
-                        scripts.turnManager.SetStatusText("you read scroll of courage... you feel courageous");
-                        Remove();
-                        // consume and notify player
-                    }
-                }
-                else if (modifier == "challenge") {
-                    scripts.levelManager.NextLevel(true);
-                    // load lich level
-                    scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
+                    scripts.SaveDataToFile();
+                    scripts.statSummoner.SummonStats();
+                    scripts.statSummoner.SetDebugInformationFor("player");
                     Remove();
-                }
-                else if (modifier == "nothing") {
-                    scripts.turnManager.SetStatusText("you read scroll of nothing... nothing happens");
-                    Remove();
-                    // consume and notfiy player
-                }
-            }
-            else if (itemName == "potion" && scripts.levelManager.sub != 4) {
-                // don't let potions be used at lich
-                scripts.soundManager.PlayClip("gulp");
-                scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
-                // notify player
-                if (modifier == "accuracy") {
-                    scripts.player.potionStats["green"] += 3;
-                    ShiftDiceAccordingly("green", 3);
-                    scripts.data.potionAcc = scripts.player.potionStats["green"];
-                }
-                else if (modifier == "speed") {
-                    scripts.player.potionStats["blue"] += 3;
-                    ShiftDiceAccordingly("blue", 3);
-                    scripts.data.potionSpd = scripts.player.potionStats["blue"];
-                }
-                else if (modifier == "strength") {
-                    scripts.player.potionStats["red"] += 3;
-                    ShiftDiceAccordingly("red", 3);
-                    scripts.data.potionDmg = scripts.player.potionStats["red"];
-                }
-                else if (modifier == "defense") {
-                    scripts.player.potionStats["white"] += 3;
-                    ShiftDiceAccordingly("white", 3);
-                    scripts.data.potionDef = scripts.player.potionStats["white"];
-                }
-                // increase stat temporarily via scripts.player.potionStats if it is a stat potion
-                else if (modifier == "might") {
-                    scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
-                    // create a yellow die and add it to player's attack
-                }
-                else if (modifier == "life") {
-                    scripts.player.woundList.Clear();
-                    scripts.turnManager.DisplayWounds();
-                    // heal and display the wounds
-                    // injuredtextchange does not want to work for some reason
-                    // StartCoroutine(scripts.turnManager.InjuredTextChange(scripts.player.woundGUIElement));
-                }
-                else if (modifier == "nothing") {}
-                else { print("invalid potion modifier detected"); }
-                scripts.SaveDataToFile();
-                scripts.statSummoner.SummonStats();
-                scripts.statSummoner.SetDebugInformationFor("player");
-                Remove();
-            }
-            else if (itemName == "shuriken" && scripts.levelManager.sub != 4) {
-                scripts.soundManager.PlayClip("shuriken");
-                // play sound clip
-                scripts.itemManager.discardableDieCounter++;
-                // increment counter
-                scripts.data.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                scripts.SaveDataToFile();
-                Remove();
-            }
-            else if (itemName == "skeleton key" && scripts.levelManager.sub != 4) { 
-                // don't allow usage on trader levels
-                if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
-                    // can't use skeleton key on the devil
+                    break;
+                case "shuriken" when scripts.levelManager.sub != 4:
                     scripts.soundManager.PlayClip("shuriken");
-                    scripts.turnManager.SetStatusText("the key crumbles to dust");
-                }
-                else {
-                    // spawning a normal enemy
-                    scripts.levelManager.NextLevel();
-                    // load next level
-                    scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
-                }
-                Remove();
+                    // play sound clip
+                    scripts.itemManager.discardableDieCounter++;
+                    // increment counter
+                    scripts.data.discardableDieCounter = scripts.itemManager.discardableDieCounter;
+                    scripts.SaveDataToFile();
+                    Remove();
+                    break;
+                case "skeleton key" when scripts.levelManager.sub != 4: 
+                    if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
+                        // can't use skeleton key on the devil
+                        scripts.soundManager.PlayClip("shuriken");
+                        scripts.turnManager.SetStatusText("the key crumbles to dust");
+                    }
+                    else {
+                        // spawning a normal enemy
+                        scripts.levelManager.NextLevel();
+                        // load next level
+                        scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
+                    }
+                    Remove();
+                    break;
             }
         }
     }
@@ -442,62 +445,67 @@ public class Item : MonoBehaviour {
     /// </summary>
     private void UseRare() {
         // these are pretty self explanatory
-        if (!scripts.levelManager.lockActions) {
-            if (itemName == "helm of might" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") {
-                if (!scripts.itemManager.usedHelm) {
-                    if (scripts.player.stamina >= 3) {
-                        scripts.soundManager.PlayClip("fwoosh");
-                        // need 3 stamina
-                        scripts.itemManager.usedHelm = true;
-                        scripts.data.usedMace = true;
-                        scripts.SaveDataToFile();
-                        // set variable
-                        scripts.turnManager.SetStatusText("you feel mighty");
+        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") {
+            switch (itemName) {
+                case "helm of might":
+                    if (!scripts.itemManager.usedHelm) {
+                        if (scripts.player.stamina >= 3) {
+                            scripts.soundManager.PlayClip("fwoosh");
+                            // need 3 stamina
+                            scripts.itemManager.usedHelm = true;
+                            scripts.data.usedMace = true;
+                            scripts.SaveDataToFile();
+                            // set variable
+                            scripts.turnManager.SetStatusText("you feel mighty");
+                            // notify player
+                            scripts.turnManager.ChangeStaminaOf("player", -3);
+                            // use stamina
+                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+                            // add yellow die to red stat
+                        }
+                        else { scripts.turnManager.SetStatusText("not enough stamina"); }
                         // notify player
-                        scripts.turnManager.ChangeStaminaOf("player", -3);
-                        // use stamina
-                        scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
-                        // add yellow die to red stat
                     }
-                    else { scripts.turnManager.SetStatusText("not enough stamina"); }
-                    // notify player
-                }
-                else { scripts.turnManager.SetStatusText("helm can help you no further"); }
-                // notfiy player
-            }
-            // these are pretty self explanatory
-            else if (itemName == "kapala" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") { scripts.turnManager.SetStatusText("offer an item to become furious"); }
-            else if (itemName == "boots of dodge" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") {
-                if (!scripts.itemManager.usedBoots) {
-                    if (scripts.player.stamina >= 1) {
-                        scripts.soundManager.PlayClip("fwoosh");
-                        scripts.turnManager.SetStatusText("you feel dodgy");
-                        scripts.itemManager.usedBoots = true;
-                        scripts.data.usedMace = true;
+                    else { scripts.turnManager.SetStatusText("helm can help you no further"); }
+                    // notfiy player
+                    break;
+                // these are pretty self explanatory
+                case "kapala":
+                    scripts.turnManager.SetStatusText("offer an item to become furious"); 
+                    break;
+                case "boots of dodge":
+                    if (!scripts.itemManager.usedBoots) {
+                        if (scripts.player.stamina >= 1) {
+                            scripts.soundManager.PlayClip("fwoosh");
+                            scripts.turnManager.SetStatusText("you feel dodgy");
+                            scripts.itemManager.usedBoots = true;
+                            scripts.data.usedMace = true;
+                            scripts.SaveDataToFile();
+                            scripts.turnManager.ChangeStaminaOf("player", -1);
+                            scripts.player.SetPlayerStatusEffect("dodge", true);
+                        }
+                        else { scripts.turnManager.SetStatusText("not enough stamina"); }
+                    }
+                    else { scripts.turnManager.SetStatusText("boots can help you no further"); }
+                    break;
+                case "ankh":
+                    if (!scripts.itemManager.usedAnkh) {
+                        scripts.soundManager.PlayClip("click");
+                        scripts.itemManager.usedAnkh = true;
+                        scripts.data.usedAnkh = true;
                         scripts.SaveDataToFile();
-                        scripts.turnManager.ChangeStaminaOf("player", -1);
-                        scripts.player.SetPlayerStatusEffect("dodge", true);
+                        foreach (string key in scripts.itemManager.statArr) {
+                            scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
+                            scripts.statSummoner.addedPlayerStamina[key] = 0;
+                            // refund stamina
+                        }
+                        scripts.statSummoner.ResetDiceAndStamina();
+                        scripts.diceSummoner.SummonDice(false);
+                        scripts.statSummoner.SummonStats();
                     }
-                    else { scripts.turnManager.SetStatusText("not enough stamina"); }
-                }
-                else { scripts.turnManager.SetStatusText("boots can help you no further"); }
-            }
-            else if (itemName == "ankh" && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone") {
-                if (!scripts.itemManager.usedAnkh) {
-                    scripts.soundManager.PlayClip("click");
-                    scripts.itemManager.usedAnkh = true;
-                    scripts.data.usedAnkh = true;
-                    scripts.SaveDataToFile();
-                    foreach (string key in scripts.itemManager.statArr) {
-                        scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
-                        scripts.statSummoner.addedPlayerStamina[key] = 0;
-                        // refund stamina
-                    }
-                    scripts.statSummoner.ResetDiceAndStamina();
-                    scripts.diceSummoner.SummonDice(false);
-                    scripts.statSummoner.SummonStats();
-                }
-                else { scripts.turnManager.SetStatusText("ankh glows with red light"); }
+                    else { scripts.turnManager.SetStatusText("ankh glows with red light"); }
+                    break;
+                default: print("rare item with invalid name found!"); break;
             }
         }
     }
@@ -610,6 +618,7 @@ public class Item : MonoBehaviour {
         else if (torchFade) { 
             StartCoroutine(FadeTorch(index, selectNew));
         }
+        // fading armor or torch, so do something special
         else { 
             Destroy(gameObject);
             // destroy the object

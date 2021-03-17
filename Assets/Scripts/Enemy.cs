@@ -58,24 +58,38 @@ public class Enemy : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         // SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
         scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
+        // make sure to show the enemy's stats at the start
         if (scripts.levelManager.level == 4) { 
+            // devil level
             if (scripts.enemy.woundGUIElement.text == "[cloaked]") { SpawnNewEnemy(0); }
             else { SpawnNewEnemy(1); }
+            // spawn cloaked or normal devil, depending 
             scripts.itemManager.lootText.text = "";
         }
         else if (scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub) {
+            // on the tombstone level
             SpawnNewEnemy(8);
+            // spawn th tombstone
             scripts.itemManager.lootText.text = "loot:";
+            // indicate that the player can loot
             scripts.tombstoneData.SpawnSavedTSItems(true);
+            // spawn the saved tombstone items
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
+            // hide the stats (don't fight tombstones)
         }
         else if (scripts.levelManager.sub == 4) {
+            // on a merchant level
             SpawnNewEnemy(7);
+            // spawn the merchant
             scripts.itemManager.lootText.text = "goods:";
+            // indicate that the player should trade
             scripts.tombstoneData.SpawnSavedMerchantItems(true);
+            // spawn the saved merchant items
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
+            // hide the stats (don't fight merchants)
         }
         else { 
+            // yet to be implemented, spawn in the enemy based on its previous name
             print("spawn based on enemy name!");
             SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
             scripts.itemManager.lootText.text = "";

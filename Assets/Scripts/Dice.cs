@@ -282,20 +282,25 @@ public class Dice : MonoBehaviour {
             // decrease the colors of the die and base
         }
         if (statAddedTo != "") { 
-            if (scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this) != -1) {
+            // if the die has already been attached (only needed to check for my cheat )
+            if (isOnPlayerOrEnemy == "player") {
+                // if the die is attached to the player
                 for (int i = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedPlayerDice[statAddedTo].Count; i++) { 
-                    print($"shifting die of type {diceType} at index {i}");
+                    // for every die following this current die
                     GameObject curDie = scripts.statSummoner.addedPlayerDice[diceType][i].gameObject;
                     curDie.transform.position = new Vector3(curDie.transform.position.x - scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
+                    // shift each die back one, because this die will decrease to 0 and fade out
                 }
             }
-            else if (scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this) != -1) {
+            else if (isOnPlayerOrEnemy == "enemy") {
+                // else the die is attached to the enemy
                 for (int i = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedEnemyDice[statAddedTo].Count; i++) { 
-                    print($"shifting die of type {diceType} at index {i}");
                     GameObject curDie = scripts.statSummoner.addedEnemyDice[diceType][i].gameObject;
-                    curDie.transform.position = new Vector3(curDie.transform.position.x - scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
+                    curDie.transform.position = new Vector3(curDie.transform.position.x + scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
                 }
+                // same situation as above, shift the die (except forwards this time)
             }
+            else { print("something is wrong with this die"); }
         }
         try { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
         try { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this); } catch { }
@@ -310,6 +315,7 @@ public class Dice : MonoBehaviour {
             // display the debug information if needed
         }
         scripts.diceSummoner.SaveDiceValues();
+        // save the dice values to the save file
     }
     
     /// <summary>

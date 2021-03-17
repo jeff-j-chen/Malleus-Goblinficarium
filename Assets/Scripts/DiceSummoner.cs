@@ -47,7 +47,7 @@ public class DiceSummoner : MonoBehaviour
             // create the die and add it to the player
         }
         if (!initialSummon) {
-            // delay is necessary
+            // delay if necessary
             yield return scripts.delays[0.25f];
         }
         existingDice.Clear();
@@ -55,11 +55,14 @@ public class DiceSummoner : MonoBehaviour
         GenerateDiceTypes();
         for (int i = 0; i < 6; i++) {
             GenerateSingleDie(UnityEngine.Random.Range(1, 7), null, "none", null, i);
+            // generate the 6 base die for every round
         }
         if (scripts.itemManager.PlayerHasWeapon("flail")) {
+            // give the player a red die if wielding a flail
             GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red");
         }
         if (scripts.player.charNum == 1) { 
+            // if player character #2 (maul armor helm), give player yellow die
             scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
         }
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
@@ -152,15 +155,19 @@ public class DiceSummoner : MonoBehaviour
         scripts.data.diceAttachedToStat.Clear();
         scripts.data.dicePlayerOrEnemy.Clear();
         scripts.data.diceRerolled.Clear();
+        // make sure to clear everything before saving new data
         for (int i = 0; i < existingDice.Count; i++) { 
+            // for every existing dice
             Dice dice = existingDice[i].GetComponent<Dice>();
             scripts.data.diceNumbers.Add(dice.diceNum);
             scripts.data.diceTypes.Add(dice.diceType);
             scripts.data.diceAttachedToStat.Add(dice.statAddedTo);
             scripts.data.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
             scripts.data.diceRerolled.Add(dice.isRerolled);
+            // add its info to the info 
         }
         scripts.SaveDataToFile();
+        // make sure to save it
     }
 
     /// <summary>
@@ -186,5 +193,6 @@ public class DiceSummoner : MonoBehaviour
             // remove dice needed to get just 6
             generatedTypes.RemoveAt(UnityEngine.Random.Range(0, generatedTypes.Count));
         }
+        // this generates a set of die identical to malleus die generation, as far as i can tell
     }
 }

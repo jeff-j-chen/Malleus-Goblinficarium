@@ -339,10 +339,10 @@ public class StatSummoner : MonoBehaviour {
     /// <param name="playerOrEnemy">Who to set to the debug information for.</param>
     public void SetDebugInformationFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            playerDebug.text = "(" + SumOfStat("green", "player") + ")\n(" + SumOfStat("blue", "player") + ")\n(" + SumOfStat("red", "player") + ")\n(" + SumOfStat("white", "player") + ")";
+            playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";
         }
         else if (playerOrEnemy == "enemy") {
-            enemyDebug.text = "(" + SumOfStat("green", "enemy") + ")\n(" + SumOfStat("blue", "enemy") + ")\n(" + SumOfStat("red", "enemy") + ")\n(" + SumOfStat("white", "enemy") + ")";
+            enemyDebug.text = "("+SumOfStat("green", "enemy")+")\n("+SumOfStat("blue", "enemy")+")\n("+SumOfStat("red", "enemy")+")\n("+SumOfStat("white", "enemy")+")";
         }
         // ends up looking like
         // (2)
