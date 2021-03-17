@@ -43,7 +43,7 @@ public class LevelManager : MonoBehaviour {
 
     void Start() {
         level = 1;
-        sub = 1;
+        sub = 2;
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded

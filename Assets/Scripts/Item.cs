@@ -118,7 +118,9 @@ public class Item : MonoBehaviour {
         else {
             if (scripts.levelManager == null || !scripts.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
-                if (scripts.levelManager != null && scripts.enemy.isDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
+                if (scripts.levelManager != null && scripts.enemy.isDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { 
+                    scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; 
+                }
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
                 if (itemName == "potion")  {
                     if (modifier == "accuracy") {  scripts.itemManager.itemDesc.text = "potion of accuracy\n+3 accuracy"; }

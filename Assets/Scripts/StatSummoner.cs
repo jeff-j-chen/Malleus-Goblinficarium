@@ -19,7 +19,7 @@ public class StatSummoner : MonoBehaviour {
     private readonly float buttonXOffset = -0.6f;
     public readonly float[] yCoords = new float[] { 8.77f, 7.77f, 6.77f, 5.77f };
     private List<GameObject> existingStatSquares = new List<GameObject>();
-    public Dictionary<string, List<Dice>> addedPlayerDice = new Dictionary<string, List<Dice>>() {
+    [SerializeField] public Dictionary<string, List<Dice>> addedPlayerDice = new Dictionary<string, List<Dice>>() {
         { "green", new List<Dice>() },
         { "blue", new List<Dice>() },
         { "red", new List<Dice>() },

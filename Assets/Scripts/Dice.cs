@@ -281,6 +281,22 @@ public class Dice : MonoBehaviour {
             baseSR.color = baseTemp;
             // decrease the colors of the die and base
         }
+        if (statAddedTo != "") { 
+            if (scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this) != -1) {
+                for (int i = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedPlayerDice[statAddedTo].Count; i++) { 
+                    print($"shifting die of type {diceType} at index {i}");
+                    GameObject curDie = scripts.statSummoner.addedPlayerDice[diceType][i].gameObject;
+                    curDie.transform.position = new Vector3(curDie.transform.position.x - scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
+                }
+            }
+            else if (scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this) != -1) {
+                for (int i = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedEnemyDice[statAddedTo].Count; i++) { 
+                    print($"shifting die of type {diceType} at index {i}");
+                    GameObject curDie = scripts.statSummoner.addedEnemyDice[diceType][i].gameObject;
+                    curDie.transform.position = new Vector3(curDie.transform.position.x - scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
+                }
+            }
+        }
         try { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
         try { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this); } catch { }
         // attempt to remove from the player/enemy, this way is much easier than checking
