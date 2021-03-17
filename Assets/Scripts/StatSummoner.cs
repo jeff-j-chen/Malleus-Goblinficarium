@@ -153,7 +153,7 @@ public class StatSummoner : MonoBehaviour {
             // summon the positive stat squares at the proper place
             if (scripts.player.stats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName] < 0) {
                 // if total without necklet is negative, but total with necklet is positive
-                for (int k1 = 0; k1 < 0 - scripts.player.stats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; k1++) {
+                for (int k1 = 0; k1 < 0 - Mathf.Abs(scripts.player.stats[colorName]) + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; k1++) {
                     // create circles based on the number over the negative
                     SpawnGeneratedShape(i, statColor, k0 + k1, xCoord, xOffset, true, false);
                 }

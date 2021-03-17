@@ -181,14 +181,14 @@ public class ItemManager : MonoBehaviour {
 
     public void GiveClassItems(int charNum) {
         if (scripts.player.charNum == 0) { 
-            CreateWeaponWithStats("flail", "harsh", 2, 2, 1, 2);
+            CreateWeaponWithStats("rapier", "common", 4, 2, -1, 1);
             // CreateWeaponWithStats("maul", "admin", 10, 10, 10, 10);
             MoveToInventory(0, true, false, false);
-            CreateItem("steak", "common");
+            CreateItem("necklet", "common", "arcane");
             MoveToInventory(0, true, false, false);
-            CreateItem("shuriken", "common");
+            CreateItem("necklet", "common", "strength");
             MoveToInventory(0, true, false, false);
-            CreateItem("shuriken", "common");
+            CreateItem("necklet", "common", "strength");
             MoveToInventory(0, true, false, false);
             CreateItem("shuriken", "common");
             MoveToInventory(0, true, false, false);

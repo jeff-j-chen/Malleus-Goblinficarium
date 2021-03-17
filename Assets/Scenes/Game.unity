@@ -479,7 +479,7 @@ MonoBehaviour:
   loadingCircle: {fileID: 628028891}
   levelText: {fileID: 1444069972}
   level: 1
-  sub: 4
+  sub: 2
   lockActions: 0
   characters: .:!il.:!il.:!il\/'`,\/'`,-_=()[]{}Ymzl
   time: 0.03
@@ -2854,7 +2854,7 @@ MonoBehaviour:
   alterationDuringMove: 0
   diceDiscarded: 0
   scimitarParry: 0
-  maceUsed: 0
+  usedMace: 0
   dieSavedFromLastRound: {fileID: 0}
   discardDieBecauseCourage: 0
   dontRemoveLeechYet: 0
@@ -2999,6 +2999,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   data:
+    newGame: 0
     curCharNum: 0
     newCharNum: 0
     easyMode: 0
@@ -3012,19 +3013,73 @@ MonoBehaviour:
     tsItemNames: []
     tsItemTypes: []
     tsItemMods: []
+    floorItemNames:
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    floorItemTypes:
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    floorItemMods:
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
     merchantItemNames: []
     merchantItemTypes: []
     merchantItemMods: []
+    resumeItemNames: []
+    resumeItemTypes: []
+    resumeItemMods: []
     resumeLevel: 0
     resumeSub: 0
     resumeAcc: 0
     resumeSpd: 0
     resumeDmg: 0
     resumeDef: 0
-    resumeStamina: 0
-    resumeItemNames: []
-    resumeItemTypes: []
-    resumeItemMods: []
+    potionAcc: 0
+    potionSpd: 0
+    potionDmg: 0
+    potionDef: 0
+    playerStamina: 0
+    enemyStamina: 0
+    diceNumbers: 
+    diceTypes: []
+    dicePlayerOrEnemy: []
+    diceAttachedToStat: []
+    diceRerolled: 
+    playerWounds: []
+    enemyWounds: []
+    enemyNum: 0
+    usedMace: 0
+    usedAnkh: 0
+    usedHelm: 0
+    usedBoots: 0
+    numItemsDroppedForTrade: 0
+    discardableDieCounter: 0
+    enemyIsDead: 0
+    enemyAcc: 0
+    enemySpd: 0
+    enemyDmg: 0
+    enemyDef: 0
   dice: {fileID: 0}
   arrow: {fileID: 0}
   enemy: {fileID: 0}
