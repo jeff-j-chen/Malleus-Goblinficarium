@@ -66,7 +66,7 @@ public class Enemy : MonoBehaviour {
             // spawn cloaked or normal devil, depending 
             scripts.itemManager.lootText.text = "";
         }
-        else if (scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub) {
+        else if (scripts.levelManager.level == scripts.gameData.tsLevel && scripts.levelManager.sub == scripts.gameData.tsSub) {
             // on the tombstone level
             SpawnNewEnemy(8);
             // spawn th tombstone
@@ -183,7 +183,7 @@ public class Enemy : MonoBehaviour {
     /// <param name="enemyNum"></param>
     public void SpawnNewEnemy(int enemyNum) {
         isDead = false;
-        scripts.data.enemyIsDead = false;
+        scripts.gameData.enemyIsDead = false;
         // make sure enemy is not dead
         float[] temp;
         // array to hold stats
@@ -196,10 +196,10 @@ public class Enemy : MonoBehaviour {
             { "red", (int)temp[2] },
             { "white", (int)temp[3] },
         };
-        scripts.data.enemyAcc = stats["green"];
-        scripts.data.enemySpd = stats["blue"];
-        scripts.data.enemyDmg = stats["red"];
-        scripts.data.enemyDef = stats["white"];
+        scripts.gameData.enemyAcc = stats["green"];
+        scripts.gameData.enemySpd = stats["blue"];
+        scripts.gameData.enemyDmg = stats["red"];
+        scripts.gameData.enemyDef = stats["white"];
         spawnNum = enemyNum;
         // set stats
         woundList.Clear();
@@ -251,8 +251,8 @@ public class Enemy : MonoBehaviour {
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
         try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
-        scripts.data.enemyNum = enemyNum;
-        scripts.SaveDataToFile();
+        scripts.gameData.enemyNum = enemyNum;
+        scripts.SaveGameData();
     }
 
     /// <summary>

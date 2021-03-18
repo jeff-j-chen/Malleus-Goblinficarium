@@ -194,7 +194,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("potion", "common", "might");
             MoveToInventory(0, true, false, false);
-            if (scripts.data.easyMode) { 
+            if (scripts.gameData.easyMode) { 
                 CreateItem("torch", "common");
                 MoveToInventory(0, true, false, false);
             }
@@ -204,7 +204,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("armor", "common");
             MoveToInventory(0, true, false, false);
-            if (scripts.data.easyMode) {
+            if (scripts.gameData.easyMode) {
                 CreateItem("helm_of_might", "rare");
                 MoveToInventory(0, true, false, false);
             }
@@ -214,7 +214,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("boots_of_dodge", "rare");
             MoveToInventory(0, true, false, false);
-            if (scripts.data.easyMode) { 
+            if (scripts.gameData.easyMode) { 
                 CreateItem("ankh", "rare");
                 MoveToInventory(0, true, false, false);
             }
@@ -224,14 +224,14 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("cheese", "common");
             MoveToInventory(0, true, false, false);
-            if (scripts.data.easyMode) { 
+            if (scripts.gameData.easyMode) { 
                 CreateItem("kapala", "rare");
                 MoveToInventory(0, true, false, false);
             }
         }
         Select(curList, 0, playAudio:false);
         // select the first item
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
     }
 
     /// <summary>
@@ -493,10 +493,10 @@ public class ItemManager : MonoBehaviour {
                     // move the item to the weapon slot
                     scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
                     // set the player's stats to be equal to that of the weapon
-                    scripts.data.resumeAcc = scripts.player.stats["green"];
-                    scripts.data.resumeSpd = scripts.player.stats["blue"];
-                    scripts.data.resumeDmg = scripts.player.stats["red"];
-                    scripts.data.resumeDef = scripts.player.stats["white"];
+                    scripts.gameData.resumeAcc = scripts.player.stats["green"];
+                    scripts.gameData.resumeSpd = scripts.player.stats["blue"];
+                    scripts.gameData.resumeDmg = scripts.player.stats["red"];
+                    scripts.gameData.resumeDef = scripts.player.stats["white"];
                     if (!starter) {
                         // if the weapon is not a starter (so player already has a weapon)
                         scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
@@ -592,7 +592,7 @@ public class ItemManager : MonoBehaviour {
             floorItems.RemoveAt(index);
         }
         if (saveData) { 
-            scripts.SaveDataToFile();
+            scripts.SaveGameData();
         }
     }
 
@@ -724,73 +724,73 @@ public class ItemManager : MonoBehaviour {
     }
 
     public void SaveInventoryItems() {
-        scripts.data.resumeItemNames = new string[9];
-        scripts.data.resumeItemTypes = new string[9];
-        scripts.data.resumeItemMods = new string[9];
+        scripts.gameData.resumeItemNames = new string[9];
+        scripts.gameData.resumeItemTypes = new string[9];
+        scripts.gameData.resumeItemMods = new string[9];
         // clear the data before placing in new
         Item item = scripts.player.inventory[0].GetComponent<Item>();
-        scripts.data.resumeItemNames[0] = item.itemName.Split(' ')[1];
-        scripts.data.resumeItemTypes[0] = item.itemType;
-        scripts.data.resumeItemMods[0] = item.modifier;
+        scripts.gameData.resumeItemNames[0] = item.itemName.Split(' ')[1];
+        scripts.gameData.resumeItemTypes[0] = item.itemType;
+        scripts.gameData.resumeItemMods[0] = item.modifier;
         // add the player's weapon first
         for (int i = 1; i < scripts.player.inventory.Count; i++) {
             item = scripts.player.inventory[i].GetComponent<Item>();
-            scripts.data.resumeItemNames[i] = item.itemName;
-            scripts.data.resumeItemTypes[i] = item.itemType;
-            scripts.data.resumeItemMods[i] = item.modifier;
+            scripts.gameData.resumeItemNames[i] = item.itemName;
+            scripts.gameData.resumeItemTypes[i] = item.itemType;
+            scripts.gameData.resumeItemMods[i] = item.modifier;
             // add all the remaining items
         }
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
         // save to file
     }
 
     public void SaveFloorItems() { 
-        scripts.data.floorItemNames = new string[9];
-        scripts.data.floorItemTypes = new string[9];
-        scripts.data.floorItemMods = new string[9];
+        scripts.gameData.floorItemNames = new string[9];
+        scripts.gameData.floorItemTypes = new string[9];
+        scripts.gameData.floorItemMods = new string[9];
         // clear the data before placing in new 
         bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                if (item.itemType == "weapon") { scripts.data.floorItemNames[i] = item.itemName.Split(' ')[1]; }
-                else { scripts.data.floorItemNames[i] = item.itemName; }
+                if (item.itemType == "weapon") { scripts.gameData.floorItemNames[i] = item.itemName.Split(' ')[1]; }
+                else { scripts.gameData.floorItemNames[i] = item.itemName; }
                 
-                scripts.data.floorItemTypes[i] = item.itemType;
-                scripts.data.floorItemMods[i] = item.modifier;
-                if (scripts.data.floorItemNames[i] == "arrow") { arrowFound = true; }
+                scripts.gameData.floorItemTypes[i] = item.itemType;
+                scripts.gameData.floorItemMods[i] = item.modifier;
+                if (scripts.gameData.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
                 Debug.Log($"clearing {i}");
-                scripts.data.floorItemNames[i] = "";
-                scripts.data.floorItemTypes[i] = "";
-                scripts.data.floorItemMods[i] = "";
+                scripts.gameData.floorItemNames[i] = "";
+                scripts.gameData.floorItemTypes[i] = "";
+                scripts.gameData.floorItemMods[i] = "";
             }
         }
         // funky workaround to make it so that the player doesn't get duplicate arrows
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
     }
 
     public void SaveMerchantItems() { 
         bool arrowFound = false;
-        scripts.data.merchantItemNames = new string[9];
-        scripts.data.merchantItemTypes = new string[9];
-        scripts.data.merchantItemMods = new string[9];
+        scripts.gameData.merchantItemNames = new string[9];
+        scripts.gameData.merchantItemTypes = new string[9];
+        scripts.gameData.merchantItemMods = new string[9];
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                scripts.data.merchantItemNames[i] = item.itemName;
-                scripts.data.merchantItemTypes[i] = item.itemType;
-                scripts.data.merchantItemMods[i] = item.modifier;
-                if (scripts.data.merchantItemNames[i] == "arrow") { arrowFound = true; }
+                scripts.gameData.merchantItemNames[i] = item.itemName;
+                scripts.gameData.merchantItemTypes[i] = item.itemType;
+                scripts.gameData.merchantItemMods[i] = item.modifier;
+                if (scripts.gameData.merchantItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
-                scripts.data.merchantItemNames[i] = "";
-                scripts.data.merchantItemTypes[i] = "";
-                scripts.data.merchantItemMods[i] = "";
+                scripts.gameData.merchantItemNames[i] = "";
+                scripts.gameData.merchantItemTypes[i] = "";
+                scripts.gameData.merchantItemMods[i] = "";
             }
         }
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
         // pretty much same as above
     }
 }

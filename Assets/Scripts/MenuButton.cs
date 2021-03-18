@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class MenuButton : MonoBehaviour
@@ -38,7 +37,8 @@ public class MenuButton : MonoBehaviour
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             case "New Game":
-                // clear all data here
+                GameData data = new GameData();
+                File.WriteAllText("save.txt", JsonUtility.ToJson(data));
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             default:

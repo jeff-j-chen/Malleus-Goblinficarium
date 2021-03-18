@@ -5,7 +5,7 @@ using System.IO;
 
 public class Scripts : MonoBehaviour {
     string path = "save.txt";
-    public Data data;
+    public GameData gameData;
     public Dice dice;
     public Arrow arrow;
     public Enemy enemy;
@@ -28,7 +28,7 @@ public class Scripts : MonoBehaviour {
     public Dictionary<float, WaitForSeconds> delays = new Dictionary<float, WaitForSeconds>();
 
     private void Start() {
-        data = LoadData();
+        gameData = LoadGameData();
         dice = FindObjectOfType<Dice>();
         arrow = FindObjectOfType<Arrow>();
         enemy = FindObjectOfType<Enemy>();
@@ -51,18 +51,21 @@ public class Scripts : MonoBehaviour {
             delays.Add(delay, new WaitForSeconds(delay));
         }
         print("refund stamina before just before the game is closed!");
+        print("loading game, newgame is " + gameData.newGame);
+        gameData.newGame = false;
+        SaveGameData();
     }
 
-    public void SaveDataToFile() { 
-        File.WriteAllText(path, JsonUtility.ToJson(data));
+    public void SaveGameData() { 
+        File.WriteAllText(path, JsonUtility.ToJson(gameData));
     }
 
-    public Data LoadData() { 
-        if (File.Exists(path)) { return JsonUtility.FromJson<Data>(File.ReadAllText(path)); }
+    public GameData LoadGameData() { 
+        if (File.Exists(path)) { return JsonUtility.FromJson<GameData>(File.ReadAllText(path)); }
         else { 
             Debug.LogError($"no savefile found, so just created one!");
-            File.WriteAllText(path, JsonUtility.ToJson(new Data()));
-            return JsonUtility.FromJson<Data>(File.ReadAllText(path));
+            File.WriteAllText(path, JsonUtility.ToJson(new GameData()));
+            return JsonUtility.FromJson<GameData>(File.ReadAllText(path));
         }
     }
 }

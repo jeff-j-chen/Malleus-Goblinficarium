@@ -143,8 +143,8 @@ public class LevelManager : MonoBehaviour {
                 // going to next level after having defeated devil
                 if (scripts.player.charNum != 3) { 
                     // give player the next character, as long as they aren't on the last one\
-                    scripts.data.unlockedChars[scripts.player.charNum + 1] = true;
-                    scripts.SaveDataToFile();
+                    scripts.gameData.unlockedChars[scripts.player.charNum + 1] = true;
+                    scripts.SaveGameData();
                     // grab it back 
                 }
                 for (int i = 0; i < 15; i++) {
@@ -178,27 +178,27 @@ public class LevelManager : MonoBehaviour {
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
-                    scripts.data.tsLevel = -1;
-                    scripts.data.tsSub = -1;
-                    scripts.data.tsWeaponAcc = -1;
-                    scripts.data.tsWeaponSpd = -1;
-                    scripts.data.tsWeaponDmg = -1;
-                    scripts.data.tsWeaponDef = -1;
-                    scripts.data.tsItemNames = new string[9];
-                    scripts.data.tsItemNames = new string[9];
-                    scripts.data.tsItemNames = new string[9];
-                    scripts.SaveDataToFile();
+                    scripts.gameData.tsLevel = -1;
+                    scripts.gameData.tsSub = -1;
+                    scripts.gameData.tsWeaponAcc = -1;
+                    scripts.gameData.tsWeaponSpd = -1;
+                    scripts.gameData.tsWeaponDmg = -1;
+                    scripts.gameData.tsWeaponDef = -1;
+                    scripts.gameData.tsItemNames = new string[9];
+                    scripts.gameData.tsItemNames = new string[9];
+                    scripts.gameData.tsItemNames = new string[9];
+                    scripts.SaveGameData();
                     // make tombstone inaccessible
                 }
                 else if (scripts.enemy.enemyName.text == "Merchant") {
                     print("cleared merchant wares!"); 
-                    scripts.data.merchantItemNames = new string[9];
-                    scripts.data.merchantItemTypes = new string[9];
-                    scripts.data.merchantItemMods  = new string[9];
-                    scripts.SaveDataToFile();
+                    scripts.gameData.merchantItemNames = new string[9];
+                    scripts.gameData.merchantItemTypes = new string[9];
+                    scripts.gameData.merchantItemMods  = new string[9];
+                    scripts.SaveGameData();
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
-                if (sub == scripts.data.tsSub && level == scripts.data.tsLevel && !(sub == 1 && level == 1)) {
+                if (sub == scripts.gameData.tsSub && level == scripts.gameData.tsLevel && !(sub == 1 && level == 1)) {
                     // spawn tombstone if we are on the correct level and not on 1-1
                     toSpawn = "tombstone";
                     // level matches which level to add to
@@ -254,8 +254,8 @@ public class LevelManager : MonoBehaviour {
             // clear the loading text and move the box offscreen
             scripts.itemManager.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
-            scripts.data.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-            scripts.SaveDataToFile();
+            scripts.gameData.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+            scripts.SaveGameData();
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
                 scripts.itemManager.lootText.text = "loot:";
@@ -296,8 +296,8 @@ public class LevelManager : MonoBehaviour {
             scripts.turnManager.DetermineMove(false);
             // determine who moves
             lockActions = false;
-            scripts.data.resumeSub = scripts.levelManager.sub;
-            scripts.data.resumeLevel = scripts.levelManager.sub;
+            scripts.gameData.resumeSub = scripts.levelManager.sub;
+            scripts.gameData.resumeLevel = scripts.levelManager.sub;
         }
     }
 

@@ -31,7 +31,7 @@ public class TurnManager : MonoBehaviour {
         SetTargetOf("enemy");
         scripts.enemy.TargetBest();
         scripts.statSummoner.ResetDiceAndStamina();
-        if (!(scripts.levelManager.level == scripts.data.tsLevel && scripts.levelManager.sub == scripts.data.tsSub) && scripts.levelManager.sub != 4) { scripts.diceSummoner.SummonDice(true); }
+        if (!(scripts.levelManager.level == scripts.gameData.tsLevel && scripts.levelManager.sub == scripts.gameData.tsSub) && scripts.levelManager.sub != 4) { scripts.diceSummoner.SummonDice(true); }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
     }
@@ -161,7 +161,7 @@ public class TurnManager : MonoBehaviour {
     /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            if (scripts.levelManager.sub == scripts.data.tsSub && scripts.levelManager.level == scripts.data.tsLevel && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
+            if (scripts.levelManager.sub == scripts.gameData.tsSub && scripts.levelManager.level == scripts.gameData.tsLevel && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
                 // tombstone
                 scripts.player.target.text = "none";
                 scripts.player.targetInfo.text = "why would you try to wound a tombstone?";
@@ -270,8 +270,8 @@ public class TurnManager : MonoBehaviour {
                 scripts.player.woundList.Clear();
                 StartCoroutine(HealAfterDelay());
             }
-            scripts.data.playerStamina = scripts.player.stamina;
-            scripts.SaveDataToFile();
+            scripts.gameData.playerStamina = scripts.player.stamina;
+            scripts.SaveGameData();
         }
         else if (playerOrEnemy == "enemy") {
             scripts.enemy.stamina += amount;
@@ -457,7 +457,7 @@ public class TurnManager : MonoBehaviour {
             DetermineMove(true);
             // make the next person go again
         }
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
         yield return scripts.delays[0.45f];
         // small delay
         ClearVariablesAfterRound();
@@ -480,12 +480,12 @@ public class TurnManager : MonoBehaviour {
         scripts.itemManager.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
         usedMace = false;
-        scripts.data.discardableDieCounter = 0;
-        scripts.data.usedMace = false;
-        scripts.data.usedAnkh = false;
-        scripts.data.usedBoots = false;
-        scripts.data.usedHelm = false;
-        scripts.SaveDataToFile();
+        scripts.gameData.discardableDieCounter = 0;
+        scripts.gameData.usedMace = false;
+        scripts.gameData.usedAnkh = false;
+        scripts.gameData.usedBoots = false;
+        scripts.gameData.usedHelm = false;
+        scripts.SaveGameData();
         ClearPotionStats();
         if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !scripts.enemy.isDead) {
             scripts.enemy.stamina = 5;
@@ -517,8 +517,8 @@ public class TurnManager : MonoBehaviour {
         if (playerOrEnemy == "player") { scripts.player.isDead = true; }
         else if (playerOrEnemy == "enemy") { scripts.enemy.isDead = true; }
         // make sure whoever is killed is set to be dead
-        scripts.data.enemyIsDead = true;
-        scripts.SaveDataToFile();
+        scripts.gameData.enemyIsDead = true;
+        scripts.SaveGameData();
         yield return scripts.delays[0.55f];
         // short delay
         if (playerOrEnemy == "player") {
@@ -564,7 +564,7 @@ public class TurnManager : MonoBehaviour {
         if (scripts.enemy.spawnNum == 0) {
             // if cloaked devil
             scripts.enemy.spawnNum = 1;
-            scripts.data.enemyNum = scripts.enemy.spawnNum;
+            scripts.gameData.enemyNum = scripts.enemy.spawnNum;
             scripts.enemy.GetComponent<Animator>().runtimeAnimatorController = scripts.enemy.controllers[1];
             if (playerOrEnemy == "enemy") { 
                 print("syncing up!");
@@ -812,8 +812,8 @@ public class TurnManager : MonoBehaviour {
                 // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
                 scripts.player.woundList.Add(scripts.enemy.target.text);
                 // add the hit
-                scripts.data.playerWounds = scripts.player.woundList;
-                scripts.SaveDataToFile();
+                scripts.gameData.playerWounds = scripts.player.woundList;
+                scripts.SaveGameData();
                 StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
                 // make it change
                 RecalculateMaxFor("player");
@@ -909,8 +909,8 @@ public class TurnManager : MonoBehaviour {
                     if (scripts.enemy.spawnNum != 0) {
                         scripts.enemy.woundList.Add(scripts.player.target.text);
                         // add the wound
-                        scripts.data.enemyWounds = scripts.enemy.woundList;
-                        scripts.SaveDataToFile();
+                        scripts.gameData.enemyWounds = scripts.enemy.woundList;
+                        scripts.SaveGameData();
                         if (scripts.player.charNum == 2) { 
                             scripts.turnManager.ChangeStaminaOf("player", 1);
                             // increment stamina if on 3rd character
@@ -1118,8 +1118,8 @@ public class TurnManager : MonoBehaviour {
             scripts.statSummoner.SetDebugInformationFor("enemy");
             // update the debug
         }
-        scripts.data.enemyStamina = scripts.enemy.stamina;
-        scripts.SaveDataToFile();
+        scripts.gameData.enemyStamina = scripts.enemy.stamina;
+        scripts.SaveGameData();
     }
 
     private void AddSpeedAndAccuracy(int enemyAim, int playerSpd, int enemySpd, int playerAtt, int enemyDef)

@@ -13,46 +13,46 @@ public class TombstoneData : MonoBehaviour {
     public void SetTombstoneData() {
         print("make sure to clear player's saved items and stuff here");
         scripts = FindObjectOfType<Scripts>();
-        scripts.data.tsItemNames = new string[9];
-        scripts.data.tsItemNames = new string[9];
-        scripts.data.tsItemNames = new string[9];
+        scripts.gameData.tsItemNames = new string[9];
+        scripts.gameData.tsItemNames = new string[9];
+        scripts.gameData.tsItemNames = new string[9];
         // clear data before placing in new stuff
         Item item = scripts.player.inventory[0].GetComponent<Item>();
-        scripts.data.tsWeaponAcc = item.weaponStats["green"];
-        scripts.data.tsWeaponSpd = item.weaponStats["blue"];
-        scripts.data.tsWeaponDmg = item.weaponStats["red"];
-        scripts.data.tsWeaponDef = item.weaponStats["white"];
-        scripts.data.tsItemNames[0] = item.itemName.Split(' ')[1];
-        scripts.data.tsItemTypes[0] = item.itemType;
-        scripts.data.tsItemMods[0] = item.modifier;
+        scripts.gameData.tsWeaponAcc = item.weaponStats["green"];
+        scripts.gameData.tsWeaponSpd = item.weaponStats["blue"];
+        scripts.gameData.tsWeaponDmg = item.weaponStats["red"];
+        scripts.gameData.tsWeaponDef = item.weaponStats["white"];
+        scripts.gameData.tsItemNames[0] = item.itemName.Split(' ')[1];
+        scripts.gameData.tsItemTypes[0] = item.itemType;
+        scripts.gameData.tsItemMods[0] = item.modifier;
         for (int i = 1; i < scripts.player.inventory.Count; i++) {
             item = scripts.player.inventory[i].GetComponent<Item>();
-            scripts.data.tsItemNames[i] = item.itemName;
-            scripts.data.tsItemTypes[i] = item.itemType;
-            scripts.data.tsItemMods[i] = item.modifier;
+            scripts.gameData.tsItemNames[i] = item.itemName;
+            scripts.gameData.tsItemTypes[i] = item.itemType;
+            scripts.gameData.tsItemMods[i] = item.modifier;
         }
         // set the tombstone data to whatever the player currently has
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
-            scripts.data.tsLevel = 3;
-            scripts.data.tsSub = 3;
+            scripts.gameData.tsLevel = 3;
+            scripts.gameData.tsSub = 3;
             // game will crash if we go to 4-1*, easy solution here
         }
         else { 
-            if (scripts.levelManager.sub == 4) { scripts.data.tsSub = 3; }
+            if (scripts.levelManager.sub == 4) { scripts.gameData.tsSub = 3; }
             else if (scripts.levelManager.sub == 1 && scripts.levelManager.level == 1){ 
-                scripts.data.tsSub = -1;
-                scripts.data.tsLevel = -1;
+                scripts.gameData.tsSub = -1;
+                scripts.gameData.tsLevel = -1;
             }
             else { 
-                scripts.data.tsSub = scripts.levelManager.sub; 
-                scripts.data.tsLevel = scripts.levelManager.level;
+                scripts.gameData.tsSub = scripts.levelManager.sub; 
+                scripts.gameData.tsLevel = scripts.levelManager.level;
             }
         }
         // assign the level of which the tombstone will appear on
-        scripts.data.newGame = true;
+        scripts.gameData.newGame = true;
         // player died, so make the next game a new one
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true);
             // move all items on the floor to the player's inventory
@@ -84,11 +84,11 @@ public class TombstoneData : MonoBehaviour {
         if (delay) { yield return new WaitForSeconds(0.01f); }
         // optional slight delay so that resuming on a tombstone level doesn't mess things up
         scripts = FindObjectOfType<Scripts>();
-        scripts.itemManager.CreateWeaponWithStats(scripts.data.tsItemNames[0], "rusty", scripts.data.tsWeaponAcc - 1, scripts.data.tsWeaponSpd - 1, scripts.data.tsWeaponDmg - 1, scripts.data.tsWeaponDef - 1);
+        scripts.itemManager.CreateWeaponWithStats(scripts.gameData.tsItemNames[0], "rusty", scripts.gameData.tsWeaponAcc - 1, scripts.gameData.tsWeaponSpd - 1, scripts.gameData.tsWeaponDmg - 1, scripts.gameData.tsWeaponDef - 1);
         // make the item with worse stats
-        for (int i = 1; i < scripts.data.tsItemNames.Length; i++) {
-            if (scripts.data.tsItemNames[i] != null && scripts.data.tsItemNames[i] != "") { 
-                GameObject created = scripts.itemManager.CreateItem(scripts.data.tsItemNames[i].Replace(' ', '_'), scripts.data.tsItemTypes[i], scripts.data.tsItemMods[i]);
+        for (int i = 1; i < scripts.gameData.tsItemNames.Length; i++) {
+            if (scripts.gameData.tsItemNames[i] != null && scripts.gameData.tsItemNames[i] != "") { 
+                GameObject created = scripts.itemManager.CreateItem(scripts.gameData.tsItemNames[i].Replace(' ', '_'), scripts.gameData.tsItemTypes[i], scripts.gameData.tsItemMods[i]);
                 switch (created.GetComponent<Item>().itemName) { 
                     case "helm of might":
                         created.GetComponent<Item>().itemName = "broken helm"; break;
@@ -114,9 +114,9 @@ public class TombstoneData : MonoBehaviour {
         if (delay) { yield return new WaitForSeconds(0.01f); }
         scripts = FindObjectOfType<Scripts>();
         for (int i = 0; i < 9; i++) {  
-            if (scripts.data.merchantItemNames[i] != null && scripts.data.merchantItemNames[i] != "") { 
-                print($"creating a {scripts.data.merchantItemNames[i]}");
-                GameObject created = scripts.itemManager.CreateItem(scripts.data.merchantItemNames[i], scripts.data.merchantItemTypes[i], scripts.data.merchantItemMods[i]);
+            if (scripts.gameData.merchantItemNames[i] != null && scripts.gameData.merchantItemNames[i] != "") { 
+                print($"creating a {scripts.gameData.merchantItemNames[i]}");
+                GameObject created = scripts.itemManager.CreateItem(scripts.gameData.merchantItemNames[i], scripts.gameData.merchantItemTypes[i], scripts.gameData.merchantItemMods[i]);
             }
         }
         // just spawn in the goods 

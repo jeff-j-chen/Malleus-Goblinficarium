@@ -205,8 +205,8 @@ public class Item : MonoBehaviour {
                         if (scripts.itemManager.numItemsDroppedForTrade > 0)  { 
                             // if player has dropped items for trading
                             scripts.itemManager.numItemsDroppedForTrade--;
-                            scripts.data.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-                            scripts.SaveDataToFile();
+                            scripts.gameData.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                            scripts.SaveGameData();
                             // decrement counter
                             scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
                             // move the selected item into the player's inventory
@@ -379,22 +379,22 @@ public class Item : MonoBehaviour {
                         case "accuracy":
                             scripts.player.potionStats["green"] += 3;
                             ShiftDiceAccordingly("green", 3);
-                            scripts.data.potionAcc = scripts.player.potionStats["green"];
+                            scripts.gameData.potionAcc = scripts.player.potionStats["green"];
                             break;
                         case "speed":
                             scripts.player.potionStats["blue"] += 3;
                             ShiftDiceAccordingly("blue", 3);
-                            scripts.data.potionAcc = scripts.player.potionStats["blue"];
+                            scripts.gameData.potionAcc = scripts.player.potionStats["blue"];
                             break;
                         case "strength":
                             scripts.player.potionStats["red"] += 3;
                             ShiftDiceAccordingly("red", 3);
-                            scripts.data.potionAcc = scripts.player.potionStats["red"];
+                            scripts.gameData.potionAcc = scripts.player.potionStats["red"];
                             break;
                         case "defense":
                             scripts.player.potionStats["white"] += 3;
                             ShiftDiceAccordingly("white", 3);
-                            scripts.data.potionAcc = scripts.player.potionStats["white"];
+                            scripts.gameData.potionAcc = scripts.player.potionStats["white"];
                             break;
                         case "might":
                             scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
@@ -408,7 +408,7 @@ public class Item : MonoBehaviour {
                         case "nothing": break;
                         default: print("invalid potion modifier detected"); break;
                     }
-                    scripts.SaveDataToFile();
+                    scripts.SaveGameData();
                     scripts.statSummoner.SummonStats();
                     scripts.statSummoner.SetDebugInformationFor("player");
                     Remove();
@@ -418,8 +418,8 @@ public class Item : MonoBehaviour {
                     // play sound clip
                     scripts.itemManager.discardableDieCounter++;
                     // increment counter
-                    scripts.data.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                    scripts.SaveDataToFile();
+                    scripts.gameData.discardableDieCounter = scripts.itemManager.discardableDieCounter;
+                    scripts.SaveGameData();
                     Remove();
                     break;
                 case "skeleton key" when scripts.levelManager.sub != 4: 
@@ -453,8 +453,8 @@ public class Item : MonoBehaviour {
                             scripts.soundManager.PlayClip("fwoosh");
                             // need 3 stamina
                             scripts.itemManager.usedHelm = true;
-                            scripts.data.usedMace = true;
-                            scripts.SaveDataToFile();
+                            scripts.gameData.usedMace = true;
+                            scripts.SaveGameData();
                             // set variable
                             scripts.turnManager.SetStatusText("you feel mighty");
                             // notify player
@@ -479,8 +479,8 @@ public class Item : MonoBehaviour {
                             scripts.soundManager.PlayClip("fwoosh");
                             scripts.turnManager.SetStatusText("you feel dodgy");
                             scripts.itemManager.usedBoots = true;
-                            scripts.data.usedMace = true;
-                            scripts.SaveDataToFile();
+                            scripts.gameData.usedMace = true;
+                            scripts.SaveGameData();
                             scripts.turnManager.ChangeStaminaOf("player", -1);
                             scripts.player.SetPlayerStatusEffect("dodge", true);
                         }
@@ -492,8 +492,8 @@ public class Item : MonoBehaviour {
                     if (!scripts.itemManager.usedAnkh) {
                         scripts.soundManager.PlayClip("click");
                         scripts.itemManager.usedAnkh = true;
-                        scripts.data.usedAnkh = true;
-                        scripts.SaveDataToFile();
+                        scripts.gameData.usedAnkh = true;
+                        scripts.SaveGameData();
                         foreach (string key in scripts.itemManager.statArr) {
                             scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
                             scripts.statSummoner.addedPlayerStamina[key] = 0;
@@ -568,8 +568,8 @@ public class Item : MonoBehaviour {
                     }
                     else {
                         if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
-                        scripts.data.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-                        scripts.SaveDataToFile();
+                        scripts.gameData.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                        scripts.SaveGameData();
                         // if trader level increment the number of items dropped for trading
                         if (itemType == "weapon") { 
                             scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"); 

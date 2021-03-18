@@ -150,23 +150,23 @@ public class DiceSummoner : MonoBehaviour
     }
 
     public void SaveDiceValues() { 
-        scripts.data.diceNumbers.Clear();
-        scripts.data.diceTypes.Clear();
-        scripts.data.diceAttachedToStat.Clear();
-        scripts.data.dicePlayerOrEnemy.Clear();
-        scripts.data.diceRerolled.Clear();
+        scripts.gameData.diceNumbers.Clear();
+        scripts.gameData.diceTypes.Clear();
+        scripts.gameData.diceAttachedToStat.Clear();
+        scripts.gameData.dicePlayerOrEnemy.Clear();
+        scripts.gameData.diceRerolled.Clear();
         // make sure to clear everything before saving new data
         for (int i = 0; i < existingDice.Count; i++) { 
             // for every existing dice
             Dice dice = existingDice[i].GetComponent<Dice>();
-            scripts.data.diceNumbers.Add(dice.diceNum);
-            scripts.data.diceTypes.Add(dice.diceType);
-            scripts.data.diceAttachedToStat.Add(dice.statAddedTo);
-            scripts.data.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
-            scripts.data.diceRerolled.Add(dice.isRerolled);
+            scripts.gameData.diceNumbers.Add(dice.diceNum);
+            scripts.gameData.diceTypes.Add(dice.diceType);
+            scripts.gameData.diceAttachedToStat.Add(dice.statAddedTo);
+            scripts.gameData.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
+            scripts.gameData.diceRerolled.Add(dice.isRerolled);
             // add its info to the info 
         }
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
         // make sure to save it
     }
 

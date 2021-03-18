@@ -123,8 +123,8 @@ public class Dice : MonoBehaviour {
                     // discard from the enemy
                     scripts.itemManager.discardableDieCounter--;
                     // decrease the counter for the number of die 
-                    scripts.data.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                    scripts.SaveDataToFile();
+                    scripts.gameData.discardableDieCounter = scripts.itemManager.discardableDieCounter;
+                    scripts.SaveGameData();
                 }
                 else if (scripts.enemy.woundList.Contains("chest")) {
                     // if enemy is wounded in the chest

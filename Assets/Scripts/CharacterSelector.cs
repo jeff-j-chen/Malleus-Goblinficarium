@@ -34,7 +34,7 @@ public class CharacterSelector : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
-        unlockedChars = scripts.data.unlockedChars;
+        unlockedChars = scripts.gameData.unlockedChars;
         selectionNum = 0;
         SetSelection(selectionNum);
         StartCoroutine(allowFX());
@@ -74,9 +74,9 @@ public class CharacterSelector : MonoBehaviour {
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip");
         // play sfx (this is when selected)
-        scripts.data.newCharNum = selectionNum;
+        scripts.gameData.newCharNum = selectionNum;
         // set the selection num
-        scripts.SaveDataToFile();
+        scripts.SaveGameData();
         // save the selection num
         yield return scripts.delays[0.1f];
         // delay here, because i don't want a singleton and this allows blip to complete playing
@@ -180,8 +180,8 @@ public class CharacterSelector : MonoBehaviour {
             // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
             // fade to black and then back
-            scripts.data.easyMode = easy; 
-            scripts.SaveDataToFile();
+            scripts.gameData.easyMode = easy; 
+            scripts.SaveGameData();
             // apply it to our save file so the next game will have the correct character
         }
     }

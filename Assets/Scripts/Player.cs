@@ -60,9 +60,9 @@ public class Player : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // something here to check if we are continuing or starting a new game
-        if (scripts.data.newGame) { charNum = scripts.data.newCharNum; }
-        else { charNum = scripts.data.curCharNum; }
-        scripts.data.curCharNum = charNum;
+        if (scripts.gameData.newGame) { charNum = scripts.gameData.newCharNum; }
+        else { charNum = scripts.gameData.curCharNum; }
+        scripts.gameData.curCharNum = charNum;
         scripts.itemManager.GiveClassItems(charNum);
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
@@ -185,8 +185,8 @@ public class Player : MonoBehaviour {
             if (scripts.itemManager.PlayerHasWeapon("mace") && !scripts.turnManager.usedMace) {
                 // if player has mace
                 scripts.turnManager.usedMace = true;
-                scripts.data.usedMace = true;
-                scripts.SaveDataToFile();
+                scripts.gameData.usedMace = true;
+                scripts.SaveGameData();
                 // prevent player from using mace again
                 scripts.soundManager.PlayClip("click");
                 foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
