@@ -167,8 +167,8 @@ public class Dice : MonoBehaviour {
         }
         scripts.statSummoner.SetDebugInformationFor("enemy");
         // set the debug information
-        
-        
+        scripts.persistentData.diceDiscarded++;
+        scripts.SavePersistentData();
     }
 
     /// <summary>

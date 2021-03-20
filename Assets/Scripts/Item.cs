@@ -220,6 +220,8 @@ public class Item : MonoBehaviour {
             }
             else {
                 if (itemType == "retry") {
+                    scripts.persistentData.gamesPlayed++;
+                    scripts.SavePersistentData();
                     scripts.levelManager.lockActions = true;
                     Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
                     // reload scene

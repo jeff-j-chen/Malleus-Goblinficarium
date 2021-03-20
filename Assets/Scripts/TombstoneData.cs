@@ -69,6 +69,7 @@ public class TombstoneData : MonoBehaviour {
         scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
         scripts.persistentData.deaths++;
+        scripts.persistentData.gamesPlayed++;
         scripts.SavePersistentData();
     }
 

@@ -60,7 +60,6 @@ public class Scripts : MonoBehaviour {
     }
 
     public void SaveGameData() { 
-        print("saved all game data!");
         File.WriteAllText(gamePath, JsonUtility.ToJson(gameData));
     }
 
@@ -74,7 +73,7 @@ public class Scripts : MonoBehaviour {
     }
 
     public void SavePersistentData() { 
-        File.WriteAllText(persistentPath, JsonUtility.ToJson(gameData));
+        File.WriteAllText(persistentPath, JsonUtility.ToJson(persistentData));
     }
 
     public PersistentData LoadPersistentData() { 

@@ -16,7 +16,7 @@ public class StaminaButton : MonoBehaviour {
             // if situation allows
             if (name == "plus(Clone)") {
                 // if plus button
-                if (scripts.player.stamina > 0 && scripts.statSummoner.addedPlayerStamina[stat] < 6) {
+                if (scripts.player.stamina > 0 && scripts.statSummoner.addedPlayerStamina[stat] < 8) {
                     // if player has the stamina and hasn't put 7 into the stat already
                     ShiftDiceAccordingly(stat, 1);
                     // move the die 
@@ -26,7 +26,9 @@ public class StaminaButton : MonoBehaviour {
                     scripts.statSummoner.SummonStats();
                     scripts.statSummoner.SetDebugInformationFor("player");
                     // summon stats and update the debug information
+                    scripts.persistentData.staminaUsed++;
                 }
+                
             }
             else if (name == "minus(Clone)") {
                 if (scripts.statSummoner.addedPlayerStamina[stat] > 0) {
@@ -39,12 +41,14 @@ public class StaminaButton : MonoBehaviour {
                     scripts.statSummoner.SummonStats();
                     scripts.statSummoner.SetDebugInformationFor("player");
                     // summon teh stats and update the debug information
+                    scripts.persistentData.staminaUsed--;
                 }
             }
             else {
                 Debug.LogError("StaminaButton is not attached to the correct object");
                 // something is wrong
             }
+            scripts.SavePersistentData();
         }
     }
 

@@ -184,15 +184,9 @@ public class ItemManager : MonoBehaviour {
             CreateWeaponWithStats("rapier", "common", 4, 2, -1, 1);
             // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
             MoveToInventory(0, true, false, false);
-            CreateItem("necklet", "common", "arcane");
+            CreateItem("armor", "common");
             MoveToInventory(0, true, false, false);
-            CreateItem("necklet", "common", "strength");
-            MoveToInventory(0, true, false, false);
-            CreateItem("necklet", "common", "strength");
-            MoveToInventory(0, true, false, false);
-            CreateItem("shuriken", "common");
-            MoveToInventory(0, true, false, false);
-            CreateItem("potion", "common", "might");
+            CreateItem("scroll", "common", "challenge");
             MoveToInventory(0, true, false, false);
             if (scripts.persistentData.easyMode) { 
                 CreateItem("torch", "common");
@@ -487,7 +481,7 @@ public class ItemManager : MonoBehaviour {
                 if (!starter && playAudio) { scripts.soundManager.PlayClip("click"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
-                    scripts.persistentData.weaponsSwapped++;
+                    if (!starter) { scripts.persistentData.weaponsSwapped++; }
                     // if the item being moved is a weapon 
                     floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
                     // move the item to the weapon slot

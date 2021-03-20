@@ -260,8 +260,6 @@ public class TurnManager : MonoBehaviour {
     public void ChangeStaminaOf(string playerOrEnemy, int amount) {
         if (playerOrEnemy == "player") {
             scripts.player.stamina += amount;
-            scripts.persistentData.staminaUsed += amount;
-            scripts.SavePersistentData();
             // change stamina
             scripts.player.staminaCounter.text = scripts.player.stamina.ToString();
             // update counter
@@ -332,7 +330,7 @@ public class TurnManager : MonoBehaviour {
                 // show animation
             }
         }
-        scripts.persistentData.weaponUses[Array.IndexOf(scripts.itemManager.weaponNames, scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[0])]++;
+        scripts.persistentData.weaponUses[Array.IndexOf(scripts.itemManager.weaponNames, scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1])]++;
         // increment the # of times the player's current weapon has been used
         scripts.SavePersistentData();
     }
@@ -917,7 +915,7 @@ public class TurnManager : MonoBehaviour {
                             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
                         }
                         scripts.persistentData.woundsInflicted++;
-                        scripts.persistentData.woundsInflictedDict[scripts.enemy.enemyName.text.ToLower()]++;
+                        scripts.persistentData.woundsInflictedDict[scripts.player.target.text.ToLower()]++;
                         // same as above
                     }
                 }

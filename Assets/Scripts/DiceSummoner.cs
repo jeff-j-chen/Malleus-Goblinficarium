@@ -42,7 +42,8 @@ public class DiceSummoner : MonoBehaviour
                 scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>().diceNum, 
                 scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>().diceType, 
                 "player",
-                scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>().statAddedTo
+                scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>().statAddedTo,
+                initialSix:true
             );
             // create the die and add it to the player
         }
@@ -54,25 +55,26 @@ public class DiceSummoner : MonoBehaviour
         // clear the list so we have a fresh array
         GenerateDiceTypes();
         for (int i = 0; i < 6; i++) {
-            GenerateSingleDie(UnityEngine.Random.Range(1, 7), null, "none", null, i);
+            GenerateSingleDie(UnityEngine.Random.Range(1, 7), null, "none", null, i, initialSix:true);
             // generate the 6 base die for every round
         }
         if (scripts.itemManager.PlayerHasWeapon("flail")) {
             // give the player a red die if wielding a flail
-            GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red");
+            GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red", initialSix:true);
         }
         if (scripts.player.charNum == 1) { 
             // if player character #2 (maul armor helm), give player yellow die
-            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
         }
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
             // if devil
             foreach (string typeToGen in scripts.itemManager.statArr) {
                 // generate a die for every stat
-                GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen);
+                GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
                 // attach it to the devl
             }
         }
+        SaveDiceValues();
     }
 
     /// <summary>
@@ -83,7 +85,7 @@ public class DiceSummoner : MonoBehaviour
     /// <param name="attachToPlayerOrEnemy">If attaching the die to the player, enemy, or none. Default none.</param>
     /// <param name="statToAttachTo">The string of the stat to add the die to. Default null.</param>
     /// <param name="i">The integer representing the number of die spawned if spawned in a chain. Default 0.</param>
-    public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0) {
+    public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0, bool initialSix=false) {
         Vector2 instantiationPos;
         // reference variable for the die's attribute.
         if (attachToPlayerOrEnemy == "none") { instantiationPos = new Vector2(xCoords[i], yCoord); }
@@ -146,7 +148,7 @@ public class DiceSummoner : MonoBehaviour
         if (attachToPlayerOrEnemy == "player") { scripts.statSummoner.SetDebugInformationFor("player"); }
         else if (attachToPlayerOrEnemy == "enemy") { scripts.statSummoner.SetDebugInformationFor("enemy"); }
         // set the necessary debug information
-        SaveDiceValues();
+        if (!initialSix) { SaveDiceValues(); }
     }
 
     public void SaveDiceValues() { 
