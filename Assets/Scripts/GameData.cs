@@ -9,8 +9,6 @@ public class GameData {
     public bool newGame;
     public int curCharNum;
     public int newCharNum;
-    public bool easyMode;
-    public bool[] unlockedChars;
     public int tsLevel;
     public int tsSub;
     public int tsWeaponAcc;
@@ -64,8 +62,6 @@ public class GameData {
     public GameData() {
         curCharNum = 0;
         newCharNum = 0;
-        easyMode = false;
-        unlockedChars = new bool[4] { true, false, false, false};
         tsLevel = -1;
         tsSub = -1;
         tsWeaponAcc = 0;

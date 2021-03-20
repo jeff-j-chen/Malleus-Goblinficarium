@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class MenuButton : MonoBehaviour
 {
+    string persistentPath = "persistentSave.txt";
     private float transitionMultiplier;
     private SoundManager soundManager;
     private Arrow arrow;
@@ -39,12 +40,23 @@ public class MenuButton : MonoBehaviour
             case "New Game":
                 GameData data = new GameData();
                 File.WriteAllText("save.txt", JsonUtility.ToJson(data));
+                PersistentData persistentData = LoadPersistentData();
+                persistentData.gamesPlayed++;
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             default:
                 Initiate.Fade(buttonName, Color.black, transitionMultiplier);
                 break;
             // go to the associated level
+        }
+    }
+
+    public PersistentData LoadPersistentData() { 
+        if (File.Exists(persistentPath)) { return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath)); }
+        else { 
+            Debug.LogError($"no statistics found, so just created one!");
+            File.WriteAllText(persistentPath, JsonUtility.ToJson(new PersistentData()));
+            return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath));
         }
     }
 }

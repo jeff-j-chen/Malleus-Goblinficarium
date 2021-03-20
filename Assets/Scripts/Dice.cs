@@ -194,10 +194,12 @@ public class Dice : MonoBehaviour {
     /// </summary>
     private void Reroll() {
         // self explanatory
+        scripts.persistentData.diceRerolled++;
         scripts.turnManager.alterationDuringMove = true;
         StartCoroutine(RerollAnimation());
         isRerolled = true;
         scripts.diceSummoner.SaveDiceValues();
+        scripts.SavePersistentData();
     }
 
     /// <summary>

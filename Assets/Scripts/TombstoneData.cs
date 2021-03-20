@@ -32,7 +32,6 @@ public class TombstoneData : MonoBehaviour {
             scripts.gameData.tsItemMods[i] = item.modifier;
         }
         // set the tombstone data to whatever the player currently has
-        scripts.SaveGameData();
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
             scripts.gameData.tsLevel = 3;
             scripts.gameData.tsSub = 3;
@@ -69,6 +68,8 @@ public class TombstoneData : MonoBehaviour {
         // create retry button
         scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
+        scripts.persistentData.deaths++;
+        scripts.SavePersistentData();
     }
 
     public void SpawnSavedTSItems(bool delay=false) {

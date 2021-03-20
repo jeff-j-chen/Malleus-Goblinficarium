@@ -244,6 +244,7 @@ public class HighlightCalculator : MonoBehaviour {
             dice.SetToOne();
         }
         // take actions depending on injuries and die types
+        scripts.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
@@ -262,6 +263,7 @@ public class HighlightCalculator : MonoBehaviour {
         }
         // decrease if gut wound
         scripts.turnManager.SetTargetOf("player");
+        scripts.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>

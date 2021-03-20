@@ -150,6 +150,7 @@ public class DiceSummoner : MonoBehaviour
     }
 
     public void SaveDiceValues() { 
+        print("saving dice values!");
         scripts.gameData.diceNumbers.Clear();
         scripts.gameData.diceTypes.Clear();
         scripts.gameData.diceAttachedToStat.Clear();
@@ -163,6 +164,7 @@ public class DiceSummoner : MonoBehaviour
             scripts.gameData.diceTypes.Add(dice.diceType);
             scripts.gameData.diceAttachedToStat.Add(dice.statAddedTo);
             scripts.gameData.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
+            print(dice.isOnPlayerOrEnemy);
             scripts.gameData.diceRerolled.Add(dice.isRerolled);
             // add its info to the info 
         }

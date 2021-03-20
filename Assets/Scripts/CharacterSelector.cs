@@ -34,7 +34,7 @@ public class CharacterSelector : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
-        unlockedChars = scripts.gameData.unlockedChars;
+        unlockedChars = scripts.persistentData.unlockedChars;
         selectionNum = 0;
         SetSelection(selectionNum);
         StartCoroutine(allowFX());
@@ -180,8 +180,8 @@ public class CharacterSelector : MonoBehaviour {
             // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
             // fade to black and then back
-            scripts.gameData.easyMode = easy; 
-            scripts.SaveGameData();
+            scripts.persistentData.easyMode = easy; 
+            scripts.SavePersistentData();
             // apply it to our save file so the next game will have the correct character
         }
     }

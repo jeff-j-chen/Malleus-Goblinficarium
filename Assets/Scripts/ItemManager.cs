@@ -32,7 +32,7 @@ public class ItemManager : MonoBehaviour {
         { "spear",    new Dictionary<string, int>() { { "green", 2 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
         { "sword",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
     };  
-    private string[] weaponNames = new string[] { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
+    public string[] weaponNames = new string[] { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
     public Dictionary<string, Dictionary<string, int>> modifierDict = new Dictionary<string, Dictionary<string, int>>() {
         { "accurate0", new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
         { "accurate1", new Dictionary<string, int>() { { "green", 2 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
@@ -194,7 +194,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("potion", "common", "might");
             MoveToInventory(0, true, false, false);
-            if (scripts.gameData.easyMode) { 
+            if (scripts.persistentData.easyMode) { 
                 CreateItem("torch", "common");
                 MoveToInventory(0, true, false, false);
             }
@@ -204,7 +204,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("armor", "common");
             MoveToInventory(0, true, false, false);
-            if (scripts.gameData.easyMode) {
+            if (scripts.persistentData.easyMode) {
                 CreateItem("helm_of_might", "rare");
                 MoveToInventory(0, true, false, false);
             }
@@ -214,7 +214,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("boots_of_dodge", "rare");
             MoveToInventory(0, true, false, false);
-            if (scripts.gameData.easyMode) { 
+            if (scripts.persistentData.easyMode) { 
                 CreateItem("ankh", "rare");
                 MoveToInventory(0, true, false, false);
             }
@@ -224,7 +224,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             CreateItem("cheese", "common");
             MoveToInventory(0, true, false, false);
-            if (scripts.gameData.easyMode) { 
+            if (scripts.persistentData.easyMode) { 
                 CreateItem("kapala", "rare");
                 MoveToInventory(0, true, false, false);
             }
@@ -392,7 +392,7 @@ public class ItemManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Create a item with random modifier and stats. 
+    /// Create a weapon with randomized modifier and stats. Use to generate a weapon when the player slays the enemy.
     /// </summary>
     public void CreateRandomWeapon() {
         Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
@@ -414,8 +414,7 @@ public class ItemManager : MonoBehaviour {
         // concatenate the modifier with weapon name and assign the item's name attribute to be that
         baseWeapon = weaponDict[weaponNames[rand]];
         // get the base weapon's stats from the array of dictionaries gotten from the previous random number
-        foreach (string key in statArr)
-        { 
+        foreach (string key in statArr) { 
             // for every key in the stat array ("green", "blue", etc.)
             baseWeapon[key] += modifierDict[modifier][key]; 
             // add the modifier stats to the weapon stats
@@ -488,6 +487,7 @@ public class ItemManager : MonoBehaviour {
                 if (!starter && playAudio) { scripts.soundManager.PlayClip("click"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
+                    scripts.persistentData.weaponsSwapped++;
                     // if the item being moved is a weapon 
                     floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
                     // move the item to the weapon slot
@@ -714,13 +714,6 @@ public class ItemManager : MonoBehaviour {
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// Save tombstone data, clear player's inventory, and give them the retry button.
-    /// </summary>
-    public void SaveTombstoneItems() {
-        scripts.tombstoneData.SetTombstoneData();
     }
 
     public void SaveInventoryItems() {

@@ -4,8 +4,10 @@ using UnityEngine;
 using System.IO;
 
 public class Scripts : MonoBehaviour {
-    string path = "save.txt";
+    string gamePath = "gameSave.txt";
+    string persistentPath = "persistentSave.txt";
     public GameData gameData;
+    public PersistentData persistentData;
     public Dice dice;
     public Arrow arrow;
     public Enemy enemy;
@@ -29,6 +31,7 @@ public class Scripts : MonoBehaviour {
 
     private void Start() {
         gameData = LoadGameData();
+        persistentData = LoadPersistentData();
         dice = FindObjectOfType<Dice>();
         arrow = FindObjectOfType<Arrow>();
         enemy = FindObjectOfType<Enemy>();
@@ -57,15 +60,29 @@ public class Scripts : MonoBehaviour {
     }
 
     public void SaveGameData() { 
-        File.WriteAllText(path, JsonUtility.ToJson(gameData));
+        print("saved all game data!");
+        File.WriteAllText(gamePath, JsonUtility.ToJson(gameData));
     }
 
     public GameData LoadGameData() { 
-        if (File.Exists(path)) { return JsonUtility.FromJson<GameData>(File.ReadAllText(path)); }
+        if (File.Exists(gamePath)) { return JsonUtility.FromJson<GameData>(File.ReadAllText(gamePath)); }
         else { 
-            Debug.LogError($"no savefile found, so just created one!");
-            File.WriteAllText(path, JsonUtility.ToJson(new GameData()));
-            return JsonUtility.FromJson<GameData>(File.ReadAllText(path));
+            Debug.Log($"no savefile found, so just created one!");
+            File.WriteAllText(gamePath, JsonUtility.ToJson(new GameData()));
+            return JsonUtility.FromJson<GameData>(File.ReadAllText(gamePath));
+        }
+    }
+
+    public void SavePersistentData() { 
+        File.WriteAllText(persistentPath, JsonUtility.ToJson(gameData));
+    }
+
+    public PersistentData LoadPersistentData() { 
+        if (File.Exists(persistentPath)) { return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath)); }
+        else { 
+            Debug.Log($"no statistics found, so just created one!");
+            File.WriteAllText(persistentPath, JsonUtility.ToJson(new PersistentData()));
+            return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath));
         }
     }
 }

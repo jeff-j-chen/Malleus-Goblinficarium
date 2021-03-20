@@ -143,7 +143,9 @@ public class LevelManager : MonoBehaviour {
                 // going to next level after having defeated devil
                 if (scripts.player.charNum != 3) { 
                     // give player the next character, as long as they aren't on the last one\
-                    scripts.gameData.unlockedChars[scripts.player.charNum + 1] = true;
+                    scripts.persistentData.unlockedChars[scripts.player.charNum + 1] = true;
+                    scripts.persistentData.successfulRuns++;
+                    scripts.SavePersistentData();
                     scripts.SaveGameData();
                     // grab it back 
                 }
@@ -177,6 +179,11 @@ public class LevelManager : MonoBehaviour {
                 sub++;
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
+                if (sub > scripts.persistentData.highestSub && level >= scripts.persistentData.highestLevel) { 
+                    scripts.persistentData.highestSub = sub;
+                    scripts.persistentData.highestLevel = level;
+                    scripts.SavePersistentData();
+                }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
                     scripts.gameData.tsLevel = -1;
                     scripts.gameData.tsSub = -1;

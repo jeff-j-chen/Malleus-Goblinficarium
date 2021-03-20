@@ -260,6 +260,8 @@ public class TurnManager : MonoBehaviour {
     public void ChangeStaminaOf(string playerOrEnemy, int amount) {
         if (playerOrEnemy == "player") {
             scripts.player.stamina += amount;
+            scripts.persistentData.staminaUsed += amount;
+            scripts.SavePersistentData();
             // change stamina
             scripts.player.staminaCounter.text = scripts.player.stamina.ToString();
             // update counter
@@ -304,7 +306,7 @@ public class TurnManager : MonoBehaviour {
             if (!PlayerAttacks()) {
                 // if enemy was not killed
                 StartCoroutine(RoundTwo("enemy"));
-                // begin the next round where the player will attadck
+                // begin the next round where the player will attack
             }
             else {
                 // enemy was killed
@@ -330,6 +332,9 @@ public class TurnManager : MonoBehaviour {
                 // show animation
             }
         }
+        scripts.persistentData.weaponUses[Array.IndexOf(scripts.itemManager.weaponNames, scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[0])]++;
+        // increment the # of times the player's current weapon has been used
+        scripts.SavePersistentData();
     }
 
     /// <summary>
@@ -458,6 +463,7 @@ public class TurnManager : MonoBehaviour {
             // make the next person go again
         }
         scripts.SaveGameData();
+        scripts.SavePersistentData();
         yield return scripts.delays[0.45f];
         // small delay
         ClearVariablesAfterRound();
@@ -538,6 +544,8 @@ public class TurnManager : MonoBehaviour {
             // set status text and play the animation
         }
         else { print("invalid string passed"); }
+        scripts.persistentData.enemiesSlain++;
+        scripts.SavePersistentData();
         yield return scripts.delays[0.45f];
         isMoving = false;
     }
@@ -628,7 +636,7 @@ public class TurnManager : MonoBehaviour {
             scripts.player.GetComponent<SpriteRenderer>().sprite = scripts.player.GetDeathSprite();
             scripts.player.SetPlayerPositionAfterDeath();
             // if player dies, set sprite and proper position
-            scripts.itemManager.SaveTombstoneItems();
+            scripts.tombstoneData.SetTombstoneData();
             // allow the player to retry
         }
         else if (playerOrEnemy == "enemy") {
@@ -772,6 +780,7 @@ public class TurnManager : MonoBehaviour {
                     armor = true;
                     // set armor to true
                     SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... your armor shatters");
+                    scripts.persistentData.armorBroken++;
                     // notify player
                     StartCoroutine(RemoveArmorAfterDelay());
                     scripts.itemManager.Select(scripts.player.inventory, 0, playAudio: false);
@@ -786,6 +795,7 @@ public class TurnManager : MonoBehaviour {
                                 SetStatusText($"devil twists claws in your {scripts.enemy.target.text.Substring(1)}!");
                             }
                             SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text.Substring(1)}!");
+                            scripts.persistentData.woundsReceived++;
                             // notify player
                         }
                         else {
@@ -795,6 +805,7 @@ public class TurnManager : MonoBehaviour {
                             if (scripts.player.woundList.Count != 2) {
                                 // if player won't die
                                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text}!");
+                                scripts.persistentData.woundsReceived++;
                                 // notify player
                             }
                         }
@@ -837,7 +848,9 @@ public class TurnManager : MonoBehaviour {
             else { 
                 if (scripts.itemManager.PlayerHasWeapon("scimitar")) { scimitarParry = true; }
                 // player has parried (this resets at the start of every round so we can do it regardless)
-                SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you parry"); 
+                SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you parry");
+                scripts.persistentData.attacksParried++;
+                scripts.SavePersistentData(); 
             }
             // notify player
         }
@@ -891,6 +904,8 @@ public class TurnManager : MonoBehaviour {
                     }
                     if (scripts.player.target.text.Contains("*")) {
                         SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
+                        scripts.persistentData.woundsInflicted++;
+                        scripts.persistentData.woundsInflictedDict[scripts.player.target.text.Substring(1)]++;
                     }
                     else {
                         // not injured
@@ -901,6 +916,8 @@ public class TurnManager : MonoBehaviour {
                         else {
                             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
                         }
+                        scripts.persistentData.woundsInflicted++;
+                        scripts.persistentData.woundsInflictedDict[scripts.enemy.enemyName.text.ToLower()]++;
                         // same as above
                     }
                 }

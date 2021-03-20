@@ -206,7 +206,7 @@ public class Item : MonoBehaviour {
                             // if player has dropped items for trading
                             scripts.itemManager.numItemsDroppedForTrade--;
                             scripts.gameData.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-                            scripts.SaveGameData();
+                            scripts.persistentData.itemsTraded++;
                             // decrement counter
                             scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
                             // move the selected item into the player's inventory
@@ -219,39 +219,39 @@ public class Item : MonoBehaviour {
                 }
             }
             else {
-                if (scripts.enemy.enemyName.text != "Tombstone") {
-                    if (itemType == "retry") {
-                        scripts.levelManager.lockActions = true;
-                        Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
-                        // reload scene
-                        scripts.soundManager.PlayClip("next");
-                        // play sound clip
-                        // scripts.tombstoneData.sub = scripts.tombstoneData.tempSub;
-                        // scripts.tombstoneData.tempSub = 0;
-                        // set tombstone data up correctly
-                    }
-                    else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
-                        // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
-                        if (itemType == "weapon")  { 
-                            // if player is trying to use weapon
-                            if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
-                                // if conditions allow for attack
-                                if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
-                                else if (scripts.levelManager.sub == 4 || scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.SetStatusText("mind your manners"); }
-                                // send reminders accordingly
-                                else if (!scripts.enemy.isDead) { scripts.player.UseWeapon(); }
-                                // attack if enemy is not dead or tombstone
-                                else { print("error!"); }
-                            }
+                if (itemType == "retry") {
+                    scripts.levelManager.lockActions = true;
+                    Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
+                    // reload scene
+                    scripts.soundManager.PlayClip("next");
+                    // play sound clip
+                    // scripts.tombstoneData.sub = scripts.tombstoneData.tempSub;
+                    // scripts.tombstoneData.tempSub = 0;
+                    // set tombstone data up correctly
+                }
+                else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {
+                    // in player's inventory and not moving, MUST HAVE CHECK FOR INVENTORY HERE BECAUSE OTHERWISE IT BREAKS
+                    if (itemType == "weapon")  { 
+                        // if player is trying to use weapon
+                        if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
+                            // if conditions allow for attack
+                            if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
+                            else if (scripts.levelManager.sub == 4 || scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.SetStatusText("mind your manners"); }
+                            // send reminders accordingly
+                            else if (!scripts.enemy.isDead) { scripts.player.UseWeapon(); }
+                            // attack if enemy is not dead or tombstone
+                            else { print("error!"); }
                         }
-                        else if (itemType == "common") { UseCommon(); }
-                        else if (itemType == "rare") { UseRare(); }
-                        // not item, so use corresponding item type
                     }
+                    else if (itemType == "common") { UseCommon(); }
+                    else if (itemType == "rare") { UseRare(); }
+                    // not item, so use corresponding item type
                 }
             }
         }
         if (itemType != "retry") { scripts.itemManager.SaveInventoryItems(); }
+        scripts.SaveGameData();
+        scripts.SavePersistentData();
         // save the items as long as we didn't use the retry button
     }
 
@@ -262,7 +262,8 @@ public class Item : MonoBehaviour {
         if (!scripts.levelManager.lockActions) {
             // don't use items when locked
             switch (itemName) { 
-                case "steak":
+                case "steak" when scripts.enemy.enemyName.text != "Tombstone":
+                    scripts.persistentData.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     // play sound clip
                     if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 7); }
@@ -273,25 +274,29 @@ public class Item : MonoBehaviour {
                     Remove();
                     // remove from player inventory
                     break;
-                case "rotten steak": 
+                case "rotten steak" when scripts.enemy.enemyName.text != "Tombstone": 
+                    scripts.persistentData.foodEaten++;
                     // don't change stamina for rotten foods
                     scripts.soundManager.PlayClip("eat");
                     scripts.turnManager.SetStatusText("you swallow rotten steak");
                     Remove();
                     break;
-                case "cheese":
+                case "cheese" when scripts.enemy.enemyName.text != "Tombstone":
+                    scripts.persistentData.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     if (scripts.player.charNum == 0)  { scripts.turnManager.ChangeStaminaOf("player", 5); }
                     else { scripts.turnManager.ChangeStaminaOf("player", 3); }
                     scripts.turnManager.SetStatusText("you swallow cheese");
                     Remove();
                     break;
-                case "moldy cheese":
+                case "moldy cheese" when scripts.enemy.enemyName.text != "Tombstone":
+                    scripts.persistentData.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     scripts.turnManager.SetStatusText("you swallow moldy cheese");
                     Remove();
                     break;
                 case "scroll" when scripts.levelManager.sub != 4:
+                    scripts.persistentData.scrollsRead++;
                     if (modifier != "challenge") { scripts.soundManager.PlayClip("fwoosh"); }
                     switch (modifier) {
                         case "fury": 
@@ -372,6 +377,7 @@ public class Item : MonoBehaviour {
                     break;
                 case "potion" when scripts.levelManager.sub != 4:
                     // don't let potions be used at merchant
+                    scripts.persistentData. potionsQuaffed++;
                     scripts.soundManager.PlayClip("gulp");
                     scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
                     // notify player
@@ -414,6 +420,7 @@ public class Item : MonoBehaviour {
                     Remove();
                     break;
                 case "shuriken" when scripts.levelManager.sub != 4:
+                    scripts.persistentData.shurikensThrown++;
                     scripts.soundManager.PlayClip("shuriken");
                     // play sound clip
                     scripts.itemManager.discardableDieCounter++;
