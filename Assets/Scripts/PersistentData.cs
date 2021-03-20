@@ -17,7 +17,7 @@ public class PersistentData {
     public int attacksParried;
     public int woundsReceived;
     public int woundsInflicted;
-    public Dictionary<string, int> woundsInflictedDict;
+    public int[] woundsInflictedArr;
     public int[] weaponUses;
     public int enemiesSlain;
     public int staminaUsed;
@@ -41,16 +41,7 @@ public class PersistentData {
         attacksParried = 0;
         woundsReceived = 0;
         woundsInflicted = 0;
-        woundsInflictedDict = new Dictionary<string, int> { 
-            {"chest", 0},
-            {"guts", 0},
-            {"knee", 0},
-            {"hip", 0},
-            {"head", 0},
-            {"hand", 0},
-            {"armpits", 0},
-            {"face", 0},
-        };
+        woundsInflictedArr = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
         weaponUses = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
         enemiesSlain = 0;
         staminaUsed = 0;

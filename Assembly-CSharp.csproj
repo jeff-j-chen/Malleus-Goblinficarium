@@ -61,9 +61,10 @@
      <Compile Include="Assets\Scripts\StatSummoner.cs" />
      <Compile Include="Assets\Scripts\Music.cs" />
      <Compile Include="Assets\Scripts\GameData.cs" />
+     <Compile Include="Assets\Scripts\PersistentData.cs" />
      <Compile Include="Assets\Scripts\DiceSummoner.cs" />
      <Compile Include="Assets\Scripts\HighlightCalculator.cs" />
-     <Compile Include="Assets\Scripts\PersistentData.cs" />
+     <Compile Include="Assets\Scripts\Statistics.cs" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap.shader" />

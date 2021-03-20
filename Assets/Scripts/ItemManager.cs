@@ -99,7 +99,7 @@ public class ItemManager : MonoBehaviour {
         { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
     public Dictionary<string, int> neckletCounter = new Dictionary<string, int>() 
         { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 }, { "arcane", 1 } };
-    // start with 1 arcane necklet so we don't have to have +1s everywhere
+    // start with 1 arcane necklet so we don't have to have +1's everywhere
     private string[] scrollTypes = new string[] { "fury", "haste", "dodge", "leech", "courage", "challenge", "nothing" };
     private string[] potionTypes = new string[] { "accuracy", "speed", "strength", "defense", "might", "life", "nothing" };
     private Sprite[] allSprites;
@@ -181,12 +181,10 @@ public class ItemManager : MonoBehaviour {
 
     public void GiveClassItems(int charNum) {
         if (scripts.player.charNum == 0) { 
-            CreateWeaponWithStats("rapier", "common", 4, 2, -1, 1);
+            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
             // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
             MoveToInventory(0, true, false, false);
-            CreateItem("armor", "common");
-            MoveToInventory(0, true, false, false);
-            CreateItem("scroll", "common", "challenge");
+            CreateItem("steak", "common");
             MoveToInventory(0, true, false, false);
             if (scripts.persistentData.easyMode) { 
                 CreateItem("torch", "common");

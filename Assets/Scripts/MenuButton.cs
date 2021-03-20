@@ -39,7 +39,7 @@ public class MenuButton : MonoBehaviour
                 break;
             case "New Game":
                 GameData data = new GameData();
-                File.WriteAllText("save.txt", JsonUtility.ToJson(data));
+                File.WriteAllText("gameData.txt", JsonUtility.ToJson(data));
                 PersistentData persistentData = LoadPersistentData();
                 persistentData.gamesPlayed++;
                 Initiate.Fade("Game", Color.black, transitionMultiplier);

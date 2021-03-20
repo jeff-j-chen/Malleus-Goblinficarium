@@ -903,7 +903,7 @@ public class TurnManager : MonoBehaviour {
                     if (scripts.player.target.text.Contains("*")) {
                         SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
                         scripts.persistentData.woundsInflicted++;
-                        scripts.persistentData.woundsInflictedDict[scripts.player.target.text.Substring(1)]++;
+                        scripts.persistentData.woundsInflictedArr[Array.IndexOf(targetArr, scripts.player.target.text.Substring(1))]++;
                     }
                     else {
                         // not injured
@@ -915,7 +915,7 @@ public class TurnManager : MonoBehaviour {
                             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
                         }
                         scripts.persistentData.woundsInflicted++;
-                        scripts.persistentData.woundsInflictedDict[scripts.player.target.text.ToLower()]++;
+                        scripts.persistentData.woundsInflictedArr[Array.IndexOf(targetArr, scripts.player.target.text)]++;
                         // same as above
                     }
                 }

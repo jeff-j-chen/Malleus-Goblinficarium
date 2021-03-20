@@ -260,6 +260,79 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 79751573}
   m_CullTransparentMesh: 0
+--- !u!1 &135440258
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 135440260}
+  - component: {fileID: 135440259}
+  m_Layer: 0
+  m_Name: Text Assigner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &135440259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 135440258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95ac281e9faa0ce8288f25b5d3a8f996, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  persistentData:
+    easyMode: 0
+    unlockedChars: 01000000
+    gamesPlayed: 0
+    highestLevel: 1
+    highestSub: 1
+    successfulRuns: 0
+    deaths: 0
+    attacksParried: 0
+    woundsReceived: 0
+    woundsInflicted: 0
+    woundsInflictedArr: 0000000000000000000000000000000000000000000000000000000000000000
+    weaponUses: 00000000000000000000000000000000000000000000000000000000000000000000000001000000
+    enemiesSlain: 0
+    staminaUsed: 0
+    armorBroken: 0
+    weaponsSwapped: 0
+    scrollsRead: 0
+    potionsQuaffed: 0
+    foodEaten: 0
+    shurikensThrown: 0
+    itemsTraded: 0
+    diceRerolled: 0
+    diceDiscarded: 0
+  leftWhite: {fileID: 404473505}
+  leftGray: {fileID: 169763518}
+  favWeapon: {fileID: 143015314}
+  rightWhite: {fileID: 179799223}
+  rightGray: {fileID: 556526649}
+  bottomText: {fileID: 1700556509}
+--- !u!4 &135440260
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 135440258}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.436464, y: 1.2520611, z: 70.83635}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &143015312
 GameObject:
   m_ObjectHideFlags: 0
@@ -915,8 +988,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 01d06a4ffce03e04d9d9b5e63f50f870, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: 21300000, guid: f098ea1a373147a4cb0c810cb237e2fc, type: 3}
+  m_Color: {r: 0.21568628, g: 0.21568628, b: 0.21568628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
