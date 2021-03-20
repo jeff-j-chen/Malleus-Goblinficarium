@@ -150,7 +150,12 @@ public class DiceSummoner : MonoBehaviour
     }
 
     public void SaveDiceValues() { 
-        print("saving dice values!");
+        StartCoroutine(SaveDiceValuesCoro());
+    }
+
+    private IEnumerator SaveDiceValuesCoro() { 
+        yield return scripts.delays[0.1f];
+        // KEEP THIS DELAY HERE, WITHOUT IT THE DICE WILL NOT SAVE PROPERLY
         scripts.gameData.diceNumbers.Clear();
         scripts.gameData.diceTypes.Clear();
         scripts.gameData.diceAttachedToStat.Clear();
@@ -164,7 +169,6 @@ public class DiceSummoner : MonoBehaviour
             scripts.gameData.diceTypes.Add(dice.diceType);
             scripts.gameData.diceAttachedToStat.Add(dice.statAddedTo);
             scripts.gameData.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
-            print(dice.isOnPlayerOrEnemy);
             scripts.gameData.diceRerolled.Add(dice.isRerolled);
             // add its info to the info 
         }
