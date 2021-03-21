@@ -50,6 +50,7 @@ public class GameData {
     public int enemyDef;
 
     public GameData() {
+        newGame = true;
         curCharNum = 0;
         floorItemNames = new string[9];
         floorItemTypes = new string[9];
@@ -60,8 +61,8 @@ public class GameData {
         resumeItemNames = new string[9];
         resumeItemTypes = new string[9];
         resumeItemMods = new string[9];
-        resumeLevel = 0;
-        resumeSub = 0;
+        resumeLevel = 1;
+        resumeSub = 1;
         resumeAcc = 0;
         resumeSpd = 0;
         resumeDmg = 0;
@@ -70,8 +71,8 @@ public class GameData {
         potionSpd = 0;
         potionDmg = 0;
         potionDef = 0;
-        playerStamina = 0;
-        enemyStamina = 0;
+        playerStamina = 3;
+        enemyStamina = 1;
         diceNumbers = new List<int>();
         diceTypes = new List<string>();
         dicePlayerOrEnemy = new List<string>();

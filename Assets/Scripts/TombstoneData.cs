@@ -11,7 +11,6 @@ public class TombstoneData : MonoBehaviour {
     }
 
     public void SetTombstoneData() {
-        print("make sure to clear player's saved items and stuff here");
         scripts = FindObjectOfType<Scripts>();
         scripts.persistentData.tsItemNames = new string[9];
         scripts.persistentData.tsItemNames = new string[9];
@@ -53,7 +52,7 @@ public class TombstoneData : MonoBehaviour {
         // player died, so make the next game a new one
         scripts.SaveGameData();
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
-            scripts.itemManager.MoveToInventory(0, true);
+            scripts.itemManager.MoveToInventory(0, true, false, false);
             // move all items on the floor to the player's inventory
         }
         foreach (GameObject toBeDeleted in scripts.player.inventory.ToList()) {
@@ -66,10 +65,15 @@ public class TombstoneData : MonoBehaviour {
         // KEEP IT AS FOREACH, for loop doesn't seem to work!
         GameObject retryButton = scripts.itemManager.CreateItem("retry", "retry");
         // create retry button
-        scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true);
+        scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true, false, false);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
         scripts.persistentData.deaths++;
         scripts.persistentData.gamesPlayed++;
+        scripts.gameData = new GameData();
+        // clear all existing player data
+        scripts.gameData.curCharNum = scripts.persistentData.newCharNum;
+        // set the curcharnum to the new one, because it gets set to 0 on new GameData()
+        scripts.SaveGameData();
         scripts.SavePersistentData();
     }
 

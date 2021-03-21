@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -58,6 +59,12 @@ public class Scripts : MonoBehaviour {
         gameData.newGame = false;
         SaveGameData();
     }
+
+    // private IEnumerator SaveAfterDelay() { 
+    //     yield return delays[.75f];
+    //     SaveGameData();
+    //     // save the game after a delay, because saving it immediately causes some things to not save for some reason
+    // }
 
     public void SaveGameData() { 
         File.WriteAllText(gamePath, JsonUtility.ToJson(gameData));

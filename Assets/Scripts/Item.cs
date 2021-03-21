@@ -252,7 +252,6 @@ public class Item : MonoBehaviour {
             }
         }
         if (itemType != "retry") { scripts.itemManager.SaveInventoryItems(); }
-        scripts.SaveGameData();
         scripts.SavePersistentData();
         // save the items as long as we didn't use the retry button
     }
