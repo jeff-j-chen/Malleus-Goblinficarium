@@ -56,7 +56,7 @@ public class Scripts : MonoBehaviour {
         }
         print("refund stamina before just before the game is closed!");
         print("loading game, newgame is " + gameData.newGame);
-        gameData.newGame = false;
+        if (player != null) { gameData.newGame = false;print("newgame just got set to false!"); } // only set newgame to false if we are in game (player exists)
         SaveGameData();
     }
 

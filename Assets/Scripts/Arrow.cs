@@ -11,10 +11,12 @@ public class Arrow : MonoBehaviour {
     private Scripts scripts;
     // necessary for all files
     private bool preventPlayingFX = true;
+    private GameData gameData;
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // find scripts
+        gameData = scripts.LoadGameData();
         MoveToButtonPos(currentIndex);
         // immediately move to the correct button position
         StartCoroutine(allowFX());
@@ -26,7 +28,6 @@ public class Arrow : MonoBehaviour {
     }
 
     private void Update() {
-        
         if (Input.GetKeyDown(KeyCode.DownArrow)) {
             // if player pressed down
             if (currentIndex + 1 < menuButtons.Length) {
@@ -38,7 +39,7 @@ public class Arrow : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow)) {
             // if player pressed up
-            if (currentIndex - 1 >= 0) {
+            if (currentIndex - 1 >= 0 && gameData.newGame == false || currentIndex - 1 >= 1 && gameData.newGame == true) {
                 // if can move the selector (arrow) up
                 currentIndex--;
                 MoveToButtonPos(currentIndex);
@@ -58,11 +59,14 @@ public class Arrow : MonoBehaviour {
     /// <param name="index">The index of the menu item to move the selection arrow to.</param>
     public void MoveToButtonPos(int index) {
         // function used to move the arrow to the desired button position
-        currentIndex = index;
-        transform.position = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);
-        // move the arrow to the menu icon at the index, with offset
-        if (!preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
-        // play sound clip
+        if (!(scripts.gameData.newGame == true && index == 0)) {
+            // as long as we are not trying to select continue when newgame is true (previous save wiped)
+            currentIndex = index;
+            transform.position = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);
+            // move the arrow to the menu icon at the index, with offset
+            if (!preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+            // play sound clip
+        }
     }
 
     
