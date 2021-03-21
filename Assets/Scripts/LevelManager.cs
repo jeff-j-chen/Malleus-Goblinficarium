@@ -185,15 +185,15 @@ public class LevelManager : MonoBehaviour {
                     scripts.SavePersistentData();
                 }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
-                    scripts.gameData.tsLevel = -1;
-                    scripts.gameData.tsSub = -1;
-                    scripts.gameData.tsWeaponAcc = -1;
-                    scripts.gameData.tsWeaponSpd = -1;
-                    scripts.gameData.tsWeaponDmg = -1;
-                    scripts.gameData.tsWeaponDef = -1;
-                    scripts.gameData.tsItemNames = new string[9];
-                    scripts.gameData.tsItemNames = new string[9];
-                    scripts.gameData.tsItemNames = new string[9];
+                    scripts.persistentData.tsLevel = -1;
+                    scripts.persistentData.tsSub = -1;
+                    scripts.persistentData.tsWeaponAcc = -1;
+                    scripts.persistentData.tsWeaponSpd = -1;
+                    scripts.persistentData.tsWeaponDmg = -1;
+                    scripts.persistentData.tsWeaponDef = -1;
+                    scripts.persistentData.tsItemNames = new string[9];
+                    scripts.persistentData.tsItemNames = new string[9];
+                    scripts.persistentData.tsItemNames = new string[9];
                     scripts.SaveGameData();
                     // make tombstone inaccessible
                 }
@@ -205,7 +205,7 @@ public class LevelManager : MonoBehaviour {
                     scripts.SaveGameData();
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
-                if (sub == scripts.gameData.tsSub && level == scripts.gameData.tsLevel && !(sub == 1 && level == 1)) {
+                if (sub == scripts.persistentData.tsSub && level == scripts.persistentData.tsLevel && !(sub == 1 && level == 1)) {
                     // spawn tombstone if we are on the correct level and not on 1-1
                     toSpawn = "tombstone";
                     // level matches which level to add to

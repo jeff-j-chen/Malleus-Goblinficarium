@@ -6,7 +6,16 @@ using UnityEngine;
 
 [System.Serializable]
 public class PersistentData {
-    //test
+    public int tsLevel;
+    public int tsSub;
+    public int tsWeaponAcc;
+    public int tsWeaponSpd;
+    public int tsWeaponDmg;
+    public int tsWeaponDef;
+    public string[] tsItemNames;
+    public string[] tsItemTypes;
+    public string[] tsItemMods;
+    public int newCharNum;
     public bool easyMode;
     public bool[] unlockedChars;
     public int gamesPlayed;
@@ -31,6 +40,16 @@ public class PersistentData {
     public int diceRerolled;
     public int diceDiscarded;
     public PersistentData() {
+        tsLevel = -1;
+        tsSub = -1;
+        tsWeaponAcc = 0;
+        tsWeaponSpd = 0;
+        tsWeaponDmg = 0;
+        tsWeaponDef = 0;
+        tsItemNames = new string[9];
+        tsItemTypes = new string[9];
+        tsItemMods = new string[9];
+        newCharNum = 0;
         easyMode = false;
         unlockedChars = new bool[4] { true, false, false, false };
         gamesPlayed = 0;

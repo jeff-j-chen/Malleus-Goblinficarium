@@ -8,16 +8,6 @@ using UnityEngine;
 public class GameData {
     public bool newGame;
     public int curCharNum;
-    public int newCharNum;
-    public int tsLevel;
-    public int tsSub;
-    public int tsWeaponAcc;
-    public int tsWeaponSpd;
-    public int tsWeaponDmg;
-    public int tsWeaponDef;
-    public string[] tsItemNames;
-    public string[] tsItemTypes;
-    public string[] tsItemMods;
     public string[] floorItemNames;
     public string[] floorItemTypes;
     public string[] floorItemMods;
@@ -61,16 +51,6 @@ public class GameData {
 
     public GameData() {
         curCharNum = 0;
-        newCharNum = 0;
-        tsLevel = -1;
-        tsSub = -1;
-        tsWeaponAcc = 0;
-        tsWeaponSpd = 0;
-        tsWeaponDmg = 0;
-        tsWeaponDef = 0;
-        tsItemNames = new string[9];
-        tsItemTypes = new string[9];
-        tsItemMods = new string[9];
         floorItemNames = new string[9];
         floorItemTypes = new string[9];
         floorItemMods = new string[9];

@@ -31,7 +31,7 @@ public class TurnManager : MonoBehaviour {
         SetTargetOf("enemy");
         scripts.enemy.TargetBest();
         scripts.statSummoner.ResetDiceAndStamina();
-        if (!(scripts.levelManager.level == scripts.gameData.tsLevel && scripts.levelManager.sub == scripts.gameData.tsSub) && scripts.levelManager.sub != 4) { scripts.diceSummoner.SummonDice(true); }
+        if (!(scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) && scripts.levelManager.sub != 4) { scripts.diceSummoner.SummonDice(true); }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
     }
@@ -161,7 +161,7 @@ public class TurnManager : MonoBehaviour {
     /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            if (scripts.levelManager.sub == scripts.gameData.tsSub && scripts.levelManager.level == scripts.gameData.tsLevel && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
+            if (scripts.levelManager.sub == scripts.persistentData.tsSub && scripts.levelManager.level == scripts.persistentData.tsLevel && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
                 // tombstone
                 scripts.player.target.text = "none";
                 scripts.player.targetInfo.text = "why would you try to wound a tombstone?";

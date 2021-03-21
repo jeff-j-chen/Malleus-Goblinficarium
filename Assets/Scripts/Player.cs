@@ -60,7 +60,7 @@ public class Player : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // something here to check if we are continuing or starting a new game
-        if (scripts.gameData.newGame) { charNum = scripts.gameData.newCharNum; }
+        if (scripts.gameData.newGame) { charNum = scripts.persistentData.newCharNum; }
         else { charNum = scripts.gameData.curCharNum; }
         scripts.gameData.curCharNum = charNum;
         scripts.itemManager.GiveClassItems(charNum);

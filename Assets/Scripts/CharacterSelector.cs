@@ -74,7 +74,7 @@ public class CharacterSelector : MonoBehaviour {
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip");
         // play sfx (this is when selected)
-        scripts.gameData.newCharNum = selectionNum;
+        scripts.persistentData.newCharNum = selectionNum;
         // set the selection num
         scripts.SaveGameData();
         // save the selection num

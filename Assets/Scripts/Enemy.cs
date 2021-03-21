@@ -66,7 +66,7 @@ public class Enemy : MonoBehaviour {
             // spawn cloaked or normal devil, depending 
             scripts.itemManager.lootText.text = "";
         }
-        else if (scripts.levelManager.level == scripts.gameData.tsLevel && scripts.levelManager.sub == scripts.gameData.tsSub) {
+        else if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) {
             // on the tombstone level
             SpawnNewEnemy(8);
             // spawn th tombstone
