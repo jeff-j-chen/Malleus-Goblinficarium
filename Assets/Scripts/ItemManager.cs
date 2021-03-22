@@ -141,6 +141,8 @@ public class ItemManager : MonoBehaviour {
             // assign the curlist variable for item selection navigation
             // need to implement a check if continuing or new game
         }
+        if (scripts.gameData.newGame) { print("made a new game!"); }
+        else { print("resuming existing game!"); }
     }
 
     void Update() {

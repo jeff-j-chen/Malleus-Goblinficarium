@@ -7,11 +7,12 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Animations;
 
 public class LevelManager : MonoBehaviour {
-    [SerializeField] GameObject levelBox;
-    [SerializeField] GameObject loadingCircle;
+    [SerializeField] private GameObject levelBox;
+    [SerializeField] private GameObject loadingCircle;
     Vector3 onScreen = new Vector2(0.0502f, -1.533f);
     Vector3 offScreen = new Vector2(-20f, 15f);
-    [SerializeField] TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI levelTransText;
+    [SerializeField] private TextMeshProUGUI levelText;
     SpriteRenderer boxSR;
     Color temp;
     Scripts scripts;
@@ -42,8 +43,11 @@ public class LevelManager : MonoBehaviour {
     private string newText = "";
 
     void Start() {
+        if (PlayerPrefs.GetString("debug") == "on") { levelText.gameObject.SetActive(true); }
+        else { levelText.gameObject.SetActive(false); }
         level = 1;
         sub = 1;
+        levelText.text = $"(level {level}-{sub})";
         scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
@@ -178,7 +182,8 @@ public class LevelManager : MonoBehaviour {
                 // if spawning a normal enemy
                 sub++;
                 // increment the sub counter
-                if (sub > 4) { sub = 1; level++; levelText.text = "level " + level + "-" + sub; }
+                if (sub > 4) { sub = 1; level++; }
+                // increment level and reset sub if we passed sub 4
                 if (sub > scripts.persistentData.highestSub && level >= scripts.persistentData.highestLevel) { 
                     scripts.persistentData.highestSub = sub;
                     scripts.persistentData.highestLevel = level;
@@ -198,7 +203,6 @@ public class LevelManager : MonoBehaviour {
                     // make tombstone inaccessible
                 }
                 else if (scripts.enemy.enemyName.text == "Merchant") {
-                    print("cleared merchant wares!"); 
                     scripts.gameData.merchantItemNames = new string[9];
                     scripts.gameData.merchantItemTypes = new string[9];
                     scripts.gameData.merchantItemMods  = new string[9];
@@ -209,7 +213,8 @@ public class LevelManager : MonoBehaviour {
                     // spawn tombstone if we are on the correct level and not on 1-1
                     toSpawn = "tombstone";
                     // level matches which level to add to
-                    levelText.text = "level " + level + "-" + sub + "*";
+                    levelTransText.text = $"level {level}-{sub}*";
+                    levelText.text = $"(level {level}-{sub}*)";
                     sub--;
                     // decrement sub (because we went up 1 level but aren't going to fight anything)
                     scripts.enemy.SpawnNewEnemy(8);
@@ -221,7 +226,8 @@ public class LevelManager : MonoBehaviour {
                     // create the trader enemy
                     scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
                     // summon trader if necessary
-                    levelText.text = "level " + level + "-3+"; 
+                    levelTransText.text = $"level {level}-3+";
+                    levelText.text = $"(level {level}-3+)";
                     // set the correct level loading text
                 }
                 else if (level == 4 && sub == 1) { 
@@ -233,13 +239,15 @@ public class LevelManager : MonoBehaviour {
                 else { 
                     toSpawn = "normal";
                     scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); 
-                    levelText.text = "level " + level + "-" + sub; 
+                    levelTransText.text = $"{level}-{sub}";
+                    levelText.text = $"(level {level}-{sub})";
                 }
                 // normal level, so notify the player accordingly and spawn basic enemy
             }
             else { 
                 toSpawn = "lich";
-                levelText.text = "level ???";
+                levelTransText.text = "level ???";
+                levelText.text = "(level ???)";
                 // going to the lich level, so notify player
                 scripts.enemy.SpawnNewEnemy(2);
             }
@@ -255,7 +263,7 @@ public class LevelManager : MonoBehaviour {
             scripts.statSummoner.SummonStats();
             scripts.statSummoner.SetDebugInformationFor("enemy");
             // summon the stats and update the debug information
-            levelText.text = "";
+            levelTransText.text = "";
             loadingCircle.transform.position = offScreen;
             levelBox.transform.position = offScreen;
             // clear the loading text and move the box offscreen
@@ -311,19 +319,19 @@ public class LevelManager : MonoBehaviour {
     private IEnumerator GlitchyLevelText() {
         newText = "";
         for (int i = 0; i < 5; i++) {
-            levelText.text += characters[UnityEngine.Random.Range(0, characters.Length)];
+            levelTransText.text += characters[UnityEngine.Random.Range(0, characters.Length)];
         }
         // create the initial sequence
         for (int k = 0; k < 50; k++) {
             newText = "";
             // make the string empty so we can store something new in it
-            foreach (char curChar in levelText.text) {
+            foreach (char curChar in levelTransText.text) {
                 if (UnityEngine.Random.Range(0, 3) == 0) { newText += characters[UnityEngine.Random.Range(0, characters.Length)]; }
                 // replace character with random one
                 else { newText += curChar; };
                 // no change
             }
-            levelText.text = newText;
+            levelTransText.text = newText;
             // set the text to be the newly generated one
             yield return new WaitForSeconds(time);
         }

@@ -54,17 +54,16 @@ public class Scripts : MonoBehaviour {
         foreach (float delay in delayArr) {
             delays.Add(delay, new WaitForSeconds(delay));
         }
-        print("refund stamina before just before the game is closed!");
-        print("loading game, newgame is " + gameData.newGame);
-        if (player != null) { gameData.newGame = false;print("newgame just got set to false!"); } // only set newgame to false if we are in game (player exists)
-        SaveGameData();
+        StartCoroutine(SaveAfterDelay());
     }
 
-    // private IEnumerator SaveAfterDelay() { 
-    //     yield return delays[.75f];
-    //     SaveGameData();
-    //     // save the game after a delay, because saving it immediately causes some things to not save for some reason
-    // }
+    private IEnumerator SaveAfterDelay() { 
+        // set newgame to false after a delay so that stuff can load in if its true
+        yield return delays[.75f];
+        if (player != null) { gameData.newGame = false; }
+        
+        SaveGameData();
+    }
 
     public void SaveGameData() { 
         File.WriteAllText(gamePath, JsonUtility.ToJson(gameData));
