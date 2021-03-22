@@ -181,46 +181,57 @@ public class ItemManager : MonoBehaviour {
         }
     } 
 
-    public void GiveClassItems(int charNum) {
-        if (scripts.player.charNum == 0) { 
-            CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-            // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
-            MoveToInventory(0, true, false, false);
-            CreateItem("steak", "common");
+    public void GiveStarterItems(int charNum) {
+        if (scripts.gameData.newGame) { 
+            if (scripts.player.charNum == 0) { 
+                CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                 MoveToInventory(0, true, false, false);
-            if (scripts.persistentData.easyMode) { 
-                CreateItem("torch", "common");
+                CreateItem("steak", "common");
+                MoveToInventory(0, true, false, false);
+                if (scripts.persistentData.easyMode) { 
+                    CreateItem("torch", "common");
+                        MoveToInventory(0, true, false, false);
+                }
+            }
+            else if (scripts.player.charNum == 1) { 
+                CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+                MoveToInventory(0, true, false, false);
+                CreateItem("armor", "common");
+                MoveToInventory(0, true, false, false);
+                if (scripts.persistentData.easyMode) {
+                    CreateItem("helm_of_might", "rare");
                     MoveToInventory(0, true, false, false);
+                }
+            }
+            else if (scripts.player.charNum == 2) { 
+                CreateWeaponWithStats("dagger", "quick", 2, 5, 0, 0);
+                MoveToInventory(0, true, false, false);
+                CreateItem("boots_of_dodge", "rare");
+                MoveToInventory(0, true, false, false);
+                if (scripts.persistentData.easyMode) { 
+                    CreateItem("ankh", "rare");
+                    MoveToInventory(0, true, false, false);
+                }
+            }
+            else if (scripts.player.charNum == 3) {
+                CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
+                MoveToInventory(0, true, false, false);
+                CreateItem("cheese", "common");
+                MoveToInventory(0, true, false, false);
+                if (scripts.persistentData.easyMode) { 
+                    CreateItem("kapala", "rare");
+                    MoveToInventory(0, true, false, false);
+                }
             }
         }
-        else if (scripts.player.charNum == 1) { 
-            CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+        else { 
+            CreateWeaponWithStats(scripts.gameData.resumeItemNames[0], scripts.gameData.resumeItemMods[0], scripts.gameData.resumeAcc, scripts.gameData.resumeSpd, scripts.gameData.resumeDmg, scripts.gameData.resumeDef);
             MoveToInventory(0, true, false, false);
-            CreateItem("armor", "common");
+            for (int i = 1; i < 9; i++) {
+                if (scripts.gameData.resumeItemNames[i] == "") { break; }
+                CreateItem(scripts.gameData.resumeItemNames[i], scripts.gameData.resumeItemTypes[i], scripts.gameData.resumeItemMods[i]);
                 MoveToInventory(0, true, false, false);
-            if (scripts.persistentData.easyMode) {
-                CreateItem("helm_of_might", "rare");
-                    MoveToInventory(0, true, false, false);
-            }
-        }
-        else if (scripts.player.charNum == 2) { 
-            CreateWeaponWithStats("dagger", "quick", 2, 5, 0, 0);
-            MoveToInventory(0, true, false, false);
-            CreateItem("boots_of_dodge", "rare");
-                MoveToInventory(0, true, false, false);
-            if (scripts.persistentData.easyMode) { 
-                CreateItem("ankh", "rare");
-                    MoveToInventory(0, true, false, false);
-            }
-        }
-        else if (scripts.player.charNum == 3) {
-            CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
-            MoveToInventory(0, true, false, false);
-            CreateItem("cheese", "common");
-                MoveToInventory(0, true, false, false);
-            if (scripts.persistentData.easyMode) { 
-                CreateItem("kapala", "rare");
-                    MoveToInventory(0, true, false, false);
             }
         }
         Select(curList, 0, playAudio:false);
@@ -350,7 +361,7 @@ public class ItemManager : MonoBehaviour {
     /// <param name="itemType">The modifier of the item of which to create</param>
     /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
     /// <param name="victory">true to create a necklet of victory, false otherwise.</param>
-    public GameObject CreateItem(string itemName, string itemType, string modifier, int negativeOffset=0, bool victory=false) {
+    public GameObject CreateItem(string itemName, string itemType, string modifier, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = GetItemSprite(itemName);
@@ -360,7 +371,7 @@ public class ItemManager : MonoBehaviour {
         instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<SpriteRenderer>().sprite.name.Replace("_", " ");
         instantiatedItem.GetComponent<Item>().itemType = itemType;
         // assign the attributes for the name and the type of the item
-        instantiatedItem.GetComponent<Item>().modifier = modifier;
+        if (modifier != "") { instantiatedItem.GetComponent<Item>().modifier = modifier; }
         // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);
         // add the item to the array

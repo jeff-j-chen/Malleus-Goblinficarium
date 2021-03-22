@@ -63,7 +63,7 @@ public class Player : MonoBehaviour {
         if (scripts.gameData.newGame) { charNum = scripts.persistentData.newCharNum; }
         else { charNum = scripts.gameData.curCharNum; }
         scripts.gameData.curCharNum = charNum;
-        scripts.itemManager.GiveClassItems(charNum);
+        scripts.itemManager.GiveStarterItems(charNum);
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
         // set the initial positions

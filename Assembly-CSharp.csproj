@@ -39,6 +39,7 @@
      <Compile Include="Assets\Scripts\Player.cs" />
      <Compile Include="Assets\Simple Scene Fade Load System\Scripts\Fader.cs" />
      <Compile Include="Assets\Scripts\OnClickToggle.cs" />
+     <Compile Include="Assets\Scripts\Statistics.cs" />
      <Compile Include="Assets\Scripts\CharacterSelector.cs" />
      <Compile Include="Assets\Scripts\LevelManager.cs" />
      <Compile Include="Assets\Scripts\ItemManager.cs" />
@@ -64,7 +65,6 @@
      <Compile Include="Assets\Scripts\PersistentData.cs" />
      <Compile Include="Assets\Scripts\DiceSummoner.cs" />
      <Compile Include="Assets\Scripts\HighlightCalculator.cs" />
-     <Compile Include="Assets\Scripts\Statistics.cs" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap.shader" />

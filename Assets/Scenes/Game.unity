@@ -2963,7 +2963,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blackBox: {fileID: 1585409375}
-  onScreen: {x: 0.33, y: 10, z: 0}
+  onScreen: {x: 2.4, y: 10, z: 0}
   offScreen: {x: 0.33, y: 20, z: 0}
   statusText: {fileID: 119983209}
   targetArr:

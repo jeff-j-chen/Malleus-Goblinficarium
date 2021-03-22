@@ -43,12 +43,12 @@ public class LevelManager : MonoBehaviour {
     private string newText = "";
 
     void Start() {
+        scripts = FindObjectOfType<Scripts>();
         if (PlayerPrefs.GetString("debug") == "on") { levelText.gameObject.SetActive(true); }
         else { levelText.gameObject.SetActive(false); }
-        level = 1;
-        sub = 1;
+        level = scripts.gameData.resumeLevel;
+        sub = scripts.gameData.resumeSub;
         levelText.text = $"(level {level}-{sub})";
-        scripts = FindObjectOfType<Scripts>();
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
         temp = boxSR.color;
@@ -178,6 +178,13 @@ public class LevelManager : MonoBehaviour {
             // fade in the box
             loadingCircle.transform.position = onScreen;
             // make the loading thing go on screen
+            scripts.gameData.floorItemNames = new string[9];
+            scripts.gameData.floorItemTypes = new string[9];
+            scripts.gameData.floorItemMods = new string[9];
+            scripts.gameData.merchantItemNames = new string[9];
+            scripts.gameData.merchantItemTypes = new string[9];
+            scripts.gameData.merchantItemMods  = new string[9];
+            // clear merchant and floor items when going to the next level
             if (!isLich) {
                 // if spawning a normal enemy
                 sub++;
@@ -199,14 +206,7 @@ public class LevelManager : MonoBehaviour {
                     scripts.persistentData.tsItemNames = new string[9];
                     scripts.persistentData.tsItemNames = new string[9];
                     scripts.persistentData.tsItemNames = new string[9];
-                    scripts.SaveGameData();
                     // make tombstone inaccessible
-                }
-                else if (scripts.enemy.enemyName.text == "Merchant") {
-                    scripts.gameData.merchantItemNames = new string[9];
-                    scripts.gameData.merchantItemTypes = new string[9];
-                    scripts.gameData.merchantItemMods  = new string[9];
-                    scripts.SaveGameData();
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
                 if (sub == scripts.persistentData.tsSub && level == scripts.persistentData.tsLevel && !(sub == 1 && level == 1)) {
