@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections; 
+
 public class Arrow : MonoBehaviour {
     [SerializeField] public GameObject[] menuButtons;
     // serialized field of menubuttons 
@@ -17,6 +18,9 @@ public class Arrow : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         // find scripts
         gameData = scripts.LoadGameData();
+        if (scripts.gameData.newGame == true) { menuButtons[0].SetActive(false); }
+        else { menuButtons[0].SetActive(true); }
+        // hide/show the continue button if there is a game or not
         MoveToButtonPos(currentIndex);
         // immediately move to the correct button position
         StartCoroutine(allowFX());
