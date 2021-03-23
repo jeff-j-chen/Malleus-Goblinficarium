@@ -89,9 +89,7 @@ public class Enemy : MonoBehaviour {
             // hide the stats (don't fight merchants)
         }
         else { 
-            // yet to be implemented, spawn in the enemy based on its previous name
-            print("spawn based on enemy name!");
-            SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
+            SpawnNewEnemy(scripts.gameData.enemyNum);
             scripts.itemManager.lootText.text = "";
         }
         // spawn an enemy at the start of the round
@@ -182,71 +180,108 @@ public class Enemy : MonoBehaviour {
     /// </summary>
     /// <param name="enemyNum"></param>
     public void SpawnNewEnemy(int enemyNum) {
-        isDead = false;
-        scripts.gameData.enemyIsDead = false;
-        // make sure enemy is not dead
-        float[] temp;
-        // array to hold stats
-        if (enemyNum == 2) { temp = scripts.levelManager.GenStats("lich"); }
-        else if (enemyNum == 0) { temp = scripts.levelManager.GenStats("devil"); }
-        else { temp = scripts.levelManager.GenStats(); }
-        stats = new Dictionary<string, int>() {
-            { "green", (int)temp[0] },
-            { "blue", (int)temp[1] },
-            { "red", (int)temp[2] },
-            { "white", (int)temp[3] },
-        };
-        scripts.gameData.enemyAcc = stats["green"];
-        scripts.gameData.enemySpd = stats["blue"];
-        scripts.gameData.enemyDmg = stats["red"];
-        scripts.gameData.enemyDef = stats["white"];
-        spawnNum = enemyNum;
-        // set stats
-        woundList.Clear();
-        // make sure is not woudneds
-        // woundList = new List<string>() { "armpits" };
-        try { scripts.turnManager.DisplayWounds(); } catch {}
-        // try to display wounds
-        iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
-        // set the sprite for the icon
-        GetComponent<Animator>().enabled = true;
-        // enable the animator (which is disabled frmo enemies dying)
-        try {GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
-        catch { 
-            GetComponent<Animator>().runtimeAnimatorController = null; 
-            GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+        if (scripts.gameData.newGame) {
+
+            isDead = false;
+            scripts.gameData.enemyIsDead = false;
+            // make sure enemy is not dead
+            float[] temp;
+            // array to hold stats
+            if (enemyNum == 2) { temp = scripts.levelManager.GenStats("lich"); }
+            else if (enemyNum == 0) { temp = scripts.levelManager.GenStats("devil"); }
+            else { temp = scripts.levelManager.GenStats(); }
+            stats = new Dictionary<string, int>() {
+                { "green", (int)temp[0] },
+                { "blue", (int)temp[1] },
+                { "red", (int)temp[2] },
+                { "white", (int)temp[3] },
+            };
+            scripts.gameData.enemyAcc = stats["green"];
+            scripts.gameData.enemySpd = stats["blue"];
+            scripts.gameData.enemyDmg = stats["red"];
+            scripts.gameData.enemyDef = stats["white"];
+            spawnNum = enemyNum;
+            // set stats
+            woundList.Clear();
+            // make sure is not woudneds
+            // woundList = new List<string>() { "armpits" };
+            try { scripts.turnManager.DisplayWounds(); } catch {}
+            // try to display wounds
+            iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+            // set the sprite for the icon
+            GetComponent<Animator>().enabled = true;
+            // enable the animator (which is disabled frmo enemies dying)
+            try {GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
+            catch { 
+                GetComponent<Animator>().runtimeAnimatorController = null; 
+                GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+            }
+            // try set the controller (none for tombstone), must use runtimeanimationcontroller here
+            // new Vector2(1.9f, -1.866667f)
+            if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
+                // devil needs to be in a different spot
+                transform.position = offsetPositions["Devil"];
+            }
+            else if (enemyArr[enemyNum] == "Tombstone") {
+                // tombstone also needs to be different
+                transform.position = offsetPositions["Tombstone"];
+                iconGameobject.GetComponent<SpriteRenderer>().sprite = tombstoneIcon;
+            }
+            else {
+                // set normal position
+                transform.position = basePosition;
+            }
+            // set stamina counter
+            if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
+            else { enemyName.text = enemyArr[enemyNum]; }
+            // set the name, when spawning the cloaked just set it to be "Devil"
+            if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") {
+                stamina = 0;
+                // tombstone and merchant don't have stamina
+            }
+            else if (enemyArr[enemyNum] == "Lich") {
+                // if lich, has 5 stamina by default
+                stamina = 5;
+            }
+            else {
+                // normal enemy 
+                stamina = givenStamina[$"{scripts.levelManager.level}{scripts.levelManager.sub}"];
+                // assign stamina based on level and sub
+            }
         }
-        // try set the controller (none for tombstone), must use runtimeanimationcontroller here
-        // new Vector2(1.9f, -1.866667f)
-        if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
-            // devil needs to be in a different spot
-            transform.position = offsetPositions["Devil"];
-        }
-        else if (enemyArr[enemyNum] == "Tombstone") {
-            // tombstone also needs to be different
-            transform.position = offsetPositions["Tombstone"];
-            iconGameobject.GetComponent<SpriteRenderer>().sprite = tombstoneIcon;
-        }
-        else {
-            // set normal position
-            transform.position = basePosition;
-        }
-        // set stamina counter
-        if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
-        else { enemyName.text = enemyArr[enemyNum]; }
-        // set the name, when spawning the cloaked just set it to be "Devil"
-        if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") {
-            stamina = 0;
-            // tombstone and merchant don't have stamina
-        }
-        else if (enemyArr[enemyNum] == "Lich") {
-            // if lich, has 5 stamina by default
-            stamina = 5;
-        }
-        else {
-            // normal enemy 
-            stamina = givenStamina[$"{scripts.levelManager.level}{scripts.levelManager.sub}"];
-            // assign stamina based on level and sub
+        else { 
+            isDead = scripts.gameData.enemyIsDead;
+            stats = new Dictionary<string, int>() {
+                { "green", scripts.gameData.enemyAcc },
+                { "blue", scripts.gameData.enemySpd },
+                { "red", scripts.gameData.enemyDmg },
+                { "white", scripts.gameData.enemyDef },
+            };
+            spawnNum = enemyNum;
+            woundList = scripts.gameData.enemyWounds;
+            try { scripts.turnManager.DisplayWounds(); } catch {}
+            iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+            if (isDead) { GetComponent<Animator>().enabled = false; }
+            else { GetComponent<Animator>().enabled = true; }
+            try { GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
+            catch { 
+                GetComponent<Animator>().runtimeAnimatorController = null; 
+                GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+            }
+            if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
+                transform.position = offsetPositions["Devil"];
+            }
+            else if (enemyArr[enemyNum] == "Tombstone") {
+                transform.position = offsetPositions["Tombstone"];
+                iconGameobject.GetComponent<SpriteRenderer>().sprite = tombstoneIcon;
+            }
+            else { transform.position = basePosition; }
+            if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
+            else { enemyName.text = enemyArr[enemyNum]; }
+            // set the name, when spawning the cloaked just set it to be "Devil"
+            if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { stamina = 0; }
+            else if (enemyArr[enemyNum] == "Lich") { stamina = 5; }
+            else { stamina = scripts.gameData.enemyStamina; }
         }
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has

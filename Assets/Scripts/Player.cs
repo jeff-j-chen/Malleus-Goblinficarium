@@ -73,6 +73,7 @@ public class Player : MonoBehaviour {
         // set the correct sprite
         GetComponent<Animator>().runtimeAnimatorController = controllers[charNum];
         // set the correct animation controller (using runtime so that it works in the actual game, and not only the editor)
+        stamina = scripts.gameData.playerStamina;
         staminaCounter.text = stamina.ToString();
         // set up the information for the stamina counter
     }

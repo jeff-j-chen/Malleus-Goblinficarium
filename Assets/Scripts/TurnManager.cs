@@ -13,7 +13,6 @@ public class TurnManager : MonoBehaviour {
     [SerializeField] public string[] targetArr = { "chest", "guts", "knee", "hip", "head", "hand", "armpits", "face" };
     [SerializeField] public string[] targetInfoArr = { "reroll any number of enemy's dice", "all enemy's dice suffer a penalty of -1", "your speed is always higher than enemy's", "enemy can't use stamina", "discard one of enemy's die", "enemy can't use white dice", "enemy can't use red dice", "instantaneous death" };
     private Scripts scripts;
-    public string toMove;
     public bool isMoving = false;
     public bool actionsAvailable = false;
     public bool alterationDuringMove = false;
