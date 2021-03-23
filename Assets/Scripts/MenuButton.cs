@@ -38,10 +38,15 @@ public class MenuButton : MonoBehaviour
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             case "New Game":
+                print("new game pressed!");
                 GameData data = new GameData();
                 File.WriteAllText("gameSave.txt", JsonUtility.ToJson(data));
                 PersistentData persistentData = LoadPersistentData();
                 persistentData.gamesPlayed++;
+                print("new game should be done! printing out the enemy woundlist:");
+                foreach (string str in data.enemyWounds) { 
+                    print(str);
+                }
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             default:

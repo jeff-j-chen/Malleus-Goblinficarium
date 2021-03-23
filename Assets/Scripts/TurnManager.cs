@@ -814,6 +814,7 @@ public class TurnManager : MonoBehaviour {
                             // if player has phylactery
                             StartCoroutine(GiveLeechAfterDelay());
                             // give them leech buff after waiting, so it looks better
+                            dontRemoveLeechYet = true;
                         }
                     }
                 }
@@ -922,35 +923,35 @@ public class TurnManager : MonoBehaviour {
                         // same as above
                     }
                 }
-                if (!scripts.player.target.text.Contains("*") && scripts.statSummoner.SumOfStat("green", "player") >= 0) {
-                    // if wound was not injured and player has enough accuracy to hit
-                    if (scripts.enemy.spawnNum != 0) {
-                        scripts.enemy.woundList.Add(scripts.player.target.text);
-                        // add the wound
-                        scripts.gameData.enemyWounds = scripts.enemy.woundList;
-                        scripts.SaveGameData();
-                        if (scripts.player.charNum == 2) { 
-                            scripts.turnManager.ChangeStaminaOf("player", 1);
-                            // increment stamina if on 3rd character
+                if (scripts.statSummoner.SumOfStat("green", "player") >= 0) {
+                    print("player is currently bloodthirsty?" + scripts.player.isBloodthirsty); 
+                    if (scripts.player.isBloodthirsty) {
+                        // if player is wounded
+                        try { 
+                            StartCoroutine(HealSFXFromPhylactery());
+                        } catch {}
+                        // try to heal the wound, else don't do anything
+                        scripts.player.SetPlayerStatusEffect("leech", false);
+                        // turn off bloodthirsty
+                    }
+                    if (!scripts.player.target.text.Contains("*")) {
+                        // if wound was not injured and player has enough accuracy to hit
+                        if (scripts.enemy.spawnNum != 0) {
+                            scripts.enemy.woundList.Add(scripts.player.target.text);
+                            // add the wound
+                            scripts.gameData.enemyWounds = scripts.enemy.woundList;
+                            scripts.SaveGameData();
+                            if (scripts.player.charNum == 2) { 
+                                scripts.turnManager.ChangeStaminaOf("player", 1);
+                                // increment stamina if on 3rd character
+                            }
+                            StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));
+                            // make the text change
+                            RecalculateMaxFor("enemy");
+                            // recalculate max
+                            return ApplyInjuriesDuringMove(scripts.player.target.text, "enemy");
+                            // return if the enemy dies and at the same time apply wounds instantly
                         }
-                        if (scripts.player.isBloodthirsty) {
-                            // if player is wounded
-                            try { 
-                                scripts.player.woundList.Remove(scripts.player.target.text); 
-                                scripts.soundManager.PlayClip("blip");
-                            } catch {}
-                            // try to heal the wound, else don't do anything
-                            StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
-                            // update the text
-                            scripts.player.SetPlayerStatusEffect("leech", false);
-                            // turn off bloodthirsty
-                        }
-                        StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));
-                        // make the text change
-                        RecalculateMaxFor("enemy");
-                        // recalculate max
-                        return ApplyInjuriesDuringMove(scripts.player.target.text, "enemy");
-                        // return if the enemy dies and at the same time apply wounds instantly
                     }
                 }
                 if (scripts.itemManager.PlayerHasWeapon("maul") && scripts.enemy.spawnNum != 0) { return true; }
@@ -972,6 +973,24 @@ public class TurnManager : MonoBehaviour {
         }
         return false;
         // enemy has not died, so return false
+    }
+
+    private IEnumerator HealSFXFromPhylactery() {
+        yield return scripts.delays[0.55f];
+        print("healing!");
+        if (scripts.player.target.text.Contains("*")) { 
+            if (scripts.player.woundList.Remove(scripts.player.target.text.Substring(1))) { 
+                StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
+                scripts.soundManager.PlayClip("blip");
+            }
+            
+        }
+        else { 
+            if (scripts.player.woundList.Remove(scripts.player.target.text)) { 
+                StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
+                scripts.soundManager.PlayClip("blip");
+            }
+        }
     }
 
     /// <summary>

@@ -39,8 +39,7 @@ public class DiceSummoner : MonoBehaviour
     }
 
     private IEnumerator SummonAfterFade(bool initialSummon, bool newSet) {
-        if (newSet) { 
-            print("creating new set of dice!");
+        if (newSet) {
             if (scripts.turnManager.dieSavedFromLastRound != null) { 
                 Dice fromLastRound = scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>();
                 lastNum = fromLastRound.diceNum;
@@ -84,7 +83,6 @@ public class DiceSummoner : MonoBehaviour
             }
         }
         else { 
-            print("use the old set of dice!");
             existingDice.Clear();
             int initialSpawnCount = 0;
             for (int i = 0; i < scripts.gameData.diceTypes.Count; i++) {

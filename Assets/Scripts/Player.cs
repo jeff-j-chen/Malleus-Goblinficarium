@@ -66,6 +66,7 @@ public class Player : MonoBehaviour {
         scripts.itemManager.GiveStarterItems(charNum);
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
+        woundList = scripts.gameData.playerWounds;
         // set the initial positions
         identifier.text = "You";
         // set the identifier text

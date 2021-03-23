@@ -289,7 +289,7 @@ public class Dice : MonoBehaviour {
                 // if the die is attached to the player
                 for (int i = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedPlayerDice[statAddedTo].Count; i++) { 
                     // for every die following this current die
-                    GameObject curDie = scripts.statSummoner.addedPlayerDice[diceType][i].gameObject;
+                    GameObject curDie = scripts.statSummoner.addedPlayerDice[statAddedTo][i].gameObject;
                     curDie.transform.position = new Vector3(curDie.transform.position.x - scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
                     // shift each die back one, because this die will decrease to 0 and fade out
                 }
@@ -297,7 +297,7 @@ public class Dice : MonoBehaviour {
             else if (isOnPlayerOrEnemy == "enemy") {
                 // else the die is attached to the enemy
                 for (int i = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedEnemyDice[statAddedTo].Count; i++) { 
-                    GameObject curDie = scripts.statSummoner.addedEnemyDice[diceType][i].gameObject;
+                    GameObject curDie = scripts.statSummoner.addedEnemyDice[statAddedTo][i].gameObject;
                     curDie.transform.position = new Vector3(curDie.transform.position.x + scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
                 }
                 // same situation as above, shift the die (except forwards this time)

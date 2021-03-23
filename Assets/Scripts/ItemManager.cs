@@ -184,15 +184,24 @@ public class ItemManager : MonoBehaviour {
     public void GiveStarterItems(int charNum) {
         if (scripts.gameData.newGame) { 
             if (scripts.player.charNum == 0) { 
-                CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                CreateWeaponWithStats("mace", "harsh", 2, 2, 2, 2);
+                // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                 // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                 MoveToInventory(0, true, false, false);
-                CreateItem("steak", "common");
-                MoveToInventory(0, true, false, false);
+                // CreateItem("steak", "common");
+                // MoveToInventory(0, true, false, false);
 
                 CreateItem("potion", "common", "might");
                 MoveToInventory(0, true, false, false);
+                CreateItem("phylactery", "phylactery", "");
+                MoveToInventory(0, true, false, false);
                 CreateItem("scroll", "common", "courage");
+                MoveToInventory(0, true, false, false);
+                CreateItem("scroll", "common", "leech");
+                MoveToInventory(0, true, false, false);
+                CreateItem("scroll", "common", "fury");
+                MoveToInventory(0, true, false, false);
+                CreateItem("scroll", "common", "dodge");
                 MoveToInventory(0, true, false, false);
                 
                 if (scripts.persistentData.easyMode) { 

@@ -96,6 +96,7 @@ public class Enemy : MonoBehaviour {
         // spawn an enemy at the start of the round
         iconGameobject.transform.position = iconPosition;
         // set the position of the icon, enemy's is set in spawnnewenemy()
+        woundList = scripts.gameData.enemyWounds;
     }
 
     /// <summary>
@@ -259,7 +260,6 @@ public class Enemy : MonoBehaviour {
                 { "white", scripts.gameData.enemyDef },
             };
             spawnNum = enemyNum;
-            woundList = scripts.gameData.enemyWounds;
             try { scripts.turnManager.DisplayWounds(); } catch {}
             iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
             if (isDead) { GetComponent<Animator>().enabled = false; }
