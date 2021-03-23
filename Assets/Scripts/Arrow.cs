@@ -63,7 +63,7 @@ public class Arrow : MonoBehaviour {
     /// <param name="index">The index of the menu item to move the selection arrow to.</param>
     public void MoveToButtonPos(int index) {
         // function used to move the arrow to the desired button position
-        if (!(scripts.gameData.newGame == true && index == 0)) {
+        if (!(index == 0 && scripts.gameData.newGame == true)) {
             // as long as we are not trying to select continue when newgame is true (previous save wiped)
             currentIndex = index;
             transform.position = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);

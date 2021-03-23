@@ -12,7 +12,7 @@ public class MenuButton : MonoBehaviour
         transitionMultiplier = FindObjectOfType<BackToMenu>().transitionMultiplier;
         soundManager = FindObjectOfType<SoundManager>();
         arrow = FindObjectOfType<Arrow>();
-        
+        arrow.MoveToButtonPos(1);
     }
 
     public void OnMouseEnter() {
@@ -40,7 +40,6 @@ public class MenuButton : MonoBehaviour
             case "New Game":
                 GameData data = new GameData();
                 File.WriteAllText("gameSave.txt", JsonUtility.ToJson(data));
-                print("case newgame, so reset game data and newGame is now " + data.newGame);
                 PersistentData persistentData = LoadPersistentData();
                 persistentData.gamesPlayed++;
                 Initiate.Fade("Game", Color.black, transitionMultiplier);

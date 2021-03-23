@@ -304,6 +304,8 @@ public class Dice : MonoBehaviour {
             }
             else { print("something is wrong with this die"); }
         }
+        // if (scripts.statSummoner.addedPlayerDice[statAddedTo].Contains(this)) { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); }
+        // else if (scripts.statSummoner.addedEnemyDice[statAddedTo].Contains(this)) { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this);}
         try { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
         try { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this); } catch { }
         // attempt to remove from the player/enemy, this way is much easier than checking
@@ -311,13 +313,11 @@ public class Dice : MonoBehaviour {
         // remove from existing die list so no errors later on
         Destroy(gameObject);
         // destroy the die
-        if (decrease) {
-            scripts.statSummoner.SetDebugInformationFor("enemy");
-            scripts.statSummoner.SetDebugInformationFor("player");
-            // display the debug information if needed
-        }
         scripts.diceSummoner.SaveDiceValues();
         // save the dice values to the save file
+        scripts.statSummoner.SetDebugInformationFor("enemy");
+        scripts.statSummoner.SetDebugInformationFor("player");
+        // display the debug information if needed
     }
     
     /// <summary>

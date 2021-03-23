@@ -141,8 +141,8 @@ public class ItemManager : MonoBehaviour {
             // assign the curlist variable for item selection navigation
             // need to implement a check if continuing or new game
         }
-        if (scripts.gameData.newGame) { print("made a new game!"); }
-        else { print("resuming existing game!"); }
+        // if (scripts.gameData.newGame) { print("made a new game!"); }
+        // else { print("resuming existing game!"); }
     }
 
     void Update() {
@@ -189,6 +189,12 @@ public class ItemManager : MonoBehaviour {
                 MoveToInventory(0, true, false, false);
                 CreateItem("steak", "common");
                 MoveToInventory(0, true, false, false);
+
+                CreateItem("potion", "common", "might");
+                MoveToInventory(0, true, false, false);
+                CreateItem("scroll", "common", "courage");
+                MoveToInventory(0, true, false, false);
+                
                 if (scripts.persistentData.easyMode) { 
                     CreateItem("torch", "common");
                         MoveToInventory(0, true, false, false);

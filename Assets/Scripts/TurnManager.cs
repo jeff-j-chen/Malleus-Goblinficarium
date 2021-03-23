@@ -30,7 +30,10 @@ public class TurnManager : MonoBehaviour {
         SetTargetOf("enemy");
         scripts.enemy.TargetBest();
         scripts.statSummoner.ResetDiceAndStamina();
-        if (!(scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) && scripts.levelManager.sub != 4) { scripts.diceSummoner.SummonDice(true); }
+        if (!(scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) && scripts.levelManager.sub != 4) { 
+            if (scripts.gameData.newGame) { scripts.diceSummoner.SummonDice(true, true); }
+            else { scripts.diceSummoner.SummonDice(true, false); }
+        }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
     }
@@ -442,12 +445,13 @@ public class TurnManager : MonoBehaviour {
                 discardDieBecauseCourage = false;
                 scripts.player.SetPlayerStatusEffect("courage", false);
                 // reset necessary variables
+                print("in turnmanager, dice saved is " + dieSavedFromLastRound.GetComponent<Dice>().diceType);
             }
             isMoving = false;
             // stop moving
             scripts.statSummoner.ResetDiceAndStamina();
             // reset die and stamina
-            scripts.diceSummoner.SummonDice(false);
+            scripts.diceSummoner.SummonDice(false, true);
             // summon the die again
             scripts.statSummoner.SummonStats();
             // summon the stats again

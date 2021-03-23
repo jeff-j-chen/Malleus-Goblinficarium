@@ -508,7 +508,7 @@ public class Item : MonoBehaviour {
                             // refund stamina
                         }
                         scripts.statSummoner.ResetDiceAndStamina();
-                        scripts.diceSummoner.SummonDice(false);
+                        scripts.diceSummoner.SummonDice(false, true);
                         scripts.statSummoner.SummonStats();
                     }
                     else { scripts.turnManager.SetStatusText("ankh glows with red light"); }

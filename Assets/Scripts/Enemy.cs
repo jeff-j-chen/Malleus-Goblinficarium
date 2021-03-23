@@ -89,7 +89,8 @@ public class Enemy : MonoBehaviour {
             // hide the stats (don't fight merchants)
         }
         else { 
-            SpawnNewEnemy(scripts.gameData.enemyNum);
+            if (scripts.gameData.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); }
+            else { SpawnNewEnemy(scripts.gameData.enemyNum); }
             scripts.itemManager.lootText.text = "";
         }
         // spawn an enemy at the start of the round

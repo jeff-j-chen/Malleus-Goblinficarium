@@ -13,7 +13,10 @@ public class DiceSummoner : MonoBehaviour
     public float yCoord = -5.51f;
     private float[] xCoords = new float[] { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
     private List<Color> generatedTypes = new List<Color>();
-
+    public int lastNum;
+    public string lastType;
+    public string lastStat;
+    
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
     }
@@ -22,7 +25,7 @@ public class DiceSummoner : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space)) {
             // testing purposes only
             scripts.statSummoner.ResetDiceAndStamina();
-            SummonDice(false);
+            SummonDice(false, true);
             scripts.statSummoner.SummonStats();
         }
     }
@@ -31,47 +34,87 @@ public class DiceSummoner : MonoBehaviour
     /// Start the summoning of the dice.
     /// </summary>
     /// <param name="initialSummon">If not intial summon => delay 0.25f</param>
-    public void SummonDice(bool initialSummon) {
-        StartCoroutine(SummonAfterFade(initialSummon));
+    public void SummonDice(bool initialSummon, bool newSet) {
+        StartCoroutine(SummonAfterFade(initialSummon, newSet));
     }
 
-    private IEnumerator SummonAfterFade(bool initialSummon) {
-        if (scripts.turnManager.dieSavedFromLastRound != null) {
-            // if there is a die saved from last round (from scroll of courage)
-            GenerateSingleDie (
-                scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>().diceNum, 
-                scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>().diceType, 
-                "player",
-                scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>().statAddedTo,
-                initialSix:true
-            );
-            // create the die and add it to the player
+    private IEnumerator SummonAfterFade(bool initialSummon, bool newSet) {
+        if (newSet) { 
+            print("creating new set of dice!");
+            if (scripts.turnManager.dieSavedFromLastRound != null) { 
+                Dice fromLastRound = scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>();
+                lastNum = fromLastRound.diceNum;
+                lastType = fromLastRound.diceType;
+                lastStat = fromLastRound.statAddedTo;
+                // need to store them in primitives because the dice and its info will be destroyed
+            }
+            else { lastNum = -1; }
+            // need to save the die before the delay and summon it afterwards for some reason
+            if (!initialSummon) {
+                // delay if necessary
+                yield return scripts.delays[0.25f];
+            }
+            existingDice.Clear();
+            // clear the list so we have a fresh array
+            GenerateDiceTypes();
+            for (int i = 0; i < 6; i++) {
+                GenerateSingleDie(UnityEngine.Random.Range(1, 7), null, "none", null, i, initialSix:true);
+                // generate the 6 base die for every round
+            }
+            if (scripts.itemManager.PlayerHasWeapon("flail")) {
+                // give the player a red die if wielding a flail
+                GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red", initialSix:true);
+            }
+            if (scripts.player.charNum == 1) { 
+                // if player character #2 (maul armor helm), give player yellow die
+                scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+            }
+            if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
+                // if devil
+                foreach (string typeToGen in scripts.itemManager.statArr) {
+                    // generate a die for every stat
+                    GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
+                    // attach it to the devl
+                }
+            }
+            if (lastNum != -1) {
+                // if there is a die saved from last round (from scroll of courage)
+                GenerateSingleDie (lastNum, lastType, "player", lastStat, initialSix:true);
+                // create the die and add it to the player
+            }
         }
-        if (!initialSummon) {
-            // delay if necessary
-            yield return scripts.delays[0.25f];
-        }
-        existingDice.Clear();
-        // clear the list so we have a fresh array
-        GenerateDiceTypes();
-        for (int i = 0; i < 6; i++) {
-            GenerateSingleDie(UnityEngine.Random.Range(1, 7), null, "none", null, i, initialSix:true);
-            // generate the 6 base die for every round
-        }
-        if (scripts.itemManager.PlayerHasWeapon("flail")) {
-            // give the player a red die if wielding a flail
-            GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red", initialSix:true);
-        }
-        if (scripts.player.charNum == 1) { 
-            // if player character #2 (maul armor helm), give player yellow die
-            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
-        }
-        if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
-            // if devil
-            foreach (string typeToGen in scripts.itemManager.statArr) {
-                // generate a die for every stat
-                GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
-                // attach it to the devl
+        else { 
+            print("use the old set of dice!");
+            existingDice.Clear();
+            int initialSpawnCount = 0;
+            for (int i = 0; i < scripts.gameData.diceTypes.Count; i++) {
+                // for every die
+                if (scripts.gameData.dicePlayerOrEnemy[i] == "none") {
+                    // if its not attached, its part of the 6 pickupable
+                    GenerateSingleDie(
+                        scripts.gameData.diceNumbers[i],
+                        scripts.gameData.diceTypes[i],
+                        "none",
+                        scripts.gameData.diceAttachedToStat[i],
+                        initialSpawnCount,
+                        initialSix:true
+                    );
+                    // create the die
+                    initialSpawnCount++;
+                    // increment the counter (used in generation to calculate offset)
+                }
+                else {
+                    // else its a die attached by some other means (e.g. flail, devil)
+                    GenerateSingleDie(
+                        scripts.gameData.diceNumbers[i],
+                        scripts.gameData.diceTypes[i],
+                        scripts.gameData.dicePlayerOrEnemy[i],
+                        scripts.gameData.diceAttachedToStat[i],
+                        initialSpawnCount,
+                        initialSix:true
+                    );
+                    // so create it and attach directly
+                }
             }
         }
         SaveDiceValues();

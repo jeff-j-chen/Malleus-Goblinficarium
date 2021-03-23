@@ -239,7 +239,7 @@ public class LevelManager : MonoBehaviour {
                 else { 
                     toSpawn = "normal";
                     scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); 
-                    levelTransText.text = $"{level}-{sub}";
+                    levelTransText.text = $"level {level}-{sub}";
                     levelText.text = $"(level {level}-{sub})";
                 }
                 // normal level, so notify the player accordingly and spawn basic enemy
@@ -282,7 +282,7 @@ public class LevelManager : MonoBehaviour {
             }
             else {
                 // not going to the trader or tombstone
-                scripts.diceSummoner.SummonDice(false);
+                scripts.diceSummoner.SummonDice(false, true);
                 scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
                 // summon die and make sure the enemy's stats can be seen
             }
