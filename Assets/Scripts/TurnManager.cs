@@ -924,7 +924,6 @@ public class TurnManager : MonoBehaviour {
                     }
                 }
                 if (scripts.statSummoner.SumOfStat("green", "player") >= 0) {
-                    print("player is currently bloodthirsty?" + scripts.player.isBloodthirsty); 
                     if (scripts.player.isBloodthirsty) {
                         // if player is wounded
                         try { 
