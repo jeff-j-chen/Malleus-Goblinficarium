@@ -4,6 +4,15 @@ using System.Collections;
 public class Arrow : MonoBehaviour {
     [SerializeField] public GameObject[] menuButtons;
     // serialized field of menubuttons 
+    private Vector2[] buttonPositions = new Vector2[] { 
+        new Vector2(0.75f, 1.5f),
+        new Vector2(0.75f, 0.5f),
+        new Vector2(0.75f, -0.5f),
+        new Vector2(0.75f, -1.5f),
+        new Vector2(0.75f, -2.5f),
+        new Vector2(0.75f, -3.5f),
+    };
+
     private float xOffset = -3.2f;
     private float yOffset = -0.04f;
     // how far off the arrow should be on the x and y axes
@@ -18,8 +27,18 @@ public class Arrow : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         // find scripts
         gameData = scripts.LoadGameData();
-        if (scripts.gameData.newGame == true) { menuButtons[0].SetActive(false); }
-        else { menuButtons[0].SetActive(true); }
+        if (scripts.gameData.newGame == true) { 
+            menuButtons[0].SetActive(false); 
+            for (int i = 1; i < menuButtons.Length; i++) { 
+                menuButtons[i].transform.position = buttonPositions[i-1];
+            }
+        }
+        else { 
+            menuButtons[0].SetActive(true); 
+            for (int i = 0; i < menuButtons.Length; i++) { 
+                menuButtons[i].transform.position = buttonPositions[i];
+            }
+        }
         // hide/show the continue button if there is a game or not
         MoveToButtonPos(currentIndex);
         // immediately move to the correct button position
