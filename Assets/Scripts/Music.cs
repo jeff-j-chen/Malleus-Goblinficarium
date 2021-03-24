@@ -2,6 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+// for music: menu screen is intro.ogg, main game is through.ogg, trader is smoke.ogg, boss is labossa.ogg
+// intro music is changed to main game by cutting
+// main game music will be quieted during level change
+// main and trader are hard loops, assume boss is as well
+// boss does a quick fade into intro after you kill him
 
 public class Music : MonoBehaviour {
     private void Awake() {

@@ -149,7 +149,7 @@ public class Item : MonoBehaviour {
                         switch (modifier) { 
                             case "arcane": scripts.itemManager.itemDesc.text = $"arcane necklet\nall necklets are more effective"; break; 
                             case "nothing": scripts.itemManager.itemDesc.text = $"necklet of nothing\ndoes nothing"; break; 
-                            case "victory": scripts.itemManager.itemDesc.text = $"necklet of victory"; break;
+                            case "victory": scripts.itemManager.itemDesc.text = $"necklet of victory\nthe victory is in your hands!.."; break;
                             default: scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{scripts.itemManager.neckletCounter["arcane"]} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; break;
                         }
                         break;
@@ -161,7 +161,13 @@ public class Item : MonoBehaviour {
                         scripts.itemManager.itemDesc.text = "moldy cheese\n+0 stamina"; break;
                     case "rotten steak":
                         scripts.itemManager.itemDesc.text = "rotten steak\n+0 stamina"; break;
-                    case "arrow": case "retry":  
+                    case "arrow": 
+                        if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
+                            scripts.itemManager.itemDesc.text = "leave dungeon";
+                        }
+                        else { scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; }
+                        break;
+                    case "retry":  
                         scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName]; break;
                     default: 
                         scripts.itemManager.itemDesc.text = $"{itemName}\n{scripts.itemManager.descriptionDict[itemName]}"; break;

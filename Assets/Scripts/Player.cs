@@ -202,6 +202,9 @@ public class Player : MonoBehaviour {
                     // reroll the die
                 }
             }
+            else if (scripts.itemManager.PlayerHasWeapon("mace") && scripts.turnManager.usedMace) {
+                scripts.turnManager.SetStatusText("already rerolled");
+            }
             else {
                 scripts.turnManager.SetStatusText("choose a die"); 
                 // player doesn't have mace, so notify them to choose a die

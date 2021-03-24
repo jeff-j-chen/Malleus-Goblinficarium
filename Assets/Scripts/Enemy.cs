@@ -61,14 +61,14 @@ public class Enemy : MonoBehaviour {
         // make sure to show the enemy's stats at the start
         if (scripts.levelManager.level == 4) { 
             // devil level
-            if (scripts.enemy.woundGUIElement.text == "[cloaked]") { SpawnNewEnemy(0); }
-            else { SpawnNewEnemy(1); }
+            if (scripts.enemy.woundGUIElement.text == "[cloaked]") { SpawnNewEnemy(0, scripts.gameData.newGame); }
+            else { SpawnNewEnemy(1, scripts.gameData.newGame); }
             // spawn cloaked or normal devil, depending 
             scripts.itemManager.lootText.text = "";
         }
         else if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) {
             // on the tombstone level
-            SpawnNewEnemy(8);
+            SpawnNewEnemy(8, scripts.gameData.newGame);
             // spawn th tombstone
             scripts.itemManager.lootText.text = "loot:";
             // indicate that the player can loot
@@ -79,7 +79,7 @@ public class Enemy : MonoBehaviour {
         }
         else if (scripts.levelManager.sub == 4) {
             // on a merchant level
-            SpawnNewEnemy(7);
+            SpawnNewEnemy(7, scripts.gameData.newGame);
             // spawn the merchant
             scripts.itemManager.lootText.text = "goods:";
             // indicate that the player should trade
@@ -89,14 +89,14 @@ public class Enemy : MonoBehaviour {
             // hide the stats (don't fight merchants)
         }
         else { 
-            if (scripts.gameData.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); }
-            else { SpawnNewEnemy(scripts.gameData.enemyNum); }
+            if (scripts.gameData.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7), scripts.gameData.newGame); }
+            else { SpawnNewEnemy(scripts.gameData.enemyNum, scripts.gameData.newGame); }
             scripts.itemManager.lootText.text = "";
         }
         // spawn an enemy at the start of the round
         iconGameobject.transform.position = iconPosition;
         // set the position of the icon, enemy's is set in spawnnewenemy()
-        woundList = scripts.gameData.enemyWounds;
+        // spawn new enemy if we are in a new game, else spawn the old enemy
     }
 
     /// <summary>
@@ -181,8 +181,8 @@ public class Enemy : MonoBehaviour {
     /// Spawn an enemy from the array at specified index.
     /// </summary>
     /// <param name="enemyNum"></param>
-    public void SpawnNewEnemy(int enemyNum) {
-        if (scripts.gameData.newGame) {
+    public void SpawnNewEnemy(int enemyNum, bool isNewEnemy) {
+        if (isNewEnemy) {
 
             isDead = false;
             scripts.gameData.enemyIsDead = false;
@@ -202,13 +202,9 @@ public class Enemy : MonoBehaviour {
             scripts.gameData.enemySpd = stats["blue"];
             scripts.gameData.enemyDmg = stats["red"];
             scripts.gameData.enemyDef = stats["white"];
-            spawnNum = enemyNum;
             // set stats
-            woundList.Clear();
-            // make sure is not woudneds
+            spawnNum = enemyNum;
             // woundList = new List<string>() { "armpits" };
-            try { scripts.turnManager.DisplayWounds(); } catch {}
-            // try to display wounds
             iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
             // set the sprite for the icon
             GetComponent<Animator>().enabled = true;
@@ -250,8 +246,10 @@ public class Enemy : MonoBehaviour {
                 stamina = givenStamina[$"{scripts.levelManager.level}{scripts.levelManager.sub}"];
                 // assign stamina based on level and sub
             }
+            woundList.Clear();
         }
         else { 
+            // spawning old enemy
             isDead = scripts.gameData.enemyIsDead;
             stats = new Dictionary<string, int>() {
                 { "green", scripts.gameData.enemyAcc },
@@ -283,10 +281,12 @@ public class Enemy : MonoBehaviour {
             if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { stamina = 0; }
             else if (enemyArr[enemyNum] == "Lich") { stamina = 5; }
             else { stamina = scripts.gameData.enemyStamina; }
+            woundList = scripts.gameData.enemyWounds;
         }
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
         try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
+        try { scripts.turnManager.DisplayWounds(); } catch {}
         scripts.gameData.enemyNum = enemyNum;
         scripts.SaveGameData();
     }

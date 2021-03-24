@@ -2733,6 +2733,9 @@ MonoBehaviour:
   breakOutOfScimitarParryLoop: 0
   existingDice: []
   yCoord: -5.5
+  lastNum: 0
+  lastType: 
+  lastStat: 
 --- !u!4 &1399067056
 Transform:
   m_ObjectHideFlags: 0
@@ -2963,7 +2966,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blackBox: {fileID: 1585409375}
-  onScreen: {x: 2.4, y: 10, z: 0}
+  onScreen: {x: -0.2, y: 10.89, z: 0}
   offScreen: {x: 0.33, y: 20, z: 0}
   statusText: {fileID: 119983209}
   targetArr:
@@ -2984,7 +2987,6 @@ MonoBehaviour:
   - enemy can't use white dice
   - enemy can't use red dice
   - instantaneous death
-  toMove: 
   isMoving: 0
   actionsAvailable: 0
   alterationDuringMove: 0
@@ -3251,6 +3253,11 @@ MonoBehaviour:
     usedAnkh: 0
     usedHelm: 0
     usedBoots: 0
+    isFurious: 0
+    isDodgy: 0
+    isHasty: 0
+    isBloodthirsty: 0
+    isCourageous: 0
     numItemsDroppedForTrade: 0
     discardableDieCounter: 0
     enemyIsDead: 0

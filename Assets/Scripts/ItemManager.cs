@@ -185,14 +185,14 @@ public class ItemManager : MonoBehaviour {
     public void GiveStarterItems(int charNum) {
         if (scripts.gameData.newGame) { 
             if (scripts.player.charNum == 0) { 
-                CreateWeaponWithStats("mace", "harsh", 2, 2, 2, 2);
+                // CreateWeaponWithStats("mace", "harsh", 2, 2, 2, 2);
                 // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-                // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
+                CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                 MoveToInventory(0, true, false, false);
                 // CreateItem("steak", "common");
                 // MoveToInventory(0, true, false, false);
 
-                CreateItem("potion", "common", "might");
+                CreateItem("potion", "common", "life");
                 MoveToInventory(0, true, false, false);
                 CreateItem("phylactery", "phylactery", "");
                 MoveToInventory(0, true, false, false);
@@ -376,7 +376,6 @@ public class ItemManager : MonoBehaviour {
     /// <param name="itemType">The type of the item of which to create</param>
     /// <param name="itemType">The modifier of the item of which to create</param>
     /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
-    /// <param name="victory">true to create a necklet of victory, false otherwise.</param>
     public GameObject CreateItem(string itemName, string itemType, string modifier, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item

@@ -60,6 +60,7 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
+        print("created new levelmanager!");
     }
 
     /// <summary>
@@ -217,12 +218,12 @@ public class LevelManager : MonoBehaviour {
                     levelText.text = $"(level {level}-{sub}*)";
                     sub--;
                     // decrement sub (because we went up 1 level but aren't going to fight anything)
-                    scripts.enemy.SpawnNewEnemy(8);
+                    scripts.enemy.SpawnNewEnemy(8, true);
                     // spawn the tombstone
                 }
                 else if (sub == 4) { 
                     toSpawn = "trader";
-                    scripts.enemy.SpawnNewEnemy(7);
+                    scripts.enemy.SpawnNewEnemy(7, true);
                     // create the trader enemy
                     scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
                     // summon trader if necessary
@@ -234,11 +235,11 @@ public class LevelManager : MonoBehaviour {
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
                     StartCoroutine(GlitchyLevelText());
-                    scripts.enemy.SpawnNewEnemy(0); 
+                    scripts.enemy.SpawnNewEnemy(0, true); 
                 }
                 else { 
                     toSpawn = "normal";
-                    scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7)); 
+                    scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); 
                     levelTransText.text = $"level {level}-{sub}";
                     levelText.text = $"(level {level}-{sub})";
                 }
@@ -249,8 +250,9 @@ public class LevelManager : MonoBehaviour {
                 levelTransText.text = "level ???";
                 levelText.text = "(level ???)";
                 // going to the lich level, so notify player
-                scripts.enemy.SpawnNewEnemy(2);
+                scripts.enemy.SpawnNewEnemy(2, true);
             }
+            // always spawn new enemy if going to next level
             scripts.itemManager.DestroyItems();
             // remove all items from the floor
             // scripts.player.GetComponent<Animation>().Rewind();
