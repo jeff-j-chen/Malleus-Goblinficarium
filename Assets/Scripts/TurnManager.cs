@@ -437,7 +437,7 @@ public class TurnManager : MonoBehaviour {
                     yield return scripts.delays[0.1f];
                     // wait
                 }
-                if (dieSavedFromLastRound == null && scripts.diceSummoner.existingDice.Count > 0) {
+                if (dieSavedFromLastRound is null && scripts.diceSummoner.existingDice.Count > 0) {
                     // player has not discarded enough dice in the 5s time slot, so choose a random one
                     dieSavedFromLastRound = (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList()[UnityEngine.Random.Range(0, (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList().Count)];
                     // save random die
@@ -977,13 +977,11 @@ public class TurnManager : MonoBehaviour {
 
     private IEnumerator HealSFXFromPhylactery() {
         yield return scripts.delays[0.55f];
-        print("healing!");
         if (scripts.player.target.text.Contains("*")) { 
             if (scripts.player.woundList.Remove(scripts.player.target.text.Substring(1))) { 
                 StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
                 scripts.soundManager.PlayClip("blip");
             }
-            
         }
         else { 
             if (scripts.player.woundList.Remove(scripts.player.target.text)) { 

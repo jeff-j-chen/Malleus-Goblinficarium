@@ -129,10 +129,6 @@ public class ItemManager : MonoBehaviour {
             MoveItemToDisplay();
             GameObject created = CreateItem("torch", "common");
             MoveItemToDisplay();
-            if (scripts.characterSelector != null) { 
-                if (scripts.characterSelector.easy) { created.GetComponent<Item>().UnHide(); }
-                else { created.GetComponent<Item>().Hide(); }
-            }
         }
         else {
             // in game
@@ -246,7 +242,7 @@ public class ItemManager : MonoBehaviour {
             MoveToInventory(0, true, false, false);
             for (int i = 1; i < 9; i++) {
                 if (scripts.gameData.resumeItemNames[i] == "") { break; }
-                CreateItem(scripts.gameData.resumeItemNames[i], scripts.gameData.resumeItemTypes[i], scripts.gameData.resumeItemMods[i]);
+                CreateItem(scripts.gameData.resumeItemNames[i].Replace(' ', '_'), scripts.gameData.resumeItemTypes[i], scripts.gameData.resumeItemMods[i]);
                 MoveToInventory(0, true, false, false);
             }
         }
@@ -737,24 +733,26 @@ public class ItemManager : MonoBehaviour {
     }
 
     public void SaveInventoryItems() {
-        scripts.gameData.resumeItemNames = new string[9];
-        scripts.gameData.resumeItemTypes = new string[9];
-        scripts.gameData.resumeItemMods = new string[9];
-        // clear the data before placing in new
-        Item item = scripts.player.inventory[0].GetComponent<Item>();
-        scripts.gameData.resumeItemNames[0] = item.itemName.Split(' ')[1];
-        scripts.gameData.resumeItemTypes[0] = item.itemType;
-        scripts.gameData.resumeItemMods[0] = item.modifier;
-        // add the player's weapon first
-        for (int i = 1; i < scripts.player.inventory.Count; i++) {
-            item = scripts.player.inventory[i].GetComponent<Item>();
-            scripts.gameData.resumeItemNames[i] = item.itemName;
-            scripts.gameData.resumeItemTypes[i] = item.itemType;
-            scripts.gameData.resumeItemMods[i] = item.modifier;
-            // add all the remaining items
+        if (scripts.levelManager != null) { 
+            scripts.gameData.resumeItemNames = new string[9];
+            scripts.gameData.resumeItemTypes = new string[9];
+            scripts.gameData.resumeItemMods = new string[9];
+            // clear the data before placing in new
+            Item item = scripts.player.inventory[0].GetComponent<Item>();
+            scripts.gameData.resumeItemNames[0] = item.itemName.Split(' ')[1];
+            scripts.gameData.resumeItemTypes[0] = item.itemType;
+            scripts.gameData.resumeItemMods[0] = item.modifier;
+            // add the player's weapon first
+            for (int i = 1; i < scripts.player.inventory.Count; i++) {
+                item = scripts.player.inventory[i].GetComponent<Item>();
+                scripts.gameData.resumeItemNames[i] = item.itemName;
+                scripts.gameData.resumeItemTypes[i] = item.itemType;
+                scripts.gameData.resumeItemMods[i] = item.modifier;
+                // add all the remaining items
+            }
+            scripts.SaveGameData();
+            // save to file
         }
-        scripts.SaveGameData();
-        // save to file
     }
 
     public void SaveFloorItems() { 

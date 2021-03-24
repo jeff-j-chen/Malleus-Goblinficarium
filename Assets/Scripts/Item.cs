@@ -116,7 +116,7 @@ public class Item : MonoBehaviour {
             }
         }
         else {
-            if (scripts.levelManager == null || !scripts.levelManager.lockActions) {
+            if (scripts.levelManager is null || !scripts.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
                 if (scripts.levelManager != null && scripts.enemy.isDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
@@ -154,7 +154,7 @@ public class Item : MonoBehaviour {
                         }
                         break;
                     case "cheese": case "steak":
-                        if (scripts.player == null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
+                        if (scripts.player is null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
                         else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
                         break;
                     case "moldy cheese":
@@ -175,7 +175,7 @@ public class Item : MonoBehaviour {
                 }
             }
         }
-        if (scripts.levelManager == null || itemType == "weapon" || 
+        if (scripts.levelManager is null || itemType == "weapon" || 
             scripts.levelManager != null && !scripts.levelManager.lockActions ) {
             // only allow weapons to be used when unlocked
             scripts.itemManager.highlight.transform.position = transform.position;
@@ -262,10 +262,11 @@ public class Item : MonoBehaviour {
         // save the items as long as we didn't use the retry button
     }
 
-    /// <summary>
-    /// Use a common item. 
-    /// </summary>
-    private void UseCommon() {
+    private void UseCommon() { 
+        StartCoroutine(UseCommonCoro());
+    }
+    
+    private IEnumerator UseCommonCoro() {
         if (!scripts.levelManager.lockActions) {
             // don't use items when locked
             switch (itemName) { 
@@ -417,6 +418,8 @@ public class Item : MonoBehaviour {
                             scripts.turnManager.DisplayWounds();
                             // heal and display the wounds
                             // injuredtextchange does not want to work for some reason
+                            yield return scripts.delays[0.25f];
+                            scripts.soundManager.PlayClip("blip");
                             break;
                         case "nothing": break;
                         default: print("invalid potion modifier detected"); break;

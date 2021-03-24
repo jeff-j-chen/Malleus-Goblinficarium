@@ -120,8 +120,7 @@ public class TombstoneData : MonoBehaviour {
         if (delay) { yield return new WaitForSeconds(0.01f); }
         scripts = FindObjectOfType<Scripts>();
         for (int i = 0; i < 9; i++) {  
-            if (scripts.gameData.merchantItemNames[i] != null && scripts.gameData.merchantItemNames[i] != "") { 
-                print($"creating a {scripts.gameData.merchantItemNames[i]}");
+            if (scripts.gameData.merchantItemNames[i] != null && scripts.gameData.merchantItemNames[i] != "") {
                 GameObject created = scripts.itemManager.CreateItem(scripts.gameData.merchantItemNames[i], scripts.gameData.merchantItemTypes[i], scripts.gameData.merchantItemMods[i]);
             }
         }

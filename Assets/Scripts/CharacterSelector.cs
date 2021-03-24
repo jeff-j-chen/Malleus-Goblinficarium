@@ -35,6 +35,9 @@ public class CharacterSelector : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         unlockedChars = scripts.persistentData.unlockedChars;
+        easy = scripts.persistentData.easyMode;
+        if (easy) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
+        else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
         selectionNum = 0;
         SetSelection(selectionNum);
         StartCoroutine(allowFX());
@@ -48,35 +51,37 @@ public class CharacterSelector : MonoBehaviour {
 
 
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) { ChangeToPressed("Left"); }
-        // holding down left, so press down the button
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) { ChangeToPressed("Right"); }
-        // holding down right, so press down the button
-        else if (Input.GetKeyUp(KeyCode.LeftArrow)) { 
-            // left arrow released, so move the selection left
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) { 
             SetSelection(selectionNum - 1);
+            ChangeToPressed("Left"); 
+        }
+        else if (Input.GetKeyDown(KeyCode.RightArrow)) { 
+            SetSelection(selectionNum + 1);
+            ChangeToPressed("Right"); 
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftArrow)) { 
             ChangeToReleased("Left");
         }
         else if (Input.GetKeyUp(KeyCode.RightArrow)) { 
-            // right arrow released, so move the selection right
-            SetSelection(selectionNum + 1);
             ChangeToReleased("Right");
         }
         else if (Input.GetKeyDown(KeyCode.Space)) { ToggleEasy(); }
         // space toggles easy mode
-        else if (Input.GetKeyDown(KeyCode.Return)) { 
+        else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) { 
             // enter selects the character
             if (unlockedChars[selectionNum]) { StartCoroutine(LoadMenuScene()); }
             // but only if its already unlocked
         }
     }
 
+
+
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip");
         // play sfx (this is when selected)
         scripts.persistentData.newCharNum = selectionNum;
         // set the selection num
-        scripts.SaveGameData();
+        scripts.SavePersistentData();
         // save the selection num
         yield return scripts.delays[0.1f];
         // delay here, because i don't want a singleton and this allows blip to complete playing

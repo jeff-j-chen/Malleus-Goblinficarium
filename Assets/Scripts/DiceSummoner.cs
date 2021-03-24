@@ -141,7 +141,7 @@ public class DiceSummoner : MonoBehaviour
         else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
         int diceColorIndex;
         // reference variable for the die's color index relative to scripts.color.coloArr
-        if (diceType == null) { diceColorIndex = Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]); }
+        if (diceType is null) { diceColorIndex = Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]); }
         // generate the respected die from the type list if not given a set die type
         else { diceColorIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType); }
         // else create one of the specified type
