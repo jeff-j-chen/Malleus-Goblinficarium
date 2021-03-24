@@ -13,7 +13,7 @@ public class BackToMenu : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            if (scripts.player != null) { 
+            if (scripts != null && scripts.player != null) { 
                 scripts.SaveGameData();
                 scripts.SavePersistentData();
             }

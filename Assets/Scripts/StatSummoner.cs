@@ -314,7 +314,7 @@ public class StatSummoner : MonoBehaviour {
     /// <param name="optionalDiceOffsetStatToMultiplyBy">Put this variable here if you want to offset by a different stat.</param>
     /// <returns>float of outmost x for the given stat.</returns>
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
-        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; };
+        if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
         // not setting the optional variable will just default it to the base stat type
         return xCoord + ((Mathf.Abs(scripts.player.stats[statType] + scripts.player.potionStats[statType] + scripts.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * scripts.statSummoner.addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
@@ -327,7 +327,7 @@ public class StatSummoner : MonoBehaviour {
     /// <param name="optionalDiceOffsetStatToMultiplyBy">Put this variable here if you want to offset by a different stat.</param>
     /// <returns>float of outmost x for the given stat.</returns>
     public float OutermostEnemyX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
-        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; };
+        if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
         return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) - 1) * -xOffset)  - scripts.statSummoner.highlightOffset - scripts.statSummoner.diceOffset * (scripts.statSummoner.addedEnemyDice[statType].Count - 1);
         // similar to outermostplayerx
     }

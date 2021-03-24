@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
-using UnityEngine.Animations;
+using System.IO;
 
 public class LevelManager : MonoBehaviour {
     [SerializeField] private GameObject levelBox;
@@ -48,7 +48,6 @@ public class LevelManager : MonoBehaviour {
         else { levelText.gameObject.SetActive(false); }
         level = scripts.gameData.resumeLevel;
         sub = scripts.gameData.resumeSub;
-        levelText.text = $"(level {level}-{sub})";
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
         temp = boxSR.color;
@@ -60,7 +59,12 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
-        print("created new levelmanager!");
+        if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
+        else if (sub == scripts.persistentData.tsSub && level == scripts.persistentData.tsLevel && !(sub == 1 && level == 1))
+        { levelText.text = $"(level {level}-{sub}*)"; }
+        else if (level == 4 && sub == 1) { levelText.text = $"PLACEHOLDER TEXT"; }
+        else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = $"(level ???)"; }
+        else { levelText.text = $"(level {level}-{sub})"; }
     }
 
     /// <summary>
@@ -154,6 +158,8 @@ public class LevelManager : MonoBehaviour {
                     scripts.SaveGameData();
                     // grab it back 
                 }
+                print("notify the player they unlocked a new character to play here!");
+                File.Delete("gameSave.txt");
                 for (int i = 0; i < 15; i++) {
                     yield return scripts.delays[0.033f];
                     temp.a += 1f/15f;
@@ -236,6 +242,7 @@ public class LevelManager : MonoBehaviour {
                     // spawn the devil if on the correct level
                     StartCoroutine(GlitchyLevelText());
                     scripts.enemy.SpawnNewEnemy(0, true); 
+                    levelText.text = $"PLACEHOLDER TEXT";
                 }
                 else { 
                     toSpawn = "normal";
@@ -314,8 +321,9 @@ public class LevelManager : MonoBehaviour {
             // determine who moves
             lockActions = false;
             scripts.gameData.resumeSub = scripts.levelManager.sub;
-            scripts.gameData.resumeLevel = scripts.levelManager.sub;
+            scripts.gameData.resumeLevel = scripts.levelManager.level;
         }
+        scripts.SaveGameData();
     }
 
     private IEnumerator GlitchyLevelText() {
