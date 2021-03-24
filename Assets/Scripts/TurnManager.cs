@@ -36,6 +36,7 @@ public class TurnManager : MonoBehaviour {
         }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
+        
     }
 
     /// <summary>

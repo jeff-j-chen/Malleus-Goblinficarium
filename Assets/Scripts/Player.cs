@@ -47,7 +47,7 @@ public class Player : MonoBehaviour {
     public bool isDodgy = false;
     public bool isHasty = false;
     public bool isBloodthirsty = false;
-    public bool isCourageous;
+    public bool isCourageous = false;
     private Vector2 basePosition = new Vector2(-2.166667f, -1.866667f);
     private Vector2 iconPosition = new Vector2(-12.16667f, 3.333333f);
     private Dictionary<int, Vector2> deathPositions = new Dictionary<int, Vector2>() {
@@ -77,6 +77,11 @@ public class Player : MonoBehaviour {
         stamina = scripts.gameData.playerStamina;
         staminaCounter.text = stamina.ToString();
         // set up the information for the stamina counter
+        SetPlayerStatusEffect("fury", scripts.gameData.isFurious);
+        SetPlayerStatusEffect("dodge", scripts.gameData.isDodgy);
+        SetPlayerStatusEffect("haste", scripts.gameData.isHasty);
+        SetPlayerStatusEffect("leech", scripts.gameData.isBloodthirsty);
+        SetPlayerStatusEffect("courage", scripts.gameData.isCourageous);
     }
 
     private void Update() {
@@ -251,11 +256,26 @@ public class Player : MonoBehaviour {
     /// <param name="statusEffect">The name of the status effect to toggle.</param>
     /// <param name="onOrOff">To turn on or off the status effect.</param>
     public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
-        if (statusEffect == "fury") { if (scripts.player.isFurious && onOrOff == true) { return; } else { scripts.player.isFurious = onOrOff; } }
-        else if (statusEffect == "dodge") { if (scripts.player.isDodgy && onOrOff == true) { return; } else { scripts.player.isDodgy = onOrOff; } }
-        else if (statusEffect == "haste") { if (scripts.player.isHasty && onOrOff == true) { return; } else { scripts.player.isHasty = onOrOff; } }
-        else if (statusEffect == "leech") { if (scripts.player.isBloodthirsty && onOrOff == true) { return; } else { scripts.player.isBloodthirsty = onOrOff; } }
-        else if (statusEffect == "courage") { if (scripts.player.isCourageous && onOrOff == true) { return; } else { scripts.player.isCourageous = onOrOff; } }
+        if (statusEffect == "fury") { if (scripts.player.isFurious && onOrOff == true) { return; } else { 
+            scripts.player.isFurious = onOrOff; 
+            
+        } }
+        else if (statusEffect == "dodge") { if (scripts.player.isDodgy && onOrOff == true) { return; } else { 
+            scripts.player.isDodgy = onOrOff; 
+            scripts.gameData.isDodgy = onOrOff;
+        } }
+        else if (statusEffect == "haste") { if (scripts.player.isHasty && onOrOff == true) { return; } else { 
+            scripts.player.isHasty = onOrOff; 
+            scripts.gameData.isHasty = onOrOff;
+        } }
+        else if (statusEffect == "leech") { if (scripts.player.isBloodthirsty && onOrOff == true) { return; } else { 
+            scripts.player.isBloodthirsty = onOrOff; 
+            scripts.gameData.isBloodthirsty = onOrOff;
+        } }
+        else if (statusEffect == "courage") { if (scripts.player.isCourageous && onOrOff == true) { return; } else { 
+            scripts.player.isCourageous = onOrOff; 
+            scripts.gameData.isCourageous = onOrOff;
+        } }
         // set as desired, if turning on something already on then instantly exit function
         if (onOrOff == true) {
             // if turning on

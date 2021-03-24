@@ -143,6 +143,7 @@ public class ItemManager : MonoBehaviour {
         }
         // if (scripts.gameData.newGame) { print("made a new game!"); }
         // else { print("resuming existing game!"); }
+        // if (scripts.)
     }
 
     void Update() {

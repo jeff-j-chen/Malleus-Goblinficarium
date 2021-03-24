@@ -41,6 +41,11 @@ public class GameData {
     public bool usedAnkh;
     public bool usedHelm;
     public bool usedBoots;
+    public bool isFurious;
+    public bool isDodgy;
+    public bool isHasty;
+    public bool isBloodthirsty;
+    public bool isCourageous;
     public int numItemsDroppedForTrade;
     public int discardableDieCounter;
     public bool enemyIsDead;
@@ -85,6 +90,11 @@ public class GameData {
         usedAnkh = false;
         usedHelm = false;
         usedBoots = false;
+        isFurious = false;
+        isDodgy = false;
+        isHasty = false;
+        isBloodthirsty = false;
+        isCourageous = false;
         numItemsDroppedForTrade = 0;
         discardableDieCounter = 0;
         enemyIsDead = false;
