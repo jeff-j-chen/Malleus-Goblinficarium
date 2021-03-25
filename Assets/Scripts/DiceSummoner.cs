@@ -244,4 +244,23 @@ public class DiceSummoner : MonoBehaviour
         }
         // this generates a set of die identical to malleus die generation, as far as i can tell
     }
+
+    public void MakeAllAttachedYellow()
+    {
+        foreach (GameObject dice in existingDice)
+        {
+            // for every die
+            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player")
+            {
+                // if the die is attached to the player
+                dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black;
+                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
+                dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
+                // make the die yellow
+                dice.GetComponent<Dice>().moveable = true;
+                // allow for moving the die around
+            }
+        }
+        SaveDiceValues();
+    }
 }

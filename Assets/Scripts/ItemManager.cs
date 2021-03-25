@@ -181,26 +181,16 @@ public class ItemManager : MonoBehaviour {
     public void GiveStarterItems(int charNum) {
         if (scripts.gameData.newGame) { 
             if (scripts.player.charNum == 0) { 
-                // CreateWeaponWithStats("mace", "harsh", 2, 2, 2, 2);
                 // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                 CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                 MoveToInventory(0, true, false, false);
-                // CreateItem("steak", "common");
-                // MoveToInventory(0, true, false, false);
+                CreateItem("steak", "common");
+                MoveToInventory(0, true, false, false);
 
-                CreateItem("potion", "common", "life");
-                MoveToInventory(0, true, false, false);
-                CreateItem("phylactery", "phylactery", "");
-                MoveToInventory(0, true, false, false);
-                CreateItem("scroll", "common", "courage");
-                MoveToInventory(0, true, false, false);
-                CreateItem("scroll", "common", "leech");
+                CreateItem("shuriken", "common", "");
                 MoveToInventory(0, true, false, false);
                 CreateItem("scroll", "common", "fury");
                 MoveToInventory(0, true, false, false);
-                CreateItem("scroll", "common", "dodge");
-                MoveToInventory(0, true, false, false);
-                
                 if (scripts.persistentData.easyMode) { 
                     CreateItem("torch", "common");
                         MoveToInventory(0, true, false, false);
@@ -609,6 +599,8 @@ public class ItemManager : MonoBehaviour {
         }
         if (saveData) { 
             SaveInventoryItems();
+            if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) { SaveTombstoneItems(); }
+            else { SaveFloorItems(); }
         }
     }
 
@@ -668,7 +660,7 @@ public class ItemManager : MonoBehaviour {
         // create 3 common items, negativelyoffesting by the deletionq
         CreateItem("arrow", "arrow", tempOffset);
         // create the next level arrow
-        SaveMerchantItems();
+        SaveFloorItems();
     }
     
     /// <summary>
@@ -752,6 +744,7 @@ public class ItemManager : MonoBehaviour {
             }
             scripts.SaveGameData();
             // save to file
+
         }
     }
 
@@ -781,26 +774,31 @@ public class ItemManager : MonoBehaviour {
         // funky workaround to make it so that the player doesn't get duplicate arrows
         scripts.SaveGameData();
     }
-
-    public void SaveMerchantItems() { 
+    // two separate methods so that we dont have to do any fancy checks, just pull whichever we need as long as we save it properly
+    public void SaveTombstoneItems() { 
+        scripts.gameData.floorItemNames = new string[9];
+        scripts.gameData.floorItemTypes = new string[9];
+        scripts.gameData.floorItemMods = new string[9];
+        // clear the data before placing in new 
         bool arrowFound = false;
-        scripts.gameData.merchantItemNames = new string[9];
-        scripts.gameData.merchantItemTypes = new string[9];
-        scripts.gameData.merchantItemMods = new string[9];
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                scripts.gameData.merchantItemNames[i] = item.itemName;
-                scripts.gameData.merchantItemTypes[i] = item.itemType;
-                scripts.gameData.merchantItemMods[i] = item.modifier;
-                if (scripts.gameData.merchantItemNames[i] == "arrow") { arrowFound = true; }
+                if (item.itemType == "weapon") { scripts.gameData.floorItemNames[i] = item.itemName.Split(' ')[1]; }
+                else { scripts.gameData.floorItemNames[i] = item.itemName; }
+                
+                scripts.gameData.floorItemTypes[i] = item.itemType;
+                scripts.gameData.floorItemMods[i] = item.modifier;
+                if (scripts.gameData.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
-                scripts.gameData.merchantItemNames[i] = "";
-                scripts.gameData.merchantItemTypes[i] = "";
-                scripts.gameData.merchantItemMods[i] = "";
+                Debug.Log($"clearing {i}");
+                scripts.gameData.floorItemNames[i] = "";
+                scripts.gameData.floorItemTypes[i] = "";
+                scripts.gameData.floorItemMods[i] = "";
             }
         }
-        // pretty much same as above
+        // funky workaround to make it so that the player doesn't get duplicate arrows
+        scripts.SaveGameData();
     }
 }

@@ -261,7 +261,7 @@ public class Player : MonoBehaviour {
     public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
         if (statusEffect == "fury") { if (scripts.player.isFurious && onOrOff == true) { return; } else { 
             scripts.player.isFurious = onOrOff; 
-            
+            scripts.gameData.isFurious = onOrOff;
         } }
         else if (statusEffect == "dodge") { if (scripts.player.isDodgy && onOrOff == true) { return; } else { 
             scripts.player.isDodgy = onOrOff; 

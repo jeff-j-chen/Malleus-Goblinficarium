@@ -82,11 +82,10 @@ public class TombstoneData : MonoBehaviour {
     }
 
     public void SpawnSavedMerchantItems(bool delay=false) {
-        StartCoroutine(SpawnSavedMerchantItemsCoro(delay));
+        StartCoroutine(SpawnSavedFloorItemsCoro(delay));
     }
 
-    public IEnumerator SpawnSavedTSItemsCoro(bool delay) { 
-        print("spawning saved ts items!");
+    public IEnumerator SpawnSavedTSItemsCoro(bool delay) {
         if (delay) { yield return new WaitForSeconds(0.01f); }
         // optional slight delay so that resuming on a tombstone level doesn't mess things up
         scripts = FindObjectOfType<Scripts>();
@@ -114,14 +113,15 @@ public class TombstoneData : MonoBehaviour {
         }
         scripts.itemManager.CreateItem("arrow", "arrow");
         // create the next level arrow
+        scripts.itemManager.SaveTombstoneItems();
     }
 
-    public IEnumerator SpawnSavedMerchantItemsCoro(bool delay) { 
+    public IEnumerator SpawnSavedFloorItemsCoro(bool delay) { 
         if (delay) { yield return new WaitForSeconds(0.01f); }
         scripts = FindObjectOfType<Scripts>();
         for (int i = 0; i < 9; i++) {  
-            if (scripts.gameData.merchantItemNames[i] != null && scripts.gameData.merchantItemNames[i] != "") {
-                GameObject created = scripts.itemManager.CreateItem(scripts.gameData.merchantItemNames[i], scripts.gameData.merchantItemTypes[i], scripts.gameData.merchantItemMods[i]);
+            if (scripts.gameData.floorItemNames[i] != null && scripts.gameData.floorItemNames[i] != "") {
+                GameObject created = scripts.itemManager.CreateItem(scripts.gameData.floorItemNames[i], scripts.gameData.floorItemTypes[i], scripts.gameData.floorItemMods[i]);
             }
         }
         // just spawn in the goods 

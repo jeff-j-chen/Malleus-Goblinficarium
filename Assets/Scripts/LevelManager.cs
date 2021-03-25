@@ -188,9 +188,6 @@ public class LevelManager : MonoBehaviour {
             scripts.gameData.floorItemNames = new string[9];
             scripts.gameData.floorItemTypes = new string[9];
             scripts.gameData.floorItemMods = new string[9];
-            scripts.gameData.merchantItemNames = new string[9];
-            scripts.gameData.merchantItemTypes = new string[9];
-            scripts.gameData.merchantItemMods  = new string[9];
             // clear merchant and floor items when going to the next level
             if (!isLich) {
                 // if spawning a normal enemy
@@ -201,7 +198,6 @@ public class LevelManager : MonoBehaviour {
                 if (sub > scripts.persistentData.highestSub && level >= scripts.persistentData.highestLevel) { 
                     scripts.persistentData.highestSub = sub;
                     scripts.persistentData.highestLevel = level;
-                    scripts.SavePersistentData();
                 }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
                     scripts.persistentData.tsLevel = -1;
@@ -213,6 +209,7 @@ public class LevelManager : MonoBehaviour {
                     scripts.persistentData.tsItemNames = new string[9];
                     scripts.persistentData.tsItemNames = new string[9];
                     scripts.persistentData.tsItemNames = new string[9];
+                    sub--;
                     // make tombstone inaccessible
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
@@ -222,7 +219,6 @@ public class LevelManager : MonoBehaviour {
                     // level matches which level to add to
                     levelTransText.text = $"level {level}-{sub}*";
                     levelText.text = $"(level {level}-{sub}*)";
-                    sub--;
                     // decrement sub (because we went up 1 level but aren't going to fight anything)
                     scripts.enemy.SpawnNewEnemy(8, true);
                     // spawn the tombstone
@@ -323,6 +319,7 @@ public class LevelManager : MonoBehaviour {
             scripts.gameData.resumeSub = scripts.levelManager.sub;
             scripts.gameData.resumeLevel = scripts.levelManager.level;
         }
+        scripts.SavePersistentData();
         scripts.SaveGameData();
     }
 

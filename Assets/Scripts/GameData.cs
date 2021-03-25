@@ -11,9 +11,6 @@ public class GameData {
     public string[] floorItemNames;
     public string[] floorItemTypes;
     public string[] floorItemMods;
-    public string[] merchantItemNames;
-    public string[] merchantItemTypes;
-    public string[] merchantItemMods;
     public string[] resumeItemNames;
     public string[] resumeItemTypes;
     public string[] resumeItemMods;
@@ -60,9 +57,6 @@ public class GameData {
         floorItemNames = new string[9];
         floorItemTypes = new string[9];
         floorItemMods = new string[9];
-        merchantItemNames = new string[9];
-        merchantItemTypes = new string[9];
-        merchantItemMods = new string[9];
         resumeItemNames = new string[9];
         resumeItemTypes = new string[9];
         resumeItemMods = new string[9];
@@ -72,10 +66,12 @@ public class GameData {
         resumeSpd = 0;
         resumeDmg = 0;
         resumeDef = 0;
-        potionAcc = 0;
-        potionSpd = 0;
-        potionDmg = 0;
-        potionDef = 0;
+        
+        potionAcc = 0; // NOT DONE
+        potionSpd = 0; // NOT DONE
+        potionDmg = 0; // NOT DONE
+        potionDef = 0; // NOT DONE
+
         playerStamina = 3;
         enemyStamina = 1;
         diceNumbers = new List<int>();
@@ -86,17 +82,21 @@ public class GameData {
         playerWounds = new List<string>();
         enemyWounds = new List<string>();
         enemyNum = 0;
-        usedMace = false;
-        usedAnkh = false;
-        usedHelm = false;
-        usedBoots = false;
+
+        usedMace = false; // NOT DONE
+        usedAnkh = false; // NOT DONE
+        usedHelm = false; // NOT DONE
+        usedBoots = false; // NOT DONE
+
         isFurious = false;
         isDodgy = false;
         isHasty = false;
         isBloodthirsty = false;
         isCourageous = false;
-        numItemsDroppedForTrade = 0;
-        discardableDieCounter = 0;
+
+        numItemsDroppedForTrade = 0; // NOT DONE
+        discardableDieCounter = 0; // NOT DONE
+
         enemyIsDead = false;
         enemyAcc = 0;
         enemySpd = 0;
