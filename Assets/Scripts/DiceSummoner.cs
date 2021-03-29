@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class DiceSummoner : MonoBehaviour
 {
@@ -30,10 +31,14 @@ public class DiceSummoner : MonoBehaviour
         }
     }
 
+    public int CountPlayerDice() { 
+        return (from die in existingDice where die.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select die).Count();
+    }
+
     /// <summary>
     /// Start the summoning of the dice.
     /// </summary>
-    /// <param name="initialSummon">If not intial summon => delay 0.25f</param>
+    /// <param name="initialSummon">If not initial summon => delay 0.25f</param>
     public void SummonDice(bool initialSummon, bool newSet) {
         StartCoroutine(SummonAfterFade(initialSummon, newSet));
     }

@@ -188,6 +188,11 @@ public class HighlightCalculator : MonoBehaviour {
                         StartCoroutine(dice.RerollAnimation());
                         // reroll the die, use the coroutine rather than reroll() because reroll is for player alterting others only
                     }
+                    if (scripts.player.woundList.Contains("head") && diceTakenByPlayer >= 3) {
+                        // if injured in head the player has taken 3 dice 
+                        scripts.enemy.DiscardBestPlayerDie();
+                        // note that this calls a coroutine which has a slightly delay, avoiding a weird bug with discarding too early
+                    }
                     if (scripts.statSummoner.SumOfStat("green", "player") >= 0 && scripts.statSummoner.SumOfStat("green", "player") - dice.diceNum < 0) {
                         scripts.turnManager.RecalculateMaxFor("player");
                         // recalculate max for the player if necessary
@@ -214,10 +219,11 @@ public class HighlightCalculator : MonoBehaviour {
                 return;
                 // found a collider so no need to check others, just end funciton
             }
-        }
-        if (dice.diceType == "yellow" && dice.isAttached) {
-            scripts.statSummoner.AddDiceToPlayer(dice.statAddedTo, dice);
-            // if moving a yellow die make sure the correct actions are performed
+            // if (dice.diceType == "yellow" && dice.isAttached) {
+            //     scripts.statSummoner.AddDiceToPlayer(dice.statAddedTo, dice);
+            //     // if moving a yellow die make sure the correct actions are performed
+            // }
+            
         }
     }
 
@@ -245,6 +251,7 @@ public class HighlightCalculator : MonoBehaviour {
         }
         // take actions depending on injuries and die types
         scripts.diceSummoner.SaveDiceValues();
+        
     }
 
     /// <summary>

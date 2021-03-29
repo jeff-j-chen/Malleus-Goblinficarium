@@ -296,10 +296,6 @@ public class TurnManager : MonoBehaviour {
         List<Dice> availableDice = new List<Dice>();
         RunEnemyCalculations();
         // make enemy add stamina to stats as necessary
-        if (scripts.player.woundList.Contains("head")) {
-            scripts.enemy.DiscardBestPlayerDie();
-            // if the player has a head wound, make the enemy discard it
-        }
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         // get all the stats so we can use them
         if (playerSpd >= enemySpd) {

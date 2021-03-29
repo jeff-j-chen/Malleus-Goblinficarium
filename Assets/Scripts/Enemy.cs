@@ -291,10 +291,11 @@ public class Enemy : MonoBehaviour {
         scripts.SaveGameData();
     }
 
-    /// <summary>
-    /// Run calculations to find the most valuable player die and discard it.
-    /// </summary>
     public void DiscardBestPlayerDie() {
+        StartCoroutine(DiscardBestPlayerDieCoro());
+    }
+    public IEnumerator DiscardBestPlayerDieCoro() {
+        yield return scripts.delays[0.25f];
         List<Dice> availableDice = new List<Dice>();
         List<int> diceValuations = new List<int>();
         // create lists to store the information in
