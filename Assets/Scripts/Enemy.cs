@@ -83,15 +83,23 @@ public class Enemy : MonoBehaviour {
             // spawn the merchant
             scripts.itemManager.lootText.text = "goods:";
             // indicate that the player should trade
-            scripts.tombstoneData.SpawnSavedMerchantItems(true);
+            scripts.tombstoneData.SpawnSavedFloorItems(true);
             // spawn the saved merchant items
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
             // hide the stats (don't fight merchants)
         }
         else { 
-            if (scripts.gameData.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7), scripts.gameData.newGame); }
-            else { SpawnNewEnemy(scripts.gameData.enemyNum, scripts.gameData.newGame); }
-            scripts.itemManager.lootText.text = "";
+            if (scripts.gameData.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); }
+            else { 
+                SpawnNewEnemy(scripts.gameData.enemyNum, false); 
+                if (scripts.gameData.enemyIsDead) { 
+                    scripts.itemManager.lootText.text = "loot:";
+                    scripts.tombstoneData.SpawnSavedFloorItems(true);
+                    GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
+                    SetEnemyPositionAfterDeath();
+                }
+                else { scripts.itemManager.lootText.text = ""; }
+            }
         }
         // spawn an enemy at the start of the round
         iconGameobject.transform.position = iconPosition;

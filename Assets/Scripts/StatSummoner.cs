@@ -341,7 +341,6 @@ public class StatSummoner : MonoBehaviour {
     public void SetDebugInformationFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             float furthest = (new float[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
-            print("current furthest is: " + furthest);
             if (furthest >= -3.8) { playerDebug.transform.position = new Vector2(furthest + 1.333f, baseDebugPos.y); }
             else { playerDebug.transform.position = new Vector2(baseDebugPos.x, baseDebugPos.y); }
             playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";

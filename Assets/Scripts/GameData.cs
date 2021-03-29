@@ -20,6 +20,10 @@ public class GameData {
     public int resumeSpd;
     public int resumeDmg;
     public int resumeDef;
+    public int floorAcc;
+    public int floorSpd;
+    public int floorDmg;
+    public int floorDef;
     public int potionAcc;
     public int potionSpd;
     public int potionDmg;
@@ -67,6 +71,10 @@ public class GameData {
         resumeDmg = 0;
         resumeDef = 0;
         
+        floorAcc = 0;
+        floorSpd = 0;
+        floorDmg = 0;
+        floorDef = 0;
         potionAcc = 0; // NOT DONE
         potionSpd = 0; // NOT DONE
         potionDmg = 0; // NOT DONE

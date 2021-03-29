@@ -81,7 +81,7 @@ public class TombstoneData : MonoBehaviour {
         StartCoroutine(SpawnSavedTSItemsCoro(delay));
     }
 
-    public void SpawnSavedMerchantItems(bool delay=false) {
+    public void SpawnSavedFloorItems(bool delay=false) {
         StartCoroutine(SpawnSavedFloorItemsCoro(delay));
     }
 
@@ -119,7 +119,8 @@ public class TombstoneData : MonoBehaviour {
     public IEnumerator SpawnSavedFloorItemsCoro(bool delay) { 
         if (delay) { yield return new WaitForSeconds(0.01f); }
         scripts = FindObjectOfType<Scripts>();
-        for (int i = 0; i < 9; i++) {  
+        scripts.itemManager.CreateWeaponWithStats(scripts.gameData.floorItemNames[0], scripts.gameData.floorItemMods[0], scripts.gameData.floorAcc, scripts.gameData.floorSpd, scripts.gameData.floorDmg, scripts.gameData.floorDef);
+        for (int i = 1; i < 9; i++) {  
             if (scripts.gameData.floorItemNames[i] != null && scripts.gameData.floorItemNames[i] != "") {
                 GameObject created = scripts.itemManager.CreateItem(scripts.gameData.floorItemNames[i], scripts.gameData.floorItemTypes[i], scripts.gameData.floorItemMods[i]);
             }

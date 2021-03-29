@@ -431,6 +431,11 @@ public class ItemManager : MonoBehaviour {
         // assign the weapon stats to the weapon
         floorItems.Add(instantiatedItem);
         // add the item to the array
+        scripts.gameData.floorAcc = baseWeapon["green"];
+        scripts.gameData.floorSpd = baseWeapon["blue"];
+        scripts.gameData.floorDmg = baseWeapon["red"];
+        scripts.gameData.floorDef = baseWeapon["white"];
+        scripts.SaveGameData();
     }
 
     /// <summary>
@@ -455,6 +460,7 @@ public class ItemManager : MonoBehaviour {
         instantiatedItem.transform.parent = gameObject.transform;
         // child the item to this manager
         instantiatedItem.GetComponent<Item>().itemName = modifier + " " + sprite.name.Replace("_", " ");
+        print($"created weapon, modifier is {modifier} and type is {sprite.name.Replace('_', ' ')}");
         instantiatedItem.GetComponent<Item>().itemType = "weapon";
         instantiatedItem.GetComponent<Item>().modifier = modifier;
         baseWeapon["green"] = aim >= 0 ? aim : -1;
@@ -640,7 +646,7 @@ public class ItemManager : MonoBehaviour {
                 CreateItem("common");
                 // create a random number of items based on the spawn count
             }
-            if (UnityEngine.Random.Range(0, 10) == 0) { CreateItem("rare"); }
+            if (UnityEngine.Random.Range(0, 13) == 0) { CreateItem("rare"); }
             // low chance to produce rare
         }
         CreateItem("arrow", "arrow");

@@ -188,6 +188,10 @@ public class LevelManager : MonoBehaviour {
             scripts.gameData.floorItemNames = new string[9];
             scripts.gameData.floorItemTypes = new string[9];
             scripts.gameData.floorItemMods = new string[9];
+            scripts.gameData.floorAcc = 0;
+            scripts.gameData.floorSpd = 0;
+            scripts.gameData.floorDmg = 0;
+            scripts.gameData.floorDef = 0;
             // clear merchant and floor items when going to the next level
             if (!isLich) {
                 // if spawning a normal enemy
