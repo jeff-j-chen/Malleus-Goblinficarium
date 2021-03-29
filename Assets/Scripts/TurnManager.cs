@@ -490,6 +490,7 @@ public class TurnManager : MonoBehaviour {
         scripts.gameData.usedAnkh = false;
         scripts.gameData.usedBoots = false;
         scripts.gameData.usedHelm = false;
+        scripts.gameData.expendedStamina = 0;
         scripts.SaveGameData();
         if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !scripts.enemy.isDead) {
             scripts.enemy.stamina = 5;
@@ -548,7 +549,9 @@ public class TurnManager : MonoBehaviour {
         }
         else { print("invalid string passed"); }
         scripts.persistentData.enemiesSlain++;
+        scripts.gameData.expendedStamina = 0;
         scripts.SavePersistentData();
+        scripts.SaveGameData();
         yield return scripts.delays[0.45f];
         isMoving = false;
     }

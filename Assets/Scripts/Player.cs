@@ -74,9 +74,6 @@ public class Player : MonoBehaviour {
         // set the correct sprite
         GetComponent<Animator>().runtimeAnimatorController = controllers[charNum];
         // set the correct animation controller (using runtime so that it works in the actual game, and not only the editor)
-        stamina = scripts.gameData.playerStamina;
-        staminaCounter.text = stamina.ToString();
-        // set up the information for the stamina counter
         SetPlayerStatusEffect("fury", scripts.gameData.isFurious);
         SetPlayerStatusEffect("dodge", scripts.gameData.isDodgy);
         SetPlayerStatusEffect("haste", scripts.gameData.isHasty);
@@ -86,6 +83,10 @@ public class Player : MonoBehaviour {
         potionStats["blue"] = scripts.gameData.potionSpd;
         potionStats["red"] = scripts.gameData.potionDmg;
         potionStats["white"] = scripts.gameData.potionDef;
+        stamina = scripts.gameData.playerStamina + scripts.gameData.expendedStamina;
+        scripts.gameData.expendedStamina = 0;
+        staminaCounter.text = stamina.ToString();
+        scripts.SaveGameData();
     }
 
     private void Update() {

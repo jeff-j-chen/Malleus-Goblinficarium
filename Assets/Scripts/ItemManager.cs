@@ -186,16 +186,10 @@ public class ItemManager : MonoBehaviour {
                 // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                 CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                 MoveToInventory(0, true, false, false);
-                // CreateItem("steak", "common");
-                // MoveToInventory(0, true, false, false);
+                CreateItem("steak", "common");
+                MoveToInventory(0, true, false, false);
 
-                CreateItem("shuriken", "common");
-                MoveToInventory(0, true, false, false);
-                CreateItem("shuriken", "common");
-                MoveToInventory(0, true, false, false);
-                CreateItem("shuriken", "common");
-                MoveToInventory(0, true, false, false);
-                CreateItem("shuriken", "common");
+                CreateItem("steak", "common");
                 MoveToInventory(0, true, false, false);
 
                 if (scripts.persistentData.easyMode) { 

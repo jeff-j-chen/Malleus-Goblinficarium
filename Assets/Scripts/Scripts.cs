@@ -90,4 +90,7 @@ public class Scripts : MonoBehaviour {
             return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath));
         }
     }
+
+    public void OnApplicationQuit() { SaveGameData(); }
+    public void OnApplicationPause() { SaveGameData(); }
 }
