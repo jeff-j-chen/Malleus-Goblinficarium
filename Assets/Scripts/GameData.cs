@@ -47,6 +47,7 @@ public class GameData {
     public bool isHasty;
     public bool isBloodthirsty;
     public bool isCourageous;
+    public int expendedStamina;
     public int numItemsDroppedForTrade;
     public int discardableDieCounter;
     public bool enemyIsDead;
@@ -70,16 +71,14 @@ public class GameData {
         resumeSpd = 0;
         resumeDmg = 0;
         resumeDef = 0;
-        
         floorAcc = 0;
         floorSpd = 0;
         floorDmg = 0;
         floorDef = 0;
-        potionAcc = 0; // NOT DONE
-        potionSpd = 0; // NOT DONE
-        potionDmg = 0; // NOT DONE
-        potionDef = 0; // NOT DONE
-
+        potionAcc = 0;
+        potionSpd = 0;
+        potionDmg = 0;
+        potionDef = 0;
         playerStamina = 3;
         enemyStamina = 1;
         diceNumbers = new List<int>();
@@ -90,21 +89,18 @@ public class GameData {
         playerWounds = new List<string>();
         enemyWounds = new List<string>();
         enemyNum = 0;
-
-        usedMace = false; // NOT DONE
-        usedAnkh = false; // NOT DONE
-        usedHelm = false; // NOT DONE
-        usedBoots = false; // NOT DONE
-
+        usedMace = false;
+        usedAnkh = false;
+        usedHelm = false;
+        usedBoots = false;
         isFurious = false;
         isDodgy = false;
         isHasty = false;
         isBloodthirsty = false;
         isCourageous = false;
-
-        numItemsDroppedForTrade = 0; // NOT DONE
-        discardableDieCounter = 0; // NOT DONE
-
+        expendedStamina = 0;
+        numItemsDroppedForTrade = 0;
+        discardableDieCounter = 0;
         enemyIsDead = false;
         enemyAcc = 0;
         enemySpd = 0;

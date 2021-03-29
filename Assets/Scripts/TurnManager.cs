@@ -36,7 +36,7 @@ public class TurnManager : MonoBehaviour {
         }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
-        
+        usedMace = scripts.gameData.usedMace;
     }
 
     /// <summary>
@@ -471,6 +471,7 @@ public class TurnManager : MonoBehaviour {
     /// Reset all variables used in preparation for the next round.
     /// </summary>
     public void ClearVariablesAfterRound() {
+        ClearPotionStats();
         scripts.player.SetPlayerStatusEffect("fury", false);
         scripts.player.SetPlayerStatusEffect("dodge", false);
         if (!dontRemoveLeechYet) {
@@ -479,18 +480,17 @@ public class TurnManager : MonoBehaviour {
         }
         scripts.highlightCalculator.diceTakenByPlayer = 0;
         scripts.itemManager.discardableDieCounter = 0;
+        usedMace = false;
         scripts.itemManager.usedAnkh = false;
         scripts.itemManager.usedBoots = false;
         scripts.itemManager.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
-        usedMace = false;
         scripts.gameData.discardableDieCounter = 0;
         scripts.gameData.usedMace = false;
         scripts.gameData.usedAnkh = false;
         scripts.gameData.usedBoots = false;
         scripts.gameData.usedHelm = false;
         scripts.SaveGameData();
-        ClearPotionStats();
         if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !scripts.enemy.isDead) {
             scripts.enemy.stamina = 5;
             // refresh lich's stamina
@@ -506,11 +506,16 @@ public class TurnManager : MonoBehaviour {
     /// Clear the stats gained from potions from the player.
     /// </summary>
     public void ClearPotionStats() {
-        foreach (string key in scripts.itemManager.statArr) {
-            // for every key
-            scripts.player.potionStats[key] = 0;
-            // clear stats
-        }
+        scripts.player.potionStats["green"] = 0;
+        scripts.player.potionStats["blue"] = 0;
+        scripts.player.potionStats["red"] = 0;
+        scripts.player.potionStats["white"] = 0;
+        scripts.statSummoner.SummonStats();
+        scripts.gameData.potionAcc = 0;
+        scripts.gameData.potionSpd = 0;
+        scripts.gameData.potionDmg = 0;
+        scripts.gameData.potionDef = 0;
+        scripts.SaveGameData();
     }
 
     /// <summary>
@@ -655,8 +660,6 @@ public class TurnManager : MonoBehaviour {
         // clear them
         ClearPotionStats();
         // clear potion stats
-        scripts.statSummoner.SummonStats();
-        // summon stats
         scripts.statSummoner.SetDebugInformationFor("player");
         // set debug (only player needed here)
         RecalculateMaxFor("player");

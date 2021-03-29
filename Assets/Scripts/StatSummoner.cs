@@ -318,7 +318,7 @@ public class StatSummoner : MonoBehaviour {
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
         // not setting the optional variable will just default it to the base stat type
-        return xCoord + ((Mathf.Abs(scripts.player.stats[statType] + scripts.player.potionStats[statType] + scripts.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * scripts.statSummoner.addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
+        return xCoord + ((Mathf.Abs(scripts.player.stats[statType] + scripts.player.potionStats[statType] + scripts.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
     }
 
@@ -330,7 +330,7 @@ public class StatSummoner : MonoBehaviour {
     /// <returns>float of outmost x for the given stat.</returns>
     public float OutermostEnemyX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
-        return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) - 1) * -xOffset)  - scripts.statSummoner.highlightOffset - scripts.statSummoner.diceOffset * (scripts.statSummoner.addedEnemyDice[statType].Count - 1);
+        return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) - 1) * -xOffset)  - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
         // similar to outermostplayerx
     }
 
@@ -355,5 +355,18 @@ public class StatSummoner : MonoBehaviour {
         // (2)
         // for example
         else { Debug.Log("error"); }
+    }
+
+    public void ShiftDiceAccordingly(string stat, int shiftAmount)
+    {
+        foreach (Dice dice in addedPlayerDice[stat])
+        {
+            // for every die in the specified stat
+            dice.transform.position = new Vector2(dice.transform.position.x + xOffset * shiftAmount, dice.transform.position.y);
+            // shift the die by the specified amount
+            dice.instantiationPos = dice.transform.position;
+            // update the instantiation position
+        }
+        SetDebugInformationFor("player");
     }
 }

@@ -83,7 +83,7 @@ public class Enemy : MonoBehaviour {
             // spawn the merchant
             scripts.itemManager.lootText.text = "goods:";
             // indicate that the player should trade
-            scripts.tombstoneData.SpawnSavedFloorItems(true);
+            scripts.tombstoneData.SpawnSavedMerchantItems(true);
             // spawn the saved merchant items
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
             // hide the stats (don't fight merchants)

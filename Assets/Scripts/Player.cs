@@ -82,6 +82,10 @@ public class Player : MonoBehaviour {
         SetPlayerStatusEffect("haste", scripts.gameData.isHasty);
         SetPlayerStatusEffect("leech", scripts.gameData.isBloodthirsty);
         SetPlayerStatusEffect("courage", scripts.gameData.isCourageous);
+        potionStats["green"] = scripts.gameData.potionAcc;
+        potionStats["blue"] = scripts.gameData.potionSpd;
+        potionStats["red"] = scripts.gameData.potionDmg;
+        potionStats["white"] = scripts.gameData.potionDef;
     }
 
     private void Update() {

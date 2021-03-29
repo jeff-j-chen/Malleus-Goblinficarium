@@ -137,9 +137,11 @@ public class ItemManager : MonoBehaviour {
             // assign the curlist variable for item selection navigation
             // need to implement a check if continuing or new game
         }
-        // if (scripts.gameData.newGame) { print("made a new game!"); }
-        // else { print("resuming existing game!"); }
-        // if (scripts.)
+        usedAnkh = scripts.gameData.usedAnkh;
+        usedBoots = scripts.gameData.usedBoots;
+        usedHelm = scripts.gameData.usedHelm;
+        numItemsDroppedForTrade = scripts.gameData.numItemsDroppedForTrade;
+        discardableDieCounter = scripts.gameData.discardableDieCounter;
     }
 
     void Update() {
@@ -184,13 +186,18 @@ public class ItemManager : MonoBehaviour {
                 // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                 CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                 MoveToInventory(0, true, false, false);
-                CreateItem("steak", "common");
+                // CreateItem("steak", "common");
+                // MoveToInventory(0, true, false, false);
+
+                CreateItem("shuriken", "common");
+                MoveToInventory(0, true, false, false);
+                CreateItem("shuriken", "common");
+                MoveToInventory(0, true, false, false);
+                CreateItem("shuriken", "common");
+                MoveToInventory(0, true, false, false);
+                CreateItem("shuriken", "common");
                 MoveToInventory(0, true, false, false);
 
-                CreateItem("shuriken", "common", "");
-                MoveToInventory(0, true, false, false);
-                CreateItem("scroll", "common", "fury");
-                MoveToInventory(0, true, false, false);
                 if (scripts.persistentData.easyMode) { 
                     CreateItem("torch", "common");
                         MoveToInventory(0, true, false, false);
@@ -460,7 +467,6 @@ public class ItemManager : MonoBehaviour {
         instantiatedItem.transform.parent = gameObject.transform;
         // child the item to this manager
         instantiatedItem.GetComponent<Item>().itemName = modifier + " " + sprite.name.Replace("_", " ");
-        print($"created weapon, modifier is {modifier} and type is {sprite.name.Replace('_', ' ')}");
         instantiatedItem.GetComponent<Item>().itemType = "weapon";
         instantiatedItem.GetComponent<Item>().modifier = modifier;
         baseWeapon["green"] = aim >= 0 ? aim : -1;
