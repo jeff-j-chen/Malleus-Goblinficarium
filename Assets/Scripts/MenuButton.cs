@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using UnityEngine;
 
@@ -34,12 +35,12 @@ public class MenuButton : MonoBehaviour
         // play sound clip
         switch (buttonName) {
             case "Continue":
+                print("resuming an existing game!");
                 // do something special here
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             case "New Game":
-                print("new game pressed!");
-                File.Delete("gameSave.txt");
+                File.WriteAllText("gameSave.txt", JsonUtility.ToJson(new GameData()));
                 PersistentData persistentData = LoadPersistentData();
                 persistentData.gamesPlayed++;
                 Initiate.Fade("Game", Color.black, transitionMultiplier);

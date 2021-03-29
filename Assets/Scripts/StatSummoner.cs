@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class StatSummoner : MonoBehaviour {
     [SerializeField] private GameObject plus;
@@ -18,6 +19,7 @@ public class StatSummoner : MonoBehaviour {
     private readonly float buttonXCoord = -11.7f;
     private readonly float buttonXOffset = -0.6f;
     public readonly float[] yCoords = new float[] { 8.77f, 7.77f, 6.77f, 5.77f };
+    public readonly Vector2 baseDebugPos = new Vector2(-1.667f, 7.333f);
     private List<GameObject> existingStatSquares = new List<GameObject>();
     [SerializeField] public Dictionary<string, List<Dice>> addedPlayerDice = new Dictionary<string, List<Dice>>() {
         { "green", new List<Dice>() },
@@ -338,6 +340,10 @@ public class StatSummoner : MonoBehaviour {
     /// <param name="playerOrEnemy">Who to set to the debug information for.</param>
     public void SetDebugInformationFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
+            float furthest = (new float[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
+            print("current furthest is: " + furthest);
+            if (furthest >= -3.8) { playerDebug.transform.position = new Vector2(furthest + 1.333f, baseDebugPos.y); }
+            else { playerDebug.transform.position = new Vector2(baseDebugPos.x, baseDebugPos.y); }
             playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";
         }
         else if (playerOrEnemy == "enemy") {
