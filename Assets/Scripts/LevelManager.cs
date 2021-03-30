@@ -39,8 +39,10 @@ public class LevelManager : MonoBehaviour {
     };
     [SerializeField] public bool lockActions = false;
     [SerializeField] private string characters = "";
+    [SerializeField] private string thinCharacters = "";
     [SerializeField] private float time = 0.03f;
-    private string newText = "";
+    private Coroutine transGlitchCoro;
+    private Coroutine debugGlitchCoro;
 
     void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -62,7 +64,7 @@ public class LevelManager : MonoBehaviour {
         if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
         else if (sub == scripts.persistentData.tsSub && level == scripts.persistentData.tsLevel && !(sub == 1 && level == 1))
         { levelText.text = $"(level {level}-{sub}*)"; }
-        else if (level == 4 && sub == 1) { levelText.text = $"PLACEHOLDER TEXT"; }
+        else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
         else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = $"(level ???)"; }
         else { levelText.text = $"(level {level}-{sub})"; }
     }
@@ -149,6 +151,7 @@ public class LevelManager : MonoBehaviour {
             scripts.soundManager.PlayClip("next");
             // play sound clip
             if (level == 4 && sub == 1) {
+                if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
                 // going to next level after having defeated devil
                 if (scripts.player.charNum != 3) { 
                     // give player the next character, as long as they aren't on the last one\
@@ -240,9 +243,9 @@ public class LevelManager : MonoBehaviour {
                 else if (level == 4 && sub == 1) { 
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
-                    StartCoroutine(GlitchyLevelText());
+                    transGlitchCoro = StartCoroutine(GlitchyLevelText());
                     scripts.enemy.SpawnNewEnemy(0, true); 
-                    levelText.text = $"PLACEHOLDER TEXT";
+                    debugGlitchCoro = StartCoroutine(GlitchyDebugText());
                 }
                 else { 
                     toSpawn = "normal";
@@ -268,6 +271,7 @@ public class LevelManager : MonoBehaviour {
             scripts.player.GetComponent<Animator>().Rebind();
             scripts.player.GetComponent<Animator>().Update(0f);
             yield return scripts.delays[1.5f];
+            if (transGlitchCoro != null) { StopCoroutine(transGlitchCoro); }
             // wait 1.5s
             scripts.statSummoner.SummonStats();
             scripts.statSummoner.SetDebugInformationFor("enemy");
@@ -327,24 +331,34 @@ public class LevelManager : MonoBehaviour {
         scripts.SaveGameData();
     }
 
+    private char r() { 
+        // return a random character
+        return characters[UnityEngine.Random.Range(0, characters.Length)];
+    }
+    private char t() { 
+        // return a random thin character
+        return thinCharacters[UnityEngine.Random.Range(0, thinCharacters.Length)];
+    }
+
     private IEnumerator GlitchyLevelText() {
-        newText = "";
-        for (int i = 0; i < 5; i++) {
-            levelTransText.text += characters[UnityEngine.Random.Range(0, characters.Length)];
+        for (int i = 0; i < 12; i++) {
+            levelTransText.text = $"level {r()}-{r()}";
+            yield return scripts.delays[0.033f];
         }
-        // create the initial sequence
-        for (int k = 0; k < 50; k++) {
-            newText = "";
-            // make the string empty so we can store something new in it
-            foreach (char curChar in levelTransText.text) {
-                if (UnityEngine.Random.Range(0, 3) == 0) { newText += characters[UnityEngine.Random.Range(0, characters.Length)]; }
-                // replace character with random one
-                else { newText += curChar; };
-                // no change
-            }
-            levelTransText.text = newText;
-            // set the text to be the newly generated one
-            yield return new WaitForSeconds(time);
+        for (int i = 0; i < 12; i++) {
+            levelTransText.text = $"lev{r()} {r()}{r()}{r()}";
+            yield return scripts.delays[0.033f];
+        }
+        for (int i = 0; i < 12; i++) {
+            levelTransText.text = $"{r()}{r()}{r()}{r()} {r()}{r()}{r()}";
+            yield return scripts.delays[0.05f];
+        }
+    }
+
+    private IEnumerator GlitchyDebugText() {
+        while (true){ 
+            levelText.text = $"level {t()}-{t()}";
+            yield return scripts.delays[0.05f];
         }
     }
 }

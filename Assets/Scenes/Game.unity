@@ -482,7 +482,8 @@ MonoBehaviour:
   level: 1
   sub: 2
   lockActions: 0
-  characters: .:!il.:!il.:!il\/'`,\/'`,-_=()[]{}Ymzl
+  characters: '",:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
+  thinCharacters: :|i
   time: 0.03
 --- !u!1 &247861091
 GameObject:
@@ -714,7 +715,6 @@ MonoBehaviour:
   woundGUIElement: {fileID: 1988400041}
   staminaCounter: {fileID: 822763159}
   target: {fileID: 362620657}
-  availableTargets: []
   woundList:
   - head
   - armpits
@@ -1385,7 +1385,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5a9a59896b057c346978dd96851fa39d, type: 3}
   - {fileID: 21300000, guid: f66450bf6b2fd3d49993f2462bc6f3a9, type: 3}
   - {fileID: 21300000, guid: 02be88e36b66e3e48ab0213142fa9da4, type: 3}
-  availableTargets: []
   woundList: []
   isDead: 0
   cancelMove: 0
@@ -3169,36 +3168,6 @@ MonoBehaviour:
     - 
     - 
     - 
-    merchantItemNames:
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    merchantItemTypes:
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    merchantItemMods:
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
     resumeItemNames:
     - 
     - 
@@ -3235,6 +3204,10 @@ MonoBehaviour:
     resumeSpd: 0
     resumeDmg: 0
     resumeDef: 0
+    floorAcc: 0
+    floorSpd: 0
+    floorDmg: 0
+    floorDef: 0
     potionAcc: 0
     potionSpd: 0
     potionDmg: 0
@@ -3258,6 +3231,7 @@ MonoBehaviour:
     isHasty: 0
     isBloodthirsty: 0
     isCourageous: 0
+    expendedStamina: 0
     numItemsDroppedForTrade: 0
     discardableDieCounter: 0
     enemyIsDead: 0

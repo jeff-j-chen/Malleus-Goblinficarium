@@ -27,7 +27,7 @@ public class Scripts : MonoBehaviour {
     public TombstoneData tombstoneData;
     public CharacterSelector characterSelector;
     public HighlightCalculator highlightCalculator;
-    private readonly float[] delayArr = { 0.0001f, 0.001f, 0.005f, 0.01f, 0.0125f, 0.02f, 0.025f, 0.033f, 0.05f, 0.1f, 0.15f, 0.2f, 0.25f, 0.4f, 0.45f, 0.5f, 0.55f, 0.6f, 0.65f, 0.75f, 0.8f, 1f, 1.5f, 1.55f, 2f, 2.5f, 3f };
+    private readonly float[] delayArr = { 0.0001f, 0.001f, 0.005f, 0.01f, 0.0125f, 0.02f, 0.025f, 0.03f, 0.033f, 0.05f, 0.1f, 0.15f, 0.2f, 0.25f, 0.4f, 0.45f, 0.5f, 0.55f, 0.6f, 0.65f, 0.75f, 0.8f, 1f, 1.5f, 1.55f, 2f, 2.5f, 3f };
     public Dictionary<float, WaitForSeconds> delays = new Dictionary<float, WaitForSeconds>();
 
     private void Start() {

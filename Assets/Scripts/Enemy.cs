@@ -86,7 +86,9 @@ public class Enemy : MonoBehaviour {
                 SpawnNewEnemy(scripts.gameData.enemyNum, false); 
                 if (scripts.gameData.enemyIsDead) { 
                     scripts.itemManager.lootText.text = "loot:";
-                    scripts.tombstoneData.SpawnSavedFloorItems(true);
+                    if (scripts.levelManager.level == 4) { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
+                    else { scripts.tombstoneData.SpawnSavedFloorItems(true); }
+                    // devil doesnt have a weapon, so make sure it doesnt bug
                     GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
                     SetEnemyPositionAfterDeath();
                 }

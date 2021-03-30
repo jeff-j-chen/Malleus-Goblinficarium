@@ -97,7 +97,6 @@ public class Player : MonoBehaviour {
                 if (hintTimer > 0.05f) { hintTimer += 0.1f; }
                 // if there is still time left on the hint timer (for targeting face or targeting wounded body part)
                 targetIndex++;
-                print("targetindex is now " + targetIndex);
                 // increment target index
                 scripts.turnManager.SetTargetOf("player");
                 // and set target based off the new target index
