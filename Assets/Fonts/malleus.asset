@@ -1376,9 +1376,9 @@ MonoBehaviour:
     m_Metrics:
       m_Width: 2
       m_Height: 14
-      m_HorizontalBearingX: 0
+      m_HorizontalBearingX: 2
       m_HorizontalBearingY: 14
-      m_HorizontalAdvance: 4
+      m_HorizontalAdvance: 6
     m_GlyphRect:
       m_X: 98
       m_Y: 154

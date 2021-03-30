@@ -151,6 +151,7 @@ public class LevelManager : MonoBehaviour {
             scripts.soundManager.PlayClip("next");
             // play sound clip
             if (level == 4 && sub == 1) {
+                print("going to next level after beating devil!");
                 if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
                 // going to next level after having defeated devil
                 if (scripts.player.charNum != 3) { 
@@ -158,18 +159,12 @@ public class LevelManager : MonoBehaviour {
                     scripts.persistentData.unlockedChars[scripts.player.charNum + 1] = true;
                     scripts.persistentData.successfulRuns++;
                     scripts.SavePersistentData();
-                    scripts.SaveGameData();
-                    // grab it back 
                 }
                 print("notify the player they unlocked a new character to play here!");
-                File.Delete("gameSave.txt");
-                for (int i = 0; i < 15; i++) {
-                    yield return scripts.delays[0.033f];
-                    temp.a += 1f/15f;
-                    boxSR.color = temp;
-                }
-                // fade in
-                SceneManager.LoadScene("Credits");
+                scripts.gameData = new GameData();
+                scripts.SaveGameData();
+                // for some reason file.delete doesn't want to work here
+                Initiate.Fade("Credits", Color.black, 2.5f);
                 // load credits scene
             }
             scripts.turnManager.ClearVariablesAfterRound();

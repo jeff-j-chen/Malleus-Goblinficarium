@@ -13,13 +13,11 @@ public class BackToMenu : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            if (scripts != null) { 
-                if (scripts.player != null && scripts.turnManager != null && !scripts.turnManager.isMoving) { 
-                    scripts.SaveGameData();
-                    scripts.SavePersistentData();
-                }
-                SceneManager.LoadScene("Menu");
+            if (scripts != null && scripts.player != null && scripts.turnManager != null && !scripts.turnManager.isMoving) { 
+                scripts.SaveGameData();
+                scripts.SavePersistentData();
             }
+            SceneManager.LoadScene("Menu");
             // Initiate.Fade("Menu", Color.black, transitionMultiplier);
         }
     }
