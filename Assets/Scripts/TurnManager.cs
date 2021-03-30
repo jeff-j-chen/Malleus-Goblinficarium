@@ -180,7 +180,7 @@ public class TurnManager : MonoBehaviour {
                     if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
                         // if devil
                         if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
-                        // add an asteriks if already injured
+                        // add an asterisks if already injured
                         else { 
                             if (targetArr[scripts.player.targetIndex] == "face") {
                                 // can't aim at the devil's face, so notify player
@@ -243,6 +243,7 @@ public class TurnManager : MonoBehaviour {
                 // take the # of wounds based on accuracy (system.linq function)
                 scripts.player.availableTargets.Add(targetingString);
                 // add each one to the available targets
+                print($"added {targetingString} to player's available targets");
             }
         }
         else if (playerOrEnemy == "enemy") {

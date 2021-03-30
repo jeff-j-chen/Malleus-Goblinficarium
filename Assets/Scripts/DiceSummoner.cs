@@ -231,7 +231,7 @@ public class DiceSummoner : MonoBehaviour
         generatedTypes.Clear();
         // clear the list so we can start with a new one
         for (int a = 0; a < 3; a++) {
-            // create 4 yellow dice
+            // create 3 yellow dice
             generatedTypes.Add(scripts.colors.colorArr[4]);
         }
         for (int b = 0; b < 4; b++) {
@@ -241,7 +241,7 @@ public class DiceSummoner : MonoBehaviour
                 generatedTypes.Add(scripts.colors.colorArr[b]);
             }
         }
-        generatedTypes.RemoveAt(3);
+        generatedTypes.RemoveAt(4);
         // remove a green
         for (int d = 0; d < 8; d++) {
             // remove dice needed to get just 6

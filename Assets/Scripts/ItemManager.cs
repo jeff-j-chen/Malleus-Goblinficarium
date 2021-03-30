@@ -79,7 +79,7 @@ public class ItemManager : MonoBehaviour {
         {"maul", "any wound is deadly"}, 
         {"montante", ""}, 
         {"necklet", ""}, 
-        {"phylactery", "gain leech buff once wounded"},
+        {"phylactery", "gain \"leech\" buff once wounded"},
         {"potion", ""}, 
         {"rapier", "gain 3 stamina upon kill"}, 
         {"retry", "retry?"}, 
@@ -188,9 +188,10 @@ public class ItemManager : MonoBehaviour {
                 MoveToInventory(0, true, false, false);
                 CreateItem("steak", "common");
                 MoveToInventory(0, true, false, false);
-
-                CreateItem("steak", "common");
+                
+                CreateItem("scroll", "common", "challenge");
                 MoveToInventory(0, true, false, false);
+
 
                 if (scripts.persistentData.easyMode) { 
                     CreateItem("torch", "common");

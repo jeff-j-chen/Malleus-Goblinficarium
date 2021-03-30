@@ -59,14 +59,7 @@ public class Enemy : MonoBehaviour {
         // SpawnNewEnemy(UnityEngine.Random.Range(3, 7));
         scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
         // make sure to show the enemy's stats at the start
-        if (scripts.levelManager.level == 4) { 
-            // devil level
-            if (scripts.enemy.woundGUIElement.text == "[cloaked]") { SpawnNewEnemy(0, scripts.gameData.newGame); }
-            else { SpawnNewEnemy(1, scripts.gameData.newGame); }
-            // spawn cloaked or normal devil, depending 
-            scripts.itemManager.lootText.text = "";
-        }
-        else if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) {
+        if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) {
             // on the tombstone level
             SpawnNewEnemy(8, scripts.gameData.newGame);
             // spawn th tombstone

@@ -355,6 +355,10 @@ public class StatSummoner : MonoBehaviour {
         // (2)
         // for example
         else { Debug.Log("error"); }
+        scripts.turnManager.SetAvailableTargetsOf("player");
+        scripts.turnManager.SetTargetOf("player");
+        scripts.turnManager.SetAvailableTargetsOf("enemy");
+        scripts.turnManager.SetTargetOf("enemy");
     }
 
     public void ShiftDiceAccordingly(string stat, int shiftAmount)

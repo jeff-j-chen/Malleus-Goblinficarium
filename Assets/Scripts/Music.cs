@@ -7,6 +7,7 @@ using UnityEngine;
 // main game music will be quieted during level change
 // main and trader are hard loops, assume boss is as well
 // boss does a quick fade into intro after you kill him
+// lich has boss music as well
 
 public class Music : MonoBehaviour {
     private void Awake() {
