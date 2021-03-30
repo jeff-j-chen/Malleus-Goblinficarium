@@ -22,7 +22,6 @@ public class Player : MonoBehaviour {
     [SerializeField] public string[] statusEffectDescs = new string[] { "if you strike first, ignore all damage", "cure the same wound as inflicted", "all picked die turn yellow", "pick 3 dice, enemy gets the rest", "keep 1 of your die till next round" };
     [SerializeField] public Sprite[] statusEffectSprites;
     private List<GameObject> statusEffectList = new List<GameObject>();
-    public List<string> availableTargets = new List<string>();
     public List<string> woundList = new List<string>();
     public bool isDead;
     public bool cancelMove = false;
@@ -92,9 +91,8 @@ public class Player : MonoBehaviour {
     private void Update() {
         if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f  && !scripts.turnManager.isMoving)) {
             // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
-            scripts.turnManager.SetAvailableTargetsOf("player");
             // set the available targets to make sure the player can do that
-            if (targetIndex < scripts.player.availableTargets.Count) {
+            if (targetIndex < Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "player"), 0, 7)) {
                 // if player can target there
                 if (hintTimer > 0.05f) { hintTimer += 0.1f; }
                 // if there is still time left on the hint timer (for targeting face or targeting wounded body part)

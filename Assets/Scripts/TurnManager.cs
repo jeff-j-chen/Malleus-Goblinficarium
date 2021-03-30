@@ -76,18 +76,16 @@ public class TurnManager : MonoBehaviour {
     /// <param name="playerOrEnemy">Who to perform the check on.</param>
     public void RecalculateMaxFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            SetAvailableTargetsOf(playerOrEnemy);
-            if (scripts.player.targetIndex > scripts.player.availableTargets.Count) {
-                scripts.player.targetIndex = scripts.player.availableTargets.Count;
+            if (scripts.player.targetIndex > scripts.statSummoner.SumOfStat("green", "player")) {
+                scripts.player.targetIndex =scripts.statSummoner.SumOfStat("green", "player");
             }
             // check the available targets
             SetTargetOf("player");
             // reset the target
         }
         else if (playerOrEnemy == "enemy") {
-            SetAvailableTargetsOf(playerOrEnemy);
-            if (scripts.enemy.targetIndex > scripts.enemy.availableTargets.Count) {
-                scripts.enemy.targetIndex = scripts.enemy.availableTargets.Count;
+            if (scripts.enemy.targetIndex > scripts.statSummoner.SumOfStat("green", "enemy")) {
+                scripts.enemy.targetIndex = scripts.statSummoner.SumOfStat("green", "enemy");
             }
             SetTargetOf("enemy");
             // same as above
@@ -225,35 +223,6 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else { Debug.LogError("Invalid string passed in to SetTarget() in TurnManager.cs"); }
-    }
-
-    /// <summary>
-    /// Update the list of available targets based on accuracy. 
-    /// </summary>
-    /// <param name="playerOrEnemy">Whether to update the player or enemy's target list.</param>
-    public void SetAvailableTargetsOf(string playerOrEnemy) {
-        int accuracy = scripts.statSummoner.SumOfStat("green", playerOrEnemy);
-        // get the accuracy sum 
-        if (accuracy > 7) { accuracy = 7; }
-        // limit accuracy to be 7
-        if (playerOrEnemy == "player") {
-            scripts.player.availableTargets.Clear();
-            // clear the list of targets
-            foreach (string targetingString in targetArr.Take(accuracy)) {
-                // take the # of wounds based on accuracy (system.linq function)
-                scripts.player.availableTargets.Add(targetingString);
-                // add each one to the available targets
-                print($"added {targetingString} to player's available targets");
-            }
-        }
-        else if (playerOrEnemy == "enemy") {
-            scripts.enemy.availableTargets.Clear();
-            foreach (string targetingString in targetArr.Take(accuracy)) {
-                scripts.enemy.availableTargets.Add(targetingString);
-            }
-            // same as above
-        }
-        else { Debug.LogError("Invalid string passed in to SetAvailableTargetsOf() in TurnManager.cs"); }
     }
 
     /// <summary>

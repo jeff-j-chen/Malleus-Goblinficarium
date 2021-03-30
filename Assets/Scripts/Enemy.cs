@@ -15,7 +15,6 @@ public class Enemy : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI woundGUIElement;
     [SerializeField] public TextMeshProUGUI staminaCounter;
     [SerializeField] public TextMeshProUGUI target;
-    public List<string> availableTargets = new List<string>();
     public List<string> woundList = new List<string>();
     public bool isDead = false;
     public Dictionary<string, int> stats;
@@ -105,12 +104,11 @@ public class Enemy : MonoBehaviour {
     /// </summary>
     public void TargetBest() {
         // change this later so that it prioritizes certain wounds rather than just aiming for the highest wound
-        scripts.turnManager.SetAvailableTargetsOf("enemy");
         // set the list of available targets
-        targetIndex = availableTargets.Count - 1;
+        targetIndex = 7;
         // start at the end of the array
-        for (int i = availableTargets.Count; i > -1; i--) {
-            // iterating from the end to the start
+        for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7); i >= 0; i--) {
+;            // iterating from the end to the start
             if (!scripts.player.woundList.Contains(scripts.turnManager.targetArr[i])) {
                 // if the player does not have the wound
                 targetIndex = i;
