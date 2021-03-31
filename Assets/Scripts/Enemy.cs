@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour {
     [SerializeField] public RuntimeAnimatorController[] controllers;
+    [SerializeField] public RuntimeAnimatorController lichDeathController;
     [SerializeField] private Sprite[] icons;
     [SerializeField] private Sprite tombstoneIcon;
     [SerializeField] private Sprite[] deathSprites;
@@ -86,9 +87,9 @@ public class Enemy : MonoBehaviour {
                 SpawnNewEnemy(scripts.gameData.enemyNum, false); 
                 if (scripts.gameData.enemyIsDead) { 
                     scripts.itemManager.lootText.text = "loot:";
-                    if (scripts.levelManager.level == 4) { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
+                    if (scripts.levelManager.level == 4 || scripts.gameData.enemyNum == 2) { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
                     else { scripts.tombstoneData.SpawnSavedFloorItems(true); }
-                    // devil doesnt have a weapon, so make sure it doesnt bug
+                    // devil and lich dont have weapons, so make sure it doesnt bug
                     GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
                     SetEnemyPositionAfterDeath();
                 }

@@ -588,8 +588,7 @@ public class TurnManager : MonoBehaviour {
         // fade out
         if (playerOrEnemy == "player") { scripts.player.GetComponent<Animator>().enabled = false; }
         else if (playerOrEnemy == "enemy") { 
-            if (scripts.enemy.enemyName.text == "Lich") { print("change lich's animation here!"); }
-            scripts.enemy.GetComponent<Animator>().enabled = false; 
+            scripts.enemy.GetComponent<Animator>().enabled = false;
         }
         // disable the animator for whoever is dead
         for (int i = 0; i < 28; i++) {
@@ -601,12 +600,13 @@ public class TurnManager : MonoBehaviour {
         yield return scripts.delays[0.8f];
         // pause (animation is not playing so it looks like they are just standing there)
         if (playerOrEnemy == "enemy") { 
-            if (scripts.enemy.enemyName.text == "Skeleton") {
-                scripts.soundManager.PlayClip("clank");
-            }
+            if (scripts.enemy.enemyName.text == "Skeleton") { scripts.soundManager.PlayClip("clank"); }
             else if (scripts.enemy.enemyName.text == "Lich") { 
-                scripts.soundManager.PlayClip("scream");
+                scripts.soundManager.PlayClip("scream"); 
+                scripts.enemy.GetComponent<Animator>().enabled = true;
+                scripts.enemy.GetComponent<Animator>().runtimeAnimatorController = scripts.enemy.lichDeathController;
             }
+            else { scripts.soundManager.PlayClip("death"); }
         }
         else { 
             scripts.soundManager.PlayClip("death");
@@ -622,6 +622,11 @@ public class TurnManager : MonoBehaviour {
             // allow the player to retry
         }
         else if (playerOrEnemy == "enemy") {
+            if (scripts.enemy.enemyName.text == "Lich") { 
+                scripts.enemy.GetComponent<Animator>().enabled = true; 
+                yield return scripts.delays[1.15f];
+                scripts.soundManager.PlayClip("clang");
+            }
             scripts.enemy.GetComponent<SpriteRenderer>().sprite = scripts.enemy.GetDeathSprite();
             scripts.enemy.SetEnemyPositionAfterDeath();
             // if enemy dies, set sprite and proper position
