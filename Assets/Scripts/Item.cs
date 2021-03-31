@@ -217,7 +217,7 @@ public class Item : MonoBehaviour
             // update the highlighted item variable
             scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
             // update the col variable
-            if (playAudio && !preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+            if (playAudio && !preventPlayingFX) { scripts.soundManager.PlayClip("click0"); }
             // dont play this if we just came from menu scene
             // play sound clip
         }
@@ -491,7 +491,7 @@ public class Item : MonoBehaviour
                             // heal and display the wounds
                             // injuredtextchange does not want to work for some reason
                             yield return scripts.delays[0.25f];
-                            scripts.soundManager.PlayClip("blip");
+                            scripts.soundManager.PlayClip("blip1");
                             break;
                         case "nothing": break;
                         // default: print("invalid potion modifier detected"); break;
@@ -589,7 +589,7 @@ public class Item : MonoBehaviour
                 case "ankh":
                     if (!scripts.itemManager.usedAnkh)
                     {
-                        scripts.soundManager.PlayClip("click");
+                        scripts.soundManager.PlayClip("click0");
                         scripts.itemManager.usedAnkh = true;
                         scripts.gameData.usedAnkh = true;
                         scripts.SaveGameData();

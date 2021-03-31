@@ -462,9 +462,9 @@ public class TurnManager : MonoBehaviour {
         scripts.gameData.expendedStamina = 0;
         scripts.SaveGameData();
         if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !scripts.enemy.isDead) {
-            scripts.enemy.stamina = 5;
+            scripts.enemy.stamina = 3;
             // refresh lich's stamina
-            scripts.soundManager.PlayClip("blip");
+            scripts.soundManager.PlayClip("blip1");
             // play sound clip
             scripts.enemy.staminaCounter.text = scripts.enemy.stamina.ToString();
         }
@@ -587,7 +587,10 @@ public class TurnManager : MonoBehaviour {
         }
         // fade out
         if (playerOrEnemy == "player") { scripts.player.GetComponent<Animator>().enabled = false; }
-        else if (playerOrEnemy == "enemy") { scripts.enemy.GetComponent<Animator>().enabled = false; }
+        else if (playerOrEnemy == "enemy") { 
+            if (scripts.enemy.enemyName.text == "Lich") { print("change lich's animation here!"); }
+            scripts.enemy.GetComponent<Animator>().enabled = false; 
+        }
         // disable the animator for whoever is dead
         for (int i = 0; i < 28; i++) {
             yield return scripts.delays[0.0125f];
@@ -597,8 +600,13 @@ public class TurnManager : MonoBehaviour {
         // fade back in
         yield return scripts.delays[0.8f];
         // pause (animation is not playing so it looks like they are just standing there)
-        if (playerOrEnemy == "enemy" && scripts.enemy.enemyName.text == "Skeleton") { 
-            scripts.soundManager.PlayClip("skeletonDeath");
+        if (playerOrEnemy == "enemy") { 
+            if (scripts.enemy.enemyName.text == "Skeleton") {
+                scripts.soundManager.PlayClip("clank");
+            }
+            else if (scripts.enemy.enemyName.text == "Lich") { 
+                scripts.soundManager.PlayClip("scream");
+            }
         }
         else { 
             scripts.soundManager.PlayClip("death");
@@ -654,7 +662,7 @@ public class TurnManager : MonoBehaviour {
             statusText.color = temp;
         }
         // fade in
-        yield return scripts.delays[1f];
+        yield return scripts.delays[1.15f];
         // wait 1 sec (so player has time to read)
         for (int i = 0; i < 10; i++) {
             yield return scripts.delays[0.033f];
@@ -840,7 +848,7 @@ public class TurnManager : MonoBehaviour {
         yield return scripts.delays[1f];
         scripts.turnManager.ChangeStaminaOf("player", -10);
         // StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
-        scripts.soundManager.PlayClip("blip");
+        scripts.soundManager.PlayClip("blip0");
         DisplayWounds();
     }
 
@@ -950,13 +958,13 @@ public class TurnManager : MonoBehaviour {
         if (scripts.player.target.text.Contains("*")) { 
             if (scripts.player.woundList.Remove(scripts.player.target.text.Substring(1))) { 
                 StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
-                scripts.soundManager.PlayClip("blip");
+                scripts.soundManager.PlayClip("blip0");
             }
         }
         else { 
             if (scripts.player.woundList.Remove(scripts.player.target.text)) { 
                 StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
-                scripts.soundManager.PlayClip("blip");
+                scripts.soundManager.PlayClip("blip0");
             }
         }
     }

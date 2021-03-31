@@ -198,7 +198,7 @@ public class Player : MonoBehaviour {
                 scripts.gameData.usedMace = true;
                 scripts.SaveGameData();
                 // prevent player from using mace again
-                scripts.soundManager.PlayClip("click");
+                scripts.soundManager.PlayClip("click0");
                 foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
                     // for every die that is not attached
                     StartCoroutine(dice.RerollAnimation(false));

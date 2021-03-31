@@ -77,7 +77,7 @@ public class CharacterSelector : MonoBehaviour {
 
 
     private IEnumerator LoadMenuScene() { 
-        scripts.soundManager.PlayClip("blip");
+        scripts.soundManager.PlayClip("blip0");
         // play sfx (this is when selected)
         scripts.persistentData.newCharNum = selectionNum;
         // set the selection num
@@ -113,7 +113,7 @@ public class CharacterSelector : MonoBehaviour {
             }
             GetComponent<SpriteRenderer>().sprite = icons[selectionNum];
             // set the character icon
-            if (!preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+            if (!preventPlayingFX) { scripts.soundManager.PlayClip("click0"); }
             // only play sfx if we want it 
             if (selectionNum == 0) { leftButton.transform.position = new Vector2(-8.53f, 20f); }
             // hide left button if we are the leftmost (first) character

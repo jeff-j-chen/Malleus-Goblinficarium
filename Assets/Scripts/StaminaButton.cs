@@ -92,7 +92,7 @@ public class StaminaButton : MonoBehaviour {
     }
 
     private void OnMouseDown() {
-        scripts.soundManager.PlayClip("click");
+        scripts.soundManager.PlayClip("click0");
         spriteRenderer.color = scripts.colors.clicked;
     }
 

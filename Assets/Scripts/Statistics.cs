@@ -44,7 +44,7 @@ public class Statistics : MonoBehaviour {
         for (int i = 0; i < 50; i++) { 
             if (i % 10 == 0) {
                 bottomText.text = $"[{Mathf.Round(time)}]";
-                soundManager.PlayClip("click");
+                soundManager.PlayClip("click0");
             }
             if (!Input.GetKey(KeyCode.Space)) { break; }
             yield return tenthSecond;

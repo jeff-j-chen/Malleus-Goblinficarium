@@ -31,7 +31,7 @@ public class MenuButton : MonoBehaviour
     /// </summary>
     /// <param name="buttonName"></param>
     public void ButtonPress(string buttonName) {
-        soundManager.PlayClip("click");
+        soundManager.PlayClip("click0");
         // play sound clip
         switch (buttonName) {
             case "Continue":

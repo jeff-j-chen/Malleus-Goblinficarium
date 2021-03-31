@@ -484,7 +484,6 @@ MonoBehaviour:
   lockActions: 0
   characters: '",:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
   thinCharacters: :|i!
-  time: 0.03
 --- !u!1 &247861091
 GameObject:
   m_ObjectHideFlags: 0
@@ -5092,6 +5091,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6032342762329974427, guid: 7e8bb50b108481949aced7cf63aaa1c3,
+        type: 3}
+      propertyPath: audioClipNames.Array.data[16]
+      value: clank
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7e8bb50b108481949aced7cf63aaa1c3, type: 3}

@@ -192,7 +192,6 @@ public class ItemManager : MonoBehaviour {
                 CreateItem("scroll", "common", "challenge");
                 MoveToInventory(0, true, false, false);
 
-
                 if (scripts.persistentData.easyMode) { 
                     CreateItem("torch", "common");
                         MoveToInventory(0, true, false, false);
@@ -499,7 +498,7 @@ public class ItemManager : MonoBehaviour {
         if (floorItems[index] != null) {
             if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
                 // if the player doesn't have 7 or more items or is trying to pick up weapon 
-                if (!starter && playAudio) { scripts.soundManager.PlayClip("click"); }
+                if (!starter && playAudio) { scripts.soundManager.PlayClip("click0"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
                     if (!starter) { scripts.persistentData.weaponsSwapped++; }

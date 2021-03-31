@@ -240,7 +240,7 @@ public class Enemy : MonoBehaviour {
             }
             else if (enemyArr[enemyNum] == "Lich") {
                 // if lich, has 5 stamina by default
-                stamina = 5;
+                stamina = 3;
             }
             else {
                 // normal enemy 
@@ -280,7 +280,7 @@ public class Enemy : MonoBehaviour {
             else { enemyName.text = enemyArr[enemyNum]; }
             // set the name, when spawning the cloaked just set it to be "Devil"
             if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { stamina = 0; }
-            else if (enemyArr[enemyNum] == "Lich") { stamina = 5; }
+            else if (enemyArr[enemyNum] == "Lich") { stamina = 3; }
             else { stamina = scripts.gameData.enemyStamina; }
             woundList = scripts.gameData.enemyWounds;
         }

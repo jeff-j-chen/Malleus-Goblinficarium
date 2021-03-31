@@ -30,7 +30,7 @@ public class Dice : MonoBehaviour {
         // as soon as the mouse button is pressed over
         if (moveable) {
             // if the dice is still moveable
-            scripts.soundManager.PlayClip("click");
+            scripts.soundManager.PlayClip("click0");
             // play sound clip
             childSpriteRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
             // assign the child sprite renderer to be edited 
@@ -43,7 +43,7 @@ public class Dice : MonoBehaviour {
                 // if the situation permits action to occur on the die
                 if (scripts.enemy.woundList.Contains("head") && !scripts.turnManager.diceDiscarded) {
                     // if the enemy is wounded in the head and a die has not been discarded yet
-                    scripts.soundManager.PlayClip("click");
+                    scripts.soundManager.PlayClip("click0");
                     // play sound clip
                     SpriteRenderer numSR = GetComponent<SpriteRenderer>();
                     SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
@@ -60,7 +60,7 @@ public class Dice : MonoBehaviour {
         }
         if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && !scripts.turnManager.isMoving) {
             // if the player wants to save a die via scroll of courage by discarding the others
-            scripts.soundManager.PlayClip("click");
+            scripts.soundManager.PlayClip("click0");
             // play sound clip
             SpriteRenderer numSR = GetComponent<SpriteRenderer>();
             SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
@@ -213,7 +213,7 @@ public class Dice : MonoBehaviour {
             // 10 times
             yield return rollTimes[i];
             // wait for a set amount of time
-            if (playSound) { scripts.soundManager.PlayClip("click"); }
+            if (playSound) { scripts.soundManager.PlayClip("click0"); }
             // play sound clip if necessary
             int randNum = UnityEngine.Random.Range(1, 7);
             // get a random number for the dice 

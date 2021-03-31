@@ -87,7 +87,7 @@ public class Arrow : MonoBehaviour {
             currentIndex = index;
             transform.position = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);
             // move the arrow to the menu icon at the index, with offset
-            if (!preventPlayingFX) { scripts.soundManager.PlayClip("click"); }
+            if (!preventPlayingFX) { scripts.soundManager.PlayClip("click0"); }
             // play sound clip
         }
     }
