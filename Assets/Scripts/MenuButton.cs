@@ -35,7 +35,6 @@ public class MenuButton : MonoBehaviour
         // play sound clip
         switch (buttonName) {
             case "Continue":
-                print("resuming an existing game!");
                 // do something special here
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;

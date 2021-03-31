@@ -40,7 +40,6 @@ public class LevelManager : MonoBehaviour {
     [SerializeField] public bool lockActions = false;
     [SerializeField] private string characters = "";
     [SerializeField] private string thinCharacters = "";
-    [SerializeField] private float time = 0.03f;
     private Coroutine transGlitchCoro;
     private Coroutine debugGlitchCoro;
 
@@ -80,7 +79,10 @@ public class LevelManager : MonoBehaviour {
             // lich has 1/1/1/1
             else if (lichOrDevilOrNormal == "devil") { return new float[] { 2f, 2f, 2f, 2f }; }
             // devil has 2/2/2/2
-            else { print("invalid enemy to attempt to spawn");return balanced;}
+            else { 
+                // print("invalid enemy to attempt to spawn");
+                return balanced;
+            }
             // notify me of error and return a basic one
         }
         else {
@@ -114,7 +116,10 @@ public class LevelManager : MonoBehaviour {
     private float[] GenBaseStats(float[] stats, float[] normal) {
         float sum = stats[5] + stats[6] + stats[7] + stats[8] + stats[9];
         // get the sum of the present chances
-        if (sum != 10f) { print("not 10f"); return balanced; }
+        if (sum != 10f) { 
+            // print("not 10f"); 
+            return balanced; 
+        }
         // something went wrong while setting up the dictionary, so notify me and return (so compiler is happy)
         else {
             int rand = UnityEngine.Random.Range(1, 11);
@@ -151,7 +156,6 @@ public class LevelManager : MonoBehaviour {
             scripts.soundManager.PlayClip("next");
             // play sound clip
             if (level == 4 && sub == 1) {
-                print("going to next level after beating devil!");
                 if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
                 // going to next level after having defeated devil
                 if (scripts.player.charNum != 3) { 

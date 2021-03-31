@@ -379,7 +379,7 @@ public class TurnManager : MonoBehaviour {
                 // play animation
             }
         }
-        else { print("error passing into ienumerator attack"); }
+        // else { print("error passing into ienumerator attack"); }
         if (!scripts.player.isDead && !scripts.enemy.isDead) { 
             // if neither player or enemy is dead
             yield return scripts.delays[2f];
@@ -412,7 +412,6 @@ public class TurnManager : MonoBehaviour {
                 discardDieBecauseCourage = false;
                 scripts.player.SetPlayerStatusEffect("courage", false);
                 // reset necessary variables
-                print("in turnmanager, dice saved is " + dieSavedFromLastRound.GetComponent<Dice>().diceType);
             }
             isMoving = false;
             // stop moving
@@ -517,7 +516,7 @@ public class TurnManager : MonoBehaviour {
             StartCoroutine(PlayDeathAnimation("enemy"));
             // set status text and play the animation
         }
-        else { print("invalid string passed"); }
+        // else { print("invalid string passed"); }
         scripts.persistentData.enemiesSlain++;
         scripts.gameData.expendedStamina = 0;
         scripts.SavePersistentData();
@@ -551,7 +550,6 @@ public class TurnManager : MonoBehaviour {
             scripts.gameData.enemyNum = scripts.enemy.spawnNum;
             scripts.enemy.GetComponent<Animator>().runtimeAnimatorController = scripts.enemy.controllers[1];
             if (playerOrEnemy == "enemy") { 
-                print("syncing up!");
                 scripts.player.GetComponent<Animator>().Rebind();
                 scripts.player.GetComponent<Animator>().Update(0f);
                 scripts.enemy.GetComponent<Animator>().Rebind();
@@ -624,7 +622,7 @@ public class TurnManager : MonoBehaviour {
             blackBox.transform.position = onScreen;
             // hide the enemy's stats
         }
-        else { print("invalid string passed"); }
+        // else { print("invalid string passed"); }
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
             StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
             // fade out all existing die
@@ -982,10 +980,6 @@ public class TurnManager : MonoBehaviour {
 
     private IEnumerator ApplyInjuriesDuringMoveCoro(string injury, string appliedTo) {
         yield return scripts.delays[0.45f];
-        // 0.5 instead of 0.55 just in case
-        if (appliedTo != "enemy" && appliedTo != "player") { print("invalid string passed into param. appliedTo in ApplyInjuriesDuringMove"); }
-        // just checking
-        
         // return true immediately if maul
         if (injury == "guts") {
             // for guts, decrease all die
@@ -1156,7 +1150,8 @@ public class TurnManager : MonoBehaviour {
     /// <param name="stat">Which stat to use the stamina on.</param>
     /// <param name="amount">The amount of stamina to use on the stat.</param>
     private void UseEnemyStaminaOn(string stat, int amount) {
-        if (scripts.enemy.stamina < amount) { print("too much stamina to use!"); }
+        if (scripts.enemy.stamina < amount) { //print("too much stamina to use!"); 
+        }
         // restrict just in case
         else {
             scripts.statSummoner.addedEnemyStamina[stat] += amount;

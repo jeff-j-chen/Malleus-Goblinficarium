@@ -158,7 +158,7 @@ public class Item : MonoBehaviour
                             case "might": scripts.itemManager.itemDesc.text = "potion of might\ngain a yellow die"; break;
                             case "life": scripts.itemManager.itemDesc.text = "potion of life\nheal all wounds"; break;
                             case "nothing": scripts.itemManager.itemDesc.text = "potion of nothing\ndoes nothing"; break;
-                            default: print("invalid potion modifier"); break;
+                            // default: print("invalid potion modifier"); break;
                         }
                         break;
                     case "scroll":
@@ -171,7 +171,7 @@ public class Item : MonoBehaviour
                             case "courage": scripts.itemManager.itemDesc.text = "scroll of courage\nkeep 1 of your die till next round"; break;
                             case "challenge": scripts.itemManager.itemDesc.text = "scroll of challenge\n???"; break;
                             case "nothing": scripts.itemManager.itemDesc.text = "scroll of nothing\ndoes nothing"; break;
-                            default: print("invalid scroll modifier"); break;
+                            // default: print("invalid scroll modifier"); break;
                         }
                         break;
                     case "necklet":
@@ -293,7 +293,7 @@ public class Item : MonoBehaviour
                             // send reminders accordingly
                             else if (!scripts.enemy.isDead) { scripts.player.UseWeapon(); }
                             // attack if enemy is not dead or tombstone
-                            else { print("error!"); }
+                            // else { print("error!"); }
                         }
                     }
                     else if (itemType == "common") { UseCommon(); }
@@ -494,7 +494,7 @@ public class Item : MonoBehaviour
                             scripts.soundManager.PlayClip("blip");
                             break;
                         case "nothing": break;
-                        default: print("invalid potion modifier detected"); break;
+                        // default: print("invalid potion modifier detected"); break;
                     }
                     scripts.SaveGameData();
                     scripts.statSummoner.SummonStats();
@@ -605,7 +605,7 @@ public class Item : MonoBehaviour
                     }
                     else { scripts.turnManager.SetStatusText("ankh glows with red light"); }
                     break;
-                default: print("rare item with invalid name found!"); break;
+                // default: print("rare item with invalid name found!"); break;
             }
         }
     }

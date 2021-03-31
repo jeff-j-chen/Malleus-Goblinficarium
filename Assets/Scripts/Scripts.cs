@@ -92,9 +92,9 @@ public class Scripts : MonoBehaviour {
     }
 
     public void OnApplicationQuit() { 
-        if (player != null) { print("saving just before close!");SaveGameData();  }
+        if (player != null) { SaveGameData();  }
     }
     public void OnApplicationPause() { 
-        if (player != null) { print("saving just before close!");SaveGameData();  }   
+        if (player != null) { SaveGameData();  }   
     }
 }

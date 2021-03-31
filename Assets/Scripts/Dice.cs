@@ -302,7 +302,7 @@ public class Dice : MonoBehaviour {
                 }
                 // same situation as above, shift the die (except forwards this time)
             }
-            else { print("something is wrong with this die"); }
+            // else { print("something is wrong with this die"); }
         }
         // if (scripts.statSummoner.addedPlayerDice[statAddedTo].Contains(this)) { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); }
         // else if (scripts.statSummoner.addedEnemyDice[statAddedTo].Contains(this)) { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this);}

@@ -152,7 +152,7 @@ public class ItemManager : MonoBehaviour {
                 if (curList == scripts.player.inventory) { Select(floorItems, 0); }
                 else if (curList == floorItems) { Select(scripts.player.inventory, 0); }
                 // swap the curList (used for selection) to the other
-                else { print("invalid list to select from"); }
+                // else { print("invalid list to select from"); }
                 // something is wrong here
             }
         }
@@ -318,7 +318,7 @@ public class ItemManager : MonoBehaviour {
         else if (itemType == "common") { sprite = commonItemSprites[UnityEngine.Random.Range(0, commonItemSprites.Length - 1)]; }
         else if (itemType == "rare") { sprite = rareItemSprites[UnityEngine.Random.Range(0, rareItemSprites.Length - 1)]; }
         // depending on the type, give it a corresponding random sprite.
-        else { print("bad item type to create"); }
+        // else { print("bad item type to create"); }
         // can only create item types of weapon, common, and rare
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = sprite;
         // give the sprite renderer the proper sprite 
@@ -480,7 +480,9 @@ public class ItemManager : MonoBehaviour {
     /// Move the item at index 0 from the floor to the display in the character selection screen.
     /// </summary>
     public void MoveItemToDisplay() {
-        if (!isCharSelect) { print("This function should only be used in character select!"); }
+        if (!isCharSelect) { 
+            // print("This function should only be used in character select!"); 
+        }
         else {
             for (int i = 0; i < floorItems.Count; i++) { 
                 floorItems[i].transform.position = new Vector2(-4.572f + itemSpacing * i, 6.612f);
@@ -564,7 +566,7 @@ public class ItemManager : MonoBehaviour {
                         } 
                         else if (floorItems[index].GetComponent<Item>().modifier == "nothing") {}
                         else if (floorItems[index].GetComponent<Item>().modifier == "victory") {}
-                        else { print("bad modifier"); }
+                        // else { print("bad modifier"); }
                         // depending on the type of the necklet, modify the stats accordingly
                         StartCoroutine(UpdateUIAfterDelay());
                         // set the debug information and summon the new stats
