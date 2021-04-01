@@ -58,7 +58,7 @@ public class Scripts : MonoBehaviour {
 
     private IEnumerator SaveAfterDelay() { 
         // set newgame to false after a delay so that stuff can load in if its true
-        yield return delays[.25f];
+        yield return delays[0.25f];
         if (player != null) { gameData.newGame = false; }
         
         SaveGameData(); 

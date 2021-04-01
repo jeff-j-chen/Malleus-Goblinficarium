@@ -9,6 +9,8 @@ public class SoundManager : MonoBehaviour {
     AudioSource audioSource;
     void Start() {
         audioSource = GetComponent<AudioSource>();
+        if (PlayerPrefs.GetString("sounds") == "on") { audioSource.volume = 1f; }
+        else { audioSource.volume = 0f; }
     }
 
     /// <summary>

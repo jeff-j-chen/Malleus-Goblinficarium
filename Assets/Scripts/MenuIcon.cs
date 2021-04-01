@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using TMPro;
+using System.Collections;
 
 public class MenuIcon : MonoBehaviour {
     private const string DEBUG_KEY = "debug";
@@ -17,7 +17,9 @@ public class MenuIcon : MonoBehaviour {
     public Color gray;
     [SerializeField] AudioSource musicPlayer;
     [SerializeField] AudioSource sfxPlayer;
+    Scripts scripts;
     void Start() {
+        scripts = FindObjectOfType<Scripts>();
         debugSR = debug.GetComponent<SpriteRenderer>();
         hintsSR = hints.GetComponent<SpriteRenderer>();
         soundsSR = sound.GetComponent<SpriteRenderer>();
@@ -30,6 +32,12 @@ public class MenuIcon : MonoBehaviour {
         PlayerPrefSetter(SOUNDS_KEY, soundsSR, false);
         PlayerPrefSetter(MUSIC_KEY, musicSR, false);
         // set the default preferences
+        StartCoroutine(FindMusicLate());
+    }
+
+    private IEnumerator FindMusicLate() { 
+        yield return scripts.delays[0.25f];
+        musicPlayer = FindObjectOfType<Music>().GetComponent<AudioSource>();
     }
 
     void Update() {

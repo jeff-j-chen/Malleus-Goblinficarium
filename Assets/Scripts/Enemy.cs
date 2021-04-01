@@ -92,7 +92,10 @@ public class Enemy : MonoBehaviour {
                     // if resuming after the enemy has been killed
                     scripts.itemManager.lootText.text = "loot:";
                     if (scripts.levelManager.level == 4 || scripts.gameData.enemyNum == 2) { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
-                    else { scripts.tombstoneData.SpawnSavedFloorItems(true); }
+                    else { 
+                        if (scripts.gameData.floorItemTypes[0] == "weapon") { scripts.tombstoneData.SpawnSavedFloorItems(true);  }
+                        else { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
+                    }
                     // spawn in the enemy's loot again for the player
                     // devil and lich dont have weapons, so make sure it doesnt bug
                     GetComponent<SpriteRenderer>().sprite = GetDeathSprite();

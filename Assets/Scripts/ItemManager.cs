@@ -407,7 +407,7 @@ public class ItemManager : MonoBehaviour {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
         int rand = UnityEngine.Random.Range(0, weaponNames.Length);
-        // get a random variable of which we will pull item information from
+        // get a random variable of which we will pull weapon information from
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = weaponSprites[rand];
         // get the sprite from the random number
         instantiatedItem.transform.parent = gameObject.transform;
@@ -418,13 +418,12 @@ public class ItemManager : MonoBehaviour {
         // pull a random modifier from the array
         instantiatedItem.GetComponent<Item>().modifier = modifier.Substring(0, modifier.Length - 1);
         // assign the modifier attribute (cut off the final letter, as modifiers are like 'common0' and 'common1')
-        instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<Item>().modifier + " " + instantiatedItem.GetComponent<SpriteRenderer>().sprite.name.Replace("_", " ");
+        instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<Item>().modifier + " " + weaponNames[rand];
         // concatenate the modifier with weapon name and assign the item's name attribute to be that
-        baseWeapon = weaponDict[weaponNames[rand]];
         // get the base weapon's stats from the array of dictionaries gotten from the previous random number
         foreach (string key in statArr) { 
             // for every key in the stat array ("green", "blue", etc.)
-            baseWeapon[key] += modifierDict[modifier][key]; 
+            baseWeapon[key] = weaponDict[weaponNames[rand]][key] + modifierDict[modifier][key]; 
             // add the modifier stats to the weapon stats
             if (baseWeapon[key] < -1) { baseWeapon[key] = -1; }
             // limit the item so it can't go down to -2 (not in the actual game, but in my modded version later i may do this)
