@@ -13,6 +13,11 @@ public static class Save {
     public static void LoadGame() { 
         if (File.Exists(gamePath)) { 
             game = JsonUtility.FromJson<GameData>(File.ReadAllText(gamePath));
+            if (game == null) { 
+                // little extra redundancy incase something went really wrong   
+                game = new GameData();
+                SaveGame();
+            }
         }
         else { 
             Debug.Log($"no save found, so just created one!");
@@ -26,7 +31,13 @@ public static class Save {
     }
 
     public static void LoadPersistent() { 
-        if (File.Exists(persistentPath)) { persistent = JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath)); }
+        if (File.Exists(persistentPath)) { 
+            persistent = JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath)); 
+            if (persistent == null) { 
+                persistent = new PersistentData();
+                SavePersistent();
+            }
+        }
         else { 
             Debug.Log($"no statistics found, so just created one!");
             persistent = new PersistentData();

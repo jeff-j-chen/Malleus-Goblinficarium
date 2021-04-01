@@ -28,7 +28,7 @@ public class Dice : MonoBehaviour {
 
     private void OnMouseDown() {
         // as soon as the mouse button is pressed down
-        if (moveable) {
+        if (moveable && !scripts.turnManager.isMoving) {
             // if the dice is still moveable
             scripts.soundManager.PlayClip("click0");
             // play sound clip
@@ -77,7 +77,7 @@ public class Dice : MonoBehaviour {
 
     private void OnMouseDrag() {
         // when the mouse is dragged
-        if (moveable) {
+        if (moveable && !scripts.turnManager.isMoving) {
             // if the dice can be moved
             spriteRenderer.sortingOrder = 3;
             childSpriteRenderer.sortingOrder = 2;
@@ -92,7 +92,7 @@ public class Dice : MonoBehaviour {
 
     private void OnMouseUp() {
         // when the mouse is released
-        if (moveable) {
+        if (moveable && !scripts.turnManager.isMoving) {
             // if the dice can be moved
             scripts.soundManager.PlayClip("click1");
             // play sound clip
@@ -106,7 +106,7 @@ public class Dice : MonoBehaviour {
             childSpriteRenderer.sortingOrder = 0;
             // send the die to the background
         }
-        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich") {
+        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich" && !scripts.turnManager.isMoving) {
             // if an action can be performed on the dice (discard, reroll)
             if (!scripts.turnManager.isMoving || scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable) {
                 // if the situation allows for an action to be performed
