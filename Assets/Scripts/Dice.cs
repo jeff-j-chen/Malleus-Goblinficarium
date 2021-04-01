@@ -59,7 +59,7 @@ public class Dice : MonoBehaviour {
             }
         }
         if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && !scripts.turnManager.isMoving) {
-            // if the player wants to save a die via scroll of courage by discarding the others
+            // if the player wants to Save a die via scroll of courage by discarding the others
             scripts.soundManager.PlayClip("click0");
             // play sound clip
             SpriteRenderer numSR = GetComponent<SpriteRenderer>();
@@ -123,8 +123,8 @@ public class Dice : MonoBehaviour {
                     // discard from the enemy
                     scripts.itemManager.discardableDieCounter--;
                     // decrease the counter for the number of die 
-                    scripts.gameData.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                    scripts.SaveGameData();
+                    Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
+                    Save.SaveGame();
                 }
                 else if (scripts.enemy.woundList.Contains("chest")) {
                     // if enemy is wounded in the chest
@@ -167,9 +167,9 @@ public class Dice : MonoBehaviour {
         }
         scripts.statSummoner.SetDebugInformationFor("enemy");
         // set the debug information
-        scripts.persistentData.diceDiscarded++;
-        scripts.SavePersistentData();
-        // increment stats and save them
+        Save.persistent.diceDiscarded++;
+        Save.SavePersistent();
+        // increment stats and Save them
     }
 
     /// <summary>
@@ -195,12 +195,12 @@ public class Dice : MonoBehaviour {
     /// </summary>
     private void Reroll() {
         // pretty self explanatory self explanatory
-        scripts.persistentData.diceRerolled++;
+        Save.persistent.diceRerolled++;
         scripts.turnManager.alterationDuringMove = true;
         StartCoroutine(RerollAnimation());
         isRerolled = true;
         scripts.diceSummoner.SaveDiceValues();
-        scripts.SavePersistentData();
+        Save.SavePersistent();
     }
 
     /// <summary>
@@ -314,7 +314,7 @@ public class Dice : MonoBehaviour {
         Destroy(gameObject);
         // destroy the die
         scripts.diceSummoner.SaveDiceValues();
-        // save the dice values to the save file
+        // Save the dice values to the Save file
         scripts.statSummoner.SetDebugInformationFor("enemy");
         scripts.statSummoner.SetDebugInformationFor("player");
     }

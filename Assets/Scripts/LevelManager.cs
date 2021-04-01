@@ -47,8 +47,8 @@ public class LevelManager : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         if (PlayerPrefs.GetString("debug") == "on") { levelText.gameObject.SetActive(true); }
         else { levelText.gameObject.SetActive(false); }
-        level = scripts.gameData.resumeLevel;
-        sub = scripts.gameData.resumeSub;
+        level = Save.game.resumeLevel;
+        sub = Save.game.resumeSub;
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
         temp = boxSR.color;
@@ -60,8 +60,9 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
+        print($"save.persistent is {Save.persistent}");
         if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
-        else if (sub == scripts.persistentData.tsSub && level == scripts.persistentData.tsLevel && !(sub == 1 && level == 1))
+        else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
         { levelText.text = $"(level {level}-{sub}*)"; }
         else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
         else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = $"(level ???)"; }
@@ -156,13 +157,13 @@ public class LevelManager : MonoBehaviour {
                 // going to next level after having defeated devil
                 if (scripts.player.charNum != 3) { 
                     // give player the next character, as long as they aren't on the last one\
-                    scripts.persistentData.unlockedChars[scripts.player.charNum + 1] = true;
-                    scripts.persistentData.successfulRuns++;
-                    scripts.SavePersistentData();
+                    Save.persistent.unlockedChars[scripts.player.charNum + 1] = true;
+                    Save.persistent.successfulRuns++;
+                    Save.SavePersistent();
                 }
                 print("notify the player they unlocked a new character to play here!");
-                scripts.gameData = new GameData();
-                scripts.SaveGameData();
+                Save.game = new GameData();
+                Save.SaveGame();
                 // for some reason file.delete doesn't want to work here
                 Initiate.Fade("Credits", Color.black, 2.5f);
                 // load credits scene
@@ -192,13 +193,13 @@ public class LevelManager : MonoBehaviour {
             // fade in the box
             loadingCircle.transform.position = onScreen;
             // make the loading thing go on screen
-            scripts.gameData.floorItemNames = new string[9];
-            scripts.gameData.floorItemTypes = new string[9];
-            scripts.gameData.floorItemMods = new string[9];
-            scripts.gameData.floorAcc = 0;
-            scripts.gameData.floorSpd = 0;
-            scripts.gameData.floorDmg = 0;
-            scripts.gameData.floorDef = 0;
+            Save.game.floorItemNames = new string[9];
+            Save.game.floorItemTypes = new string[9];
+            Save.game.floorItemMods = new string[9];
+            Save.game.floorAcc = 0;
+            Save.game.floorSpd = 0;
+            Save.game.floorDmg = 0;
+            Save.game.floorDef = 0;
             // clear merchant and floor items when going to the next level
             if (!isLich) {
                 // if spawning a normal enemy
@@ -206,25 +207,25 @@ public class LevelManager : MonoBehaviour {
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; }
                 // increment level and reset sub if we passed sub 4
-                if (sub > scripts.persistentData.highestSub && level >= scripts.persistentData.highestLevel) { 
-                    scripts.persistentData.highestSub = sub;
-                    scripts.persistentData.highestLevel = level;
+                if (sub > Save.persistent.highestSub && level >= Save.persistent.highestLevel) { 
+                    Save.persistent.highestSub = sub;
+                    Save.persistent.highestLevel = level;
                 }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
-                    scripts.persistentData.tsLevel = -1;
-                    scripts.persistentData.tsSub = -1;
-                    scripts.persistentData.tsWeaponAcc = -1;
-                    scripts.persistentData.tsWeaponSpd = -1;
-                    scripts.persistentData.tsWeaponDmg = -1;
-                    scripts.persistentData.tsWeaponDef = -1;
-                    scripts.persistentData.tsItemNames = new string[9];
-                    scripts.persistentData.tsItemNames = new string[9];
-                    scripts.persistentData.tsItemNames = new string[9];
+                    Save.persistent.tsLevel = -1;
+                    Save.persistent.tsSub = -1;
+                    Save.persistent.tsWeaponAcc = -1;
+                    Save.persistent.tsWeaponSpd = -1;
+                    Save.persistent.tsWeaponDmg = -1;
+                    Save.persistent.tsWeaponDef = -1;
+                    Save.persistent.tsItemNames = new string[9];
+                    Save.persistent.tsItemNames = new string[9];
+                    Save.persistent.tsItemNames = new string[9];
                     sub--;
                     // make tombstone inaccessible
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
-                if (sub == scripts.persistentData.tsSub && level == scripts.persistentData.tsLevel && !(sub == 1 && level == 1)) {
+                if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1)) {
                     // spawn tombstone if we are on the correct level and not on 1-1
                     toSpawn = "tombstone";
                     // level matches which level to add to
@@ -286,8 +287,8 @@ public class LevelManager : MonoBehaviour {
             // clear the loading text and move the box offscreen
             scripts.itemManager.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
-            scripts.gameData.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-            scripts.SaveGameData();
+            Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+            Save.SaveGame();
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
                 scripts.itemManager.lootText.text = "loot:";
@@ -322,11 +323,11 @@ public class LevelManager : MonoBehaviour {
             scripts.turnManager.DetermineMove(false);
             // determine who moves
             lockActions = false;
-            scripts.gameData.resumeSub = scripts.levelManager.sub;
-            scripts.gameData.resumeLevel = scripts.levelManager.level;
+            Save.game.resumeSub = scripts.levelManager.sub;
+            Save.game.resumeLevel = scripts.levelManager.level;
         }
-        scripts.SavePersistentData();
-        scripts.SaveGameData();
+        Save.SavePersistent();
+        Save.SaveGame();
     }
 
     private char r() { 

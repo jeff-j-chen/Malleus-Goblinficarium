@@ -3,15 +3,14 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 
-public class MenuButton : MonoBehaviour
-{
-    string persistentPath = "persistentSave.txt";
-    string gamePath = "gameSave.txt";
+public class MenuButton : MonoBehaviour {
     private float transitionMultiplier;
     private SoundManager soundManager;
     private Arrow arrow;
     private Scripts scripts;
     void Start() {
+        Save.LoadGame();
+        Save.LoadPersistent();
         scripts = FindObjectOfType<Scripts>();
         transitionMultiplier = FindObjectOfType<BackToMenu>().transitionMultiplier;
         soundManager = FindObjectOfType<SoundManager>();
@@ -37,11 +36,10 @@ public class MenuButton : MonoBehaviour
         // play sound clip
         switch (buttonName) {
             case "Continue":
-                GameData gameData = LoadGameData();
-                if (gameData.enemyNum == 0 || gameData.enemyNum == 1 || gameData.enemyNum == 2) { 
+                if (Save.game.enemyNum == 0 || Save.game.enemyNum == 1 || Save.game.enemyNum == 2) { 
                     if (scripts.music.audioSource.clip.name != "LaBossa") { scripts.music.FadeVolume("LaBossa"); }
                 }
-                else if (gameData.resumeSub == 4) { 
+                else if (Save.game.resumeSub == 4) { 
                     if (scripts.music.audioSource.clip.name != "Smoke") { scripts.music.FadeVolume("Smoke"); }
                 }
                 else { 
@@ -52,9 +50,10 @@ public class MenuButton : MonoBehaviour
                 break;
             case "New Game":
                 if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
-                File.WriteAllText("gameSave.txt", JsonUtility.ToJson(new GameData()));
-                PersistentData persistentData = LoadPersistentData();
-                persistentData.gamesPlayed++;
+                Save.game = new GameData();
+                Save.SaveGame();
+                // persistentData = Save.LoadPersistent();
+                // persistentData.gamesPlayed++;
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             case "Tutorial": 
@@ -68,21 +67,4 @@ public class MenuButton : MonoBehaviour
         }
     }
 
-    public PersistentData LoadPersistentData() { 
-        if (File.Exists(persistentPath)) { return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath)); }
-        else { 
-            Debug.LogError($"no statistics found, so just created one!");
-            File.WriteAllText(persistentPath, JsonUtility.ToJson(new PersistentData()));
-            return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath));
-        }
-    }
-
-    public GameData LoadGameData() { 
-        if (File.Exists(gamePath)) { return JsonUtility.FromJson<GameData>(File.ReadAllText(gamePath)); }
-        else { 
-            Debug.Log($"no savefile found, so just created one!");
-            File.WriteAllText(gamePath, JsonUtility.ToJson(new GameData()));
-            return JsonUtility.FromJson<GameData>(File.ReadAllText(gamePath));
-        }
-    }
 }

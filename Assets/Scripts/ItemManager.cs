@@ -138,12 +138,12 @@ public class ItemManager : MonoBehaviour {
             // assign the curlist variable for item selection navigation
             // need to implement a check if continuing or new game
         }
-        usedAnkh = scripts.gameData.usedAnkh;
-        usedBoots = scripts.gameData.usedBoots;
-        usedHelm = scripts.gameData.usedHelm;
-        numItemsDroppedForTrade = scripts.gameData.numItemsDroppedForTrade;
-        discardableDieCounter = scripts.gameData.discardableDieCounter;
-        // assign variables based on the save, preventing cheating
+        usedAnkh = Save.game.usedAnkh;
+        usedBoots = Save.game.usedBoots;
+        usedHelm = Save.game.usedHelm;
+        numItemsDroppedForTrade = Save.game.numItemsDroppedForTrade;
+        discardableDieCounter = Save.game.discardableDieCounter;
+        // assign variables based on the Save, preventing cheating
     }
 
     void Update() {
@@ -188,7 +188,7 @@ public class ItemManager : MonoBehaviour {
     /// Give the player their starting items, based on chosen class.
     /// </summary>
     public void GiveStarterItems(int charNum) {
-        if (scripts.gameData.newGame) { 
+        if (Save.game.newGame) { 
             // new game, so give the base weapons
             if (scripts.player.charNum == 0) { 
                 // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
@@ -200,7 +200,7 @@ public class ItemManager : MonoBehaviour {
                 CreateItem("scroll", "common", "challenge");
                 MoveToInventory(0, true, false, false);
 
-                if (scripts.persistentData.easyMode) { 
+                if (Save.persistent.easyMode) { 
                     CreateItem("torch", "common");
                         MoveToInventory(0, true, false, false);
                 }
@@ -210,7 +210,7 @@ public class ItemManager : MonoBehaviour {
                 MoveToInventory(0, true, false, false);
                 CreateItem("armor", "common");
                 MoveToInventory(0, true, false, false);
-                if (scripts.persistentData.easyMode) {
+                if (Save.persistent.easyMode) {
                     CreateItem("helm_of_might", "rare");
                     MoveToInventory(0, true, false, false);
                 }
@@ -220,7 +220,7 @@ public class ItemManager : MonoBehaviour {
                 MoveToInventory(0, true, false, false);
                 CreateItem("boots_of_dodge", "rare");
                 MoveToInventory(0, true, false, false);
-                if (scripts.persistentData.easyMode) { 
+                if (Save.persistent.easyMode) { 
                     CreateItem("ankh", "rare");
                     MoveToInventory(0, true, false, false);
                 }
@@ -230,7 +230,7 @@ public class ItemManager : MonoBehaviour {
                 MoveToInventory(0, true, false, false);
                 CreateItem("cheese", "common");
                 MoveToInventory(0, true, false, false);
-                if (scripts.persistentData.easyMode) { 
+                if (Save.persistent.easyMode) { 
                     CreateItem("kapala", "rare");
                     MoveToInventory(0, true, false, false);
                 }
@@ -238,12 +238,12 @@ public class ItemManager : MonoBehaviour {
         }
         else { 
             // continuing previously existing game
-            CreateWeaponWithStats(scripts.gameData.resumeItemNames[0], scripts.gameData.resumeItemMods[0], scripts.gameData.resumeAcc, scripts.gameData.resumeSpd, scripts.gameData.resumeDmg, scripts.gameData.resumeDef);
+            CreateWeaponWithStats(Save.game.resumeItemNames[0], Save.game.resumeItemMods[0], Save.game.resumeAcc, Save.game.resumeSpd, Save.game.resumeDmg, Save.game.resumeDef);
             MoveToInventory(0, true, false, false);
             // create their old weapon and given them it
             for (int i = 1; i < 9; i++) {
-                if (scripts.gameData.resumeItemNames[i] == "") { break; }
-                CreateItem(scripts.gameData.resumeItemNames[i].Replace(' ', '_'), scripts.gameData.resumeItemTypes[i], scripts.gameData.resumeItemMods[i]);
+                if (Save.game.resumeItemNames[i] == "") { break; }
+                CreateItem(Save.game.resumeItemNames[i].Replace(' ', '_'), Save.game.resumeItemTypes[i], Save.game.resumeItemMods[i]);
                 MoveToInventory(0, true, false, false);
             }
             // create the old items and add them in
@@ -432,11 +432,11 @@ public class ItemManager : MonoBehaviour {
         // assign the weapon stats to the weapon
         floorItems.Add(instantiatedItem);
         // add the item to the array
-        scripts.gameData.floorAcc = baseWeapon["green"];
-        scripts.gameData.floorSpd = baseWeapon["blue"];
-        scripts.gameData.floorDmg = baseWeapon["red"];
-        scripts.gameData.floorDef = baseWeapon["white"];
-        scripts.SaveGameData();
+        Save.game.floorAcc = baseWeapon["green"];
+        Save.game.floorSpd = baseWeapon["blue"];
+        Save.game.floorDmg = baseWeapon["red"];
+        Save.game.floorDef = baseWeapon["white"];
+        Save.SaveGame();
     }
 
     /// <summary>
@@ -488,23 +488,23 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Move the floor item at the specifed index into the player's inventory.
     /// </summary>
-    public void MoveToInventory(int index, bool starter=false, bool playAudio=true, bool saveData=true) {
+    public void MoveToInventory(int index, bool starter=false, bool playAudio=true, bool SaveData=true) {
         if (floorItems[index] != null) {
             if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
                 // if the player doesn't have 7 or more items or is trying to pick up weapon 
                 if (!starter && playAudio) { scripts.soundManager.PlayClip("click0"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
-                    if (!starter) { scripts.persistentData.weaponsSwapped++; }
+                    if (!starter) { Save.persistent.weaponsSwapped++; }
                     // if the item being moved is a weapon 
                     floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
                     // move the item to the weapon slot
                     scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
                     // set the player's stats to be equal to that of the weapon
-                    scripts.gameData.resumeAcc = scripts.player.stats["green"];
-                    scripts.gameData.resumeSpd = scripts.player.stats["blue"];
-                    scripts.gameData.resumeDmg = scripts.player.stats["red"];
-                    scripts.gameData.resumeDef = scripts.player.stats["white"];
+                    Save.game.resumeAcc = scripts.player.stats["green"];
+                    Save.game.resumeSpd = scripts.player.stats["blue"];
+                    Save.game.resumeDmg = scripts.player.stats["red"];
+                    Save.game.resumeDef = scripts.player.stats["white"];
                     if (!starter) {
                         // if the weapon is not a starter (so player already has a weapon)
                         scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
@@ -599,11 +599,11 @@ public class ItemManager : MonoBehaviour {
             floorItems.RemoveAt(index);
             // something went wrong here, so destroy it
         }
-        if (saveData) { 
+        if (SaveData) { 
             SaveInventoryItems();
-            if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) { SaveTombstoneItems(); }
+            if (scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) { SaveTombstoneItems(); }
             else { SaveFloorItems(); }
-            // only save items if necessary
+            // only Save items if necessary
         }
     }
 
@@ -721,91 +721,91 @@ public class ItemManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Save all inventory items onto the player's local savefile.
+    /// Save all inventory items onto the player's local Savefile.
     /// </summary>
     public void SaveInventoryItems() {
         if (scripts.levelManager != null) { 
-            scripts.gameData.resumeItemNames = new string[9];
-            scripts.gameData.resumeItemTypes = new string[9];
-            scripts.gameData.resumeItemMods = new string[9];
+            Save.game.resumeItemNames = new string[9];
+            Save.game.resumeItemTypes = new string[9];
+            Save.game.resumeItemMods = new string[9];
             // clear the data before placing in new
             Item item = scripts.player.inventory[0].GetComponent<Item>();
-            scripts.gameData.resumeItemNames[0] = item.itemName.Split(' ')[1];
-            scripts.gameData.resumeItemTypes[0] = item.itemType;
-            scripts.gameData.resumeItemMods[0] = item.modifier;
+            Save.game.resumeItemNames[0] = item.itemName.Split(' ')[1];
+            Save.game.resumeItemTypes[0] = item.itemType;
+            Save.game.resumeItemMods[0] = item.modifier;
             // add the player's weapon first
             for (int i = 1; i < scripts.player.inventory.Count; i++) {
                 item = scripts.player.inventory[i].GetComponent<Item>();
-                scripts.gameData.resumeItemNames[i] = item.itemName;
-                scripts.gameData.resumeItemTypes[i] = item.itemType;
-                scripts.gameData.resumeItemMods[i] = item.modifier;
+                Save.game.resumeItemNames[i] = item.itemName;
+                Save.game.resumeItemTypes[i] = item.itemType;
+                Save.game.resumeItemMods[i] = item.modifier;
                 // add all the remaining items
             }
-            scripts.SaveGameData();
-            // save to file
+            Save.SaveGame();
+            // Save to file
 
         }
     }
 
     /// <summary>
-    /// Save all floor items onto the player's local savefile.
+    /// Save all floor items onto the player's local Savefile.
     /// </summary>
     public void SaveFloorItems() { 
-        scripts.gameData.floorItemNames = new string[9];
-        scripts.gameData.floorItemTypes = new string[9];
-        scripts.gameData.floorItemMods = new string[9];
+        Save.game.floorItemNames = new string[9];
+        Save.game.floorItemTypes = new string[9];
+        Save.game.floorItemMods = new string[9];
         // clear the data before placing in new 
         bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                if (item.itemType == "weapon") { scripts.gameData.floorItemNames[i] = item.itemName.Split(' ')[1]; }
-                else { scripts.gameData.floorItemNames[i] = item.itemName; }
+                if (item.itemType == "weapon") { Save.game.floorItemNames[i] = item.itemName.Split(' ')[1]; }
+                else { Save.game.floorItemNames[i] = item.itemName; }
                 
-                scripts.gameData.floorItemTypes[i] = item.itemType;
-                scripts.gameData.floorItemMods[i] = item.modifier;
-                if (scripts.gameData.floorItemNames[i] == "arrow") { arrowFound = true; }
+                Save.game.floorItemTypes[i] = item.itemType;
+                Save.game.floorItemMods[i] = item.modifier;
+                if (Save.game.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
                 Debug.Log($"clearing {i}");
-                scripts.gameData.floorItemNames[i] = "";
-                scripts.gameData.floorItemTypes[i] = "";
-                scripts.gameData.floorItemMods[i] = "";
+                Save.game.floorItemNames[i] = "";
+                Save.game.floorItemTypes[i] = "";
+                Save.game.floorItemMods[i] = "";
             }
         }
         // funky workaround to make it so that the player doesn't get duplicate arrows
-        scripts.SaveGameData();
+        Save.SaveGame();
     }
 
-    // two separate methods so that we dont have to do any fancy checks, just pull whichever we need as long as we save it properly
+    // two separate methods so that we dont have to do any fancy checks, just pull whichever we need as long as we Save it properly
 
     /// <summary>
-    /// Save all tombstone items onto the player's local savefile.
+    /// Save all tombstone items onto the player's local Savefile.
     /// </summary>
     public void SaveTombstoneItems() { 
-        scripts.gameData.floorItemNames = new string[9];
-        scripts.gameData.floorItemTypes = new string[9];
-        scripts.gameData.floorItemMods = new string[9];
+        Save.game.floorItemNames = new string[9];
+        Save.game.floorItemTypes = new string[9];
+        Save.game.floorItemMods = new string[9];
         // clear the data before placing in new 
         bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
                 Item item = floorItems[i].GetComponent<Item>();
-                if (item.itemType == "weapon") { scripts.gameData.floorItemNames[i] = item.itemName.Split(' ')[1]; }
-                else { scripts.gameData.floorItemNames[i] = item.itemName; }
+                if (item.itemType == "weapon") { Save.game.floorItemNames[i] = item.itemName.Split(' ')[1]; }
+                else { Save.game.floorItemNames[i] = item.itemName; }
                 
-                scripts.gameData.floorItemTypes[i] = item.itemType;
-                scripts.gameData.floorItemMods[i] = item.modifier;
-                if (scripts.gameData.floorItemNames[i] == "arrow") { arrowFound = true; }
+                Save.game.floorItemTypes[i] = item.itemType;
+                Save.game.floorItemMods[i] = item.modifier;
+                if (Save.game.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
                 Debug.Log($"clearing {i}");
-                scripts.gameData.floorItemNames[i] = "";
-                scripts.gameData.floorItemTypes[i] = "";
-                scripts.gameData.floorItemMods[i] = "";
+                Save.game.floorItemNames[i] = "";
+                Save.game.floorItemTypes[i] = "";
+                Save.game.floorItemMods[i] = "";
             }
         }
         // funky workaround to make it so that the player doesn't get duplicate arrows
-        scripts.SaveGameData();
+        Save.SaveGame();
     }
 }

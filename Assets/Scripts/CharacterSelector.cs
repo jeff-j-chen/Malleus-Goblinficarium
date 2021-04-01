@@ -35,9 +35,9 @@ public class CharacterSelector : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         // get necessary objects
-        unlockedChars = scripts.persistentData.unlockedChars;
-        easy = scripts.persistentData.easyMode;
-        // pull in data from the savefile
+        unlockedChars = Save.persistent.unlockedChars;
+        easy = Save.persistent.easyMode;
+        // pull in data from the Savefile
         if (easy) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
         else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
         // hide the item if normal mode, if easy mode then show it
@@ -86,10 +86,10 @@ public class CharacterSelector : MonoBehaviour {
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip0");
         // play sfx (this is when selected)
-        scripts.persistentData.newCharNum = selectionNum;
+        Save.persistent.newCharNum = selectionNum;
         // set the selection num
-        scripts.SavePersistentData();
-        // save the selection num
+        Save.SavePersistent();
+        // Save the selection num
         yield return scripts.delays[0.1f];
         // delay here, because i don't want a singleton and this allows blip to complete playing
         SceneManager.LoadScene("Menu");
@@ -203,9 +203,9 @@ public class CharacterSelector : MonoBehaviour {
             // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
             // fade to black and then back
-            scripts.persistentData.easyMode = easy; 
-            scripts.SavePersistentData();
-            // apply it to the save file so the next game will have the correct character
+            Save.persistent.easyMode = easy; 
+            Save.SavePersistent();
+            // apply it to the Save file so the next game will have the correct character
         }
     }
 }

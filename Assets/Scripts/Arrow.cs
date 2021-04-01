@@ -21,13 +21,12 @@ public class Arrow : MonoBehaviour {
     private Scripts scripts;
     // necessary for all files
     private bool preventPlayingFX = true;
-    private GameData gameData;
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // find scripts
-        gameData = scripts.LoadGameData();
-        if (scripts.gameData.newGame == true) { 
+        Save.LoadGame();
+        if (Save.game.newGame == true) { 
             menuButtons[0].SetActive(false); 
             for (int i = 1; i < menuButtons.Length; i++) { 
                 menuButtons[i].transform.position = buttonPositions[i-1];
@@ -62,7 +61,7 @@ public class Arrow : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow)) {
             // if player pressed up
-            if (currentIndex - 1 >= 0 && gameData.newGame == false || currentIndex - 1 >= 1 && gameData.newGame == true) {
+            if (currentIndex - 1 >= 0 && Save.game.newGame == false || currentIndex - 1 >= 1 && Save.game.newGame == true) {
                 // if can move the selector (arrow) up
                 currentIndex--;
                 MoveToButtonPos(currentIndex);
@@ -81,8 +80,8 @@ public class Arrow : MonoBehaviour {
     /// </summary>
     public void MoveToButtonPos(int index) {
         // function used to move the arrow to the desired button position
-        if (!(index == 0 && scripts.gameData.newGame == true)) {
-            // as long as we are not trying to select continue when newgame is true (previous save wiped)
+        if (!(index == 0 && Save.game.newGame == true)) {
+            // as long as we are not trying to select continue when newgame is true (previous Save wiped)
             currentIndex = index;
             transform.position = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);
             // move the arrow to the menu icon at the index, with offset

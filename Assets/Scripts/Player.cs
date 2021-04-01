@@ -59,13 +59,13 @@ public class Player : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // something here to check if we are continuing or starting a new game
-        if (scripts.gameData.newGame) { charNum = scripts.persistentData.newCharNum; }
-        else { charNum = scripts.gameData.curCharNum; }
-        scripts.gameData.curCharNum = charNum;
+        if (Save.game.newGame) { charNum = Save.persistent.newCharNum; }
+        else { charNum = Save.game.curCharNum; }
+        Save.game.curCharNum = charNum;
         scripts.itemManager.GiveStarterItems(charNum);
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
-        woundList = scripts.gameData.playerWounds;
+        woundList = Save.game.playerWounds;
         // set the initial positions
         identifier.text = "You";
         // set the identifier text
@@ -73,20 +73,20 @@ public class Player : MonoBehaviour {
         // set the correct sprite
         GetComponent<Animator>().runtimeAnimatorController = controllers[charNum];
         // set the correct animation controller (using runtime so that it works in the actual game, and not only the editor)
-        SetPlayerStatusEffect("fury", scripts.gameData.isFurious);
-        SetPlayerStatusEffect("dodge", scripts.gameData.isDodgy);
-        SetPlayerStatusEffect("haste", scripts.gameData.isHasty);
-        SetPlayerStatusEffect("leech", scripts.gameData.isBloodthirsty);
-        SetPlayerStatusEffect("courage", scripts.gameData.isCourageous);
-        potionStats["green"] = scripts.gameData.potionAcc;
-        potionStats["blue"] = scripts.gameData.potionSpd;
-        potionStats["red"] = scripts.gameData.potionDmg;
-        potionStats["white"] = scripts.gameData.potionDef;
-        stamina = scripts.gameData.playerStamina + scripts.gameData.expendedStamina;
-        scripts.gameData.expendedStamina = 0;
+        SetPlayerStatusEffect("fury", Save.game.isFurious);
+        SetPlayerStatusEffect("dodge", Save.game.isDodgy);
+        SetPlayerStatusEffect("haste", Save.game.isHasty);
+        SetPlayerStatusEffect("leech", Save.game.isBloodthirsty);
+        SetPlayerStatusEffect("courage", Save.game.isCourageous);
+        potionStats["green"] = Save.game.potionAcc;
+        potionStats["blue"] = Save.game.potionSpd;
+        potionStats["red"] = Save.game.potionDmg;
+        potionStats["white"] = Save.game.potionDef;
+        stamina = Save.game.playerStamina + Save.game.expendedStamina;
+        Save.game.expendedStamina = 0;
         staminaCounter.text = stamina.ToString();
-        scripts.SaveGameData();
-        // give status effects, potion effects, stamina, everything from previous save
+        Save.SaveGame();
+        // give status effects, potion effects, stamina, everything from previous Save
     }
 
     private void Update() {
@@ -146,7 +146,7 @@ public class Player : MonoBehaviour {
                     // set debug (only player needed here)
                     scripts.turnManager.RecalculateMaxFor("player");
                     // reset target
-                    scripts.tombstoneData.SetTombstoneData();;
+                    scripts.tombstoneData.SetTombstoneData();
                     // allow player to retry
                 }
             }
@@ -196,8 +196,8 @@ public class Player : MonoBehaviour {
             if (scripts.itemManager.PlayerHasWeapon("mace") && !scripts.turnManager.usedMace) {
                 // if player has mace
                 scripts.turnManager.usedMace = true;
-                scripts.gameData.usedMace = true;
-                scripts.SaveGameData();
+                Save.game.usedMace = true;
+                Save.SaveGame();
                 // prevent player from using mace again
                 scripts.soundManager.PlayClip("click0");
                 foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
@@ -263,23 +263,23 @@ public class Player : MonoBehaviour {
     public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
         if (statusEffect == "fury") { if (scripts.player.isFurious && onOrOff == true) { return; } else { 
             scripts.player.isFurious = onOrOff; 
-            scripts.gameData.isFurious = onOrOff;
+            Save.game.isFurious = onOrOff;
         } }
         else if (statusEffect == "dodge") { if (scripts.player.isDodgy && onOrOff == true) { return; } else { 
             scripts.player.isDodgy = onOrOff; 
-            scripts.gameData.isDodgy = onOrOff;
+            Save.game.isDodgy = onOrOff;
         } }
         else if (statusEffect == "haste") { if (scripts.player.isHasty && onOrOff == true) { return; } else { 
             scripts.player.isHasty = onOrOff; 
-            scripts.gameData.isHasty = onOrOff;
+            Save.game.isHasty = onOrOff;
         } }
         else if (statusEffect == "leech") { if (scripts.player.isBloodthirsty && onOrOff == true) { return; } else { 
             scripts.player.isBloodthirsty = onOrOff; 
-            scripts.gameData.isBloodthirsty = onOrOff;
+            Save.game.isBloodthirsty = onOrOff;
         } }
         else if (statusEffect == "courage") { if (scripts.player.isCourageous && onOrOff == true) { return; } else { 
             scripts.player.isCourageous = onOrOff; 
-            scripts.gameData.isCourageous = onOrOff;
+            Save.game.isCourageous = onOrOff;
         } }
         // set as desired, if turning on something already on then instantly exit function
         if (onOrOff == true) {

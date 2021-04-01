@@ -51,7 +51,7 @@ public class DiceSummoner : MonoBehaviour
                 // need to store them in primitives because the dice and its info will be destroyed
             }
             else { lastNum = -1; }
-            // need to save the die before the delay and summon it afterwards for some reason
+            // need to Save the die before the delay and summon it afterwards for some reason
             if (!initialSummon) {
                 // delay if necessary
                 yield return scripts.delays[0.25f];
@@ -80,7 +80,7 @@ public class DiceSummoner : MonoBehaviour
                 }
             }
             if (lastNum != -1) {
-                // if there is a die saved from last round (from scroll of courage)
+                // if there is a die Saved from last round (from scroll of courage)
                 GenerateSingleDie (lastNum, lastType, "player", lastStat, initialSix:true);
                 // create the die and add it to the player
             }
@@ -88,15 +88,15 @@ public class DiceSummoner : MonoBehaviour
         else { 
             existingDice.Clear();
             int initialSpawnCount = 0;
-            for (int i = 0; i < scripts.gameData.diceTypes.Count; i++) {
+            for (int i = 0; i < Save.game.diceTypes.Count; i++) {
                 // for every die
-                if (scripts.gameData.dicePlayerOrEnemy[i] == "none") {
+                if (Save.game.dicePlayerOrEnemy[i] == "none") {
                     // if its not attached, its part of the 6 pickupable
                     GenerateSingleDie(
-                        scripts.gameData.diceNumbers[i],
-                        scripts.gameData.diceTypes[i],
+                        Save.game.diceNumbers[i],
+                        Save.game.diceTypes[i],
                         "none",
-                        scripts.gameData.diceAttachedToStat[i],
+                        Save.game.diceAttachedToStat[i],
                         initialSpawnCount,
                         initialSix:true
                     );
@@ -107,10 +107,10 @@ public class DiceSummoner : MonoBehaviour
                 else {
                     // else its a die attached by some other means (e.g. flail, devil)
                     GenerateSingleDie(
-                        scripts.gameData.diceNumbers[i],
-                        scripts.gameData.diceTypes[i],
-                        scripts.gameData.dicePlayerOrEnemy[i],
-                        scripts.gameData.diceAttachedToStat[i],
+                        Save.game.diceNumbers[i],
+                        Save.game.diceTypes[i],
+                        Save.game.dicePlayerOrEnemy[i],
+                        Save.game.diceAttachedToStat[i],
                         initialSpawnCount,
                         initialSix:true
                     );
@@ -191,7 +191,7 @@ public class DiceSummoner : MonoBehaviour
     }
 
     /// <summary>
-    /// Used to save all the dice properties and values into the player's local file/
+    /// Used to Save all the dice properties and values into the player's local file/
     /// </summary>
     public void SaveDiceValues() { 
         StartCoroutine(SaveDiceValuesCoro());
@@ -203,24 +203,24 @@ public class DiceSummoner : MonoBehaviour
     private IEnumerator SaveDiceValuesCoro() { 
         yield return scripts.delays[0.1f];
         // KEEP THIS DELAY HERE, WITHOUT IT THE DICE WILL NOT SAVE PROPERLY!!!
-        scripts.gameData.diceNumbers.Clear();
-        scripts.gameData.diceTypes.Clear();
-        scripts.gameData.diceAttachedToStat.Clear();
-        scripts.gameData.dicePlayerOrEnemy.Clear();
-        scripts.gameData.diceRerolled.Clear();
+        Save.game.diceNumbers.Clear();
+        Save.game.diceTypes.Clear();
+        Save.game.diceAttachedToStat.Clear();
+        Save.game.dicePlayerOrEnemy.Clear();
+        Save.game.diceRerolled.Clear();
         // make sure to clear everything before saving new data
         for (int i = 0; i < existingDice.Count; i++) { 
             // for every existing dice
             Dice dice = existingDice[i].GetComponent<Dice>();
-            scripts.gameData.diceNumbers.Add(dice.diceNum);
-            scripts.gameData.diceTypes.Add(dice.diceType);
-            scripts.gameData.diceAttachedToStat.Add(dice.statAddedTo);
-            scripts.gameData.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
-            scripts.gameData.diceRerolled.Add(dice.isRerolled);
+            Save.game.diceNumbers.Add(dice.diceNum);
+            Save.game.diceTypes.Add(dice.diceType);
+            Save.game.diceAttachedToStat.Add(dice.statAddedTo);
+            Save.game.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
+            Save.game.diceRerolled.Add(dice.isRerolled);
             // add its info to the info 
         }
-        scripts.SaveGameData();
-        // make sure to save it
+        Save.SaveGame();
+        // make sure to Save it
     }
 
     /// <summary>

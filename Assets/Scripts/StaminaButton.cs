@@ -21,13 +21,13 @@ public class StaminaButton : MonoBehaviour {
                     ShiftDiceAccordingly(stat, 1);
                     // move the die 
                     scripts.statSummoner.addedPlayerStamina[stat]++;
-                    scripts.gameData.expendedStamina++;
+                    Save.game.expendedStamina++;
                     scripts.turnManager.ChangeStaminaOf("player", -1);
                     // change the variables properly
                     scripts.statSummoner.SummonStats();
                     scripts.statSummoner.SetDebugInformationFor("player");
                     // summon stats and update the debug information
-                    scripts.persistentData.staminaUsed++;
+                    Save.persistent.staminaUsed++;
                 }
                 
             }
@@ -37,21 +37,21 @@ public class StaminaButton : MonoBehaviour {
                     ShiftDiceAccordingly(stat, -1);
                     // move the die
                     scripts.statSummoner.addedPlayerStamina[stat]--;
-                    scripts.gameData.expendedStamina--;
+                    Save.game.expendedStamina--;
                     scripts.turnManager.ChangeStaminaOf("player", 1);
                     // change the variables properly
                     scripts.statSummoner.SummonStats();
                     scripts.statSummoner.SetDebugInformationFor("player");
                     // summon teh stats and update the debug information
-                    scripts.persistentData.staminaUsed--;
+                    Save.persistent.staminaUsed--;
                 }
             }
             else {
                 Debug.LogError("StaminaButton is not attached to the correct object");
                 // something is wrong
             }
-            scripts.SaveGameData();
-            scripts.SavePersistentData();
+            Save.SaveGame();
+            Save.SavePersistent();
         }
     }
 

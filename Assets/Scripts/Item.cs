@@ -222,8 +222,8 @@ public class Item : MonoBehaviour {
                         if (scripts.itemManager.numItemsDroppedForTrade > 0) {
                             // if player has dropped items for trading
                             scripts.itemManager.numItemsDroppedForTrade--;
-                            scripts.gameData.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-                            scripts.persistentData.itemsTraded++;
+                            Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                            Save.persistent.itemsTraded++;
                             // decrement counter
                             scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
                             // move the selected item into the player's inventory
@@ -237,8 +237,8 @@ public class Item : MonoBehaviour {
             }
             else {
                 if (itemType == "retry") {
-                    scripts.persistentData.gamesPlayed++;
-                    scripts.SavePersistentData();
+                    Save.persistent.gamesPlayed++;
+                    Save.SavePersistent();
                     scripts.levelManager.lockActions = true;
                     Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
                     scripts.soundManager.PlayClip("next");
@@ -265,8 +265,8 @@ public class Item : MonoBehaviour {
             }
         }
         if (itemType != "retry") { scripts.itemManager.SaveInventoryItems(); }
-        scripts.SavePersistentData();
-        // save the items as long as we didn't use the retry button
+        Save.SavePersistent();
+        // Save the items as long as we didn't use the retry button
     }
 
     /// <summary>
@@ -293,7 +293,7 @@ public class Item : MonoBehaviour {
             switch (itemName) {
                 case "steak" when scripts.enemy.enemyName.text != "Tombstone":
                     // eating steak
-                    scripts.persistentData.foodEaten++;
+                    Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     if (scripts.player.charNum == 0) { scripts.turnManager.ChangeStaminaOf("player", 7); }
                     else { scripts.turnManager.ChangeStaminaOf("player", 5); }
@@ -304,14 +304,14 @@ public class Item : MonoBehaviour {
                     // remove from player inventory
                     break;
                 case "rotten steak" when scripts.enemy.enemyName.text != "Tombstone":
-                    scripts.persistentData.foodEaten++;
+                    Save.persistent.foodEaten++;
                     // don't change stamina for rotten foods
                     scripts.soundManager.PlayClip("eat");
                     scripts.turnManager.SetStatusText("you swallow rotten steak");
                     Remove();
                     break;
                 case "cheese" when scripts.enemy.enemyName.text != "Tombstone":
-                    scripts.persistentData.foodEaten++;
+                    Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     if (scripts.player.charNum == 0) { scripts.turnManager.ChangeStaminaOf("player", 5); }
                     else { scripts.turnManager.ChangeStaminaOf("player", 3); }
@@ -319,13 +319,13 @@ public class Item : MonoBehaviour {
                     Remove();
                     break;
                 case "moldy cheese" when scripts.enemy.enemyName.text != "Tombstone":
-                    scripts.persistentData.foodEaten++;
+                    Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     scripts.turnManager.SetStatusText("you swallow moldy cheese");
                     Remove();
                     break;
                 case "scroll" when scripts.levelManager.sub != 4:
-                    scripts.persistentData.scrollsRead++;
+                    Save.persistent.scrollsRead++;
                     switch (modifier) {
                         case "fury":
                             if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
@@ -411,7 +411,7 @@ public class Item : MonoBehaviour {
                     break;
                 case "potion" when scripts.levelManager.sub != 4:
                     // don't let potions be used at merchant
-                    scripts.persistentData.potionsQuaffed++;
+                    Save.persistent.potionsQuaffed++;
                     scripts.soundManager.PlayClip("gulp");
                     scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
                     // notify player
@@ -419,22 +419,22 @@ public class Item : MonoBehaviour {
                         case "accuracy":
                             scripts.player.potionStats["green"] += 3;
                             scripts.statSummoner.ShiftDiceAccordingly("green", 3);
-                            scripts.gameData.potionAcc = scripts.player.potionStats["green"];
+                            Save.game.potionAcc = scripts.player.potionStats["green"];
                             break;
                         case "speed":
                             scripts.player.potionStats["blue"] += 3;
                             scripts.statSummoner.ShiftDiceAccordingly("blue", 3);
-                            scripts.gameData.potionSpd = scripts.player.potionStats["blue"];
+                            Save.game.potionSpd = scripts.player.potionStats["blue"];
                             break;
                         case "strength":
                             scripts.player.potionStats["red"] += 3;
                             scripts.statSummoner.ShiftDiceAccordingly("red", 3);
-                            scripts.gameData.potionDef = scripts.player.potionStats["red"];
+                            Save.game.potionDef = scripts.player.potionStats["red"];
                             break;
                         case "defense":
                             scripts.player.potionStats["white"] += 3;
                             scripts.statSummoner.ShiftDiceAccordingly("white", 3);
-                            scripts.gameData.potionDmg = scripts.player.potionStats["white"];
+                            Save.game.potionDmg = scripts.player.potionStats["white"];
                             break;
                         case "might":
                             scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
@@ -450,19 +450,19 @@ public class Item : MonoBehaviour {
                         case "nothing": break;
                         // default: print("invalid potion modifier detected"); break;
                     }
-                    scripts.SaveGameData();
+                    Save.SaveGame();
                     scripts.statSummoner.SummonStats();
                     scripts.statSummoner.SetDebugInformationFor("player");
                     Remove();
                     break;
                 case "shuriken" when scripts.levelManager.sub != 4:
-                    scripts.persistentData.shurikensThrown++;
+                    Save.persistent.shurikensThrown++;
                     scripts.soundManager.PlayClip("shuriken");
                     // play sound clip
                     scripts.itemManager.discardableDieCounter++;
                     // increment counter
-                    scripts.gameData.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                    scripts.SaveGameData();
+                    Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
+                    Save.SaveGame();
                     Remove();
                     break;
                 case "skeleton key" when scripts.levelManager.sub != 4:
@@ -496,8 +496,8 @@ public class Item : MonoBehaviour {
                             scripts.soundManager.PlayClip("fwoosh");
                             // need 3 stamina
                             scripts.itemManager.usedHelm = true;
-                            scripts.gameData.usedHelm = true;
-                            scripts.SaveGameData();
+                            Save.game.usedHelm = true;
+                            Save.SaveGame();
                             // set variable
                             scripts.turnManager.SetStatusText("you feel mighty");
                             // notify player
@@ -522,8 +522,8 @@ public class Item : MonoBehaviour {
                             scripts.soundManager.PlayClip("fwoosh");
                             scripts.turnManager.SetStatusText("you feel dodgy");
                             scripts.itemManager.usedBoots = true;
-                            scripts.gameData.usedBoots = true;
-                            scripts.SaveGameData();
+                            Save.game.usedBoots = true;
+                            Save.SaveGame();
                             scripts.turnManager.ChangeStaminaOf("player", -1);
                             scripts.player.SetPlayerStatusEffect("dodge", true);
                         }
@@ -535,8 +535,8 @@ public class Item : MonoBehaviour {
                     if (!scripts.itemManager.usedAnkh) {
                         scripts.soundManager.PlayClip("click0");
                         scripts.itemManager.usedAnkh = true;
-                        scripts.gameData.usedAnkh = true;
-                        scripts.SaveGameData();
+                        Save.game.usedAnkh = true;
+                        Save.SaveGame();
                         foreach (string key in scripts.itemManager.statArr) {
                             scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
                             scripts.statSummoner.addedPlayerStamina[key] = 0;
@@ -574,8 +574,8 @@ public class Item : MonoBehaviour {
             }
             else {
                 if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
-                scripts.gameData.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-                scripts.SaveGameData();
+                Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                Save.SaveGame();
                 // if trader level increment the number of items dropped for trading
                 if (itemType == "weapon") {
                     scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}");

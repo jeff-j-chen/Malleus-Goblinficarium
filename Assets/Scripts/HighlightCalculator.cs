@@ -237,6 +237,7 @@ public class HighlightCalculator : MonoBehaviour {
         if (!dice.isAttached && scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
         // decrease if gut wound
         scripts.turnManager.SetTargetOf("player");
+        // update the player's targets
         scripts.diceSummoner.SaveDiceValues();
     }
 

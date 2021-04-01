@@ -58,42 +58,42 @@ public class Enemy : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
         // make sure to show the enemy's stats at the start
-        if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) {
+        if (scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) {
             // on the tombstone level
-            SpawnNewEnemy(8, scripts.gameData.newGame);
+            SpawnNewEnemy(8, Save.game.newGame);
             // spawn th tombstone
             scripts.itemManager.lootText.text = "loot:";
             // indicate that the player can loot
             scripts.tombstoneData.SpawnSavedTSItems(true);
-            // spawn the saved tombstone items
+            // spawn the Saved tombstone items
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
             // hide the stats (don't fight tombstones)
         }
         else if (scripts.levelManager.sub == 4) {
             // on a merchant level
-            SpawnNewEnemy(7, scripts.gameData.newGame);
+            SpawnNewEnemy(7, Save.game.newGame);
             // spawn the merchant
             scripts.itemManager.lootText.text = "goods:";
             // indicate that the player should trade
             scripts.tombstoneData.SpawnSavedMerchantItems(true);
-            // spawn the saved merchant items
+            // spawn the Saved merchant items
             scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
             // hide the stats (don't fight merchants)
         }
         else { 
             // else some fightable enemy
-            if (scripts.gameData.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); }
+            if (Save.game.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); }
             // if in a new game, spawn a generic enemy
             else { 
-                // else resuming game from teh savefile
-                SpawnNewEnemy(scripts.gameData.enemyNum, false); 
+                // else resuming game from teh Savefile
+                SpawnNewEnemy(Save.game.enemyNum, false); 
                 // spawn the same enemy back in
-                if (scripts.gameData.enemyIsDead) { 
+                if (Save.game.enemyIsDead) { 
                     // if resuming after the enemy has been killed
                     scripts.itemManager.lootText.text = "loot:";
-                    if (scripts.levelManager.level == 4 || scripts.gameData.enemyNum == 2) { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
+                    if (scripts.levelManager.level == 4 || Save.game.enemyNum == 2) { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
                     else { 
-                        if (scripts.gameData.floorItemTypes[0] == "weapon") { scripts.tombstoneData.SpawnSavedFloorItems(true);  }
+                        if (Save.game.floorItemTypes[0] == "weapon") { scripts.tombstoneData.SpawnSavedFloorItems(true);  }
                         else { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
                     }
                     // spawn in the enemy's loot again for the player
@@ -192,7 +192,7 @@ public class Enemy : MonoBehaviour {
         if (isNewEnemy) {
             // creating new enemy
             isDead = false;
-            scripts.gameData.enemyIsDead = false;
+            Save.game.enemyIsDead = false;
             // make sure enemy is not dead
             float[] temp;
             // array to hold stats
@@ -205,10 +205,10 @@ public class Enemy : MonoBehaviour {
                 { "red", (int)temp[2] },
                 { "white", (int)temp[3] },
             };
-            scripts.gameData.enemyAcc = stats["green"];
-            scripts.gameData.enemySpd = stats["blue"];
-            scripts.gameData.enemyDmg = stats["red"];
-            scripts.gameData.enemyDef = stats["white"];
+            Save.game.enemyAcc = stats["green"];
+            Save.game.enemySpd = stats["blue"];
+            Save.game.enemyDmg = stats["red"];
+            Save.game.enemyDef = stats["white"];
             // set stats of the enemy
             spawnNum = enemyNum;
             iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
@@ -254,16 +254,16 @@ public class Enemy : MonoBehaviour {
         }
         else { 
             // spawning old enemy
-            isDead = scripts.gameData.enemyIsDead;
-            // make it dead or not, based on the save
+            isDead = Save.game.enemyIsDead;
+            // make it dead or not, based on the Save
             stats = new Dictionary<string, int>() {
-                { "green", scripts.gameData.enemyAcc },
-                { "blue", scripts.gameData.enemySpd },
-                { "red", scripts.gameData.enemyDmg },
-                { "white", scripts.gameData.enemyDef },
+                { "green", Save.game.enemyAcc },
+                { "blue", Save.game.enemySpd },
+                { "red", Save.game.enemyDmg },
+                { "white", Save.game.enemyDef },
             };
             spawnNum = enemyNum;
-            // enemy inherits its stats from the save
+            // enemy inherits its stats from the Save
             try { scripts.turnManager.DisplayWounds(); } catch {}
             // try displaying wounds
             iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
@@ -290,16 +290,16 @@ public class Enemy : MonoBehaviour {
             else { enemyName.text = enemyArr[enemyNum]; }
             if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { stamina = 0; }
             else if (enemyArr[enemyNum] == "Lich") { stamina = 3; }
-            else { stamina = scripts.gameData.enemyStamina; }
-            woundList = scripts.gameData.enemyWounds;
+            else { stamina = Save.game.enemyStamina; }
+            woundList = Save.game.enemyWounds;
             // set stamina, show wounds and name
         }
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
         try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
         try { scripts.turnManager.DisplayWounds(); } catch {}
-        scripts.gameData.enemyNum = enemyNum;
-        scripts.SaveGameData();
+        Save.game.enemyNum = enemyNum;
+        Save.SaveGame();
     }
 
     /// <summary>
