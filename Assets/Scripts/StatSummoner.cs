@@ -63,6 +63,9 @@ public class StatSummoner : MonoBehaviour {
         // create the stamina buttons
     }
 
+    /// <summary>
+    /// Summon the stats quares for the player.
+    /// </summary>
     public void SummonStats() {
         foreach (GameObject stat in existingStatSquares) {
             Destroy(stat);
@@ -82,9 +85,6 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Gets the sum of the specified stat from the player or enemy. 
     /// </summary>
-    /// <param name="stat">The stat of which to get the sum of.</param>
-    /// <param name="playerOrEnemy">Who to get the sum from.</param>
-    /// <returns></returns>
     public int SumOfStat(string stat, string playerOrEnemy) {
         if (stat != "green" && stat != "blue" && stat != "red" && stat != "white") {
             // make sure they are getting a valid stat
@@ -95,7 +95,7 @@ public class StatSummoner : MonoBehaviour {
             if (playerOrEnemy == "player") {
                 // get for player
                 if (scripts.enemy.woundList.Contains("knee") && stat == "blue" && scripts.enemy.enemyName.text != "Lich") { return 99; }
-                // return 99 if enemy has knee wound (and is not lich)
+                // return 99 if enemy has knee wound (lich not affected by wounds)
                 int sum = scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];
                 // get the sum of base stats + potion + stamina + necklet
                 foreach (Dice dice in addedPlayerDice[stat]) {
@@ -122,7 +122,7 @@ public class StatSummoner : MonoBehaviour {
     }
 
     /// <summary>
-    /// Create the stamina buttons
+    /// Instantiate the player's stamina buttons.
     /// </summary>
     private void SummonStaminaButtons() {
         for (int i = 0; i < 4; i++) {
@@ -140,8 +140,6 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Generate the stat squares for the given stat.
     /// </summary>
-    /// <param name="i">The index of the stat within the stat array.</param>
-    /// <param name="colorName">The name of the color to create.</param>
     private void GenerateForStat(int i, string colorName) {
         // could use scripts.colors.colorNameArr[i] instead of colorName but that takes up way more space and its much more confusing
         Color statColor = scripts.colors.colorArr[Array.IndexOf(scripts.colors.colorNameArr, colorName)];
@@ -222,7 +220,7 @@ public class StatSummoner : MonoBehaviour {
     }
 
     /// <summary>
-    /// Spawn a generated shape.
+    /// Spawn a generated shape with given information.
     /// </summary>
     /// <param name="i">The index (0-3) of the stat (green, blue...)</param>
     /// <param name="statColor">The color of which to give to the shape.</param>
@@ -257,11 +255,8 @@ public class StatSummoner : MonoBehaviour {
     }
 
     /// <summary>
-    /// Make a stamina +/- counter.
+    /// Make a stamina +/- button.
     /// </summary>
-    /// <param name="buttonType">The GameObject of which to instantiate.</param>
-    /// <param name="instantationPos">Where to instantiate the button.</param>
-    /// <returns>The created button.</returns>
     private GameObject SpawnButton(GameObject buttonType, Vector3 instantationPos) {
         GameObject spawnedButton = Instantiate(buttonType, instantationPos, Quaternion.identity);
         // create a button
@@ -294,8 +289,6 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Add a die to player's stat.
     /// </summary>
-    /// <param name="addTo">Which stat to add the die to.</param>
-    /// <param name="dice">The dice script of which to add.</param>
     public void AddDiceToPlayer(string addTo, Dice dice) {
         addedPlayerDice[addTo].Add(dice);
     }
@@ -303,18 +296,13 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Add a die to enemy's stat.
     /// </summary>
-    /// <param name="addTo">Which stat to add the die to.</param>
-    /// <param name="dice">The dice script of which to add.</param>
     public void AddDiceToEnemy(string addTo, Dice dice) {
         addedEnemyDice[addTo].Add(dice);
     }
 
     /// <summary>
-    /// Get the outermost player's x coordinate to add things onto.
+    /// Return the outermost player's x coordinate to add dice onto.
     /// </summary>
-    /// <param name="statType">Which stat to check for.</param>
-    /// <param name="optionalDiceOffsetStatToMultiplyBy">Put this variable here if you want to offset by a different stat.</param>
-    /// <returns>float of outmost x for the given stat.</returns>
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
         // not setting the optional variable will just default it to the base stat type
@@ -323,11 +311,8 @@ public class StatSummoner : MonoBehaviour {
     }
 
     /// <summary>
-    /// Get the outermost enemy's x coordinate to add things onto.
+    /// Get the outermost enemy's x coordinate to add dice onto.
     /// </summary>
-    /// <param name="statType">Which stat to check for.</param>
-    /// <param name="optionalDiceOffsetStatToMultiplyBy">Put this variable here if you want to offset by a different stat.</param>
-    /// <returns>float of outmost x for the given stat.</returns>
     public float OutermostEnemyX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
         return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) - 1) * -xOffset)  - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
@@ -337,7 +322,6 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Set the debug information for player or enemy.
     /// </summary>
-    /// <param name="playerOrEnemy">Who to set to the debug information for.</param>
     public void SetDebugInformationFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             float furthest = (new float[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
@@ -356,8 +340,12 @@ public class StatSummoner : MonoBehaviour {
         // for example
         else { Debug.Log("error"); }
         scripts.enemy.TargetBest();
+
     }
 
+    /// <summary>
+    /// Shift the dice of a given stat by a given amount.
+    /// </summary>    
     public void ShiftDiceAccordingly(string stat, int shiftAmount)
     {
         foreach (Dice dice in addedPlayerDice[stat])

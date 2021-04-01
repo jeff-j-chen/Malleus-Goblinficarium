@@ -77,9 +77,8 @@ public class Arrow : MonoBehaviour {
     }
 
     /// <summary>
-    /// Move the selection arrow to a menu item.
+    /// Move the selection arrow to a menu item to a given index.
     /// </summary>
-    /// <param name="index">The index of the menu item to move the selection arrow to.</param>
     public void MoveToButtonPos(int index) {
         // function used to move the arrow to the desired button position
         if (!(index == 0 && scripts.gameData.newGame == true)) {

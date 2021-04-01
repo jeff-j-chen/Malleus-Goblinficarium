@@ -32,7 +32,6 @@ public class MenuButton : MonoBehaviour
     /// <summary>
     /// Handle when one of the menu buttons is pressed.
     /// </summary>
-    /// <param name="buttonName"></param>
     public void ButtonPress(string buttonName) {
         soundManager.PlayClip("click0");
         // play sound clip
@@ -56,6 +55,10 @@ public class MenuButton : MonoBehaviour
                 File.WriteAllText("gameSave.txt", JsonUtility.ToJson(new GameData()));
                 PersistentData persistentData = LoadPersistentData();
                 persistentData.gamesPlayed++;
+                Initiate.Fade("Game", Color.black, transitionMultiplier);
+                break;
+            case "Tutorial": 
+                if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             default:

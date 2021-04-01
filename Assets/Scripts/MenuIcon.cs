@@ -43,9 +43,6 @@ public class MenuIcon : MonoBehaviour {
     /// <summary>
     /// Set the player preference (setting) for the given key.
     /// </summary>
-    /// <param name="key">The string/key which maps to the player preference setting. </param>
-    /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
-    /// <param name="isSwap">true to toggle, false to keep it the same (just update the sprite)</param>
     public void PlayerPrefSetter(string key, SpriteRenderer spriteRenderer, bool isSwap = true) {
         if (PlayerPrefs.GetString(key) == "on") {
             // on
@@ -72,8 +69,6 @@ public class MenuIcon : MonoBehaviour {
     /// <summary>
     /// Turn on the player preference with the associated key.
     /// </summary>
-    /// <param name="key">The key which maps to the player preference.</param>
-    /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
     private void TurnOn(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = Color.white;
         // make the icon white
@@ -95,8 +90,6 @@ public class MenuIcon : MonoBehaviour {
     /// <summary>
     /// Turn on the player preference with the associated key.
     /// </summary>
-    /// <param name="key">The key which maps to the player preference.</param>
-    /// <param name="spriteRenderer">The SpriteRenderer component of the associated icon.</param>
     private void TurnOff(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = gray;
         // make the icon gray

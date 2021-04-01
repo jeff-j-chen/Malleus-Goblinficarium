@@ -129,6 +129,7 @@ public class ItemManager : MonoBehaviour {
             MoveItemToDisplay();
             GameObject created = CreateItem("torch", "common");
             MoveItemToDisplay();
+            // create the items
         }
         else {
             // in game
@@ -142,6 +143,7 @@ public class ItemManager : MonoBehaviour {
         usedHelm = scripts.gameData.usedHelm;
         numItemsDroppedForTrade = scripts.gameData.numItemsDroppedForTrade;
         discardableDieCounter = scripts.gameData.discardableDieCounter;
+        // assign variables based on the save, preventing cheating
     }
 
     void Update() {
@@ -177,11 +179,17 @@ public class ItemManager : MonoBehaviour {
         else if (Input.GetKeyDown(KeyCode.N)) {
             CreateRandomWeapon();
             MoveToInventory(0);
+            // for me only, used to give myself a new weapon to test.
         }
     } 
 
+
+    /// <summary>
+    /// Give the player their starting items, based on chosen class.
+    /// </summary>
     public void GiveStarterItems(int charNum) {
         if (scripts.gameData.newGame) { 
+            // new game, so give the base weapons
             if (scripts.player.charNum == 0) { 
                 // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                 CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
@@ -229,13 +237,16 @@ public class ItemManager : MonoBehaviour {
             }
         }
         else { 
+            // continuing previously existing game
             CreateWeaponWithStats(scripts.gameData.resumeItemNames[0], scripts.gameData.resumeItemMods[0], scripts.gameData.resumeAcc, scripts.gameData.resumeSpd, scripts.gameData.resumeDmg, scripts.gameData.resumeDef);
             MoveToInventory(0, true, false, false);
+            // create their old weapon and given them it
             for (int i = 1; i < 9; i++) {
                 if (scripts.gameData.resumeItemNames[i] == "") { break; }
                 CreateItem(scripts.gameData.resumeItemNames[i].Replace(' ', '_'), scripts.gameData.resumeItemTypes[i], scripts.gameData.resumeItemMods[i]);
                 MoveToInventory(0, true, false, false);
             }
+            // create the old items and add them in
         }
         Select(curList, 0, playAudio:false);
         // select the first item
@@ -245,9 +256,6 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Select an item from the given list at the given index. 
     /// </summary>
-    /// <param name="itemList">The list of which to attempt to make a selection from.</param>
-    /// <param name="c">The index of which to attempt to make a selection from.</param>
-    /// <param name="forceDifferentSelection">Whether or not to try to force a different selection if the index was not valid for the list.</param>
     public void Select(List<GameObject> itemList, int c, bool forceDifferentSelection=true, bool playAudio=true) {
         if (c <= itemList.Count - 1 && c >= 0) {
             // if the column is within the bounds of the list
@@ -299,15 +307,14 @@ public class ItemManager : MonoBehaviour {
         }
     }
 
-    public Sprite GetItemSprite(string name) { 
-        return allSprites[(from a in allSprites select a.name).ToList().IndexOf(name)];
-    }
+    /// <summary>
+    /// Get the sprite of an item given its name.
+    /// </summary>
+    public Sprite GetItemSprite(string name) { return allSprites[(from a in allSprites select a.name).ToList().IndexOf(name)]; }
 
     /// <summary>
-    /// Create an item with specified itemtype.
+    /// Create an item with specified type.
     /// </summary>
-    /// <param name="itemType">The type of item of which to create.</param>
-    /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
     private GameObject CreateItem(string itemType, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // create an item object at the correct position
@@ -334,11 +341,8 @@ public class ItemManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Create an item with the specified name and itemtype.
+    /// Create an item with the specified name and type.
     /// </summary>
-    /// <param name="itemName">The name of the item of which to create.</param>
-    /// <param name="itemType">The type of the item of which to create</param>
-    /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
     public GameObject CreateItem(string itemName, string itemType, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
@@ -357,12 +361,8 @@ public class ItemManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Create an item with the specified name and itemtype.
+    /// Create an item with the specified name, type, and modifier.
     /// </summary>
-    /// <param name="itemName">The name of the item of which to create.</param>
-    /// <param name="itemType">The type of the item of which to create</param>
-    /// <param name="itemType">The modifier of the item of which to create</param>
-    /// <param name="negativeOffset">The amount of items to offset the spawn by (opposite direction).</param>
     public GameObject CreateItem(string itemName, string itemType, string modifier, int negativeOffset=0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
@@ -380,10 +380,11 @@ public class ItemManager : MonoBehaviour {
         return instantiatedItem;
     }
 
+    // ^ i love overloading functions!
+
     /// <summary>
     /// Instantly assign necessary attributes of items (like their modifier).
     /// </summary>
-    /// <param name="instantiatedItem"></param>
     private void SetItemStatsImmediately(GameObject instantiatedItem) {
         // this needs to be done here rather than in Item.Start() or Awake() because the timing will be off and errors will be thrown
         if (instantiatedItem.GetComponent<Item>().itemName == "necklet") {
@@ -425,7 +426,7 @@ public class ItemManager : MonoBehaviour {
             // for every key in the stat array ("green", "blue", etc.)
             baseWeapon[key] += modifierDict[modifier][key]; 
             // add the modifier stats to the weapon stats
-            if (baseWeapon[key] < 0) { baseWeapon[key] = -1; }
+            if (baseWeapon[key] < -1) { baseWeapon[key] = -1; }
             // limit the item so it can't go down to -2 (not in the actual game, but in my modded version later i may do this)
         }
         instantiatedItem.GetComponent<Item>().weaponStats = baseWeapon;
@@ -442,12 +443,6 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Create a weapon with specified name, modifier, and stats.
     /// </summary>
-    /// <param name="weaponName">The name of the weapon of which to create.</param>
-    /// <param name="modifier">The name of the modifier of which to apply to the weapon.</param>
-    /// <param name="aim">The aim stat to give to the weapon.</param>
-    /// <param name="spd">The spd stat to give to the weapon.</param>
-    /// <param name="atk">The atk stat to give to the weapon.</param>
-    /// <param name="def">The def stat to give to the weapon.</param>
     public GameObject CreateWeaponWithStats(string weaponName, string modifier, int aim, int spd, int atk, int def) {
         Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
@@ -484,7 +479,9 @@ public class ItemManager : MonoBehaviour {
         }
         else {
             for (int i = 0; i < floorItems.Count; i++) { 
+                // for every item on the floor
                 floorItems[i].transform.position = new Vector2(-4.572f + itemSpacing * i, 6.612f);
+                // change its position to be in the display area
             }
         }
     }
@@ -492,8 +489,6 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Move the floor item at the specifed index into the player's inventory.
     /// </summary>
-    /// <param name="index">The index from which to move the item.</param>
-    /// <param name="starter">Whether the item is created instantly as a starter item or is a normal item.</param>
     public void MoveToInventory(int index, bool starter=false, bool playAudio=true, bool saveData=true) {
         if (floorItems[index] != null) {
             if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
@@ -565,13 +560,12 @@ public class ItemManager : MonoBehaviour {
                         } 
                         else if (floorItems[index].GetComponent<Item>().modifier == "nothing") {}
                         else if (floorItems[index].GetComponent<Item>().modifier == "victory") {}
-                        // else { print("bad modifier"); }
                         // depending on the type of the necklet, modify the stats accordingly
                         StartCoroutine(UpdateUIAfterDelay());
                         // set the debug information and summon the new stats
                     }
-                    if (!starter) 
-                    { 
+                    if (!starter) { 
+                        // not a starter item
                         if (tempItem.itemType == "weapon") { 
                             scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
                         }
@@ -604,11 +598,13 @@ public class ItemManager : MonoBehaviour {
         else {
             Destroy(floorItems[index]);
             floorItems.RemoveAt(index);
+            // something went wrong here, so destroy it
         }
         if (saveData) { 
             SaveInventoryItems();
             if (scripts.levelManager.level == scripts.persistentData.tsLevel && scripts.levelManager.sub == scripts.persistentData.tsSub) { SaveTombstoneItems(); }
             else { SaveFloorItems(); }
+            // only save items if necessary
         }
     }
 
@@ -630,11 +626,11 @@ public class ItemManager : MonoBehaviour {
         // set the text 
         if (scripts.enemy.enemyName.text == "Lich") {
             CreateItem("phylactery", "phylactery");
-            // create phylactery
+            // defeated lich, so give phylactery
         }
         else if (scripts.enemy.enemyName.text == "Devil") {
             CreateItem("necklet", "common", "victory");
-            // create necklet of victory for the player
+            // defeated devil, so give necklet of victory
         }
         else {
             // normal enemy
@@ -686,28 +682,21 @@ public class ItemManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Checks if the player has an item with specified item name.
+    /// Returns true if the player has an item of the given name.
     /// </summary>
-    /// <param name="itemName">The item name to check for.</param>
-    /// <returns>true if the item was found, false otherwise.</returns>
-    public bool PlayerHas(string itemName) {
-        return (from a in scripts.player.inventory select a.GetComponent<Item>().itemName).Contains(itemName);
-    }
+    public bool PlayerHas(string itemName) { return (from a in scripts.player.inventory select a.GetComponent<Item>().itemName).Contains(itemName); }
 
     /// <summary>
-    /// Checks if the player has a weapon with specified item name.
+    /// Returns true if the player has a weapon of given type.
     /// </summary>
-    /// <param name="weaponName">The weapon name to check for.</param>
-    /// <returns>true if the weapon was found, false otherwise.</returns>
     public bool PlayerHasWeapon(string weaponName) {
-        return (from a in scripts.player.inventory where a.GetComponent<Item>().itemName.Split(' ').Length > 1 select a.GetComponent<Item>().itemName.Split(' ')[1]).Contains(weaponName);
+        return (scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1] == weaponName);
+        // return (from a in scripts.player.inventory where a.GetComponent<Item>().itemName.Split(' ').Length > 1 select a.GetComponent<Item>().itemName.Split(' ')[1]).Contains(weaponName);
     }
 
     /// <summary>
     /// Gets the first item in the player's inventory with given name.
     /// </summary>
-    /// <param name="itemName">The item name to check for.</param>
-    /// <returns>The GameObject that was found.</returns>
     public GameObject GetPlayerItem(string itemName) {
         try { return scripts.player.inventory[(from a in scripts.player.inventory select a.GetComponent<Item>().itemName).ToList().IndexOf(itemName)]; }
         catch { return null; }
@@ -732,6 +721,9 @@ public class ItemManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Save all inventory items onto the player's local savefile.
+    /// </summary>
     public void SaveInventoryItems() {
         if (scripts.levelManager != null) { 
             scripts.gameData.resumeItemNames = new string[9];
@@ -756,6 +748,9 @@ public class ItemManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Save all floor items onto the player's local savefile.
+    /// </summary>
     public void SaveFloorItems() { 
         scripts.gameData.floorItemNames = new string[9];
         scripts.gameData.floorItemTypes = new string[9];
@@ -782,7 +777,12 @@ public class ItemManager : MonoBehaviour {
         // funky workaround to make it so that the player doesn't get duplicate arrows
         scripts.SaveGameData();
     }
+
     // two separate methods so that we dont have to do any fancy checks, just pull whichever we need as long as we save it properly
+
+    /// <summary>
+    /// Save all tombstone items onto the player's local savefile.
+    /// </summary>
     public void SaveTombstoneItems() { 
         scripts.gameData.floorItemNames = new string[9];
         scripts.gameData.floorItemTypes = new string[9];

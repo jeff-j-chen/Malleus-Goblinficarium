@@ -55,6 +55,11 @@ public class StaminaButton : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Shift dice left or right a given amount, based on stamina added.
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="shiftAmount"></param>
     private void ShiftDiceAccordingly(string stat, int shiftAmount) {
         int modifier = 0;
         if (scripts.player.stats[stat] + scripts.itemManager.neckletStats[stat] + scripts.player.potionStats[stat] + scripts.statSummoner.addedPlayerStamina[stat] >= 0 && shiftAmount > 0) {
@@ -103,5 +108,5 @@ public class StaminaButton : MonoBehaviour {
     private void OnMouseUp() {
         spriteRenderer.color = Color.white;
     }
-    // depnding on the mouse action, set the correct color for the button
+    // depending on the mouse action, set the correct color for the button
 }

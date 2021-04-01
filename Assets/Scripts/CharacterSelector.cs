@@ -34,21 +34,26 @@ public class CharacterSelector : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
+        // get necessary objects
         unlockedChars = scripts.persistentData.unlockedChars;
         easy = scripts.persistentData.easyMode;
+        // pull in data from the savefile
         if (easy) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
         else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
+        // hide the item if normal mode, if easy mode then show it
         selectionNum = 0;
         SetSelection(selectionNum);
-        StartCoroutine(allowFX());
-        // need to add a way to keep the easy between scene changes
+        // select 0 and go to it
+        StartCoroutine(AllowFX());
     }
     
-    private IEnumerator allowFX() { 
-        yield return new WaitForSeconds(0.45f);
+    /// <summary>
+    /// Only allow sound effects to be played after a short delay, preventing extra clicking.
+    /// </summary>
+    private IEnumerator AllowFX() { 
+        yield return scripts.delays[0.45f];
         preventPlayingFX = false;
     }
-
 
     private void Update() {
         if (Input.GetKeyDown(KeyCode.LeftArrow)) { 
@@ -65,6 +70,7 @@ public class CharacterSelector : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.RightArrow)) { 
             ChangeToReleased("Right");
         }
+        // depending on the input, shift the selection in that direction and shows a small animation
         else if (Input.GetKeyDown(KeyCode.Space)) { ToggleEasy(); }
         // space toggles easy mode
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) { 
@@ -74,8 +80,9 @@ public class CharacterSelector : MonoBehaviour {
         }
     }
 
-
-
+    /// <summary>
+    /// Coroutine used to load the menu scene after the player locks in their character selection.
+    /// </summary>
     private IEnumerator LoadMenuScene() { 
         scripts.soundManager.PlayClip("blip0");
         // play sfx (this is when selected)
@@ -89,7 +96,9 @@ public class CharacterSelector : MonoBehaviour {
         // load the menu scene after the delay
     }
 
-    // make this the main selection function, with checking for unlocked chars and setting arrows etc.
+    /// <summary>
+    /// Select (preview) a character and display it to the player
+    /// </summary>
     public void SetSelection(int num) {
         if (0 <= num && num <= 3) {
             // only allow selections between the number of available characters
@@ -161,21 +170,30 @@ public class CharacterSelector : MonoBehaviour {
         }
         // give the character items based on their class, even if its not unlocked because it will be hidden regardless
         scripts.itemManager.floorItems[0].GetComponent<Item>().Select(false);
-        // make sure to select the first item
+        // select the first item so its not buggy
     }
 
+    /// <summary>
+    /// Changes a L/R Character Select button to its 'pressed' sprite.
+    /// </summary>
     public void ChangeToPressed(string LeftOrRight) {
         // set the button to be pressed down 
         if (LeftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = pressedButton; }
         else { rightButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = pressedButton; }
     }
 
+    /// <summary>
+    /// Changes a L/R Character Select button to its 'released' sprite.
+    /// </summary>
     public void ChangeToReleased(string LeftOrRight) {
         // make the button pop up
         if (LeftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = releasedButton; }
         else { rightButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = releasedButton; }
     }
 
+    /// <summary>
+    /// Toggles easy mode and handles the hiding.
+    /// </summary>
     private void ToggleEasy() {
         if (!simpleFadeIn.lockChanges) {
             // don't allow toggle of easy if we are fading rn
@@ -187,7 +205,7 @@ public class CharacterSelector : MonoBehaviour {
             // fade to black and then back
             scripts.persistentData.easyMode = easy; 
             scripts.SavePersistentData();
-            // apply it to our save file so the next game will have the correct character
+            // apply it to the save file so the next game will have the correct character
         }
     }
 }

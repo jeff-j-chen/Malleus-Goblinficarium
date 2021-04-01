@@ -86,6 +86,7 @@ public class Player : MonoBehaviour {
         scripts.gameData.expendedStamina = 0;
         staminaCounter.text = stamina.ToString();
         scripts.SaveGameData();
+        // give status effects, potion effects, stamina, everything from previous save
     }
 
     private void Update() {
@@ -132,7 +133,7 @@ public class Player : MonoBehaviour {
                     GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
                     SetPlayerPositionAfterDeath();
                     foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-                        StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+                        StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
                         // fade out all existing die
                     }
                     scripts.statSummoner.ResetDiceAndStamina();
@@ -153,7 +154,7 @@ public class Player : MonoBehaviour {
     }
 
     /// <summary>
-    /// Use the player's weapon. 
+    /// Use the player's weapon, attacking the enemy.
     /// </summary>
     public void UseWeapon() {
         List<Dice> availableDice = new List<Dice>();
@@ -259,8 +260,6 @@ public class Player : MonoBehaviour {
     /// <summary>
     ///  Sets the status effect of a player.
     /// </summary>
-    /// <param name="statusEffect">The name of the status effect to toggle.</param>
-    /// <param name="onOrOff">To turn on or off the status effect.</param>
     public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
         if (statusEffect == "fury") { if (scripts.player.isFurious && onOrOff == true) { return; } else { 
             scripts.player.isFurious = onOrOff; 

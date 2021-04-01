@@ -69,10 +69,8 @@ public class LevelManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Generate the stats for an enemy, which is either the lich, the devil, or just a normal enemy.
+    /// Generate the stats for an enemy.
     /// </summary>
-    /// <param name="lichOrDevilOrNormal">Which type of enemy to generate.</param>
-    /// <returns>A float array of the stats that were generated.</returns>
     public float[] GenStats(string lichOrDevilOrNormal = "normal") {
         if (lichOrDevilOrNormal != "normal") {
             if (lichOrDevilOrNormal == "lich") { return new float[] { 1f, 1f, 1f, 1f }; }
@@ -108,11 +106,8 @@ public class LevelManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Generate the base stats of an enemy on the given chances.
+    /// Generate the base stats of an enemy.
     /// </summary>
-    /// <param name="stats">The stat (float[]) which contains the chances for the different stat presets.</param>
-    /// <param name="normal">The default stat to go back to if something goes wrong.</param>
-    /// <returns>A float array of the generated stats.</returns>
     private float[] GenBaseStats(float[] stats, float[] normal) {
         float sum = stats[5] + stats[6] + stats[7] + stats[8] + stats[9];
         // get the sum of the present chances
@@ -137,13 +132,14 @@ public class LevelManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Go to the next level, or the lich. Call this instead of the coroutine (more stable).
+    /// Send the player to the next level.
     /// </summary>
-    /// <param name="isLich">true to go to the lich, false otherwise.</param>
-    public void NextLevel(bool isLich = false) {
-        StartCoroutine(NextLevelCoroutine(isLich));
-    }
+    public void NextLevel(bool isLich = false) { StartCoroutine(NextLevelCoroutine(isLich)); }
 
+
+    /// <summary>
+    /// Do not call this coroutine, use NextLevel() instead.
+    /// </summary>
     public IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
             lockActions = true;
@@ -174,7 +170,7 @@ public class LevelManager : MonoBehaviour {
             scripts.turnManager.ClearVariablesAfterRound();
             // remove variables before going to next level
             foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-                StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+                StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
             }
             // fade out all die (die are only faded out upon kill normally)
             // yield return scripts.delays[1.5f]; // uncomment for tombstone tests
@@ -316,15 +312,9 @@ public class LevelManager : MonoBehaviour {
                 temp.a -= 1f/15f;
                 boxSR.color = temp;
             }
-            if (toSpawn == "tombstone") {
-                scripts.turnManager.SetStatusText("you come across a humble tombstone");
-            }
-            else if (toSpawn == "lich") {
-                scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects");
-            }
-            else if (toSpawn == "devil") {
-               scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck");
-            }
+            if (toSpawn == "tombstone") { scripts.turnManager.SetStatusText("you come across a humble tombstone"); }
+            else if (toSpawn == "lich") { scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects"); }
+            else if (toSpawn == "devil") { scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck"); }
             // fade the level box back out
             scripts.itemManager.AttemptFadeTorches();
             // try to remove torches
@@ -348,25 +338,35 @@ public class LevelManager : MonoBehaviour {
         return thinCharacters[UnityEngine.Random.Range(0, thinCharacters.Length)];
     }
 
+    /// <summary>
+    /// Create the glitchy effect that the text has when going to 4-1 (Devil).
+    /// </summary>
     private IEnumerator GlitchyLevelText() {
         for (int i = 0; i < 12; i++) {
             levelTransText.text = $"level {r()}-{r()}";
             yield return scripts.delays[0.033f];
+            // 12 times, 'level z-w'
         }
         for (int i = 0; i < 12; i++) {
             levelTransText.text = $"lev{r()} {r()}{r()}{r()}";
             yield return scripts.delays[0.033f];
+            // 12 times, 'levnU p0y'
         }
         for (int i = 0; i < 12; i++) {
             levelTransText.text = $"{r()}{r()}{r()}{r()} {r()}{r()}{r()}";
             yield return scripts.delays[0.05f];
+            // 12 times, 'OQI"k Hl9'
         }
     }
 
+    /// <summary>
+    /// Make the level indicator for 4-1 (Devil) to be glitchy, but not as much.
+    /// </summary>
     private IEnumerator GlitchyDebugText() {
         while (true){ 
             levelText.text = $"level {t()}-{t()}";
             yield return scripts.delays[0.05f];
+            // forever until interrupted, 'level i-!'
         }
     }
 }

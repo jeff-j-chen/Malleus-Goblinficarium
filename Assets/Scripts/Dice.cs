@@ -24,10 +24,10 @@ public class Dice : MonoBehaviour {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    private void Start() {StartCoroutine(FadeIn());}
+    private void Start() { StartCoroutine(FadeIn()); }
 
     private void OnMouseDown() {
-        // as soon as the mouse button is pressed over
+        // as soon as the mouse button is pressed down
         if (moveable) {
             // if the dice is still moveable
             scripts.soundManager.PlayClip("click0");
@@ -81,7 +81,7 @@ public class Dice : MonoBehaviour {
             // if the dice can be moved
             spriteRenderer.sortingOrder = 3;
             childSpriteRenderer.sortingOrder = 2;
-            // move the dice to the front of the screen
+            // move the dice and its number to the front of the screen
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             // get the mouse position via a function
             transform.position = new Vector2(mousePos.x, mousePos.y);
@@ -141,13 +141,13 @@ public class Dice : MonoBehaviour {
     }
 
     /// <summary>
-    /// Called upon a die to discard it from the enemy.
+    /// Discard this dice from the enemy.
     /// </summary>
     private void DiscardFromEnemy() {
         scripts.soundManager.PlayClip("click1");
         // play sound clip
         int index = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this);
-        // set variable index to be the index of where the die was
+        // set variable index to be the index of where the die is
         scripts.turnManager.alterationDuringMove = true;
         scripts.turnManager.diceDiscarded = true;
         // set necessary variables for the turnmanager
@@ -169,13 +169,14 @@ public class Dice : MonoBehaviour {
         // set the debug information
         scripts.persistentData.diceDiscarded++;
         scripts.SavePersistentData();
+        // increment stats and save them
     }
 
     /// <summary>
-    /// Called upon a die to discard it from the player.
+    /// Discard this die from the player.
     /// </summary>
     public void DiscardFromPlayer() {
-        // very similar to discardfromenemy, just doesn't set certain variables
+        // very similar to discardfromenemy, just doesn't set certain variables in TurnManager and such
         int index = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this);
         scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this);
         scripts.diceSummoner.existingDice.Remove(gameObject);
@@ -190,10 +191,10 @@ public class Dice : MonoBehaviour {
     }
 
     /// <summary>
-    /// Only for the player, called on when a dice is to be rerolled.
+    /// (Player only) Reroll an enemy's dice.
     /// </summary>
     private void Reroll() {
-        // self explanatory
+        // pretty self explanatory self explanatory
         scripts.persistentData.diceRerolled++;
         scripts.turnManager.alterationDuringMove = true;
         StartCoroutine(RerollAnimation());
@@ -203,9 +204,8 @@ public class Dice : MonoBehaviour {
     }
 
     /// <summary>
-    /// Coroutine for playing the animation and rerolling the die. Sets debug information afterwards.
+    /// Coroutine for playing the animation and rerolling the dice.
     /// </summary>
-    /// <param name="playSound">Whether or not to play the clicking sound when rerolling.</param>
     public IEnumerator RerollAnimation(bool playSound=true) {
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         // assign the spritrenderer reference
@@ -231,9 +231,8 @@ public class Dice : MonoBehaviour {
     }
 
     /// <summary>
-    /// Coroutine for decreasing the value of a die.
+    /// Coroutine for decreasing the value of this die.
     /// </summary>
-    /// <param name="wait">Whether or not to wait 1f before being decreased.</param>
     public IEnumerator DecreaseDiceValue(bool wait = true) {
         if (wait) { yield return scripts.delays[1f]; }
         // wait if necessary
@@ -250,19 +249,22 @@ public class Dice : MonoBehaviour {
         scripts.diceSummoner.SaveDiceValues();
     }
 
+    /// <summary>
+    /// Sets this die's value to one.
+    /// </summary>
     public void SetToOne() {
+        // pretty self explanatory
         diceNum = 1;
         GetComponent<SpriteRenderer>().sprite = scripts.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
         scripts.statSummoner.SetDebugInformationFor("player");
+        // this can only happen to player, so don't worry about enemies stuff
         scripts.diceSummoner.SaveDiceValues();
     }
     
     /// <summary>
-    /// Coroutine for fading out a die.
+    /// Coroutine for fading out this die.
     /// </summary>
-    /// <param name="wait">Whether or not to wait 0.55f before fading out the die.</param>
-    /// <param name="decrease">Whether or not to set the debug information after fading out.</param>
-    public IEnumerator FadeOut(bool wait=false, bool decrease=false) {
+    public IEnumerator FadeOut(bool wait=false) {
         if (wait) { yield return scripts.delays[0.55f]; }
         // wait if necessary
         SpriteRenderer numSR = GetComponent<SpriteRenderer>();
@@ -284,7 +286,7 @@ public class Dice : MonoBehaviour {
             // decrease the colors of the die and base
         }
         if (statAddedTo != "") { 
-            // if the die has already been attached (only needed to check for my cheat )
+            // if the die has already been attached (only needed to check for my cheat)
             if (isOnPlayerOrEnemy == "player") {
                 // if the die is attached to the player
                 for (int i = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedPlayerDice[statAddedTo].Count; i++) { 
@@ -304,11 +306,9 @@ public class Dice : MonoBehaviour {
             }
             // else { print("something is wrong with this die"); }
         }
-        // if (scripts.statSummoner.addedPlayerDice[statAddedTo].Contains(this)) { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); }
-        // else if (scripts.statSummoner.addedEnemyDice[statAddedTo].Contains(this)) { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this);}
         try { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
         try { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this); } catch { }
-        // attempt to remove from the player/enemy, this way is much easier than checking
+        // attempt to remove from the player/enemy, checking with if statements causes a plethora of bugs for no reason
         scripts.diceSummoner.existingDice.Remove(gameObject);
         // remove from existing die list so no errors later on
         Destroy(gameObject);
@@ -317,7 +317,6 @@ public class Dice : MonoBehaviour {
         // save the dice values to the save file
         scripts.statSummoner.SetDebugInformationFor("enemy");
         scripts.statSummoner.SetDebugInformationFor("player");
-        // display the debug information if needed
     }
     
     /// <summary>

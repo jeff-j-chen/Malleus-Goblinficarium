@@ -20,8 +20,12 @@ public class SimpleFadeIn : MonoBehaviour
             boxSR.color = temp;
         }
         else { StartCoroutine(FadeIn()); }
+        // assign necessary variables
     }
 
+    /// <summary>
+    /// Coroutine to fade in the scene.
+    /// </summary>
     private IEnumerator FadeIn() {
         Color temp = boxSR.color;
         temp.a = 1;
@@ -36,6 +40,9 @@ public class SimpleFadeIn : MonoBehaviour
         boxSR.color = temp;
     }
 
+    /// <summary>
+    /// Coroutine to fade out, then fade back in the scene.
+    /// </summary>
     public IEnumerator FadeHide() { 
         lockChanges = true;
         Color temp = boxSR.color;

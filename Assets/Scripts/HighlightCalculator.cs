@@ -14,14 +14,13 @@ public class HighlightCalculator : MonoBehaviour {
     private Vector2 large = new Vector2(10f, 10f);
 
 
-    private void Start()
-    {
+    private void Start() {
         scripts = FindObjectOfType<Scripts>();
         HandleHighlightInitiation();
     }
     
     /// <summary>
-    /// Creates the highlights to use.
+    /// Creates the highlights for the player to drop dice onto.
     /// </summary>
     private void HandleHighlightInitiation() {
         for (int i = 0; i < 4; i++) {
@@ -30,19 +29,18 @@ public class HighlightCalculator : MonoBehaviour {
             highlights[i] = highlight;
             highlights[i].transform.parent = transform;
             highlightColliders[i] = highlight.GetComponent<BoxCollider2D>();
-            
+            // put the data of each highlight in
         }
     }
 
     /// <summary>
-    /// Show all the valid highlights depending on the die's type. 
+    /// Show all the valid highlights, depending on the die's type. 
     /// </summary>
-    /// <param name="dice"></param>
     public void ShowValidHighlights(Dice dice) {
         if (dice.diceType == "yellow" || scripts.player.isFurious) {
             // if yellow
             MoveOtherDiceAfterYellow(dice.GetComponent<Dice>());
-            // shift all die after (if necessary)
+            // shift all die after into place
             ShowYellowHighlights();
             // show all 4 highlights for the player
             scripts.turnManager.RecalculateMaxFor("player");
@@ -51,18 +49,17 @@ public class HighlightCalculator : MonoBehaviour {
         else {
             // not yellow
             if (dice.diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger")) { ShowSingleHighlight("red"); }
-            // if player is using dagger, show highlights for red
+            // if player is using dagger, show highlights for red when picking green dice
             else if (dice.diceType == "white" && scripts.player.charNum == 3) { ShowSingleHighlight("red"); }
-            // if player is 4th char, show highlights for red
+            // if player is 4th char, show highlights for red when picking white dice
             else { ShowSingleHighlight(dice.diceType); }
-            // else show highlights for the corresponding colors
+            // no special conditions, so show highlights for the corresponding colors
         }
     }
 
     /// <summary>
-    /// Show a single highlight based upon a dicetype.
+    /// Show a single highlight for a given typ eof dice..
     /// </summary>
-    /// <param name="diceType">The dicetype of which highlight to show.</param>
     private void ShowSingleHighlight(string diceType) {
         int diceIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType);
         // get the index of the color relative to the colorName array
@@ -79,17 +76,13 @@ public class HighlightCalculator : MonoBehaviour {
             // 4 highlights
             highlights[i].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(scripts.colors.colorNameArr[i]), scripts.statSummoner.yCoords[i] - 0.01f);
             highlights[i].GetComponent<BoxCollider2D>().size = small;
-            // move the highlight into position with the corresponding stat.
+            // move the highlight into position with the corresponding stat
         }
     }
 
     /// <summary>
     /// Attempt to snap the die to position (nearest highlight).
     /// </summary>
-    /// <param name="dice">The die to attempt to snap.</param>
-    /// <param name="curInstantiationPos">The die's current instantiation position attribute.</param>
-    /// <param name="moveable">Whether or not the die is moveable. Sent out as a variable.</param>
-    /// <param name="instantiationPos">The new instantiation position. Sent out as a variable.</param>
     public void SnapToPosition(Dice dice, Vector3 curInstantiationPos, out bool moveable, out Vector3 instantiationPos) {
         moveable = true;
         // by default make the die still moveable
@@ -104,7 +97,6 @@ public class HighlightCalculator : MonoBehaviour {
     /// <summary>
     /// Shift all die attached to a stat after a yellow one is moved.
     /// </summary>
-    /// <param name="dice"></param>
     private void MoveOtherDiceAfterYellow(Dice dice) {
         if (dice.isAttached) {
             // if the die is attached to a stat
@@ -130,12 +122,8 @@ public class HighlightCalculator : MonoBehaviour {
     }
 
     /// <summary>
-    /// Performs various functions to handle die drops of different kinds.
+    /// Handles dice drops of all kinds.
     /// </summary>
-    /// <param name="dice">The die script object.</param>
-    /// <param name="moveable">Whether or not the die is moveable. Send out.</param>
-    /// <param name="instantiationPos">The die's instantiation position. Send out. </param>
-    /// <param name="mousePos">The mouse position as a Vector3.</param>
     private void HandleAllDiceDrops(Dice dice, ref bool moveable, ref Vector3 instantiationPos, Vector3 mousePos) {
         foreach (BoxCollider2D collider in highlightColliders) {
             // for each collider
@@ -162,7 +150,6 @@ public class HighlightCalculator : MonoBehaviour {
                         HandleNormalDrop("red", dice);
                         // make the die drop for red
                         moveable = false;
-                        // die can't be moved
                     }
                     else if (dice.diceType == "white" && scripts.player.charNum == 3) { 
                         // white dice buff damage on 4th character
@@ -173,11 +160,11 @@ public class HighlightCalculator : MonoBehaviour {
                         HandleNormalDrop(dice.diceType, dice);
                         // drop for the die's type
                         moveable = false;
-                        // die can't be moved
                     }
+                    // moveable it put out using the 'ref' word, so it changes the moveability of the dice
                 }
                 if (!dice.isAttached) {
-                    // if the die was taken from the selection (as opposed to say moving a yellow)
+                    // if the die was taken from the selection (as opposed to moving a yellow)
                     diceTakenByPlayer++;
                     // increment counter
                     dice.isAttached = true;
@@ -198,9 +185,9 @@ public class HighlightCalculator : MonoBehaviour {
                         // recalculate max for the player if necessary
                     }
                     if (scripts.player.isHasty) {
-                        // if the player is affected by hase
+                        // if the player is affected by haste
                         if (diceTakenByPlayer >= 3) {
-                            // if the player has taken 3 die
+                            // allow the player to take 3 dice
                             diceTakenByPlayer = 0;
                             scripts.player.SetPlayerStatusEffect("haste", false);
                             // reset and turn status effect off
@@ -218,56 +205,36 @@ public class HighlightCalculator : MonoBehaviour {
                 // set the debug information
                 return;
                 // found a collider so no need to check others, just end funciton
-            }
-            // if (dice.diceType == "yellow" && dice.isAttached) {
-            //     scripts.statSummoner.AddDiceToPlayer(dice.statAddedTo, dice);
-            //     // if moving a yellow die make sure the correct actions are performed
-            // }
-            
+            }   
         }
     }
 
     /// <summary>
-    /// For when a die that is not yellow is dropped on a collider.
+    /// Handle a normal dice being dropped onto a highlight.
     /// </summary>
-    /// <param name="addTo">Which stat to add the die to.</param>
-    /// <param name="dice">The die's script.</param>
     private void HandleNormalDrop(string addTo, Dice dice) {
         scripts.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to the player
         dice.statAddedTo = addTo;
         // set attributes
-        if (scripts.player.woundList.Contains("guts")) {
-            StartCoroutine(dice.DecreaseDiceValue(false));
-        }
-        if (dice.diceType == "red" && scripts.player.woundList.Contains("armpits")) {
-            StartCoroutine(dice.FadeOut(decrease:true));
-        }
-        else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) {
-            StartCoroutine(dice.FadeOut(decrease:true));
-        }
-        else if (dice.diceType == "white" && scripts.player.charNum == 2) {
-            dice.SetToOne();
-        }
-        // take actions depending on injuries and die types
+        if (scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
+        if (dice.diceType == "red" && scripts.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
+        else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
+        else if (dice.diceType == "white" && scripts.player.charNum == 2) { dice.SetToOne(); }
+        // take actions depending on injuries and die types, and character numbers
+        // chest wounds are handled elsewhere, so dont worry about it here
         scripts.diceSummoner.SaveDiceValues();
-        
     }
 
     /// <summary>
-    /// For when a yellow die is dropped on a collider.
+    /// Handle a yellow dice being dropped on to a highlight.
     /// </summary>
-    /// <param name="addTo">Which stat to add the die to. </param>
-    /// <param name="dice">The die's script.</param>
-    /// <param name="collider">Which collider that thed die was dropped on.</param>
     private void HandleYellowDrop(string addTo, Dice dice, BoxCollider2D collider) {
         scripts.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to player's die list
         dice.statAddedTo = addTo;
         // set attributes
-        if (!dice.isAttached && scripts.player.woundList.Contains("guts")) {
-            StartCoroutine(dice.DecreaseDiceValue(false));
-        }
+        if (!dice.isAttached && scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
         // decrease if gut wound
         scripts.turnManager.SetTargetOf("player");
         scripts.diceSummoner.SaveDiceValues();

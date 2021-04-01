@@ -73,7 +73,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Make sure the player/enemy isn't aiming at a place they can't with their current accuracy. Reassigns the target if they can't.
     /// </summary>
-    /// <param name="playerOrEnemy">Who to perform the check on.</param>
     public void RecalculateMaxFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             if (scripts.player.targetIndex > scripts.statSummoner.SumOfStat("green", "player")) {
@@ -127,9 +126,8 @@ public class TurnManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Fade and change the color of the text.
+    /// Fade and change the color of the player or enemy's wound text.
     /// </summary>
-    /// <param name="text">The textmeshpro element for the text to change.</param>
     public IEnumerator InjuredTextChange(TextMeshProUGUI text) {
         yield return scripts.delays[0.55f];
         // set a delay
@@ -159,7 +157,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Set the current target and text based on the target index.
     /// </summary>
-    /// <param name="playerOrEnemy">Update the target for either the player or the enemy.</param>
     public void SetTargetOf(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             if (scripts.levelManager.sub == scripts.persistentData.tsSub && scripts.levelManager.level == scripts.persistentData.tsLevel && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
@@ -228,8 +225,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Change the available stamina of the player or enemy by the specified amount.
     /// </summary>
-    /// <param name="playerOrEnemy">Who to change the stamina of.</param>
-    /// <param name="amount">The amount to change the stamina of.</param>
     public void ChangeStaminaOf(string playerOrEnemy, int amount) {
         if (playerOrEnemy == "player") {
             scripts.player.stamina += amount;
@@ -305,9 +300,8 @@ public class TurnManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Start the second round of attacks with the specified thing attacking.
+    /// Start the second round of attack, with the specified player or enemy attacking.
     /// </summary>
-    /// <param name="toMove">Who should be the one attacking.</param>
     private IEnumerator RoundTwo(string toMove) {
         // variables to hold stats
         isMoving = true;
@@ -491,7 +485,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Coroutine to play the death animation, set status text, toggle variables, etc.
     /// </summary>
-    /// <param name="playerOrEnemy">Who to perform the function on.</param>
     public IEnumerator Kill(string playerOrEnemy) {
         if (playerOrEnemy == "player") { scripts.player.isDead = true; }
         else if (playerOrEnemy == "enemy") { scripts.enemy.isDead = true; }
@@ -528,8 +521,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Play the hit animation for the player or enemy.
     /// </summary>
-    /// <param name="playerOrEnemy">Who to play the hit animation for.</param>
-    /// <param name="destroyDevilCloak">True to destroy the devil's cloak, false (default) otherwise.</param>
     private IEnumerator PlayHitAnimation(string playerOrEnemy) {
         SpriteRenderer spriteRenderer = playerOrEnemy == "player" ? scripts.player.GetComponent<SpriteRenderer>() : scripts.enemy.GetComponent<SpriteRenderer>();
         // get the proper spriterenderer
@@ -572,7 +563,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Play the death animation for the player or enemy. Also handle things like clearing potion stats.
     /// </summary>
-    /// <param name="playerOrEnemy">Who to play the death animation for.</param>
     public IEnumerator PlayDeathAnimation(string playerOrEnemy) {
         SpriteRenderer spriteRenderer = playerOrEnemy == "player" ? scripts.player.GetComponent<SpriteRenderer>() : scripts.enemy.GetComponent<SpriteRenderer>();
         // get the proper spriterenderer
@@ -637,7 +627,7 @@ public class TurnManager : MonoBehaviour {
         }
         // else { print("invalid string passed"); }
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-            StartCoroutine(dice.GetComponent<Dice>().FadeOut(false, true));
+            StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
             // fade out all existing die
         }
         scripts.statSummoner.ResetDiceAndStamina();
@@ -654,7 +644,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Coroutine for fading in the status text.
     /// </summary>
-    /// <param name="text">The text to set the status text to.</param>
     private IEnumerator StatusTextCoroutine(string text) {
         Color temp = statusText.color;
         temp.a = 0f;
@@ -699,11 +688,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Perform actions (sound, animation) for when a player or enemy is hit.
     /// </summary>
-    /// <param name="hitOrParry">Whether the attack was a hit or a parry.</param>
-    /// <param name="playerOrEnemy">Who is getting hit/parrying.</param>
-    /// <param name="showAnimation">true to show the animation, false to not (true by default).</param>
-    /// <param name="armor">true if the player has armor, false if not (false by default).</param>
-    /// <returns></returns>
     public IEnumerator DoStuffForAttack(string hitOrParry, string playerOrEnemy, bool showAnimation=true, bool armor=false) {
         yield return scripts.delays[0.55f];
         // wait
@@ -747,9 +731,6 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Perform actions for the enemy's attack.
     /// </summary>
-    /// <param name="enemyAtt">The enemy's attack stat.</param>
-    /// <param name="playerDef">The player's parry stat.</param>
-    /// <returns>true if the player was killed, false otherwise</returns>
     private bool EnemyAttacks() {
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         bool armor = false;
@@ -844,24 +825,35 @@ public class TurnManager : MonoBehaviour {
         // player hasn't died, so return false
     }
 
+    /// <summary>
+    /// Coroutine to remove the player's armor after being hit.
+    /// </summary>
     public IEnumerator RemoveArmorAfterDelay() { 
         yield return scripts.delays[0.45f];
         scripts.itemManager.GetPlayerItem("armor").GetComponent<Item>().Remove(armorFade:true);
     }
 
+    /// <summary>
+    /// Coroutine to heal the player's wounds, used by the 4th character.
+    /// </summary>
     public IEnumerator HealAfterDelay() { 
         yield return scripts.delays[1f];
         scripts.turnManager.ChangeStaminaOf("player", -10);
-        // StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
         scripts.soundManager.PlayClip("blip0");
         DisplayWounds();
     }
 
+    /// <summary>
+    /// Coroutine to give the player leech after a delay, given by the phylactery.
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator GiveLeechAfterDelay() {
-        yield return scripts.delays[0.55f];
-        scripts.player.SetPlayerStatusEffect("leech", true);
+        yield return scripts.delays[0.5f];
     }
 
+    /// <summary>
+    /// Handles the player's attack, returns true if it was a killing blow.
+    /// </summary>
     private bool PlayerAttacks() {
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         scripts.soundManager.PlayClip("swing");
@@ -958,8 +950,11 @@ public class TurnManager : MonoBehaviour {
         // enemy has not died, so return false
     }
 
+    /// <summary>
+    /// Coroutine to heal the player after using leech (works for the scroll too).
+    /// </summary>
     private IEnumerator HealSFXFromPhylactery() {
-        yield return scripts.delays[0.55f];
+        yield return scripts.delays[0.5f];
         if (scripts.player.target.text.Contains("*")) { 
             if (scripts.player.woundList.Remove(scripts.player.target.text.Substring(1))) { 
                 StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
@@ -977,11 +972,9 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Instantly apply injury effects (such as decreasing die on gut wound).
     /// </summary>
-    /// <param name="injury">The injury name to apply the effects of.</param>
-    /// <param name="appliedTo">Who the injury was applied to.</param>
-    /// <returns>true if who the injury was applied to dies, false otherwise.</returns>
     private bool ApplyInjuriesDuringMove(string injury, string appliedTo) {
         StartCoroutine(ApplyInjuriesDuringMoveCoro(injury, appliedTo));
+        // start applying the injuries
         if (scripts.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
         else if (injury == "face" && !(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) {
             return true;
@@ -989,8 +982,12 @@ public class TurnManager : MonoBehaviour {
         else if (appliedTo == "player" && scripts.player.woundList.Count == 3) { return true; }
         else if (appliedTo == "enemy" && scripts.enemy.woundList.Count == 3) { return true; }
         else { return false; }
+        // return true or false here, based on whether the enemy was killed or not.
     }
 
+    /// <summary>
+    /// Do not call this coroutine, use ApplyInjuriesDuringMove() instead.
+    /// </summary>
     private IEnumerator ApplyInjuriesDuringMoveCoro(string injury, string appliedTo) {
         yield return scripts.delays[0.45f];
         // return true immediately if maul
@@ -1136,20 +1133,19 @@ public class TurnManager : MonoBehaviour {
         scripts.SaveGameData();
     }
 
-    private void AddSpeedAndAccuracy(int enemyAim, int playerSpd, int enemySpd, int playerAtt, int enemyDef)
-    {
-        if (playerSpd >= enemySpd && playerAtt > enemyDef)
-        {
+    /// <summary>
+    /// Make the enemy add stamina to green and blue to gain an advantage.
+    /// </summary>
+    private void AddSpeedAndAccuracy(int enemyAim, int playerSpd, int enemySpd, int playerAtt, int enemyDef) {
+        if (playerSpd >= enemySpd && playerAtt > enemyDef) {
             // if player will attack first
-            if (enemySpd + scripts.enemy.stamina > playerSpd)
-            {
+            if (enemySpd + scripts.enemy.stamina > playerSpd) {
                 // if enemy can attack first
                 // add speed to go first
                 UseEnemyStaminaOn("blue", (playerSpd - enemySpd) + 1);
             }
         }
-        if (enemyAim < 7 && enemyAim + scripts.enemy.stamina > 6)
-        {
+        if (enemyAim < 7 && enemyAim + scripts.enemy.stamina > 6) {
             // if enemy can target face
             // add accuracy to target face
             UseEnemyStaminaOn("green", 7 - enemyAim);
@@ -1158,10 +1154,8 @@ public class TurnManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Make the enemy use stamina.
+    /// Make the enemy use stamina on a given stat.
     /// </summary>
-    /// <param name="stat">Which stat to use the stamina on.</param>
-    /// <param name="amount">The amount of stamina to use on the stat.</param>
     private void UseEnemyStaminaOn(string stat, int amount) {
         if (scripts.enemy.stamina < amount) { //print("too much stamina to use!"); 
         }

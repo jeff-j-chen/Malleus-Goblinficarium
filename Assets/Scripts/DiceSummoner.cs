@@ -24,25 +24,23 @@ public class DiceSummoner : MonoBehaviour
 
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Space)) {
-            // testing purposes only
+            // testing purposes only, use to refresh this given set of dice
             scripts.statSummoner.ResetDiceAndStamina();
             SummonDice(false, true);
             scripts.statSummoner.SummonStats();
         }
     }
 
-    public int CountPlayerDice() { 
-        return (from die in existingDice where die.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select die).Count();
-    }
-
     /// <summary>
-    /// Start the summoning of the dice.
+    /// Summon the intiial round of dice.
     /// </summary>
-    /// <param name="initialSummon">If not initial summon => delay 0.25f</param>
     public void SummonDice(bool initialSummon, bool newSet) {
         StartCoroutine(SummonAfterFade(initialSummon, newSet));
     }
 
+    /// <summary>
+    /// Do not call this coroutine, use SummonDice() instead.
+    /// </summary>
     private IEnumerator SummonAfterFade(bool initialSummon, bool newSet) {
         if (newSet) {
             if (scripts.turnManager.dieSavedFromLastRound != null) { 
@@ -124,25 +122,20 @@ public class DiceSummoner : MonoBehaviour
     }
 
     /// <summary>
-    /// Create a single die.
+    /// Create a single die with specified variables.
     /// </summary>
-    /// <param name="diceNum">The integer of the die to be generated./param>
-    /// <param name="diceType">The string of type of the die to be generated. Default null.</param>
-    /// <param name="attachToPlayerOrEnemy">If attaching the die to the player, enemy, or none. Default none.</param>
-    /// <param name="statToAttachTo">The string of the stat to add the die to. Default null.</param>
-    /// <param name="i">The integer representing the number of die spawned if spawned in a chain. Default 0.</param>
     public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0, bool initialSix=false) {
         Vector2 instantiationPos;
-        // reference variable for the die's attribute.
+        // reference variable for the die's attribute
         if (attachToPlayerOrEnemy == "none") { instantiationPos = new Vector2(xCoords[i], yCoord); }
-        // add to the bottom row with correct offset if not attaching.
+        // add to the bottom row with correct offset if not attaching
         else if (attachToPlayerOrEnemy == "player")  { 
             instantiationPos = new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, statToAttachTo)] - 0.01f); 
         }
         else if (attachToPlayerOrEnemy == "enemy") { 
             instantiationPos = new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - 1, scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, statToAttachTo)] - 0.01f); 
         }
-        // set the instant. pos to be by the correct stat with the correct position
+        // set the instantiation pos to be by the correct stat with the correct position
         else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
         int diceColorIndex;
         // reference variable for the die's color index relative to scripts.color.coloArr
@@ -197,13 +190,19 @@ public class DiceSummoner : MonoBehaviour
         if (!initialSix) { SaveDiceValues(); }
     }
 
+    /// <summary>
+    /// Used to save all the dice properties and values into the player's local file/
+    /// </summary>
     public void SaveDiceValues() { 
         StartCoroutine(SaveDiceValuesCoro());
     }
 
+    /// <summary>
+    /// Do not call this coroutine, use SaveDiceValues() instead
+    /// </summary>
     private IEnumerator SaveDiceValuesCoro() { 
         yield return scripts.delays[0.1f];
-        // KEEP THIS DELAY HERE, WITHOUT IT THE DICE WILL NOT SAVE PROPERLY
+        // KEEP THIS DELAY HERE, WITHOUT IT THE DICE WILL NOT SAVE PROPERLY!!!
         scripts.gameData.diceNumbers.Clear();
         scripts.gameData.diceTypes.Clear();
         scripts.gameData.diceAttachedToStat.Clear();
@@ -225,7 +224,7 @@ public class DiceSummoner : MonoBehaviour
     }
 
     /// <summary>
-    /// Generates a list of necessary dice types
+    /// Generates a list of dice types for the dice summoned each round.
     /// </summary>
     private void GenerateDiceTypes() {
         generatedTypes.Clear();
@@ -250,13 +249,13 @@ public class DiceSummoner : MonoBehaviour
         // this generates a set of die identical to malleus die generation, as far as i can tell
     }
 
-    public void MakeAllAttachedYellow()
-    {
-        foreach (GameObject dice in existingDice)
-        {
-            // for every die
-            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player")
-            {
+    /// <summary>
+    /// Turn all dice attached to the player into yellow dice (used for fury).
+    /// </summary>
+    public void MakeAllAttachedYellow() {
+        foreach (GameObject dice in existingDice) {
+            // for every die that exists
+            if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") {
                 // if the die is attached to the player
                 dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black;
                 dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;

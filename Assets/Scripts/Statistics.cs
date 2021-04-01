@@ -39,25 +39,34 @@ public class Statistics : MonoBehaviour {
         rightGray.text = $"\n\n\n\n\n\n\n\n{persistentData.armorBroken}\n{persistentData.weaponsSwapped}\n{persistentData.scrollsRead}\n{persistentData.potionsQuaffed}\n{persistentData.foodEaten}\n{persistentData.shurikensThrown}\n{persistentData.itemsTraded}\n{persistentData.diceRerolled}\n{persistentData.diceDiscarded}";
     }
 
+    /// <summary>
+    /// Coroutine for the player to reset their stats with.
+    /// </summary>
     private IEnumerator DataClearCountdown() {
         float time = 5f; 
+        // total time htye have to hold down the bottom
         for (int i = 0; i < 50; i++) { 
+            // 50 times, decrease by 0.1s
             if (i % 10 == 0) {
                 bottomText.text = $"[{Mathf.Round(time)}]";
                 soundManager.PlayClip("click0");
+                // whole number, so display it
             }
             if (!Input.GetKey(KeyCode.Space)) { break; }
+            // if they released spacebar, stop the countdown
             yield return tenthSecond;
             time -= 0.1f;
         }
         yield return tenthSecond;
         if (time <= 0.1f) { 
+            // player held it all the way through
             bottomText.text = "[done]";
             soundManager.PlayClip("click1");
             persistentData = new PersistentData();
             File.WriteAllText(persistentPath, JsonUtility.ToJson(persistentData));
             ShowStatistics();
             for (int i = 0; i < 5; i++) { yield return oneSecond; }
+            // some tactile feedback, clearing the stats.
             bottomText.text = baseText;
         }
         else { bottomText.text = baseText; }
