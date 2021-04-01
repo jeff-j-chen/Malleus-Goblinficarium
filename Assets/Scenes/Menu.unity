@@ -764,36 +764,6 @@ MonoBehaviour:
     - 
     - 
     - 
-    merchantItemNames:
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    merchantItemTypes:
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    merchantItemMods:
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
-    - 
     resumeItemNames:
     - 
     - 
@@ -830,6 +800,10 @@ MonoBehaviour:
     resumeSpd: 0
     resumeDmg: 0
     resumeDef: 0
+    floorAcc: 0
+    floorSpd: 0
+    floorDmg: 0
+    floorDef: 0
     potionAcc: 0
     potionSpd: 0
     potionDmg: 0
@@ -848,6 +822,12 @@ MonoBehaviour:
     usedAnkh: 0
     usedHelm: 0
     usedBoots: 0
+    isFurious: 0
+    isDodgy: 0
+    isHasty: 0
+    isBloodthirsty: 0
+    isCourageous: 0
+    expendedStamina: 0
     numItemsDroppedForTrade: 0
     discardableDieCounter: 0
     enemyIsDead: 0
@@ -1774,6 +1754,12 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!82 &1038572520 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 6006507694094798773, guid: 01fc9fe3247c6014db2cf6a84f3ec8bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 6006507694499743965}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1135494538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2242,6 +2228,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40eea5aa6d8a54b49aa8bb4a78a3141e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!82 &1890939776 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 6032342762329974428, guid: 7e8bb50b108481949aced7cf63aaa1c3,
+    type: 3}
+  m_PrefabInstance: {fileID: 2042897660}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1964874749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2259,6 +2251,8 @@ MonoBehaviour:
   sound: {fileID: 1148216675}
   music: {fileID: 1602480869}
   gray: {r: 0, g: 0, b: 0, a: 0}
+  musicPlayer: {fileID: 1038572520}
+  sfxPlayer: {fileID: 1890939776}
 --- !u!1 &1978292650
 GameObject:
   m_ObjectHideFlags: 0

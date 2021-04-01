@@ -6,10 +6,13 @@ using UnityEngine;
 public class MenuButton : MonoBehaviour
 {
     string persistentPath = "persistentSave.txt";
+    string gamePath = "gameSave.txt";
     private float transitionMultiplier;
     private SoundManager soundManager;
     private Arrow arrow;
+    private Scripts scripts;
     void Start() {
+        scripts = FindObjectOfType<Scripts>();
         transitionMultiplier = FindObjectOfType<BackToMenu>().transitionMultiplier;
         soundManager = FindObjectOfType<SoundManager>();
         arrow = FindObjectOfType<Arrow>();
@@ -35,10 +38,21 @@ public class MenuButton : MonoBehaviour
         // play sound clip
         switch (buttonName) {
             case "Continue":
-                // do something special here
+                GameData gameData = LoadGameData();
+                if (gameData.enemyNum == 0 || gameData.enemyNum == 1 || gameData.enemyNum == 2) { 
+                    if (scripts.music.audioSource.clip.name != "LaBossa") { scripts.music.FadeVolume("LaBossa"); }
+                }
+                else if (gameData.resumeSub == 4) { 
+                    if (scripts.music.audioSource.clip.name != "Smoke") { scripts.music.FadeVolume("Smoke"); }
+                }
+                else { 
+                    if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
+                }
+                // fade music in based on what the player is currently on, but only if the same music is not already playing
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             case "New Game":
+                if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
                 File.WriteAllText("gameSave.txt", JsonUtility.ToJson(new GameData()));
                 PersistentData persistentData = LoadPersistentData();
                 persistentData.gamesPlayed++;
@@ -57,6 +71,15 @@ public class MenuButton : MonoBehaviour
             Debug.LogError($"no statistics found, so just created one!");
             File.WriteAllText(persistentPath, JsonUtility.ToJson(new PersistentData()));
             return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath));
+        }
+    }
+
+    public GameData LoadGameData() { 
+        if (File.Exists(gamePath)) { return JsonUtility.FromJson<GameData>(File.ReadAllText(gamePath)); }
+        else { 
+            Debug.Log($"no savefile found, so just created one!");
+            File.WriteAllText(gamePath, JsonUtility.ToJson(new GameData()));
+            return JsonUtility.FromJson<GameData>(File.ReadAllText(gamePath));
         }
     }
 }

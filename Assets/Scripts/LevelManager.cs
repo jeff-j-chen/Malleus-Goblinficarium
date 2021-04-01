@@ -178,6 +178,15 @@ public class LevelManager : MonoBehaviour {
             }
             // fade out all die (die are only faded out upon kill normally)
             // yield return scripts.delays[1.5f]; // uncomment for tombstone tests
+            if (isLich || level == 3 && sub == 4) { 
+                scripts.music.FadeVolume("LaBossa");
+                // if spawning lich or devil, fade to boss music
+            }
+            else if (sub == 3) { 
+                scripts.music.FadeVolume("Smoke");
+                // if spawning merchant, fade to smoke
+            }
+            else { scripts.music.FadeVolume(); }
             string toSpawn = "";
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];

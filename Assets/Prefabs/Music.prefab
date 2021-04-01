@@ -44,7 +44,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: a34ccfaab5ca53649a16f334062eb0e7, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0
+  m_Volume: 0.75
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -140,3 +140,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b128a4ac50bd0ae4db78e75be166f6fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  musicPieces:
+  - {fileID: 8300000, guid: fc76560bddefbc505ba557fc11e6f2a6, type: 3}
+  - {fileID: 8300000, guid: d11df9e57319687bfb79bc6f08f9a832, type: 3}
+  - {fileID: 8300000, guid: 9583a57524baaacb4ac39e804a2a188d, type: 3}
+  - {fileID: 8300000, guid: 4872fe1f272188ba4875f4eca37f10fd, type: 3}
+  musicPieceNames:
+  - Intro
+  - Through
+  - Smoke
+  - LaBossa

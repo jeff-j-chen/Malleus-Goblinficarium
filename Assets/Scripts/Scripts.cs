@@ -36,7 +36,6 @@ public class Scripts : MonoBehaviour {
         dice = FindObjectOfType<Dice>();
         arrow = FindObjectOfType<Arrow>();
         enemy = FindObjectOfType<Enemy>();
-        music = FindObjectOfType<Music>();
         colors = FindObjectOfType<Colors>();
         player = FindObjectOfType<Player>();
         menuIcon = FindObjectOfType<MenuIcon>();
@@ -59,10 +58,12 @@ public class Scripts : MonoBehaviour {
 
     private IEnumerator SaveAfterDelay() { 
         // set newgame to false after a delay so that stuff can load in if its true
-        yield return delays[.75f];
+        yield return delays[.25f];
         if (player != null) { gameData.newGame = false; }
         
-        SaveGameData();
+        SaveGameData(); 
+        music = FindObjectOfType<Music>();
+        // also get the music here, because we need it to set up the singleton pattern first
     }
 
     public void SaveGameData() { 

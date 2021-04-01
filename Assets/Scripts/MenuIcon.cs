@@ -15,10 +15,9 @@ public class MenuIcon : MonoBehaviour {
     SpriteRenderer hintsSR;
     SpriteRenderer musicSR;
     public Color gray;
-    AudioSource musicPlayer;
+    [SerializeField] AudioSource musicPlayer;
+    [SerializeField] AudioSource sfxPlayer;
     void Start() {
-        musicPlayer = FindObjectOfType<Music>().GetComponent<AudioSource>();
-        musicPlayer.ignoreListenerVolume = true;
         debugSR = debug.GetComponent<SpriteRenderer>();
         hintsSR = hints.GetComponent<SpriteRenderer>();
         soundsSR = sound.GetComponent<SpriteRenderer>();
@@ -84,10 +83,10 @@ public class MenuIcon : MonoBehaviour {
             case HINTS_KEY:
                 break;
             case SOUNDS_KEY:
-                AudioListener.volume = 1f;
+                sfxPlayer.volume = 1f;
                 break;
             case MUSIC_KEY:
-                musicPlayer.volume = 1f;
+                musicPlayer.volume = 0.5f;
                 break;
             // do the correct action
         }
@@ -107,7 +106,7 @@ public class MenuIcon : MonoBehaviour {
             case HINTS_KEY:
                 break;
             case SOUNDS_KEY:
-                AudioListener.volume = 0f;
+                sfxPlayer.volume = 0f;
                 break;
             case MUSIC_KEY:
                 musicPlayer.volume = 0f;
