@@ -176,11 +176,9 @@ public class ItemManager : MonoBehaviour {
                 // use the item
             }
         }
-        // else if (Input.GetKeyDown(KeyCode.N)) {
-        //     CreateRandomWeapon();
-        //     MoveToInventory(0);
-        //     // for me only, used to give myself a new weapon to test.
-        // }
+        else if (Input.GetKeyDown(KeyCode.N)) {
+            CreateItem("common");
+        }
     } 
 
 
@@ -193,8 +191,12 @@ public class ItemManager : MonoBehaviour {
             if (scripts.player.charNum == 0) { 
                 CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                 MoveToInventory(0, true, false, false);
+
                 // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                 // MoveToInventory(0, true, false, false);
+                // CreateItem("scroll", "common", "challenge");
+                // MoveToInventory(0, true, false, false);
+
                 CreateItem("steak", "common");
                 MoveToInventory(0, true, false, false);
                 if (Save.persistent.easyMode) { 
@@ -206,8 +208,6 @@ public class ItemManager : MonoBehaviour {
                 CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
                 MoveToInventory(0, true, false, false);
                 CreateItem("armor", "common");
-                MoveToInventory(0, true, false, false);
-                CreateItem("potion", "common", "might");
                 MoveToInventory(0, true, false, false);
                 if (Save.persistent.easyMode) {
                     CreateItem("helm_of_might", "rare");
@@ -320,7 +320,16 @@ public class ItemManager : MonoBehaviour {
         Sprite sprite = null;
         // create a variable of which we can place the sprite upon to depending on the item type
         if (itemType == "weapon") { sprite = weaponSprites[UnityEngine.Random.Range(0, weaponSprites.Length)]; }
-        else if (itemType == "common") { sprite = commonItemSprites[UnityEngine.Random.Range(0, commonItemSprites.Length)]; }
+        else if (itemType == "common") { 
+            int rand = UnityEngine.Random.Range(0, commonItemSprites.Length);
+            // get a random item from the list of names
+            if (rand == 0 || rand == 8) { 
+                if (UnityEngine.Random.Range(0, 2) == 0) { sprite = commonItemSprites[rand]; } 
+                else { sprite = commonItemSprites[UnityEngine.Random.Range(0, commonItemSprites.Length)]; }
+            }
+            // armor and skeleton keys are about 2x rarer than other items
+            else { sprite = commonItemSprites[rand]; }
+        }
         else if (itemType == "rare") { sprite = rareItemSprites[UnityEngine.Random.Range(0, rareItemSprites.Length)]; }
         // depending on the type, give it a corresponding random sprite.
         // else { print("bad item type to create"); }
@@ -773,7 +782,6 @@ public class ItemManager : MonoBehaviour {
                 if (Save.game.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
-                Debug.Log($"clearing {i}");
                 Save.game.floorItemNames[i] = "";
                 Save.game.floorItemTypes[i] = "";
                 Save.game.floorItemMods[i] = "";
@@ -805,7 +813,6 @@ public class ItemManager : MonoBehaviour {
                 if (Save.game.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
-                Debug.Log($"clearing {i}");
                 Save.game.floorItemNames[i] = "";
                 Save.game.floorItemTypes[i] = "";
                 Save.game.floorItemMods[i] = "";

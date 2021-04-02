@@ -51,9 +51,9 @@ public class MenuButton : MonoBehaviour {
             case "New Game":
                 if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
                 Save.game = new GameData();
-                if (scripts.tutorial is null) { Save.SaveGame(); }
-                // persistentData = Save.LoadPersistent();
-                // persistentData.gamesPlayed++;
+                Save.persistent.gamesPlayed++;
+                Save.SaveGame();
+                Save.SavePersistent();
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
             case "Tutorial": 

@@ -58,6 +58,8 @@ public class Statistics : MonoBehaviour {
         yield return tenthSecond;
         if (time <= 0.1f) { 
             // player held it all the way through
+            Save.persistent = new PersistentData();
+            Save.SavePersistent();
             bottomText.text = "[done]";
             soundManager.PlayClip("click1");
             ShowStatistics();

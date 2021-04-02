@@ -152,6 +152,9 @@ public class Player : MonoBehaviour {
                     // reset target
                     scripts.tombstoneData.SetTombstoneData();
                     // allow player to retry
+                    Save.persistent.deaths++;
+                    print($"deaths incremented! should now be {Save.persistent.deaths}");
+                    Save.SavePersistent();
                 }
             }
         }

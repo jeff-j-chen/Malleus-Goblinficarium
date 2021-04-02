@@ -74,8 +74,6 @@ public class TombstoneData : MonoBehaviour {
         // create retry button
         scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true, false, false);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
-        Save.persistent.deaths++;
-        Save.persistent.gamesPlayed++;
         Save.game = new GameData();
         // clear all existing player data
         Save.game.curCharNum = Save.persistent.newCharNum;

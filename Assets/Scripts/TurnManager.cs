@@ -162,8 +162,16 @@ public class TurnManager : MonoBehaviour {
         if (playerOrEnemy == "player") {
             if (scripts.levelManager.sub == Save.persistent.tsSub && scripts.levelManager.level == Save.persistent.tsLevel && !(scripts.levelManager.sub == 1 && scripts.levelManager.level == 1)) {
                 // tombstone
-                scripts.player.target.text = "none";
-                scripts.player.targetInfo.text = "why would you try to wound a tombstone?";
+                if (scripts.player.isDead) { 
+                    // dead, i.e. was just killed
+                    scripts.player.target.text = "chest";
+                    scripts.player.targetInfo.text = targetInfoArr[0];
+                }
+                else { 
+                    // not dead, just came across the tombstone
+                    scripts.player.target.text = "none";
+                    scripts.player.targetInfo.text = "why would you try to wound a tombstone?";
+                }
             }
             else {
                 // normal setting
@@ -216,6 +224,8 @@ public class TurnManager : MonoBehaviour {
             }
         }
         else if (playerOrEnemy == "enemy") {
+            if (scripts.player.isDead) { return; }
+            // instantly return if the player is already dead, bcs it doesnt matter anymore
             if (scripts.enemy.enemyName.text == "Merchant") { 
                 // trader
                 scripts.enemy.target.text = "bargain";
@@ -625,6 +635,7 @@ public class TurnManager : MonoBehaviour {
             // if player dies, set sprite and proper position
             scripts.tombstoneData.SetTombstoneData();
             // allow the player to retry
+            Save.persistent.deaths++;
         }
         else if (playerOrEnemy == "enemy") {
             if (scripts.enemy.enemyName.text == "Devil") { 
@@ -633,7 +644,7 @@ public class TurnManager : MonoBehaviour {
             } 
             if (scripts.enemy.enemyName.text == "Lich") { 
                 scripts.enemy.GetComponent<Animator>().enabled = true; 
-                yield return scripts.delays[1.15f];
+                yield return scripts.delays[0.65f];
                 scripts.soundManager.PlayClip("clang");
             }
             scripts.enemy.GetComponent<SpriteRenderer>().sprite = scripts.enemy.GetDeathSprite();
@@ -659,6 +670,7 @@ public class TurnManager : MonoBehaviour {
         RecalculateMaxFor("player");
         RecalculateMaxFor("enemy");
         // reset target for both
+        Save.SavePersistent();
     }
 
     /// <summary>
@@ -879,7 +891,6 @@ public class TurnManager : MonoBehaviour {
     /// Handles the player's attack, returns true if it was a killing blow.
     /// </summary>
     private bool PlayerAttacks() {
-        print("now the player shall attack!");
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         scripts.soundManager.PlayClip("swing");
         // play sound clip
@@ -1153,15 +1164,14 @@ public class TurnManager : MonoBehaviour {
                 AddSpeedAndAccuracy(enemyAim, playerSpd, enemySpd, playerAtt, enemyDef);
                 // add blue and green if needed
             }
-            else if (enemyAtt <= playerDef && enemyAtt + scripts.enemy.stamina > playerDef)
-            {
+            else if (enemyAtt <= playerDef && enemyAtt + scripts.enemy.stamina > playerDef) {
                 // if enemy can hit player with the use of stamina
                 UseEnemyStaminaOn("red", (playerDef - enemyAtt) + 1);
                 // add stamina to hit player
                 AddSpeedAndAccuracy(enemyAim, playerSpd, enemySpd, playerAtt, enemyDef);
                 // and blue and green if needed
             }
-            if (enemyDef < playerAtt && enemyDef + scripts.enemy.stamina >= playerAtt) {
+            if (enemyDef < playerAtt && enemyDef + scripts.enemy.stamina >= playerAtt && scripts.statSummoner.SumOfStat("green", "player") >= 0) {
                 // if enemy will be hit and can defend
                 // add stamina to defend
                 UseEnemyStaminaOn("white", playerAtt - enemyDef);
@@ -1186,11 +1196,11 @@ public class TurnManager : MonoBehaviour {
                 UseEnemyStaminaOn("blue", (playerSpd - enemySpd) + 1);
             }
         }
-        if (enemyAim < 7 && enemyAim + scripts.enemy.stamina > 6) {
-            // if enemy can target face
-            // add accuracy to target face
+        if (enemyAim < 7 && enemyAim + scripts.enemy.stamina > 6 && !scripts.itemManager.PlayerHas("armor")) {
+            // if enemy can target face, and the player doesnt have a set of armor
             UseEnemyStaminaOn("green", 7 - enemyAim);
             scripts.enemy.TargetBest();
+            // add accuracy to target face
         }
     }
 

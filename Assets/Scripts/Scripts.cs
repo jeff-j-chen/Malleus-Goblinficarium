@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Scripts : MonoBehaviour {
+    [SerializeField] public Animator terrain;
     public Dice dice;
     public Arrow arrow;
     public Enemy enemy;
@@ -67,9 +68,15 @@ public class Scripts : MonoBehaviour {
     }
 
     public void OnApplicationQuit() { 
-        if (player != null) { if (tutorial is null) { Save.SaveGame(); } }
+        if (player != null) { 
+            if (tutorial is null) { Save.SaveGame(); } 
+            Save.SavePersistent(); 
+        }
     }
     public void OnApplicationPause() { 
-        if (player != null) { Save.SavePersistent();  }   
+        if (player != null) { 
+            if (tutorial is null) { Save.SaveGame(); } 
+            Save.SavePersistent(); 
+        }
     }
 }

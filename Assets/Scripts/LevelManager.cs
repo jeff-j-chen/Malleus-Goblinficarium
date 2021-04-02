@@ -215,9 +215,9 @@ public class LevelManager : MonoBehaviour {
                 // increment the sub counter
                 if (sub > 4) { sub = 1; level++; }
                 // increment level and reset sub if we passed sub 4
-                if (sub > Save.persistent.highestSub && level >= Save.persistent.highestLevel) { 
-                    Save.persistent.highestSub = sub;
+                if (level > Save.persistent.highestLevel || level == Save.persistent.highestLevel && sub > Save.persistent.highestSub) {
                     Save.persistent.highestLevel = level;
+                    Save.persistent.highestSub = sub;
                 }
                 if (scripts.enemy.enemyName.text == "Tombstone") {
                     Save.persistent.tsLevel = -1;
@@ -283,6 +283,8 @@ public class LevelManager : MonoBehaviour {
             scripts.enemy.GetComponent<Animator>().Update(0f);
             scripts.player.GetComponent<Animator>().Rebind();
             scripts.player.GetComponent<Animator>().Update(0f);
+            scripts.terrain.Rebind();
+            scripts.terrain.Update(0f);
             yield return scripts.delays[1.5f];
             if (transGlitchCoro != null) { StopCoroutine(transGlitchCoro); }
             // wait 1.5s
