@@ -21,13 +21,31 @@ public class Dice : MonoBehaviour {
     private void Awake()  {
         // must be in awake, otherwise scripts not set fast enough
         scripts = FindObjectOfType<Scripts>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        // assign the necessary sprite renderers
     }
 
     private void Start() { StartCoroutine(FadeIn()); }
 
     private void OnMouseDown() {
         // as soon as the mouse button is pressed down
+        if (scripts.tutorial != null) { 
+            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13)  {
+                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDown(); }
+                // only allow the red 6 to be picked
+                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDown(); }
+                // then take the green
+                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceDown(); }
+                // after that it doesnt matter
+                else { scripts.turnManager.SetStatusText("bad choice"); }
+            }
+        }
+        else { DiceDown(); }
+    }
+
+    /// <summary>
+    /// Handle what happens when the player presses down on a dice.
+    /// </summary>
+    private void DiceDown() { 
         if (moveable && !scripts.turnManager.isMoving) {
             // if the dice is still moveable
             scripts.soundManager.PlayClip("click0");
@@ -41,19 +59,16 @@ public class Dice : MonoBehaviour {
             // if an action can be performed on the dice (discard, reroll)
             if (!scripts.turnManager.isMoving || (scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable)) {
                 // if the situation permits action to occur on the die
-                if (scripts.enemy.woundList.Contains("head") && !scripts.turnManager.diceDiscarded) {
+                if (scripts.itemManager.discardableDieCounter > 0) {
                     // if the enemy is wounded in the head and a die has not been discarded yet
                     scripts.soundManager.PlayClip("click0");
                     // play sound clip
-                    SpriteRenderer numSR = GetComponent<SpriteRenderer>();
-                    SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
-                    // assign the necessary sprite renderers
-                    Color numTemp = numSR.color;
-                    Color baseTemp = baseSR.color;
+                    Color numTemp = spriteRenderer.color;
+                    Color baseTemp = childSpriteRenderer.color;
                     numTemp.a -= 0.33f;
-                    numSR.color = numTemp;
+                    spriteRenderer.color = numTemp;
                     baseTemp.a -= 0.25f;
-                    baseSR.color = baseTemp;
+                    childSpriteRenderer.color = baseTemp;
                     // dim the colors of the die
                 }
             }
@@ -62,20 +77,35 @@ public class Dice : MonoBehaviour {
             // if the player wants to Save a die via scroll of courage by discarding the others
             scripts.soundManager.PlayClip("click0");
             // play sound clip
-            SpriteRenderer numSR = GetComponent<SpriteRenderer>();
-            SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
-            // assign the sprite renderers
-            Color numTemp = numSR.color;
-            Color baseTemp = baseSR.color;
+            Color numTemp = spriteRenderer.color;
+            Color baseTemp = childSpriteRenderer.color;
             numTemp.a -= 0.33f;
-            numSR.color = numTemp;
+            spriteRenderer.color = numTemp;
             baseTemp.a -= 0.25f;
-            baseSR.color = baseTemp;
+            childSpriteRenderer.color = baseTemp;
             // dim the colors of the die
         }
     }
 
     private void OnMouseDrag() {
+        if (scripts.tutorial != null) { 
+            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13) {
+                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDrag(); }
+                // only allow the red 6 to be picked
+                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDrag(); }
+                // then take the green
+                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceDrag(); }
+                // after that it doesnt matter
+                else { scripts.turnManager.SetStatusText("bad choice"); }
+            }
+        }
+        else { DiceDrag(); }
+    }
+
+    /// <summary>
+    /// Handle what happens when a dice is attempted to be dragged.
+    /// </summary>
+    private void DiceDrag() { 
         // when the mouse is dragged
         if (moveable && !scripts.turnManager.isMoving) {
             // if the dice can be moved
@@ -91,6 +121,24 @@ public class Dice : MonoBehaviour {
     }
 
     private void OnMouseUp() {
+        if (scripts.tutorial != null) { 
+            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13) {
+                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceUp(); }
+                // only allow the red 6 to be picked
+                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceUp(); }
+                // then take the green
+                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceUp(); }
+                // after that it doesnt matter
+                else { scripts.turnManager.SetStatusText("bad choice"); }
+            }
+        }
+        else { DiceUp(); }
+    }
+
+    /// <summary>
+    /// Handle what happpens when the player releases a dice.
+    /// </summary>
+    private void DiceUp() {
         // when the mouse is released
         if (moveable && !scripts.turnManager.isMoving) {
             // if the dice can be moved
@@ -106,16 +154,12 @@ public class Dice : MonoBehaviour {
             childSpriteRenderer.sortingOrder = 0;
             // send the die to the background
         }
-        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich" && !scripts.turnManager.isMoving) {
+        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich") {
+            //  && !scripts.turnManager.isMoving
             // if an action can be performed on the dice (discard, reroll)
             if (!scripts.turnManager.isMoving || scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable) {
                 // if the situation allows for an action to be performed
-                if (scripts.enemy.woundList.Contains("head") && !scripts.turnManager.diceDiscarded) {
-                    // if can discard from head wound
-                    DiscardFromEnemy();
-                    // discard the die
-                }
-                else if (scripts.itemManager.discardableDieCounter > 0) {
+                if (scripts.itemManager.discardableDieCounter > 0) {
                     // if can discard from another source
                     if (scripts.turnManager.scimitarParry) { scripts.diceSummoner.breakOutOfScimitarParryLoop = true; }
                     // if source is from scimitarParry, break out of the waiting loop
@@ -124,7 +168,7 @@ public class Dice : MonoBehaviour {
                     scripts.itemManager.discardableDieCounter--;
                     // decrease the counter for the number of die 
                     Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                    Save.SaveGame();
+                    if (scripts.tutorial is null) { Save.SaveGame(); }
                 }
                 else if (scripts.enemy.woundList.Contains("chest")) {
                     // if enemy is wounded in the chest
@@ -149,7 +193,6 @@ public class Dice : MonoBehaviour {
         int index = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this);
         // set variable index to be the index of where the die is
         scripts.turnManager.alterationDuringMove = true;
-        scripts.turnManager.diceDiscarded = true;
         // set necessary variables for the turnmanager
         scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this);
         scripts.diceSummoner.existingDice.Remove(gameObject);
@@ -264,13 +307,11 @@ public class Dice : MonoBehaviour {
     /// <summary>
     /// Coroutine for fading out this die.
     /// </summary>
-    public IEnumerator FadeOut(bool wait=false) {
+    public IEnumerator FadeOut(bool wait=false, bool shiftOver = true) {
         if (wait) { yield return scripts.delays[0.55f]; }
         // wait if necessary
-        SpriteRenderer numSR = GetComponent<SpriteRenderer>();
-        SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
-        Color numTemp = numSR.color;
-        Color baseTemp = baseSR.color;
+        Color numTemp = spriteRenderer.color;
+        Color baseTemp = childSpriteRenderer.color;
         numTemp.a = 1;
         baseTemp.a = 1;
         // set them to 1 here because for some reason sometimes alpha starts at 2 and nothing works right
@@ -280,12 +321,12 @@ public class Dice : MonoBehaviour {
             yield return scripts.delays[0.005f];
             // wait a small duration
             numTemp.a -= 1/12f;
-            numSR.color = numTemp;
+            spriteRenderer.color = numTemp;
             baseTemp.a -= 1/12f;
-            baseSR.color = baseTemp;
+            childSpriteRenderer.color = baseTemp;
             // decrease the colors of the die and base
         }
-        if (statAddedTo != "") { 
+        if (statAddedTo != "" && shiftOver) { 
             // if the die has already been attached (only needed to check for my cheat)
             if (isOnPlayerOrEnemy == "player") {
                 // if the die is attached to the player
@@ -324,19 +365,20 @@ public class Dice : MonoBehaviour {
     /// </summary>
     public IEnumerator FadeIn() {
         // very similar to fadeout
-        SpriteRenderer baseSR = transform.GetChild(0).GetComponent<SpriteRenderer>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        childSpriteRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
         Color numTemp = spriteRenderer.color;
-        Color baseTemp = baseSR.color;
+        Color baseTemp = childSpriteRenderer.color;
         numTemp.a = 0;
         baseTemp.a = 0;
         spriteRenderer.color = numTemp;
-        baseSR.color = baseTemp;
+        childSpriteRenderer.color = baseTemp;
         yield return scripts.delays[0.005f];
         for (int i = 0; i < 40; i++) {
             numTemp.a += 0.025f;
             spriteRenderer.color = numTemp;
             baseTemp.a += 0.025f;
-            baseSR.color = baseTemp;
+            childSpriteRenderer.color = baseTemp;
             yield return scripts.delays[0.005f];
         }
     }

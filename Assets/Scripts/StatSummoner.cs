@@ -315,7 +315,7 @@ public class StatSummoner : MonoBehaviour {
     /// </summary>
     public float OutermostEnemyX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
-        return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) - 1) * -xOffset)  - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
+        return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) + addedEnemyStamina[statType] - 1) * -xOffset)  - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
         // similar to outermostplayerx
     }
 
@@ -323,33 +323,32 @@ public class StatSummoner : MonoBehaviour {
     /// Set the debug information for player or enemy.
     /// </summary>
     public void SetDebugInformationFor(string playerOrEnemy) {
-        if (playerOrEnemy == "player") {
-            float furthest = (new float[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
-            if (furthest >= -3.8) { playerDebug.transform.position = new Vector2(furthest + 1.333f, baseDebugPos.y); }
-            else { playerDebug.transform.position = new Vector2(baseDebugPos.x, baseDebugPos.y); }
-            playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";
+        if (scripts.tutorial is null) {
+            if (playerOrEnemy == "player") {
+                float furthest = (new float[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
+                if (furthest >= -3.8) { playerDebug.transform.position = new Vector2(furthest + 1.333f, baseDebugPos.y); }
+                else { playerDebug.transform.position = new Vector2(baseDebugPos.x, baseDebugPos.y); }
+                playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";
+            }
+            else if (playerOrEnemy == "enemy") {
+                enemyDebug.text = "("+SumOfStat("green", "enemy")+")\n("+SumOfStat("blue", "enemy")+")\n("+SumOfStat("red", "enemy")+")\n("+SumOfStat("white", "enemy")+")";
+            }
+            // ends up looking like
+            // (2)
+            // (2)
+            // (1)
+            // (2)
+            // for example
+            else { Debug.Log("error"); }
+            scripts.enemy.TargetBest();
         }
-        else if (playerOrEnemy == "enemy") {
-            enemyDebug.text = "("+SumOfStat("green", "enemy")+")\n("+SumOfStat("blue", "enemy")+")\n("+SumOfStat("red", "enemy")+")\n("+SumOfStat("white", "enemy")+")";
-        }
-        // ends up looking like
-        // (2)
-        // (2)
-        // (1)
-        // (2)
-        // for example
-        else { Debug.Log("error"); }
-        scripts.enemy.TargetBest();
-
     }
 
     /// <summary>
     /// Shift the dice of a given stat by a given amount.
     /// </summary>    
-    public void ShiftDiceAccordingly(string stat, int shiftAmount)
-    {
-        foreach (Dice dice in addedPlayerDice[stat])
-        {
+    public void ShiftDiceAccordingly(string stat, int shiftAmount) {
+        foreach (Dice dice in addedPlayerDice[stat]) {
             // for every die in the specified stat
             dice.transform.position = new Vector2(dice.transform.position.x + xOffset * shiftAmount, dice.transform.position.y);
             // shift the die by the specified amount

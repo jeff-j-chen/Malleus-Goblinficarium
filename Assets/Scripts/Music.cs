@@ -43,7 +43,10 @@ public class Music : MonoBehaviour {
     /// </summary>
     public void FadeVolume() { 
         shouldPlayMusic = PlayerPrefs.GetString("music") == "on" ? true : false;
-        if (shouldPlayMusic) { StartCoroutine(FadeVolumeCoro()); }
+        if (shouldPlayMusic) { 
+            audioSource.volume = 0.5f;
+            StartCoroutine(FadeVolumeCoro()); 
+        }
     }
 
     /// <summary>
@@ -51,7 +54,10 @@ public class Music : MonoBehaviour {
     /// </summary>
     public void FadeVolume(String pieceName) { 
         shouldPlayMusic = PlayerPrefs.GetString("music") == "on" ? true : false;
-        if (shouldPlayMusic) { StartCoroutine(FadeVolumeCoro(pieceName)); }
+        if (shouldPlayMusic) { 
+            audioSource.volume = 0.5f;
+            StartCoroutine(FadeVolumeCoro(pieceName)); 
+        }
     }
     
     /// <summary>
@@ -65,7 +71,7 @@ public class Music : MonoBehaviour {
         // fade the volume to 0
         audioSource.volume = 0;
         // prevent rounding errors resulting in the base level changing over time
-        yield return scripts.delays[1.5f];
+        yield return scripts.delays[1f];
         // short time where there is no music
         for (int i = 0; i < 5; i++) {
             yield return scripts.delays[0.05f];
@@ -85,7 +91,7 @@ public class Music : MonoBehaviour {
         }
         audioSource.Stop();
         audioSource.volume = 0;
-        yield return scripts.delays[1.5f];
+        yield return scripts.delays[1f];
         PlayMusic(pieceName);
         for (int i = 0; i < 5; i++) {
             yield return scripts.delays[0.05f];

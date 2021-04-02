@@ -14,7 +14,7 @@ public class BackToMenu : MonoBehaviour {
             // on escape pressed
             if (scripts != null && scripts.player != null && scripts.turnManager != null && !scripts.turnManager.isMoving) { 
                 // if in game and not moving
-                Save.SaveGame();
+                if (scripts.tutorial is null) { Save.SaveGame(); }
                 Save.SavePersistent();
                 // Save data first
             }

@@ -60,12 +60,15 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
-        if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
-        else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
-        { levelText.text = $"(level {level}-{sub}*)"; }
-        else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
-        else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = $"(level ???)"; }
-        else { levelText.text = $"(level {level}-{sub})"; }
+        if (scripts.tutorial is null) {
+            if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
+            else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
+            { levelText.text = $"(level {level}-{sub}*)"; }
+            else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
+            else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = $"(level ???)"; }
+            else { levelText.text = $"(level {level}-{sub})"; }
+        }
+        else { levelText.text = ""; }
     }
 
     /// <summary>
@@ -162,7 +165,7 @@ public class LevelManager : MonoBehaviour {
                 }
                 print("notify the player they unlocked a new character to play here!");
                 Save.game = new GameData();
-                Save.SaveGame();
+                if (scripts.tutorial is null) { Save.SaveGame(); }
                 // for some reason file.delete doesn't want to work here
                 Initiate.Fade("Credits", Color.black, 2.5f);
                 // load credits scene
@@ -182,7 +185,13 @@ public class LevelManager : MonoBehaviour {
                 scripts.music.FadeVolume("Smoke");
                 // if spawning merchant, fade to smoke
             }
-            else { scripts.music.FadeVolume(); }
+            else { 
+                if (scripts.enemy.enemyName.text == "Lich" || sub == 4) { 
+                    // leaving lich or merchant, so change back to main
+                    scripts.music.FadeVolume("Through");
+                }
+                else { scripts.music.FadeVolume(); }
+            }
             string toSpawn = "";
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
@@ -287,7 +296,7 @@ public class LevelManager : MonoBehaviour {
             scripts.itemManager.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
             Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-            Save.SaveGame();
+            if (scripts.tutorial is null) { Save.SaveGame(); }
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
                 scripts.itemManager.lootText.text = "loot:";
@@ -326,7 +335,7 @@ public class LevelManager : MonoBehaviour {
             Save.game.resumeLevel = scripts.levelManager.level;
         }
         Save.SavePersistent();
-        Save.SaveGame();
+        if (scripts.tutorial is null) { Save.SaveGame(); }
     }
 
     private char r() { 

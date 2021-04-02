@@ -3955,8 +3955,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1864871889}
-  - component: {fileID: 1864871891}
   - component: {fileID: 1864871890}
+  - component: {fileID: 1864871891}
   - component: {fileID: 1864871892}
   m_Layer: 0
   m_Name: Tutorial
@@ -3993,7 +3993,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blackBox: {fileID: 21300000, guid: f098ea1a373147a4cb0c810cb237e2fc, type: 3}
   tutorialText: {fileID: 477694468}
-  statText: {fileID: 0}
+  statText: {fileID: 449358250}
   curIndex: 0
 --- !u!212 &1864871891
 SpriteRenderer:

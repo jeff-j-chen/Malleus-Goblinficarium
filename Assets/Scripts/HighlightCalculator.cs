@@ -200,6 +200,11 @@ public class HighlightCalculator : MonoBehaviour {
                         StartCoroutine(scripts.turnManager.EnemyMove(false));
                         // enemy moves normally
                     }
+                    if (scripts.tutorial != null) {
+                        if (scripts.diceSummoner.CountUnattachedDice() == 4 || scripts.diceSummoner.CountUnattachedDice() == 0) {
+                            scripts.tutorial.Increment();
+                        }
+                    }
                 }
                 scripts.statSummoner.SetDebugInformationFor("player");
                 // set the debug information

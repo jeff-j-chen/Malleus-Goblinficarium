@@ -21,6 +21,7 @@ public class StaminaButton : MonoBehaviour {
                     ShiftDiceAccordingly(stat, 1);
                     // move the die 
                     scripts.statSummoner.addedPlayerStamina[stat]++;
+                    if (scripts.tutorial != null && scripts.tutorial.curIndex == 19 && scripts.statSummoner.addedPlayerStamina["green"] >= 3) { scripts.tutorial.Increment(); }
                     Save.game.expendedStamina++;
                     scripts.turnManager.ChangeStaminaOf("player", -1);
                     // change the variables properly
@@ -50,7 +51,7 @@ public class StaminaButton : MonoBehaviour {
                 Debug.LogError("StaminaButton is not attached to the correct object");
                 // something is wrong
             }
-            Save.SaveGame();
+            if (scripts.tutorial is null) { Save.SaveGame(); }
             Save.SavePersistent();
         }
     }

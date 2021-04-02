@@ -85,33 +85,37 @@ public class Player : MonoBehaviour {
         stamina = Save.game.playerStamina + Save.game.expendedStamina;
         Save.game.expendedStamina = 0;
         staminaCounter.text = stamina.ToString();
-        Save.SaveGame();
+        if (scripts.tutorial is null) { Save.SaveGame(); }
         // give status effects, potion effects, stamina, everything from previous Save
     }
 
     private void Update() {
-        if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f  && !scripts.turnManager.isMoving)) {
-            // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
-            // set the available targets to make sure the player can do that
-            if (targetIndex < Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "player"), 0, 7)) {
-                // if player can target there
-                if (hintTimer > 0.05f) { hintTimer += 0.1f; }
-                // if there is still time left on the hint timer (for targeting face or targeting wounded body part)
-                targetIndex++;
-                // increment target index
-                scripts.turnManager.SetTargetOf("player");
-                // and set target based off the new target index
+        if (!(scripts.tutorial != null && targetIndex == 7)) { 
+            // lock tutorial to attacking face once its targeted
+            if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f && !scripts.turnManager.isMoving)) {
+                // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
+                // set the available targets to make sure the player can do that
+                if (targetIndex < Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "player"), 0, 7)) {
+                    // if player can target there
+                    if (hintTimer > 0.05f) { hintTimer += 0.1f; }
+                    // if there is still time left on the hint timer (for targeting face or targeting wounded body part)
+                    targetIndex++;
+                    // increment target index
+                    scripts.turnManager.SetTargetOf("player");
+                    // and set target based off the new target index
+                    if (scripts.tutorial != null && targetIndex == 7) { scripts.tutorial.Increment(); }
+                }
+            }
+            else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
+                // pretty much the same as above
+                if (targetIndex > 0) {  
+                    if (hintTimer > 0.05f) { hintTimer += 0.1f; }
+                    targetIndex--;
+                    scripts.turnManager.SetTargetOf("player");
+                }
             }
         }
-        else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
-            // pretty much the same as above
-            if (targetIndex > 0) {  
-                if (hintTimer > 0.05f) { hintTimer += 0.1f; }
-                targetIndex--;
-                scripts.turnManager.SetTargetOf("player");
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.R) && !isDead && !scripts.turnManager.isMoving) {
+        if (Input.GetKeyDown(KeyCode.R) && !isDead && !scripts.turnManager.isMoving && scripts.tutorial == null) {
             if (scripts.enemy.isDead) {
                 // don't let player suicide when enemy is dead, because it is glitchy
                 scripts.turnManager.SetStatusText("you've killed him");
@@ -197,7 +201,7 @@ public class Player : MonoBehaviour {
                 // if player has mace
                 scripts.turnManager.usedMace = true;
                 Save.game.usedMace = true;
-                Save.SaveGame();
+                if (scripts.tutorial is null) { Save.SaveGame(); }
                 // prevent player from using mace again
                 scripts.soundManager.PlayClip("click0");
                 foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {

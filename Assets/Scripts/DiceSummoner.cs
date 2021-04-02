@@ -22,14 +22,14 @@ public class DiceSummoner : MonoBehaviour
         scripts = FindObjectOfType<Scripts>();
     }
 
-    private void Update() {
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            // testing purposes only, use to refresh this given set of dice
-            scripts.statSummoner.ResetDiceAndStamina();
-            SummonDice(false, true);
-            scripts.statSummoner.SummonStats();
-        }
-    }
+    // private void Update() {
+    //     if (Input.GetKeyDown(KeyCode.Space)) {
+    //         // testing purposes only, use to refresh this given set of dice
+    //         scripts.statSummoner.ResetDiceAndStamina();
+    //         SummonDice(false, true);
+    //         scripts.statSummoner.SummonStats();
+    //     }
+    // }
 
     /// <summary>
     /// Summon the intiial round of dice.
@@ -81,7 +81,7 @@ public class DiceSummoner : MonoBehaviour
             }
             if (lastNum != -1) {
                 // if there is a die Saved from last round (from scroll of courage)
-                GenerateSingleDie (lastNum, lastType, "player", lastStat, initialSix:true);
+                GenerateSingleDie(lastNum, lastType, "player", lastStat, initialSix:true);
                 // create the die and add it to the player
             }
         }
@@ -219,7 +219,7 @@ public class DiceSummoner : MonoBehaviour
             Save.game.diceRerolled.Add(dice.isRerolled);
             // add its info to the info 
         }
-        Save.SaveGame();
+        if (scripts.tutorial is null) { Save.SaveGame(); }
         // make sure to Save it
     }
 
@@ -266,5 +266,16 @@ public class DiceSummoner : MonoBehaviour
             }
         }
         SaveDiceValues();
+    }
+
+    /// <summary>
+    /// Return the number of dice that have yet to be picked.
+    /// </summary>
+    public int CountUnattachedDice() { 
+        int count = 0;
+        foreach (GameObject gameObject in existingDice) { 
+            if (gameObject.GetComponent<Dice>().isAttached == false) { count++; }
+        }
+        return count;
     }
 }

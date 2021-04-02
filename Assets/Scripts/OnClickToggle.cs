@@ -9,6 +9,15 @@ public class OnClickToggle : MonoBehaviour {
     }
 
     void OnMouseDown() {
-        scripts.menuIcon.PlayerPrefSetter(name, GetComponent<SpriteRenderer>());
+        if (gameObject.name == "tumblr") {
+            Application.OpenURL("https://ampersandbear.tumblr.com/"); 
+            scripts.soundManager.PlayClip("click0");
+        }
+        else if (gameObject.name == "twitter") { 
+            Application.OpenURL("https://twitter.com/ampersandbear"); 
+            scripts.soundManager.PlayClip("click0");
+        }
+        else { scripts.menuIcon.PlayerPrefSetter(name, GetComponent<SpriteRenderer>()); }
+        
     }
 }

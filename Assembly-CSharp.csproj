@@ -42,6 +42,7 @@
      <Compile Include="Assets\Scripts\Statistics.cs" />
      <Compile Include="Assets\Scripts\CharacterSelector.cs" />
      <Compile Include="Assets\Scripts\LevelManager.cs" />
+     <Compile Include="Assets\Scripts\Save.cs" />
      <Compile Include="Assets\Scripts\ItemManager.cs" />
      <Compile Include="Assets\Scripts\Arrow.cs" />
      <Compile Include="Assets\Scripts\Colors.cs" />
@@ -56,6 +57,7 @@
      <Compile Include="Assets\Scripts\TombstoneData.cs" />
      <Compile Include="Assets\Scripts\Scripts.cs" />
      <Compile Include="Assets\Scripts\StaminaButton.cs" />
+     <Compile Include="Assets\Scripts\Tutorial.cs" />
      <Compile Include="Assets\Scripts\Enemy.cs" />
      <Compile Include="Assets\Scripts\BackToMenu.cs" />
      <Compile Include="Assets\Scripts\MenuIcon.cs" />
@@ -65,8 +67,6 @@
      <Compile Include="Assets\Scripts\PersistentData.cs" />
      <Compile Include="Assets\Scripts\DiceSummoner.cs" />
      <Compile Include="Assets\Scripts\HighlightCalculator.cs" />
-     <Compile Include="Assets\Scripts\Save.cs" />
-     <Compile Include="Assets\Scripts\Tutorial.cs" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap.shader" />
@@ -234,6 +234,12 @@
     </Reference>
     <Reference Include="UnityEditor.UnityConnectModule">
         <HintPath>/home/jeff/Unity/Hub/Editor/2020.2.1f1/Editor/Data/Managed/UnityEngine/UnityEditor.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+        <HintPath>/home/jeff/Unity/Hub/Editor/2020.2.1f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Common">
+        <HintPath>/home/jeff/Unity/Hub/Editor/2020.2.1f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Common.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
         <HintPath>/home/jeff/Unity/Hub/Editor/2020.2.1f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>

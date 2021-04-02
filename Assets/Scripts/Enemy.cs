@@ -118,7 +118,8 @@ public class Enemy : MonoBehaviour {
         // could change this later so that it prioritizes certain wounds rather than just aiming for the highest wound
         targetIndex = 7;
         // start at the end of the array of targetbales
-        for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7); i >= 0; i--) {
+        for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 6); i >= 0; i--) {
+            // print($"enemy target starting at its accuracy stat, {Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7)}");
 ;           // iterating through the array backwards
             if (!scripts.player.woundList.Contains(scripts.turnManager.targetArr[i])) {
                 // if the player does not have the wound
@@ -127,6 +128,8 @@ public class Enemy : MonoBehaviour {
                 // set target index and break
             }
         }
+        if (targetIndex == 7 && scripts.statSummoner.SumOfStat("green", "enemy") < 7) { targetIndex = 0; }
+        // this happens if enemy already wounded everything, so it targets face by default (which is wrong)
         scripts.turnManager.SetTargetOf("enemy");
         // set the target of the enemy with the new targetindex
     }
@@ -299,7 +302,7 @@ public class Enemy : MonoBehaviour {
         try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
         try { scripts.turnManager.DisplayWounds(); } catch {}
         Save.game.enemyNum = enemyNum;
-        Save.SaveGame();
+        if (scripts.tutorial is null) { Save.SaveGame(); }
     }
 
     /// <summary>

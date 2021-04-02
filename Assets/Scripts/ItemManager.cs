@@ -176,11 +176,11 @@ public class ItemManager : MonoBehaviour {
                 // use the item
             }
         }
-        else if (Input.GetKeyDown(KeyCode.N)) {
-            CreateRandomWeapon();
-            MoveToInventory(0);
-            // for me only, used to give myself a new weapon to test.
-        }
+        // else if (Input.GetKeyDown(KeyCode.N)) {
+        //     CreateRandomWeapon();
+        //     MoveToInventory(0);
+        //     // for me only, used to give myself a new weapon to test.
+        // }
     } 
 
 
@@ -191,18 +191,15 @@ public class ItemManager : MonoBehaviour {
         if (Save.game.newGame) { 
             // new game, so give the base weapons
             if (scripts.player.charNum == 0) { 
-                // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-                CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
+                CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                 MoveToInventory(0, true, false, false);
+                // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
+                // MoveToInventory(0, true, false, false);
                 CreateItem("steak", "common");
                 MoveToInventory(0, true, false, false);
-                
-                CreateItem("scroll", "common", "challenge");
-                MoveToInventory(0, true, false, false);
-
                 if (Save.persistent.easyMode) { 
                     CreateItem("torch", "common");
-                        MoveToInventory(0, true, false, false);
+                    MoveToInventory(0, true, false, false);
                 }
             }
             else if (scripts.player.charNum == 1) { 
@@ -320,9 +317,9 @@ public class ItemManager : MonoBehaviour {
         // create an item object at the correct position
         Sprite sprite = null;
         // create a variable of which we can place the sprite upon to depending on the item type
-        if (itemType == "weapon") { sprite = weaponSprites[UnityEngine.Random.Range(0, weaponSprites.Length - 1)]; }
-        else if (itemType == "common") { sprite = commonItemSprites[UnityEngine.Random.Range(0, commonItemSprites.Length - 1)]; }
-        else if (itemType == "rare") { sprite = rareItemSprites[UnityEngine.Random.Range(0, rareItemSprites.Length - 1)]; }
+        if (itemType == "weapon") { sprite = weaponSprites[UnityEngine.Random.Range(0, weaponSprites.Length)]; }
+        else if (itemType == "common") { sprite = commonItemSprites[UnityEngine.Random.Range(0, commonItemSprites.Length)]; }
+        else if (itemType == "rare") { sprite = rareItemSprites[UnityEngine.Random.Range(0, rareItemSprites.Length)]; }
         // depending on the type, give it a corresponding random sprite.
         // else { print("bad item type to create"); }
         // can only create item types of weapon, common, and rare
@@ -436,7 +433,7 @@ public class ItemManager : MonoBehaviour {
         Save.game.floorSpd = baseWeapon["blue"];
         Save.game.floorDmg = baseWeapon["red"];
         Save.game.floorDef = baseWeapon["white"];
-        Save.SaveGame();
+        if (scripts.tutorial is null) { Save.SaveGame(); }
     }
 
     /// <summary>
@@ -575,6 +572,7 @@ public class ItemManager : MonoBehaviour {
                         else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
                         else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName}"); }
                         // notify the player of which item that they took
+                        if (scripts.tutorial != null) { scripts.tutorial.Increment(); }
                     }
                     // if the item is not a starter item, notify the player that they have picked up the item
                     floorItems[index].transform.position = new Vector2(-2.75f + itemSpacing * scripts.player.inventory.Count, 3.16f);
@@ -623,28 +621,34 @@ public class ItemManager : MonoBehaviour {
     public void SpawnItems() {
         lootText.text = "loot:";
         // set the text 
-        if (scripts.enemy.enemyName.text == "Lich") {
-            CreateItem("phylactery", "phylactery");
-            // defeated lich, so give phylactery
-        }
-        else if (scripts.enemy.enemyName.text == "Devil") {
-            CreateItem("necklet", "common", "victory");
-            // defeated devil, so give necklet of victory
-        }
-        else {
-            // normal enemy
-            int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
-            // count the number of torches
-            int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + UnityEngine.Random.Range(-2, 0), 0, 5);
-            // create a spawn count 
-            CreateRandomWeapon();
-            // create a random weapon at index 0
-            for (int i = 0; i < spawnCount; i++) {
-                CreateItem("common");
-                // create a random number of items based on the spawn count
+        if (scripts.tutorial == null) { 
+            if (scripts.enemy.enemyName.text == "Lich") {
+                CreateItem("phylactery", "phylactery");
+                // defeated lich, so give phylactery
             }
-            if (UnityEngine.Random.Range(0, 13) == 0) { CreateItem("rare"); }
-            // low chance to produce rare
+            else if (scripts.enemy.enemyName.text == "Devil") {
+                CreateItem("necklet", "common", "victory");
+                // defeated devil, so give necklet of victory
+            }
+            else {
+                // normal enemy
+                int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
+                // count the number of torches
+                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + UnityEngine.Random.Range(-2, 0), 0, 5);
+                // create a spawn count 
+                CreateRandomWeapon();
+                // create a random weapon at index 0
+                for (int i = 0; i < spawnCount; i++) {
+                    CreateItem("common");
+                    // create a random number of items based on the spawn count
+                }
+                if (UnityEngine.Random.Range(0, 13) == 0) { CreateItem("rare"); }
+                // low chance to produce rare
+            }
+        }
+        else { 
+            CreateItem("steak", "common");
+            CreateWeaponWithStats("sword", "lame", 1, 1, 1, 1);
         }
         CreateItem("arrow", "arrow");
         // create an arrow to move to the next level
@@ -741,7 +745,7 @@ public class ItemManager : MonoBehaviour {
                 Save.game.resumeItemMods[i] = item.modifier;
                 // add all the remaining items
             }
-            Save.SaveGame();
+            if (scripts.tutorial is null) { Save.SaveGame(); }
             // Save to file
 
         }
@@ -774,7 +778,7 @@ public class ItemManager : MonoBehaviour {
             }
         }
         // funky workaround to make it so that the player doesn't get duplicate arrows
-        Save.SaveGame();
+        if (scripts.tutorial is null) { Save.SaveGame(); }
     }
 
     // two separate methods so that we dont have to do any fancy checks, just pull whichever we need as long as we Save it properly
@@ -806,6 +810,6 @@ public class ItemManager : MonoBehaviour {
             }
         }
         // funky workaround to make it so that the player doesn't get duplicate arrows
-        Save.SaveGame();
+        if (scripts.tutorial is null) { Save.SaveGame(); }
     }
 }
