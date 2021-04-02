@@ -207,6 +207,8 @@ public class ItemManager : MonoBehaviour {
                 MoveToInventory(0, true, false, false);
                 CreateItem("armor", "common");
                 MoveToInventory(0, true, false, false);
+                CreateItem("potion", "common", "might");
+                MoveToInventory(0, true, false, false);
                 if (Save.persistent.easyMode) {
                     CreateItem("helm_of_might", "rare");
                     MoveToInventory(0, true, false, false);

@@ -12,7 +12,6 @@ public class Statistics : MonoBehaviour {
     private WaitForSeconds oneSecond = new WaitForSeconds(1f);
     private string baseText = "hold [space] to delete all data - this action is irrecoverable";
     private SoundManager soundManager;
-    [SerializeField] private PersistentData persistentData;
     [SerializeField] private TextMeshProUGUI leftWhite;
     [SerializeField] private TextMeshProUGUI leftGray;
     [SerializeField] private TextMeshProUGUI favWeapon;
@@ -21,7 +20,6 @@ public class Statistics : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI bottomText;
     private void Start() {
         soundManager = FindObjectOfType<SoundManager>();
-        persistentData = LoadPersistentData();
         ShowStatistics();
     }
 
@@ -32,11 +30,11 @@ public class Statistics : MonoBehaviour {
     }
 
     private void ShowStatistics() { 
-        leftWhite.text = $"\n{persistentData.gamesPlayed}\n\n\n\n\n{persistentData.attacksParried}\n{persistentData.woundsReceived}\n{persistentData.woundsInflicted}";
-        leftGray.text = $"\n\n{persistentData.highestLevel}-{persistentData.highestSub}\n{persistentData.successfulRuns}\n{persistentData.deaths}\n\n\n\n\n{persistentData.woundsInflictedArr[0]}\n{persistentData.woundsInflictedArr[1]}\n{persistentData.woundsInflictedArr[2]}\n{persistentData.woundsInflictedArr[3]}\n{persistentData.woundsInflictedArr[4]}\n{persistentData.woundsInflictedArr[5]}\n{persistentData.woundsInflictedArr[6]}\n{persistentData.woundsInflictedArr[7]}";
-        favWeapon.text = weaponNames[Array.IndexOf(persistentData.weaponUses, persistentData.weaponUses.Max())];
-        rightWhite.text = $"\n\n\n\n\n\n{persistentData.enemiesSlain}\n{persistentData.staminaUsed}";
-        rightGray.text = $"\n\n\n\n\n\n\n\n{persistentData.armorBroken}\n{persistentData.weaponsSwapped}\n{persistentData.scrollsRead}\n{persistentData.potionsQuaffed}\n{persistentData.foodEaten}\n{persistentData.shurikensThrown}\n{persistentData.itemsTraded}\n{persistentData.diceRerolled}\n{persistentData.diceDiscarded}";
+        leftWhite.text = $"\n{Save.persistent.gamesPlayed}\n\n\n\n\n{Save.persistent.attacksParried}\n{Save.persistent.woundsReceived}\n{Save.persistent.woundsInflicted}";
+        leftGray.text = $"\n\n{Save.persistent.highestLevel}-{Save.persistent.highestSub}\n{Save.persistent.successfulRuns}\n{Save.persistent.deaths}\n\n\n\n\n{Save.persistent.woundsInflictedArr[0]}\n{Save.persistent.woundsInflictedArr[1]}\n{Save.persistent.woundsInflictedArr[2]}\n{Save.persistent.woundsInflictedArr[3]}\n{Save.persistent.woundsInflictedArr[4]}\n{Save.persistent.woundsInflictedArr[5]}\n{Save.persistent.woundsInflictedArr[6]}\n{Save.persistent.woundsInflictedArr[7]}";
+        favWeapon.text = weaponNames[Array.IndexOf(Save.persistent.weaponUses, Save.persistent.weaponUses.Max())];
+        rightWhite.text = $"\n\n\n\n\n\n{Save.persistent.enemiesSlain}\n{Save.persistent.staminaUsed}";
+        rightGray.text = $"\n\n\n\n\n\n\n\n{Save.persistent.armorBroken}\n{Save.persistent.weaponsSwapped}\n{Save.persistent.scrollsRead}\n{Save.persistent.potionsQuaffed}\n{Save.persistent.foodEaten}\n{Save.persistent.shurikensThrown}\n{Save.persistent.itemsTraded}\n{Save.persistent.diceRerolled}\n{Save.persistent.diceDiscarded}";
     }
 
     /// <summary>
@@ -62,22 +60,11 @@ public class Statistics : MonoBehaviour {
             // player held it all the way through
             bottomText.text = "[done]";
             soundManager.PlayClip("click1");
-            persistentData = new PersistentData();
-            File.WriteAllText(persistentPath, JsonUtility.ToJson(persistentData));
             ShowStatistics();
             for (int i = 0; i < 5; i++) { yield return oneSecond; }
             // some tactile feedback, clearing the stats.
             bottomText.text = baseText;
         }
         else { bottomText.text = baseText; }
-    }
-
-    public PersistentData LoadPersistentData() { 
-        if (File.Exists(persistentPath)) { return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath)); }
-        else { 
-            Debug.Log($"no statistics found, so just created one!");
-            File.WriteAllText(persistentPath, JsonUtility.ToJson(new PersistentData()));
-            return JsonUtility.FromJson<PersistentData>(File.ReadAllText(persistentPath));
-        }
     }
 }

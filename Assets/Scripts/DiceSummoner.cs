@@ -124,7 +124,7 @@ public class DiceSummoner : MonoBehaviour
     /// <summary>
     /// Create a single die with specified variables.
     /// </summary>
-    public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0, bool initialSix=false) {
+    public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0, bool initialSix=false,bool isFromMight=false) {
         Vector2 instantiationPos;
         // reference variable for the die's attribute
         if (attachToPlayerOrEnemy == "none") { instantiationPos = new Vector2(xCoords[i], yCoord); }
@@ -183,6 +183,14 @@ public class DiceSummoner : MonoBehaviour
         // set the color of the base
         // fade in the die
         existingDice.Add(number);
+        if (attachToPlayerOrEnemy == "player" && isFromMight)  { 
+            if (scripts.player.woundList.Contains("guts")) { 
+                StartCoroutine(number.GetComponent<Dice>().DecreaseDiceValue());
+            }
+            if (scripts.player.woundList.Contains("chest") && number.GetComponent<Dice>().diceNum >= 4) { 
+                StartCoroutine(number.GetComponent<Dice>().RerollAnimation());
+            }
+        }
         // add it to the array of existing dice so that functions can be performed on all die at once
         if (attachToPlayerOrEnemy == "player") { scripts.statSummoner.SetDebugInformationFor("player"); }
         else if (attachToPlayerOrEnemy == "enemy") { scripts.statSummoner.SetDebugInformationFor("enemy"); }

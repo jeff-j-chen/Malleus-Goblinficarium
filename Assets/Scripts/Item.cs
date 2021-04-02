@@ -449,7 +449,7 @@ public class Item : MonoBehaviour {
                             Save.game.potionDmg = scripts.player.potionStats["white"];
                             break;
                         case "might":
-                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", isFromMight:true);
                             break;
                         case "life":
                             scripts.player.woundList.Clear();
@@ -472,7 +472,7 @@ public class Item : MonoBehaviour {
                     Save.persistent.shurikensThrown++;
                     scripts.soundManager.PlayClip("shuriken");
                     // play sound clip
-                    scripts.itemManager.discardableDieCounter++;
+                    scripts.itemManager.discardableDieCounter++;print("incremented from shuriken!");
                     // increment counter
                     Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
                     if (scripts.tutorial is null) { Save.SaveGame(); }
@@ -518,7 +518,7 @@ public class Item : MonoBehaviour {
                             // notify player
                             scripts.turnManager.ChangeStaminaOf("player", -3);
                             // use stamina
-                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red");
+                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", isFromMight:true);
                             // add yellow die to red stat
                         }
                         else { scripts.turnManager.SetStatusText("not enough stamina"); }

@@ -326,7 +326,7 @@ public class TurnManager : MonoBehaviour {
                 // if they parried and had a scimitar
                 scripts.turnManager.SetStatusText("discard enemy's die");
                 // notify player
-                scripts.itemManager.discardableDieCounter++;
+                scripts.itemManager.discardableDieCounter++;print("incremented from scimitar!");
                 // increment # is discardable die
                 actionsAvailable = true;
                 // allow for player to take actions
@@ -458,12 +458,12 @@ public class TurnManager : MonoBehaviour {
         scripts.itemManager.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
         if (scripts.player.woundList.Contains("head")) { 
-            scripts.itemManager.discardableDieCounter = 0;
-            Save.game.discardableDieCounter = 0;
-        }
-        else { 
             scripts.itemManager.discardableDieCounter = 1;
             Save.game.discardableDieCounter = 1;
+        }
+        else { 
+            scripts.itemManager.discardableDieCounter = 0;
+            Save.game.discardableDieCounter = 0;
         }
         Save.game.usedMace = false;
         Save.game.usedAnkh = false;
@@ -526,6 +526,7 @@ public class TurnManager : MonoBehaviour {
             // set status text and play the animation
         }
         // else { print("invalid string passed"); }
+        ClearVariablesAfterRound();
         Save.persistent.enemiesSlain++;
         Save.game.expendedStamina = 0;
         Save.SavePersistent();
@@ -551,18 +552,16 @@ public class TurnManager : MonoBehaviour {
             spriteRenderer.color = temp;
         }
         // fade out
-        if (scripts.enemy.spawnNum == 0) {
+        if (scripts.enemy.spawnNum == 0 && playerOrEnemy == "enemy") {
             // if cloaked devil
             scripts.enemy.spawnNum = 1;
             Save.game.enemyNum = scripts.enemy.spawnNum;
             scripts.enemy.GetComponent<Animator>().runtimeAnimatorController = scripts.enemy.controllers[1];
-            if (playerOrEnemy == "enemy") { 
                 scripts.player.GetComponent<Animator>().Rebind();
                 scripts.player.GetComponent<Animator>().Update(0f);
                 scripts.enemy.GetComponent<Animator>().Rebind();
                 scripts.enemy.GetComponent<Animator>().Update(0f);
                 // reset devil animation after his cloak shatters, so it stays synced up
-            }
             // turn the cloaked into devil
             spriteRenderer.color = temp;
             DisplayWounds();
@@ -880,6 +879,7 @@ public class TurnManager : MonoBehaviour {
     /// Handles the player's attack, returns true if it was a killing blow.
     /// </summary>
     private bool PlayerAttacks() {
+        print("now the player shall attack!");
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         scripts.soundManager.PlayClip("swing");
         // play sound clip
@@ -1074,7 +1074,7 @@ public class TurnManager : MonoBehaviour {
                 scripts.enemy.DiscardBestPlayerDie();
             }
             else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
-                scripts.itemManager.discardableDieCounter++;
+                scripts.itemManager.discardableDieCounter++;print("incremented from wound!");
             }
         }
         else if (injury == "hand") {

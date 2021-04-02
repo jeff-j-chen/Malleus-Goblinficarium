@@ -55,36 +55,36 @@ public class Dice : MonoBehaviour {
             scripts.highlightCalculator.ShowValidHighlights(gameObject.GetComponent<Dice>());
             // call the from class HighlightCalculator to show all valid highlights 
         }
-        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy") {
-            // if an action can be performed on the dice (discard, reroll)
-            if (!scripts.turnManager.isMoving || (scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable)) {
-                // if the situation permits action to occur on the die
-                if (scripts.itemManager.discardableDieCounter > 0) {
-                    // if the enemy is wounded in the head and a die has not been discarded yet
-                    scripts.soundManager.PlayClip("click0");
-                    // play sound clip
-                    Color numTemp = spriteRenderer.color;
-                    Color baseTemp = childSpriteRenderer.color;
-                    numTemp.a -= 0.33f;
-                    spriteRenderer.color = numTemp;
-                    baseTemp.a -= 0.25f;
-                    childSpriteRenderer.color = baseTemp;
-                    // dim the colors of the die
-                }
-            }
-        }
-        if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && !scripts.turnManager.isMoving) {
-            // if the player wants to Save a die via scroll of courage by discarding the others
-            scripts.soundManager.PlayClip("click0");
-            // play sound clip
-            Color numTemp = spriteRenderer.color;
-            Color baseTemp = childSpriteRenderer.color;
-            numTemp.a -= 0.33f;
-            spriteRenderer.color = numTemp;
-            baseTemp.a -= 0.25f;
-            childSpriteRenderer.color = baseTemp;
-            // dim the colors of the die
-        }
+        // if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy") {
+        //     // if an action can be performed on the dice (discard, reroll)
+        //     if (!scripts.turnManager.isMoving || (scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable)) {
+        //         // if the situation permits action to occur on the die
+        //         if (scripts.itemManager.discardableDieCounter > 0) {
+        //             // if the enemy is wounded in the head and a die has not been discarded yet
+        //             scripts.soundManager.PlayClip("click0");
+        //             // play sound clip
+        //             Color numTemp = spriteRenderer.color;
+        //             Color baseTemp = childSpriteRenderer.color;
+        //             numTemp.a -= 0.33f;
+        //             spriteRenderer.color = numTemp;
+        //             baseTemp.a -= 0.25f;
+        //             childSpriteRenderer.color = baseTemp;
+        //             // dim the colors of the die
+        //         }
+        //     }
+        // }
+        // if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && !scripts.turnManager.isMoving) {
+        //     // if the player wants to Save a die via scroll of courage by discarding the others
+        //     scripts.soundManager.PlayClip("click0");
+        //     // play sound clip
+        //     Color numTemp = spriteRenderer.color;
+        //     Color baseTemp = childSpriteRenderer.color;
+        //     numTemp.a -= 0.33f;
+        //     spriteRenderer.color = numTemp;
+        //     baseTemp.a -= 0.25f;
+        //     childSpriteRenderer.color = baseTemp;
+        //     // dim the colors of the die
+        // }
     }
 
     private void OnMouseDrag() {

@@ -536,7 +536,7 @@ ScriptsOnlyBuild:
     className: OnClickToggle
   - hash:
       serializedVersion: 2
-      Hash: 8ce5bcdf436f15e7fe5a10e20f678142
+      Hash: 746cf9a3acd999b239305ab70404a352
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Statistics
