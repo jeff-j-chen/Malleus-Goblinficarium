@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
+using UnityEngine.SceneManagement;
 
 public class Scripts : MonoBehaviour {
     public Dice dice;
@@ -12,6 +12,7 @@ public class Scripts : MonoBehaviour {
     public Colors colors;
     public Player player;
     public MenuIcon menuIcon;
+    public Tutorial tutorial;
     public BackToMenu backToMenu;
     public MenuButton menuButton;
     public TurnManager turnManager;
@@ -36,6 +37,7 @@ public class Scripts : MonoBehaviour {
         colors = FindObjectOfType<Colors>();
         player = FindObjectOfType<Player>();
         menuIcon = FindObjectOfType<MenuIcon>();
+        tutorial = FindObjectOfType<Tutorial>();
         backToMenu = FindObjectOfType<BackToMenu>();
         menuButton = FindObjectOfType<MenuButton>();
         turnManager = FindObjectOfType<TurnManager>();
@@ -47,7 +49,6 @@ public class Scripts : MonoBehaviour {
         tombstoneData = FindObjectOfType<TombstoneData>();
         characterSelector = FindObjectOfType<CharacterSelector>();
         highlightCalculator = FindObjectOfType<HighlightCalculator>();
-        print("found everything!");
         foreach (float delay in delayArr) {
             delays.Add(delay, new WaitForSeconds(delay));
         }

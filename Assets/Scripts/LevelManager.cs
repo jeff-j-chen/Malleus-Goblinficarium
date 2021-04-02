@@ -60,7 +60,6 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
-        print($"save.persistent is {Save.persistent}");
         if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
         else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
         { levelText.text = $"(level {level}-{sub}*)"; }

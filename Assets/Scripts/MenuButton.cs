@@ -58,7 +58,7 @@ public class MenuButton : MonoBehaviour {
                 break;
             case "Tutorial": 
                 if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
-                Initiate.Fade("Game", Color.black, transitionMultiplier);
+                Initiate.Fade("Tutorial", Color.black, transitionMultiplier);
                 break;
             default:
                 Initiate.Fade(buttonName, Color.black, transitionMultiplier);
