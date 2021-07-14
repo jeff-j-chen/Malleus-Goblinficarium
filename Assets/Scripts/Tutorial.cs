@@ -62,7 +62,7 @@ public class Tutorial : MonoBehaviour {
         // ^ 22
         "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[click] to continue",
         // ^ 23
-        "Finally, use the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of Malleus Goblinificarium. \nYou'll learn more as you play more!"
+        "Finally, use the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of\nMalleus Goblinificarium. \nYou'll learn more as you play more!"
         // ^ 24
     };
 
@@ -75,26 +75,30 @@ public class Tutorial : MonoBehaviour {
     private void OnMouseDown() {
         scripts.soundManager.PlayClip("click0");
         if (curIndex + 1 < tutorialTextList.Count) {
+            // if within the bounds of the tutorial
             if (isAnimating) { 
-                try { StopCoroutine(mainScroll); } catch {}
-                try { StopCoroutine(statScroll); } catch {}
+                try { StopCoroutine(mainScroll); } catch { }
+                try { StopCoroutine(statScroll); } catch { }
                 isAnimating = false;
+                // if animating stop animating (skip the text scroll)
                 if (curIndex == 3) { 
                     GetComponent<SpriteRenderer>().sprite = null;
                     statText.text = "< These are your weapon stats."; 
                 }
                 else if (curIndex == 4) { statText.text = "< Accuracy\n< Speed\n< Damage\n< Parry"; }
+                // some tutorial steps have other text to display
                 tutorialText.text = tutorialTextList[curIndex];
+                // show the full text
             }
-            else { 
-                if (curIndex == 2 || curIndex == 12 || curIndex == 13 || curIndex == 19 || curIndex == 20 || curIndex == 21 || curIndex == 22) {
-
-                }
-                else { Increment(); }
+            else {
+                // animation has already finished playing
+                if (curIndex is not (2 or 12 or 13 or 19 or 20 or 21 or 22)) { Increment(); }
+                // some tutorial steps cannot be skipped through clicking, a specific player action needs tobe taken
             }
             if (curIndex == 12 && scripts.diceSummoner.existingDice.Count == 0) { scripts.diceSummoner.SummonDice(true, false);  }
             else if (curIndex == 21) { preventAttack = false; }
             else if (curIndex != 3 && curIndex != 4) { statText.text = ""; }
+            // specific tutorials have specific necessary extra things to introduce or clear from the previous step
         }
     }
 
@@ -104,12 +108,15 @@ public class Tutorial : MonoBehaviour {
         try { StopCoroutine(statScroll); } catch {}
         statText.text = "";
         tutorialText.text = "";
+        // clear everything 
         if (curIndex == 3) { 
             GetComponent<SpriteRenderer>().sprite = null;
             statScroll = StartCoroutine(TextAnimation("< These are your weapon stats.")); 
         }
         else if (curIndex == 4) { statScroll = StartCoroutine(TextAnimation("< Accuracy\n< Speed\n< Damage\n< Parry")); }
+        // some tutorial steps have extra text pointing to the stats
         mainScroll = StartCoroutine(TextAnimation(curIndex));
+        // initialize the animation scroll of the text
     }
 
     private IEnumerator TextAnimation(int index) {
@@ -119,14 +126,16 @@ public class Tutorial : MonoBehaviour {
             yield return scripts.delays[0.02f];
         }
         isAnimating = false;
+        // self explanatory, just add the text step by step for a specific tutorial index
     }
 
     private IEnumerator TextAnimation(string str) {
         isAnimating = true;
-        for (int i = 0; i < str.Length; i++) { 
-            statText.text += str[i];
+        foreach (char c in str) {
+            statText.text += c;
             yield return scripts.delays[0.02f];
         }
         isAnimating = false;
+        // same as above, but instead with a given text
     }
 }

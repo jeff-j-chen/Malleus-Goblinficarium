@@ -87,3 +87,15 @@ The following packages were updated:
   com.unity.2d.pixel-perfect from version 3.0.2 to 4.0.1
   com.unity.ide.visualstudio from version 2.0.3 to 2.0.5
   com.unity.ide.vscode from version 1.2.2 to 1.2.3
+
+=== Mon Jul 12 21:02:19 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were added:
+  com.unity.modules.nvidia@1.0.0
+The following packages were updated:
+  com.unity.2d.pixel-perfect from version 4.0.1 to 5.0.0
+  com.unity.ide.visualstudio from version 2.0.5 to 2.0.9
+  com.unity.textmeshpro from version 3.0.1 to 3.0.6
