@@ -127,6 +127,8 @@ public class Tutorial : MonoBehaviour {
         }
         isAnimating = false;
         // self explanatory, just add the text step by step for a specific tutorial index
+        if (curIndex == 21) { preventAttack = false; }
+        // enable the player to attack after the text is done scrolling
     }
 
     private IEnumerator TextAnimation(string str) {

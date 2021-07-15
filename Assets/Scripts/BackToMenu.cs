@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class BackToMenu : MonoBehaviour {
     public float transitionMultiplier = 2.5f;
-    Scripts scripts;
+    private Scripts scripts;
 
     private void Awake() {
         scripts = FindObjectOfType<Scripts>();
@@ -12,7 +12,7 @@ public class BackToMenu : MonoBehaviour {
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
             // on escape pressed
-            if (scripts != null && scripts.player != null && scripts.turnManager != null && !scripts.turnManager.isMoving) { 
+            if (scripts is not null && scripts.player is not null && scripts.turnManager is not null && !scripts.turnManager.isMoving) { 
                 // if in game and not moving
                 if (scripts.tutorial is null) { Save.SaveGame(); }
                 Save.SavePersistent();

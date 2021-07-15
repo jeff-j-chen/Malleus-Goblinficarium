@@ -8,19 +8,7 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] public int selectionNum;
     [SerializeField] public bool[] unlockedChars = new bool[4] { true, false, false, false };
     [SerializeField] public bool easy = false;
-    [SerializeField] private Sprite[] icons; 
-    private string[] quotes = new string[4] {
-        "- \"they say 68% of adventurers die of starvation...\"",
-        "- \"what comedy is your defiance, beasts!\"",
-        "- \"...breastplate costs a fortune; dodging is free...\"",
-        "- \"honestly all the carnage is making me sleepy...\"",
-    }; 
-    private string[] perks = new string[4] {
-        "* Food restores more stamina",
-        "* Gains a yellow die each round\n* Cannot use stamina",
-        "* All white dice are set to 1\n* Gains 1 stamina upon inflicting a wound",
-        "* White dice buff damage\n* Gains 3 stamina once wounded\n* As stamina reaches 10, wounds are cured and stamina is decreased by 10",
-    }; 
+    [SerializeField] private Sprite[] icons;
     [SerializeField] private Sprite releasedButton;
     [SerializeField] private Sprite pressedButton;
     [SerializeField] private GameObject leftButton;
@@ -29,8 +17,21 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI perkText;
     [SerializeField] public SimpleFadeIn simpleFadeIn;
     [SerializeField] public GameObject itemHider;
+    private readonly string[] quotes = new string[4] {
+        "- \"they say 68% of adventurers die of starvation...\"",
+        "- \"what comedy is your defiance, beasts!\"",
+        "- \"...breastplate costs a fortune; dodging is free...\"",
+        "- \"honestly all the carnage is making me sleepy...\"",
+    }; 
+    private readonly string[] perks = new string[4] {
+        "* Food restores more stamina",
+        "* Gains a yellow die each round\n* Cannot use stamina",
+        "* All white dice are set to 1\n* Gains 1 stamina upon inflicting a wound",
+        "* White dice buff damage\n* Gains 3 stamina once wounded\n* As stamina reaches 10, wounds are cured and stamina is decreased by 10",
+    }; 
     private bool preventPlayingFX = true;
     private Scripts scripts;
+    
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
@@ -100,7 +101,7 @@ public class CharacterSelector : MonoBehaviour {
     /// Select (preview) a character and display it to the player
     /// </summary>
     public void SetSelection(int num) {
-        if (0 <= num && num <= 3) {
+        if (num is >= 0 and <= 3) {
             // only allow selections between the number of available characters
             selectionNum = num;
             // set the current selection num
@@ -118,7 +119,7 @@ public class CharacterSelector : MonoBehaviour {
                 // make sure to hide items
                 quoteText.text = "beat game on previous character to unlock";
                 perkText.text = "";
-                // let player knmow that it's locked
+                // let player know that it's locked
             }
             GetComponent<SpriteRenderer>().sprite = icons[selectionNum];
             // set the character icon
@@ -132,41 +133,55 @@ public class CharacterSelector : MonoBehaviour {
             else { rightButton.transform.position = new Vector2(8.53f, 1f); }
             // same for the right button, but 
         }
-        if (num == 0) { 
-            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "harsh sword";
-            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "harsh";
-            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("sword");
-            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "steak";
-            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("steak");
-            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "torch";
-            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("torch");
-        }
-        else if (num == 1) { 
-            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "common maul";
-            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "common";
-            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("maul");
-            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "armor";
-            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("armor");
-            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "helm of might";
-            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("helm_of_might");
-        }
-        else if (num == 2) {
-            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "quick dagger";
-            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "quick";
-            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("dagger");
-            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "boots of dodge";
-            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("boots_of_dodge");
-            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "ankh";
-            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("ankh");
-        }
-        else if (num == 3) { 
-            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "ruthless mace";
-            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "ruthless";
-            scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("mace");
-            scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "cheese";
-            scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("cheese");
-            scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "kapala";
-            scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = scripts.itemManager.GetItemSprite("kapala");
+        switch (num) {
+            case 0:
+                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "harsh sword";
+                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "harsh";
+                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("sword");
+                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "steak";
+                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("steak");
+                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "torch";
+                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("torch");
+                break;
+            case 1:
+                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "common maul";
+                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "common";
+                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("maul");
+                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "armor";
+                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("armor");
+                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "helm of might";
+                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("helm_of_might");
+                break;
+            case 2:
+                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "quick dagger";
+                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "quick";
+                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("dagger");
+                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "boots of dodge";
+                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("boots_of_dodge");
+                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "ankh";
+                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("ankh");
+                break;
+            case 3:
+                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "ruthless mace";
+                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "ruthless";
+                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("mace");
+                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "cheese";
+                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("cheese");
+                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "kapala";
+                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    scripts.itemManager.GetItemSprite("kapala");
+                break;
         }
         // give the character items based on their class, even if its not unlocked because it will be hidden regardless
         scripts.itemManager.floorItems[0].GetComponent<Item>().Select(false);
@@ -176,18 +191,18 @@ public class CharacterSelector : MonoBehaviour {
     /// <summary>
     /// Changes a L/R Character Select button to its 'pressed' sprite.
     /// </summary>
-    public void ChangeToPressed(string LeftOrRight) {
+    public void ChangeToPressed(string leftOrRight) {
         // set the button to be pressed down 
-        if (LeftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = pressedButton; }
+        if (leftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = pressedButton; }
         else { rightButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = pressedButton; }
     }
 
     /// <summary>
     /// Changes a L/R Character Select button to its 'released' sprite.
     /// </summary>
-    public void ChangeToReleased(string LeftOrRight) {
+    public void ChangeToReleased(string leftOrRight) {
         // make the button pop up
-        if (LeftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = releasedButton; }
+        if (leftOrRight == "Left") { leftButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = releasedButton; }
         else { rightButton.GetComponent<CharacterSwapButton>().spriteRenderer.sprite = releasedButton; }
     }
 

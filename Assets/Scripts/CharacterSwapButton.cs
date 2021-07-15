@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class CharacterSwapButton : MonoBehaviour {
-    [SerializeField] private string LeftOrRight;
+    [SerializeField] private string leftOrRight;
     private CharacterSelector characterSelector;
     public SpriteRenderer spriteRenderer;
 
@@ -13,15 +14,15 @@ public class CharacterSwapButton : MonoBehaviour {
 
     private void OnMouseDown() {
         // when the mouse is pressed down
-        characterSelector.ChangeToPressed(LeftOrRight);
+        characterSelector.ChangeToPressed(leftOrRight);
         // change the button sprite
-        if (LeftOrRight == "Left") { characterSelector.SetSelection(characterSelector.selectionNum - 1); }
+        if (leftOrRight == "Left") { characterSelector.SetSelection(characterSelector.selectionNum - 1); }
         else { characterSelector.SetSelection(characterSelector.selectionNum + 1); }
         // move the selection left or right depending on which button was pressed
     }
 
     private void OnMouseUp() {
-        characterSelector.ChangeToReleased(LeftOrRight);
-        // change the psrite back only when the button is released
+        characterSelector.ChangeToReleased(leftOrRight);
+        // change the sprite back only when the button is released
     }
 }

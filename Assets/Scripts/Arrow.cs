@@ -3,8 +3,7 @@ using System.Collections;
 
 public class Arrow : MonoBehaviour {
     [SerializeField] public GameObject[] menuButtons;
-    // serialized field of menubuttons 
-    private Vector2[] buttonPositions = new Vector2[] { 
+    private readonly Vector2[] buttonPositions = new Vector2[] { 
         new Vector2(0.75f, 1.5f),
         new Vector2(0.75f, 0.5f),
         new Vector2(0.75f, -0.5f),
@@ -12,9 +11,8 @@ public class Arrow : MonoBehaviour {
         new Vector2(0.75f, -2.5f),
         new Vector2(0.75f, -3.5f),
     };
-
-    private float xOffset = -3.2f;
-    private float yOffset = -0.04f;
+    private readonly float xOffset = -3.2f;
+    private readonly float yOffset = -0.04f;
     // how far off the arrow should be on the x and y axes
     private int currentIndex = 1;
     // the current index of the menu item the arrow is selecting
@@ -41,10 +39,10 @@ public class Arrow : MonoBehaviour {
         // hide/show the continue button if there is a game or not
         MoveToButtonPos(currentIndex);
         // immediately move to the correct button position
-        StartCoroutine(allowFX());
+        StartCoroutine(AllowFx());
     }
 
-    private IEnumerator allowFX() { 
+    private IEnumerator AllowFx() { 
         yield return new WaitForSeconds(0.1f);
         preventPlayingFX = false;
     }
@@ -71,7 +69,7 @@ public class Arrow : MonoBehaviour {
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) {
             // if the player presses return or the numpad enter
             scripts.menuButton.ButtonPress(menuButtons[currentIndex].name);
-            // call the function for buttonpress
+            // call the function for button press
         }
     }
 
@@ -80,8 +78,8 @@ public class Arrow : MonoBehaviour {
     /// </summary>
     public void MoveToButtonPos(int index) {
         // function used to move the arrow to the desired button position
-        if (!(index == 0 && Save.game.newGame == true)) {
-            // as long as we are not trying to select continue when newgame is true (previous Save wiped)
+        if (!(index == 0 && Save.game.newGame)) {
+            // as long as we are not trying to select continue when new game is true (previous Save wiped)
             currentIndex = index;
             transform.position = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);
             // move the arrow to the menu icon at the index, with offset

@@ -15,7 +15,7 @@ public class Dice : MonoBehaviour {
     private SpriteRenderer childSpriteRenderer;
     private Scripts scripts;
 
-    private WaitForSeconds[] rollTimes = { new WaitForSeconds(0.01f), new WaitForSeconds(0.03f), new WaitForSeconds(0.06f), new WaitForSeconds(0.09f), new WaitForSeconds(0.12f), new WaitForSeconds(0.15f), new WaitForSeconds(0.18f), new WaitForSeconds(0.21f), new WaitForSeconds(0.24f), new WaitForSeconds(0.3f) };
+    private readonly WaitForSeconds[] rollTimes = { new WaitForSeconds(0.01f), new WaitForSeconds(0.03f), new WaitForSeconds(0.06f), new WaitForSeconds(0.09f), new WaitForSeconds(0.12f), new WaitForSeconds(0.15f), new WaitForSeconds(0.18f), new WaitForSeconds(0.21f), new WaitForSeconds(0.24f), new WaitForSeconds(0.3f) };
     // different times for rolling 
 
     private void Awake()  {
@@ -24,12 +24,15 @@ public class Dice : MonoBehaviour {
         // assign the necessary sprite renderers
     }
 
-    private void Start() { StartCoroutine(FadeIn()); }
+    private void Start() {
+        StartCoroutine(FadeIn());
+    }
 
     private void OnMouseDown() {
         // as soon as the mouse button is pressed down
         if (scripts.tutorial != null) { 
-            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13)  {
+            // if within the tutorial, make sure player can only do certain actions (so that they win)
+            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex is 12 or 13)  {
                 if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDown(); }
                 // only allow the red 6 to be picked
                 else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDown(); }
@@ -40,6 +43,7 @@ public class Dice : MonoBehaviour {
             }
         }
         else { DiceDown(); }
+        // else just regular dice down
     }
 
     /// <summary>
@@ -55,6 +59,8 @@ public class Dice : MonoBehaviour {
             scripts.highlightCalculator.ShowValidHighlights(gameObject.GetComponent<Dice>());
             // call the from class HighlightCalculator to show all valid highlights 
         }
+        // LOOKS BETTER BUT CAUSES GLITCHES, FIX IN THE FUTURE
+        
         // if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy") {
         //     // if an action can be performed on the dice (discard, reroll)
         //     if (!scripts.turnManager.isMoving || (scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable)) {
@@ -86,16 +92,26 @@ public class Dice : MonoBehaviour {
         //     // dim the colors of the die
         // }
     }
+    
+    private void OnMouseUp() {
+        // self explanatory, tutorial restricts which dice can be picked, else is just normal
+        if (scripts.tutorial != null) { 
+            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13) {
+                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceUp(); }
+                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceUp(); }
+                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceUp(); }
+                else { scripts.turnManager.SetStatusText("bad choice"); }
+            }
+        }
+        else { DiceUp(); }
+    }
 
     private void OnMouseDrag() {
         if (scripts.tutorial != null) { 
             if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13) {
                 if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDrag(); }
-                // only allow the red 6 to be picked
                 else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDrag(); }
-                // then take the green
                 else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceDrag(); }
-                // after that it doesnt matter
                 else { scripts.turnManager.SetStatusText("bad choice"); }
             }
         }
@@ -120,23 +136,8 @@ public class Dice : MonoBehaviour {
         }
     }
 
-    private void OnMouseUp() {
-        if (scripts.tutorial != null) { 
-            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13) {
-                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceUp(); }
-                // only allow the red 6 to be picked
-                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceUp(); }
-                // then take the green
-                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceUp(); }
-                // after that it doesnt matter
-                else { scripts.turnManager.SetStatusText("bad choice"); }
-            }
-        }
-        else { DiceUp(); }
-    }
-
     /// <summary>
-    /// Handle what happpens when the player releases a dice.
+    /// Handle what happens when the player releases a dice.
     /// </summary>
     private void DiceUp() {
         // when the mouse is released
@@ -250,8 +251,7 @@ public class Dice : MonoBehaviour {
     /// Coroutine for playing the animation and rerolling the dice.
     /// </summary>
     public IEnumerator RerollAnimation(bool playSound=true) {
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-        // assign the spritrenderer reference
+        // assign the spriterenderer reference
         for (int i = 0; i < 10; i++) {
             // 10 times
             yield return rollTimes[i];
@@ -261,7 +261,7 @@ public class Dice : MonoBehaviour {
             int randNum = UnityEngine.Random.Range(1, 7);
             // get a random number for the dice 
             spriteRenderer.sprite = scripts.diceSummoner.numArr[randNum - 1].GetComponent<SpriteRenderer>().sprite;
-            // asisgn the sprite to be the necessary sprite with the new number
+            // assign the sprite to be the necessary sprite with the new number
             diceNum = randNum;
             // reassign the die's number
         }
@@ -298,7 +298,7 @@ public class Dice : MonoBehaviour {
     public void SetToOne() {
         // pretty self explanatory
         diceNum = 1;
-        GetComponent<SpriteRenderer>().sprite = scripts.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
+        spriteRenderer.sprite = scripts.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
         scripts.statSummoner.SetDebugInformationFor("player");
         // this can only happen to player, so don't worry about enemies stuff
         scripts.diceSummoner.SaveDiceValues();
@@ -333,7 +333,9 @@ public class Dice : MonoBehaviour {
                 for (int i = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedPlayerDice[statAddedTo].Count; i++) { 
                     // for every die following this current die
                     GameObject curDie = scripts.statSummoner.addedPlayerDice[statAddedTo][i].gameObject;
-                    curDie.transform.position = new Vector3(curDie.transform.position.x - scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
+                    Vector3 position = curDie.transform.position;
+                    position = new Vector3(position.x - scripts.statSummoner.diceOffset, position.y, position.z);
+                    curDie.transform.position = position;
                     // shift each die back one, because this die will decrease to 0 and fade out
                 }
             }
@@ -341,7 +343,9 @@ public class Dice : MonoBehaviour {
                 // else the die is attached to the enemy
                 for (int i = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedEnemyDice[statAddedTo].Count; i++) { 
                     GameObject curDie = scripts.statSummoner.addedEnemyDice[statAddedTo][i].gameObject;
-                    curDie.transform.position = new Vector3(curDie.transform.position.x + scripts.statSummoner.diceOffset, curDie.transform.position.y, curDie.transform.position.z);
+                    Vector3 position = curDie.transform.position;
+                    position = new Vector3(position.x + scripts.statSummoner.diceOffset, position.y, position.z);
+                    curDie.transform.position = position;
                 }
                 // same situation as above, shift the die (except forwards this time)
             }
@@ -363,7 +367,7 @@ public class Dice : MonoBehaviour {
     /// <summary>
     /// Coroutine for fading in a die.
     /// </summary>
-    public IEnumerator FadeIn() {
+    private IEnumerator FadeIn() {
         // very similar to fadeout
         spriteRenderer = GetComponent<SpriteRenderer>();
         childSpriteRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
