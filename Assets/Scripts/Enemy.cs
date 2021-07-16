@@ -19,13 +19,13 @@ public class Enemy : MonoBehaviour {
     public List<string> woundList = new List<string>();
     public bool isDead = false;
     public Dictionary<string, int> stats;
-    private string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone" };
-    private string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
+    private readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone" };
+    private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
     public int stamina = 1;
     public int targetIndex = 0;
-    private Vector2 basePosition = new Vector2(1.9f, -1.866667f);
-    private Vector2 iconPosition = new Vector2(6.16667f, 3.333333f);
-    private Dictionary<string, Vector2> deathPositions = new Dictionary<string, Vector2>() {
+    private readonly Vector2 basePosition = new Vector2(1.9f, -1.866667f);
+    private readonly Vector2 iconPosition = new Vector2(6.16667f, 3.333333f);
+    private readonly Dictionary<string, Vector2> deathPositions = new Dictionary<string, Vector2>() {
         {"Devil", new Vector2(2.24f, -2.25f)},
         {"Lich", new Vector2(1.9f, -1.865334f)},
         {"Skeleton", new Vector2(2.1686665f, -2.117f)},
@@ -33,11 +33,11 @@ public class Enemy : MonoBehaviour {
         {"Gog", new Vector2(2.0360003f, -2.52f)},
         {"Goblin", new Vector2(2.1f, -2.52f)},
     };
-    private Dictionary<string, Vector2> offsetPositions = new Dictionary<string, Vector2>() {
+    private readonly Dictionary<string, Vector2> offsetPositions = new Dictionary<string, Vector2>() {
         {"Devil", new Vector2(1.9f, -1.33334f)},
         {"Tombstone", new Vector2(1.9f, -2.118f)},
     };
-    private Dictionary<string, int> givenStamina = new Dictionary<string, int>() {
+    private readonly Dictionary<string, int> givenStamina = new Dictionary<string, int>() {
         {"11", 1},
         {"12", 1},
         {"13", 2},
@@ -51,8 +51,8 @@ public class Enemy : MonoBehaviour {
     };
     private Scripts scripts;
     public int spawnNum;
-    List<Dice> availableDice = new List<Dice>();
-    List<int> diceValuations = new List<int>();
+    private readonly List<Dice> availableDice = new List<Dice>();
+    private readonly List<int> diceValuations = new List<int>();
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -121,7 +121,7 @@ public class Enemy : MonoBehaviour {
         // for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 6); i >= 0; i--) {
         for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7); i >= 0; i--) {
             // print($"enemy target starting at its accuracy stat, {Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7)}");
-;           // iterating through the array backwards
+           // iterating through the array backwards
             if (!scripts.player.woundList.Contains(scripts.turnManager.targetArr[i])) {
                 // if the player does not have the wound
                 targetIndex = i;
@@ -175,7 +175,7 @@ public class Enemy : MonoBehaviour {
             else {
                 // if the dice is yellow
                 chosenDie.statAddedTo = "red";
-                scripts.statSummoner.AddDiceToEnemy("red", chosenDie);
+                scripts.statSummoner.AddDiceToEnemy("red", chosenDie); 
                 // attach to red
                 chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX("red"), scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, "red")] - 0.01f);
                 // set the correct transform position
@@ -316,23 +316,24 @@ public class Enemy : MonoBehaviour {
     /// <summary>
     /// Do not call this coroutine, use DiscardBestPlayerDie() instead.
     /// </summary>
-    public IEnumerator DiscardBestPlayerDieCoro() {
+    private IEnumerator DiscardBestPlayerDieCoro() {
+        print("hello");
         // maybe change this in the future to discard situationally (e.g. discard blue so it can get a first hit if its going to get hit regardless)
         yield return scripts.delays[0.25f];
         // dont discard immediately, otherwise its buggy
-        List<Dice> availableDice = new List<Dice>();
-        List<int> diceValuations = new List<int>();
+        List<Dice> curAvailableDice = new List<Dice>();
+        List<int> curDiceValuations = new List<int>();
         // create lists to store the information in
-        for (int i = 0; i < scripts.diceSummoner.existingDice.Count; i++) { 
+        foreach (GameObject curDice in scripts.diceSummoner.existingDice) {
             // for every existing dice
-            Dice diceScript = scripts.diceSummoner.existingDice[i].GetComponent<Dice>();
-            if (scripts.diceSummoner.existingDice[i].GetComponent<Dice>().isOnPlayerOrEnemy == "player") { 
-                availableDice.Add(diceScript);
-                diceValuations.Add(Array.IndexOf(valueArr, diceScript.diceType + diceScript.diceNum));
+            Dice diceScript = curDice.GetComponent<Dice>();
+            if (curDice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") { 
+                curAvailableDice.Add(diceScript);
+                curDiceValuations.Add(Array.IndexOf(valueArr, diceScript.diceType + diceScript.diceNum));
                 // add all the information (script and each die's valuation), only if on player
             }
         }
-        Dice chosenDie = availableDice[diceValuations.IndexOf(diceValuations.Min())];
+        Dice chosenDie = curAvailableDice[curDiceValuations.IndexOf(curDiceValuations.Min())];
         // choose the best die (lowest valuation = best)
         chosenDie.DiscardFromPlayer();
         // discard it

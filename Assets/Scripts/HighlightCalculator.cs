@@ -5,13 +5,13 @@ using System.Linq;
 
 public class HighlightCalculator : MonoBehaviour {
     [SerializeField] private GameObject highlighter;
-    private GameObject[] highlights = new GameObject[4];
-    private BoxCollider2D[] highlightColliders = new BoxCollider2D[4];
+    private readonly GameObject[] highlights = new GameObject[4];
+    private readonly BoxCollider2D[] highlightColliders = new BoxCollider2D[4];
     private Scripts scripts;
-    private Vector2 offScreen = new Vector2(0, 20);
+    private readonly Vector2 offScreen = new Vector2(0, 20);
     public int diceTakenByPlayer = 0;
-    private Vector2 small = new Vector2(10f, 1f);
-    private Vector2 large = new Vector2(10f, 10f);
+    private readonly Vector2 small = new Vector2(10f, 1f);
+    private readonly Vector2 large = new Vector2(10f, 10f);
 
 
     private void Start() {
@@ -115,7 +115,7 @@ public class HighlightCalculator : MonoBehaviour {
                 }
                 if (scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Count > 0) {
                     dice.instantiationPos = new Vector2(scripts.statSummoner.addedPlayerDice[dice.statAddedTo][scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.x + scripts.statSummoner.diceOffset, scripts.statSummoner.addedPlayerDice[dice.statAddedTo][scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.y);
-                    // create an instatiation position at the end of the die stack
+                    // create an instantiation position at the end of the die stack
                 }
             }
         }
@@ -125,22 +125,22 @@ public class HighlightCalculator : MonoBehaviour {
     /// Handles dice drops of all kinds.
     /// </summary>
     private void HandleAllDiceDrops(Dice dice, ref bool moveable, ref Vector3 instantiationPos, Vector3 mousePos) {
-        foreach (BoxCollider2D collider in highlightColliders) {
+        foreach (BoxCollider2D curCollider in highlightColliders) {
             // for each collider
-            if (collider.OverlapPoint(mousePos)) {
+            if (curCollider.OverlapPoint(mousePos)) {
                 // if the mouse over the collider
-                instantiationPos = collider.transform.position;
-                // set the instantation position to be where the highligth is
+                instantiationPos = curCollider.transform.position;
+                // set the instantiation position to be where the highlight is
                 if (dice.diceType == "yellow" || scripts.player.isFurious) {
                     // if the dice is yellow or player is furious
                     if (scripts.player.isFurious) {
-                        if (dice.diceType == "green" || dice.diceType == "red" || dice.diceType == "blue") { dice.GetComponent<SpriteRenderer>().color = Color.black; }
+                        if (dice.diceType is "green" or "red" or "blue") { dice.GetComponent<SpriteRenderer>().color = Color.black; }
                         // change the color of the spots to match the die
                         dice.transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
                         dice.diceType = scripts.colors.colorNameArr[4];
                         // make the die yellow
                     }
-                    HandleYellowDrop(scripts.colors.colorNameArr[Array.IndexOf(highlightColliders, collider)], dice, collider);
+                    HandleYellowDrop(scripts.colors.colorNameArr[Array.IndexOf(highlightColliders, curCollider)], dice);
                     // do stuff for yellow die
                 }
                 else {
@@ -173,7 +173,7 @@ public class HighlightCalculator : MonoBehaviour {
                     if (scripts.player.woundList.Contains("chest") && dice.diceNum >= 4) {
                         // if injured in chest and die num is 4 or more
                         StartCoroutine(dice.RerollAnimation());
-                        // reroll the die, use the coroutine rather than reroll() because reroll is for player alterting others only
+                        // reroll the die, use the coroutine rather than reroll() because reroll is for player altering others only
                     }
                     if (scripts.player.woundList.Contains("head") && diceTakenByPlayer >= 3) {
                         // if injured in head the player has taken 3 dice 
@@ -209,7 +209,7 @@ public class HighlightCalculator : MonoBehaviour {
                 scripts.statSummoner.SetDebugInformationFor("player");
                 // set the debug information
                 return;
-                // found a collider so no need to check others, just end funciton
+                // found a collider so no need to check others, just end function
             }   
         }
     }
@@ -234,7 +234,7 @@ public class HighlightCalculator : MonoBehaviour {
     /// <summary>
     /// Handle a yellow dice being dropped on to a highlight.
     /// </summary>
-    private void HandleYellowDrop(string addTo, Dice dice, BoxCollider2D collider) {
+    private void HandleYellowDrop(string addTo, Dice dice) {
         scripts.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to player's die list
         dice.statAddedTo = addTo;

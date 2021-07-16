@@ -12,7 +12,7 @@ public class BackToMenu : MonoBehaviour {
     private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
             // on escape pressed
-            if (scripts is not null && scripts.player is not null && scripts.turnManager is not null && !scripts.turnManager.isMoving) { 
+            if (scripts != null && scripts.player != null && scripts.turnManager != null && !scripts.turnManager.isMoving) { 
                 // if in game and not moving
                 if (scripts.tutorial is null) { Save.SaveGame(); }
                 Save.SavePersistent();

@@ -248,6 +248,7 @@ public class Item : MonoBehaviour {
                         scripts.levelManager.lockActions = true;
                         Initiate.Fade("Game", Color.black, scripts.backToMenu.transitionMultiplier);
                         scripts.soundManager.PlayClip("next");
+                        scripts.music.FadeVolume("Through");
                         // reload scene
                     }
                     else if (!scripts.turnManager.isMoving && scripts.player.inventory.Contains(gameObject)) {

@@ -12,8 +12,8 @@ public class DiceSummoner : MonoBehaviour
     private Scripts scripts;
     public List<GameObject> existingDice = new List<GameObject>();
     public float yCoord = -5.51f;
-    private float[] xCoords = new float[] { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
-    private List<Color> generatedTypes = new List<Color>();
+    private readonly float[] xCoords = new float[] { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
+    private readonly List<Color> generatedTypes = new List<Color>();
     public int lastNum;
     public string lastType;
     public string lastStat;
@@ -32,7 +32,7 @@ public class DiceSummoner : MonoBehaviour
     // }
 
     /// <summary>
-    /// Summon the intiial round of dice.
+    /// Summon the initial round of dice.
     /// </summary>
     public void SummonDice(bool initialSummon, bool newSet) {
         StartCoroutine(SummonAfterFade(initialSummon, newSet));
@@ -76,7 +76,7 @@ public class DiceSummoner : MonoBehaviour
                 foreach (string typeToGen in scripts.itemManager.statArr) {
                     // generate a die for every stat
                     GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
-                    // attach it to the devl
+                    // attach it to the devil
                 }
             }
             if (lastNum != -1) {
@@ -91,7 +91,7 @@ public class DiceSummoner : MonoBehaviour
             for (int i = 0; i < Save.game.diceTypes.Count; i++) {
                 // for every die
                 if (Save.game.dicePlayerOrEnemy[i] == "none") {
-                    // if its not attached, its part of the 6 pickupable
+                    // if its not attached, its part of the 6 pickup-able
                     GenerateSingleDie(
                         Save.game.diceNumbers[i],
                         Save.game.diceTypes[i],
@@ -139,9 +139,7 @@ public class DiceSummoner : MonoBehaviour
         else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
         int diceColorIndex;
         // reference variable for the die's color index relative to scripts.color.coloArr
-        if (diceType is null) { diceColorIndex = Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]); }
-        // generate the respected die from the type list if not given a set die type
-        else { diceColorIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType); }
+        diceColorIndex = diceType is null ? Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]) : Array.IndexOf(scripts.colors.colorNameArr, diceType);
         // else create one of the specified type
         GameObject number = Instantiate(numArr[diceNum - 1], instantiationPos, Quaternion.identity);
         GameObject indivBase = Instantiate(diceBase, instantiationPos, Quaternion.identity);
@@ -279,11 +277,7 @@ public class DiceSummoner : MonoBehaviour
     /// <summary>
     /// Return the number of dice that have yet to be picked.
     /// </summary>
-    public int CountUnattachedDice() { 
-        int count = 0;
-        foreach (GameObject gameObject in existingDice) { 
-            if (gameObject.GetComponent<Dice>().isAttached == false) { count++; }
-        }
-        return count;
+    public int CountUnattachedDice() {
+        return existingDice.Count(curObject => curObject.GetComponent<Dice>().isAttached == false);
     }
 }
