@@ -1,15 +1,14 @@
-﻿using UnityEngine;
-using System.Collections; 
-
+﻿using System.Collections;
+using UnityEngine;
 public class Arrow : MonoBehaviour {
     [SerializeField] public GameObject[] menuButtons;
-    private readonly Vector2[] buttonPositions = new Vector2[] { 
-        new Vector2(0.75f, 1.5f),
-        new Vector2(0.75f, 0.5f),
-        new Vector2(0.75f, -0.5f),
-        new Vector2(0.75f, -1.5f),
-        new Vector2(0.75f, -2.5f),
-        new Vector2(0.75f, -3.5f),
+    private readonly Vector2[] buttonPositions = { 
+        new(0.75f, 1.5f),
+        new(0.75f, 0.5f),
+        new(0.75f, -0.5f),
+        new(0.75f, -1.5f),
+        new(0.75f, -2.5f),
+        new(0.75f, -3.5f),
     };
     private readonly float xOffset = -3.2f;
     private readonly float yOffset = -0.04f;
@@ -24,7 +23,7 @@ public class Arrow : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         // find scripts
         Save.LoadGame();
-        if (Save.game.newGame == true) { 
+        if (Save.game.newGame) { 
             menuButtons[0].SetActive(false); 
             for (int i = 1; i < menuButtons.Length; i++) { 
                 menuButtons[i].transform.position = buttonPositions[i-1];
@@ -59,7 +58,7 @@ public class Arrow : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow)) {
             // if player pressed up
-            if (currentIndex - 1 >= 0 && Save.game.newGame == false || currentIndex - 1 >= 1 && Save.game.newGame == true) {
+            if (currentIndex - 1 >= 0 && Save.game.newGame == false || currentIndex - 1 >= 1 && Save.game.newGame) {
                 // if can move the selector (arrow) up
                 currentIndex--;
                 MoveToButtonPos(currentIndex);

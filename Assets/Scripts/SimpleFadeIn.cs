@@ -1,14 +1,12 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 public class SimpleFadeIn : MonoBehaviour
 {
     [SerializeField] public SpriteRenderer boxSR;
     [SerializeField] public bool lockChanges = false;
-    private WaitForSeconds zeroPointTwoFive = new WaitForSeconds(0.25f);
-    private WaitForSeconds pointZeroThreeThree = new WaitForSeconds(0.033f);
+    private WaitForSeconds zeroPointTwoFive = new(0.25f);
+    private WaitForSeconds pointZeroThreeThree = new(0.033f);
     // can't use scripts.delays because its weird
     Scripts scripts;
     private void Start() {

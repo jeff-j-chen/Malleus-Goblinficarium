@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
 using System.Linq;
-
+using TMPro;
+using UnityEngine;
 public class StatSummoner : MonoBehaviour {
     [SerializeField] private GameObject plus;
     [SerializeField] private GameObject minus;
@@ -18,29 +17,29 @@ public class StatSummoner : MonoBehaviour {
     public readonly float diceOffset = 1f;
     private readonly float buttonXCoord = -11.7f;
     private readonly float buttonXOffset = -0.6f;
-    public readonly float[] yCoords = new float[] { 8.77f, 7.77f, 6.77f, 5.77f };
-    public readonly Vector2 baseDebugPos = new Vector2(-1.667f, 7.333f);
-    private List<GameObject> existingStatSquares = new List<GameObject>();
-    [SerializeField] public Dictionary<string, List<Dice>> addedPlayerDice = new Dictionary<string, List<Dice>>() {
+    public readonly float[] yCoords = { 8.77f, 7.77f, 6.77f, 5.77f };
+    public readonly Vector2 baseDebugPos = new(-1.667f, 7.333f);
+    private List<GameObject> existingStatSquares = new();
+    [SerializeField] public Dictionary<string, List<Dice>> addedPlayerDice = new() {
         { "green", new List<Dice>() },
         { "blue", new List<Dice>() },
         { "red", new List<Dice>() },
         { "white", new List<Dice>() },
     };
-    public Dictionary<string, List<Dice>> addedEnemyDice = new Dictionary<string, List<Dice>>() {
+    public Dictionary<string, List<Dice>> addedEnemyDice = new() {
         { "green", new List<Dice>() },
         { "blue", new List<Dice>() },
         { "red", new List<Dice>() },
         { "white", new List<Dice>() },
     };
-    public Dictionary<string, int> addedPlayerStamina = new Dictionary<string, int>() {
+    public Dictionary<string, int> addedPlayerStamina = new() {
         { "green", 0 },
         { "blue", 0 },
         { "red", 0 },
         { "white", 0 },
     };
 
-    public Dictionary<string, int> addedEnemyStamina = new Dictionary<string, int>() {
+    public Dictionary<string, int> addedEnemyStamina = new() {
         { "green", 0 },
         { "blue", 0 },
         { "red", 0 },
@@ -91,34 +90,30 @@ public class StatSummoner : MonoBehaviour {
             Debug.LogError("Invalid stat to get the sum of");
             return 0;
         }
-        else {
-            if (playerOrEnemy == "player") {
-                // get for player
-                if (scripts.enemy.woundList.Contains("knee") && stat == "blue" && scripts.enemy.enemyName.text != "Lich") { return 99; }
-                // return 99 if enemy has knee wound (lich not affected by wounds)
-                int sum = scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];
-                // get the sum of base stats + potion + stamina + necklet
-                foreach (Dice dice in addedPlayerDice[stat]) {
-                    // add to the sum all the added die
-                    if (dice != null) { sum += dice.GetComponent<Dice>().diceNum; }
-                }
-                return sum;
-                // return the end
+        if (playerOrEnemy == "player") {
+            // get for player
+            if (scripts.enemy.woundList.Contains("knee") && stat == "blue" && scripts.enemy.enemyName.text != "Lich") { return 99; }
+            // return 99 if enemy has knee wound (lich not affected by wounds)
+            int sum = scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];
+            // get the sum of base stats + potion + stamina + necklet
+            foreach (Dice dice in addedPlayerDice[stat]) {
+                // add to the sum all the added die
+                if (dice != null) { sum += dice.GetComponent<Dice>().diceNum; }
             }
-            else if (playerOrEnemy == "enemy") {
-                // get for enemy, similar process to getting from player
-                if (scripts.player.woundList.Contains("knee") && stat == "blue") { return 99; }
-                int sum = scripts.enemy.stats[stat] + addedEnemyStamina[stat];
-                foreach (Dice dice in addedEnemyDice[stat]) {
-                    if (dice != null) { sum += dice.GetComponent<Dice>().diceNum; }
-                }
-                return sum;
-            }
-            else {
-                Debug.LogError("Can only get the stats of a player or an enemy");
-                return 0;
-            }
+            return sum;
+            // return the end
         }
+        if (playerOrEnemy == "enemy") {
+            // get for enemy, similar process to getting from player
+            if (scripts.player.woundList.Contains("knee") && stat == "blue") { return 99; }
+            int sum = scripts.enemy.stats[stat] + addedEnemyStamina[stat];
+            foreach (Dice dice in addedEnemyDice[stat]) {
+                if (dice != null) { sum += dice.GetComponent<Dice>().diceNum; }
+            }
+            return sum;
+        }
+        Debug.LogError("Can only get the stats of a player or an enemy");
+        return 0;
     }
 
     /// <summary>
@@ -304,7 +299,7 @@ public class StatSummoner : MonoBehaviour {
     /// Return the outermost player's x coordinate to add dice onto.
     /// </summary>
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
-        if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
+        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; };
         // not setting the optional variable will just default it to the base stat type
         return xCoord + ((Mathf.Abs(scripts.player.stats[statType] + scripts.player.potionStats[statType] + scripts.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
@@ -314,7 +309,7 @@ public class StatSummoner : MonoBehaviour {
     /// Get the outermost enemy's x coordinate to add dice onto.
     /// </summary>
     public float OutermostEnemyX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
-        if (optionalDiceOffsetStatToMultiplyBy is null) { optionalDiceOffsetStatToMultiplyBy = statType; };
+        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; };
         return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) + addedEnemyStamina[statType] - 1) * -xOffset)  - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
         // similar to outermostplayerx
     }
@@ -323,9 +318,9 @@ public class StatSummoner : MonoBehaviour {
     /// Set the debug information for player or enemy.
     /// </summary>
     public void SetDebugInformationFor(string playerOrEnemy) {
-        if (scripts.tutorial is null) {
+        if (scripts.tutorial == null) {
             if (playerOrEnemy == "player") {
-                float furthest = (new float[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
+                float furthest = (new[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
                 if (furthest >= -3.8) { playerDebug.transform.position = new Vector2(furthest + 1.333f, baseDebugPos.y); }
                 else { playerDebug.transform.position = new Vector2(baseDebugPos.x, baseDebugPos.y); }
                 playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";

@@ -1,11 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Linq;
 using TMPro;
-using System;
-
+using UnityEngine;
+using UnityEngine.SceneManagement;
 public class ItemManager : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI lootText;
     [SerializeField] public TextMeshProUGUI itemDesc;
@@ -17,52 +15,52 @@ public class ItemManager : MonoBehaviour {
     [SerializeField] public Sprite[] weaponSprites;
     [SerializeField] private Sprite[] otherSprites;
     [SerializeField] public List<GameObject> floorItems;
-    public List<GameObject> deletionQueue = new List<GameObject>();
-    public string[] statArr = new string[] { "green", "blue", "red", "white" };
-    public string[] statArr1 = new string[] { "accuracy", "speed", "damage", "parry" };
-    public Dictionary<string, Dictionary<string, int>> weaponDict = new Dictionary<string, Dictionary<string, int>>() {
-        { "dagger",   new Dictionary<string, int>() { { "green", 2 }, { "blue", 4 }, { "red", 0 }, { "white", 0 } } },
-        { "flail",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 3 }, { "red", 1 }, { "white", 0 } } },
-        { "hatchet",  new Dictionary<string, int>() { { "green", 1 }, { "blue", 2 }, { "red", 2 }, { "white", 1 } } },
-        { "mace",     new Dictionary<string, int>() { { "green", 1 }, { "blue", 3 }, { "red", 2 }, { "white", 0 } } },
-        { "maul",     new Dictionary<string, int>() { { "green",-1 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
-        { "montante", new Dictionary<string, int>() { { "green", 1 }, { "blue", 1 }, { "red", 3 }, { "white", 2 } } },
-        { "rapier",   new Dictionary<string, int>() { { "green", 4 }, { "blue", 2 }, { "red",-1 }, { "white", 1 } } },
-        { "scimitar", new Dictionary<string, int>() { { "green", 0 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
-        { "spear",    new Dictionary<string, int>() { { "green", 2 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
-        { "sword",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
+    public List<GameObject> deletionQueue = new();
+    public string[] statArr = { "green", "blue", "red", "white" };
+    public string[] statArr1 = { "accuracy", "speed", "damage", "parry" };
+    private readonly Dictionary<string, Dictionary<string, int>> weaponDict = new() {
+        { "dagger",   new Dictionary<string, int> { { "green", 2 }, { "blue", 4 }, { "red", 0 }, { "white", 0 } } },
+        { "flail",    new Dictionary<string, int> { { "green", 0 }, { "blue", 3 }, { "red", 1 }, { "white", 0 } } },
+        { "hatchet",  new Dictionary<string, int> { { "green", 1 }, { "blue", 2 }, { "red", 2 }, { "white", 1 } } },
+        { "mace",     new Dictionary<string, int> { { "green", 1 }, { "blue", 3 }, { "red", 2 }, { "white", 0 } } },
+        { "maul",     new Dictionary<string, int> { { "green",-1 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
+        { "montante", new Dictionary<string, int> { { "green", 1 }, { "blue", 1 }, { "red", 3 }, { "white", 2 } } },
+        { "rapier",   new Dictionary<string, int> { { "green", 4 }, { "blue", 2 }, { "red",-1 }, { "white", 1 } } },
+        { "scimitar", new Dictionary<string, int> { { "green", 0 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
+        { "spear",    new Dictionary<string, int> { { "green", 2 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
+        { "sword",    new Dictionary<string, int> { { "green", 1 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
     };  
-    public string[] weaponNames = new string[] { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
-    public Dictionary<string, Dictionary<string, int>> modifierDict = new Dictionary<string, Dictionary<string, int>>() {
-        { "accurate0", new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "accurate1", new Dictionary<string, int>() { { "green", 2 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
-        { "brisk0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red",-1 }, { "white", 0 } } },
-        { "brisk1",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white",-1 } } },
-        { "blunt0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
-        { "blunt1",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red",-1 }, { "white", 1 } } },
-        { "common0",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common1",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common2",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common3",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common4",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "common5",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "heavy0",    new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
-        { "heavy1",    new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
-        { "nimble0",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white",-1 } } },
-        { "nimble1",   new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red",-1 }, { "white", 1 } } },
-        { "precise0",  new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red",-1 }, { "white", 0 } } },
-        { "precise1",  new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
-        { "ruthless0", new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red",-1 }, { "white", 1 } } },
-        { "ruthless1", new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red",-1 }, { "white", 0 } } },
-        { "stable0",   new Dictionary<string, int>() { { "green",-1 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
-        { "stable1",   new Dictionary<string, int>() { { "green", 0 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
-        { "sharp0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 1 }, { "white", 0 } } },
-        { "sharp1",    new Dictionary<string, int>() { { "green", 1 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
-        { "harsh0",    new Dictionary<string, int>() { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
-        { "quick0",    new Dictionary<string, int>() { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white", 0 } } },
+    public string[] weaponNames = { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
+    private readonly Dictionary<string, Dictionary<string, int>> modifierDict = new() {
+        { "accurate0", new Dictionary<string, int> { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "accurate1", new Dictionary<string, int> { { "green", 2 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
+        { "brisk0",    new Dictionary<string, int> { { "green", 0 }, { "blue", 1 }, { "red",-1 }, { "white", 0 } } },
+        { "brisk1",    new Dictionary<string, int> { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white",-1 } } },
+        { "blunt0",    new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
+        { "blunt1",    new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red",-1 }, { "white", 1 } } },
+        { "common0",   new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common1",   new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common2",   new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common3",   new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common4",   new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "common5",   new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "heavy0",    new Dictionary<string, int> { { "green", 0 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
+        { "heavy1",    new Dictionary<string, int> { { "green", 0 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
+        { "nimble0",   new Dictionary<string, int> { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white",-1 } } },
+        { "nimble1",   new Dictionary<string, int> { { "green", 0 }, { "blue", 1 }, { "red",-1 }, { "white", 1 } } },
+        { "precise0",  new Dictionary<string, int> { { "green", 1 }, { "blue", 0 }, { "red",-1 }, { "white", 0 } } },
+        { "precise1",  new Dictionary<string, int> { { "green", 1 }, { "blue",-1 }, { "red", 0 }, { "white", 0 } } },
+        { "ruthless0", new Dictionary<string, int> { { "green", 1 }, { "blue",-1 }, { "red",-1 }, { "white", 1 } } },
+        { "ruthless1", new Dictionary<string, int> { { "green", 1 }, { "blue",-1 }, { "red",-1 }, { "white", 0 } } },
+        { "stable0",   new Dictionary<string, int> { { "green",-1 }, { "blue", 0 }, { "red", 0 }, { "white", 1 } } },
+        { "stable1",   new Dictionary<string, int> { { "green", 0 }, { "blue",-1 }, { "red", 0 }, { "white", 1 } } },
+        { "sharp0",    new Dictionary<string, int> { { "green", 0 }, { "blue", 0 }, { "red", 1 }, { "white", 0 } } },
+        { "sharp1",    new Dictionary<string, int> { { "green", 1 }, { "blue",-1 }, { "red", 1 }, { "white", 0 } } },
+        { "harsh0",    new Dictionary<string, int> { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
+        { "quick0",    new Dictionary<string, int> { { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white", 0 } } },
     };
-    private string[] modifierNames = new string[] { "accurate0", "accurate1", "brisk0", "brisk1", "blunt0", "blunt1", "common0", "common1", "common2", "common3", "common4", "common5", "heavy0", "heavy1", "nimble0", "nimble1", "precise0", "precise1", "ruthless0", "ruthless1", "stable0", "stable1", "sharp0", "sharp1", "harsh0", "quick0" };
-    public Dictionary<string, string> descriptionDict = new Dictionary<string, string>() {
+    private readonly string[] modifierNames = { "accurate0", "accurate1", "brisk0", "brisk1", "blunt0", "blunt1", "common0", "common1", "common2", "common3", "common4", "common5", "heavy0", "heavy1", "nimble0", "nimble1", "precise0", "precise1", "ruthless0", "ruthless1", "stable0", "stable1", "sharp0", "sharp1", "harsh0", "quick0" };
+    public readonly Dictionary<string, string> descriptionDict = new() {
         {"armor", "protects from one hit"}, 
         {"arrow", "proceed to the next level"}, 
         {"ankh", "force new draft"}, 
@@ -94,14 +92,12 @@ public class ItemManager : MonoBehaviour {
         {"sword", ""}, 
         {"torch", "find more loot"} 
     };
-    public string[] neckletTypes = new string[] { "solidity", "rapidity", "strength", "defense", "arcane", "nothing", "victory" };
-    public Dictionary<string, int> neckletStats = new Dictionary<string, int>() 
-        { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
-    public Dictionary<string, int> neckletCounter = new Dictionary<string, int>() 
-        { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 }, { "arcane", 1 } };
+    public string[] neckletTypes = { "solidity", "rapidity", "strength", "defense", "arcane", "nothing", "victory" };
+    public readonly Dictionary<string, int> neckletStats = new() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
+    public readonly Dictionary<string, int> neckletCounter = new() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 }, { "arcane", 1 } };
     // start with 1 arcane necklet so we don't have to have +1's everywhere
-    private string[] scrollTypes = new string[] { "fury", "haste", "dodge", "leech", "courage", "challenge", "nothing" };
-    private string[] potionTypes = new string[] { "accuracy", "speed", "strength", "defense", "might", "life", "nothing" };
+    private readonly string[] scrollTypes = { "fury", "haste", "dodge", "leech", "courage", "challenge", "nothing" };
+    private readonly string[] potionTypes = { "accuracy", "speed", "strength", "defense", "might", "life", "nothing" };
     private Sprite[] allSprites;
     public float itemSpacing = 1f;
     public float itemY = -5.3f;
@@ -115,19 +111,19 @@ public class ItemManager : MonoBehaviour {
     public int numItemsDroppedForTrade = 0;
     public bool isCharSelect = false;
 
-    void Start() {
+    private void Start() {
         allSprites = commonItemSprites.ToArray().Concat(rareItemSprites.ToArray()).Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
         // create a list containing all of the sprites
         scripts = FindObjectOfType<Scripts>();
         if (isCharSelect) {
-            // in characer selection screen
+            // in character selection screen
             curList = floorItems;
             // assign the curlist variable for item selection navigation
             CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
             MoveItemToDisplay();
             CreateItem("steak", "common");
             MoveItemToDisplay();
-            GameObject created = CreateItem("torch", "common");
+            CreateItem("torch", "common");
             MoveItemToDisplay();
             // create the items
         }
@@ -186,52 +182,56 @@ public class ItemManager : MonoBehaviour {
     /// Give the player their starting items, based on chosen class.
     /// </summary>
     public void GiveStarterItems(int charNum) {
-        if (Save.game.newGame) { 
-            // new game, so give the base weapons
-            if (scripts.player.charNum == 0) { 
-                CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-                MoveToInventory(0, true, false, false);
-
-                // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
-                // MoveToInventory(0, true, false, false);
-                // CreateItem("scroll", "common", "challenge");
-                // MoveToInventory(0, true, false, false);
-
-                CreateItem("steak", "common");
-                MoveToInventory(0, true, false, false);
-                if (Save.persistent.easyMode) { 
-                    CreateItem("torch", "common");
+        if (Save.game.newGame) {
+            switch (scripts.player.charNum) {
+                // new game, so give the base weapons
+                case 0: {
+                    CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                     MoveToInventory(0, true, false, false);
+                    // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
+                    // MoveToInventory(0, true, false, false);
+                    // CreateItem("scroll", "common", "challenge");
+                    // MoveToInventory(0, true, false, false);
+                    CreateItem("steak", "common");
+                    MoveToInventory(0, true, false, false);
+                    if (Save.persistent.easyMode) { 
+                        CreateItem("torch", "common");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    break;
                 }
-            }
-            else if (scripts.player.charNum == 1) { 
-                CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
-                MoveToInventory(0, true, false, false);
-                CreateItem("armor", "common");
-                MoveToInventory(0, true, false, false);
-                if (Save.persistent.easyMode) {
-                    CreateItem("helm_of_might", "rare");
+                case 1: {
+                    CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
                     MoveToInventory(0, true, false, false);
+                    CreateItem("armor", "common");
+                    MoveToInventory(0, true, false, false);
+                    if (Save.persistent.easyMode) {
+                        CreateItem("helm_of_might", "rare");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    break;
                 }
-            }
-            else if (scripts.player.charNum == 2) { 
-                CreateWeaponWithStats("dagger", "quick", 2, 5, 0, 0);
-                MoveToInventory(0, true, false, false);
-                CreateItem("boots_of_dodge", "rare");
-                MoveToInventory(0, true, false, false);
-                if (Save.persistent.easyMode) { 
-                    CreateItem("ankh", "rare");
+                case 2: {
+                    CreateWeaponWithStats("dagger", "quick", 2, 5, 0, 0);
                     MoveToInventory(0, true, false, false);
+                    CreateItem("boots_of_dodge", "rare");
+                    MoveToInventory(0, true, false, false);
+                    if (Save.persistent.easyMode) { 
+                        CreateItem("ankh", "rare");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    break;
                 }
-            }
-            else if (scripts.player.charNum == 3) {
-                CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
-                MoveToInventory(0, true, false, false);
-                CreateItem("cheese", "common");
-                MoveToInventory(0, true, false, false);
-                if (Save.persistent.easyMode) { 
-                    CreateItem("kapala", "rare");
+                case 3: {
+                    CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
                     MoveToInventory(0, true, false, false);
+                    CreateItem("cheese", "common");
+                    MoveToInventory(0, true, false, false);
+                    if (Save.persistent.easyMode) { 
+                        CreateItem("kapala", "rare");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    break;
                 }
             }
         }
@@ -309,28 +309,28 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Get the sprite of an item given its name.
     /// </summary>
-    public Sprite GetItemSprite(string name) { return allSprites[(from a in allSprites select a.name).ToList().IndexOf(name)]; }
+    public Sprite GetItemSprite(string itemName) { return allSprites[(from a in allSprites select a.name).ToList().IndexOf(itemName)]; }
 
     /// <summary>
     /// Create an item with specified type.
     /// </summary>
-    private GameObject CreateItem(string itemType, int negativeOffset=0) {
+    private void CreateItem(string itemType, int negativeOffset = 0) {
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // create an item object at the correct position
         Sprite sprite = null;
         // create a variable of which we can place the sprite upon to depending on the item type
-        if (itemType == "weapon") { sprite = weaponSprites[UnityEngine.Random.Range(0, weaponSprites.Length)]; }
+        if (itemType == "weapon") { sprite = weaponSprites[Random.Range(0, weaponSprites.Length)]; }
         else if (itemType == "common") { 
-            int rand = UnityEngine.Random.Range(0, commonItemSprites.Length);
+            int rand = Random.Range(0, commonItemSprites.Length);
             // get a random item from the list of names
             if (rand == 0 || rand == 8) { 
-                if (UnityEngine.Random.Range(0, 2) == 0) { sprite = commonItemSprites[rand]; } 
-                else { sprite = commonItemSprites[UnityEngine.Random.Range(0, commonItemSprites.Length)]; }
+                if (Random.Range(0, 2) == 0) { sprite = commonItemSprites[rand]; } 
+                else { sprite = commonItemSprites[Random.Range(0, commonItemSprites.Length)]; }
             }
             // armor and skeleton keys are about 2x rarer than other items
             else { sprite = commonItemSprites[rand]; }
         }
-        else if (itemType == "rare") { sprite = rareItemSprites[UnityEngine.Random.Range(0, rareItemSprites.Length)]; }
+        else if (itemType == "rare") { sprite = rareItemSprites[Random.Range(0, rareItemSprites.Length)]; }
         // depending on the type, give it a corresponding random sprite.
         // else { print("bad item type to create"); }
         // can only create item types of weapon, common, and rare
@@ -345,7 +345,6 @@ public class ItemManager : MonoBehaviour {
         // if needed, immediately give the item its proper attributes
         floorItems.Add(instantiatedItem);         
         // add the item to the array
-        return instantiatedItem;
     }
 
     /// <summary>
@@ -396,13 +395,13 @@ public class ItemManager : MonoBehaviour {
     private void SetItemStatsImmediately(GameObject instantiatedItem) {
         // this needs to be done here rather than in Item.Start() or Awake() because the timing will be off and errors will be thrown
         if (instantiatedItem.GetComponent<Item>().itemName == "necklet") {
-            instantiatedItem.GetComponent<Item>().modifier = neckletTypes[UnityEngine.Random.Range(0, 5)];
+            instantiatedItem.GetComponent<Item>().modifier = neckletTypes[Random.Range(0, 5)];
         }
         else if (instantiatedItem.GetComponent<Item>().itemName == "scroll") {
-            instantiatedItem.GetComponent<Item>().modifier = scrollTypes[UnityEngine.Random.Range(0, scrollTypes.Length)];
+            instantiatedItem.GetComponent<Item>().modifier = scrollTypes[Random.Range(0, scrollTypes.Length)];
         }
         else if (instantiatedItem.GetComponent<Item>().itemName == "potion") {
-            instantiatedItem.GetComponent<Item>().modifier = potionTypes[UnityEngine.Random.Range(0, potionTypes.Length)];
+            instantiatedItem.GetComponent<Item>().modifier = potionTypes[Random.Range(0, potionTypes.Length)];
         }
         // assign a modifier for a necklet, scroll, or potion
     }
@@ -410,19 +409,19 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Create a weapon with randomized modifier and stats. Use to generate a weapon when the player slays the enemy.
     /// </summary>
-    public void CreateRandomWeapon() {
-        Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
+    private void CreateRandomWeapon() {
+        Dictionary<string, int> baseWeapon = new() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
-        int rand = UnityEngine.Random.Range(0, weaponNames.Length);
+        int rand = Random.Range(0, weaponNames.Length);
         // get a random variable of which we will pull weapon information from
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = weaponSprites[rand];
         // get the sprite from the random number
         instantiatedItem.transform.parent = gameObject.transform;
         // child the item to this manager
         instantiatedItem.GetComponent<Item>().itemType = "weapon";
-        // set the itemtype to be a weaon
-        string modifier = modifierNames[UnityEngine.Random.Range(0, modifierNames.Length)];
+        // set the itemtype to be a weapon
+        string modifier = modifierNames[Random.Range(0, modifierNames.Length)];
         // pull a random modifier from the array
         instantiatedItem.GetComponent<Item>().modifier = modifier.Substring(0, modifier.Length - 1);
         // assign the modifier attribute (cut off the final letter, as modifiers are like 'common0' and 'common1')
@@ -444,19 +443,17 @@ public class ItemManager : MonoBehaviour {
         Save.game.floorSpd = baseWeapon["blue"];
         Save.game.floorDmg = baseWeapon["red"];
         Save.game.floorDef = baseWeapon["white"];
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
     /// <summary>
     /// Create a weapon with specified name, modifier, and stats.
     /// </summary>
     public GameObject CreateWeaponWithStats(string weaponName, string modifier, int aim, int spd, int atk, int def) {
-        Dictionary<string, int> baseWeapon = new Dictionary<string, int>() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
+        Dictionary<string, int> baseWeapon = new() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
-        // instantiaet the item
-        Sprite sprite = null;
-        // create an empty sprite variable to imprint on
-        sprite = GetItemSprite(weaponName);
+        // instantiate the item
+        Sprite sprite = GetItemSprite(weaponName);
         // get the sprite based on the weapon name
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = sprite;
         // give the sprite based on the item name
@@ -480,7 +477,7 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Move the item at index 0 from the floor to the display in the character selection screen.
     /// </summary>
-    public void MoveItemToDisplay() {
+    private void MoveItemToDisplay() {
         if (!isCharSelect) { 
             // print("This function should only be used in character select!"); 
         }
@@ -494,9 +491,9 @@ public class ItemManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Move the floor item at the specifed index into the player's inventory.
+    /// Move the floor item at the specified index into the player's inventory.
     /// </summary>
-    public void MoveToInventory(int index, bool starter=false, bool playAudio=true, bool SaveData=true) {
+    public void MoveToInventory(int index, bool starter=false, bool playAudio=true, bool saveData=true) {
         if (floorItems[index] != null) {
             if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
                 // if the player doesn't have 7 or more items or is trying to pick up weapon 
@@ -532,8 +529,8 @@ public class ItemManager : MonoBehaviour {
                     }
                     floorItems.RemoveAt(0);
                     // remove the item at index 0 (which is the weapon, because the weapon is always created first)
-                    foreach(GameObject item in floorItems) {
-                        item.transform.position = new Vector2(item.transform.position.x - 1f, itemY);
+                    foreach(GameObject curItem in floorItems) {
+                        curItem.transform.position = new Vector2(curItem.transform.position.x - 1f, itemY);
                         // for every item, shift it over now that an item has been removed
                     }
                     Select(curList, 0);
@@ -577,7 +574,7 @@ public class ItemManager : MonoBehaviour {
                             scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
                         }
                         if (tempItem.itemName == "necklet")  { 
-                            if (tempItem.modifier == "arcane") { scripts.turnManager.SetStatusText($"you take arcane necklet"); }
+                            if (tempItem.modifier == "arcane") { scripts.turnManager.SetStatusText("you take arcane necklet"); }
                             else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
                         }
                         else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
@@ -608,7 +605,7 @@ public class ItemManager : MonoBehaviour {
             floorItems.RemoveAt(index);
             // something went wrong here, so destroy it
         }
-        if (SaveData) { 
+        if (saveData) { 
             SaveInventoryItems();
             if (scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) { SaveTombstoneItems(); }
             else { SaveFloorItems(); }
@@ -645,7 +642,7 @@ public class ItemManager : MonoBehaviour {
                 // normal enemy
                 int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
                 // count the number of torches
-                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + UnityEngine.Random.Range(-2, 0), 0, 5);
+                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + Random.Range(-2, 0), 0, 5);
                 // create a spawn count 
                 CreateRandomWeapon();
                 // create a random weapon at index 0
@@ -653,7 +650,7 @@ public class ItemManager : MonoBehaviour {
                     CreateItem("common");
                     // create a random number of items based on the spawn count
                 }
-                if (UnityEngine.Random.Range(0, 13) == 0) { CreateItem("rare"); }
+                if (Random.Range(0, 13) == 0) { CreateItem("rare"); }
                 // low chance to produce rare
             }
         }
@@ -720,16 +717,14 @@ public class ItemManager : MonoBehaviour {
     /// Fade all torches that have ended their lifespan.
     /// </summary>
     public void AttemptFadeTorches() {
-        for (int i = 0; i < scripts.player.inventory.Count; i++) {
-            // for every item
-            GameObject item = scripts.player.inventory[i];
-            if (item.GetComponent<Item>().itemName == "torch") {
+        foreach (GameObject curItem in scripts.player.inventory) {
+            if (curItem.GetComponent<Item>().itemName == "torch") {
                 // if the item is a torch
-                if ($"{scripts.levelManager.level}-{scripts.levelManager.sub}" == item.GetComponent<Item>().modifier) {
+                if ($"{scripts.levelManager.level}-{scripts.levelManager.sub}" == curItem.GetComponent<Item>().modifier) {
                     // if the fade level matches the current level
                     scripts.turnManager.SetStatusText("your torch runs out");
                     // notify player
-                    scripts.player.inventory[scripts.player.inventory.IndexOf(item)].GetComponent<Item>().Remove(torchFade:true);
+                    scripts.player.inventory[scripts.player.inventory.IndexOf(curItem)].GetComponent<Item>().Remove(torchFade:true);
                 }
             }
         }
@@ -744,19 +739,19 @@ public class ItemManager : MonoBehaviour {
             Save.game.resumeItemTypes = new string[9];
             Save.game.resumeItemMods = new string[9];
             // clear the data before placing in new
-            Item item = scripts.player.inventory[0].GetComponent<Item>();
-            Save.game.resumeItemNames[0] = item.itemName.Split(' ')[1];
-            Save.game.resumeItemTypes[0] = item.itemType;
-            Save.game.resumeItemMods[0] = item.modifier;
+            Item curItem = scripts.player.inventory[0].GetComponent<Item>();
+            Save.game.resumeItemNames[0] = curItem.itemName.Split(' ')[1];
+            Save.game.resumeItemTypes[0] = curItem.itemType;
+            Save.game.resumeItemMods[0] = curItem.modifier;
             // add the player's weapon first
             for (int i = 1; i < scripts.player.inventory.Count; i++) {
-                item = scripts.player.inventory[i].GetComponent<Item>();
-                Save.game.resumeItemNames[i] = item.itemName;
-                Save.game.resumeItemTypes[i] = item.itemType;
-                Save.game.resumeItemMods[i] = item.modifier;
+                curItem = scripts.player.inventory[i].GetComponent<Item>();
+                Save.game.resumeItemNames[i] = curItem.itemName;
+                Save.game.resumeItemTypes[i] = curItem.itemType;
+                Save.game.resumeItemMods[i] = curItem.modifier;
                 // add all the remaining items
             }
-            if (scripts.tutorial is null) { Save.SaveGame(); }
+            if (scripts.tutorial == null) { Save.SaveGame(); }
             // Save to file
 
         }
@@ -765,7 +760,7 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Save all floor items onto the player's local Savefile.
     /// </summary>
-    public void SaveFloorItems() { 
+    private void SaveFloorItems() { 
         Save.game.floorItemNames = new string[9];
         Save.game.floorItemTypes = new string[9];
         Save.game.floorItemMods = new string[9];
@@ -773,12 +768,12 @@ public class ItemManager : MonoBehaviour {
         bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
-                Item item = floorItems[i].GetComponent<Item>();
-                if (item.itemType == "weapon") { Save.game.floorItemNames[i] = item.itemName.Split(' ')[1]; }
-                else { Save.game.floorItemNames[i] = item.itemName; }
+                Item curItem = floorItems[i].GetComponent<Item>();
+                if (curItem.itemType == "weapon") { Save.game.floorItemNames[i] = curItem.itemName.Split(' ')[1]; }
+                else { Save.game.floorItemNames[i] = curItem.itemName; }
                 
-                Save.game.floorItemTypes[i] = item.itemType;
-                Save.game.floorItemMods[i] = item.modifier;
+                Save.game.floorItemTypes[i] = curItem.itemType;
+                Save.game.floorItemMods[i] = curItem.modifier;
                 if (Save.game.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
@@ -788,7 +783,7 @@ public class ItemManager : MonoBehaviour {
             }
         }
         // funky workaround to make it so that the player doesn't get duplicate arrows
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
     // two separate methods so that we dont have to do any fancy checks, just pull whichever we need as long as we Save it properly
@@ -804,12 +799,12 @@ public class ItemManager : MonoBehaviour {
         bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
             if (!arrowFound) { 
-                Item item = floorItems[i].GetComponent<Item>();
-                if (item.itemType == "weapon") { Save.game.floorItemNames[i] = item.itemName.Split(' ')[1]; }
-                else { Save.game.floorItemNames[i] = item.itemName; }
+                Item curItem = floorItems[i].GetComponent<Item>();
+                if (curItem.itemType == "weapon") { Save.game.floorItemNames[i] = curItem.itemName.Split(' ')[1]; }
+                else { Save.game.floorItemNames[i] = curItem.itemName; }
                 
-                Save.game.floorItemTypes[i] = item.itemType;
-                Save.game.floorItemMods[i] = item.modifier;
+                Save.game.floorItemTypes[i] = curItem.itemType;
+                Save.game.floorItemMods[i] = curItem.modifier;
                 if (Save.game.floorItemNames[i] == "arrow") { arrowFound = true; }
             }
             else {
@@ -819,6 +814,6 @@ public class ItemManager : MonoBehaviour {
             }
         }
         // funky workaround to make it so that the player doesn't get duplicate arrows
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 }

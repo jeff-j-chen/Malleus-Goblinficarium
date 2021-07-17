@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
-
+using UnityEngine;
+using Random = UnityEngine.Random;
 public class DiceSummoner : MonoBehaviour
 {
     [SerializeField] private GameObject diceBase;
     [SerializeField] public GameObject[] numArr;
     public bool breakOutOfScimitarParryLoop = false;
     private Scripts scripts;
-    public List<GameObject> existingDice = new List<GameObject>();
+    public List<GameObject> existingDice = new();
     public float yCoord = -5.51f;
-    private readonly float[] xCoords = new float[] { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
-    private readonly List<Color> generatedTypes = new List<Color>();
+    private readonly float[] xCoords = { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
+    private readonly List<Color> generatedTypes = new();
     public int lastNum;
     public string lastType;
     public string lastStat;
@@ -60,22 +60,22 @@ public class DiceSummoner : MonoBehaviour
             // clear the list so we have a fresh array
             GenerateDiceTypes();
             for (int i = 0; i < 6; i++) {
-                GenerateSingleDie(UnityEngine.Random.Range(1, 7), null, "none", null, i, initialSix:true);
+                GenerateSingleDie(Random.Range(1, 7), null, "none", null, i, initialSix:true);
                 // generate the 6 base die for every round
             }
             if (scripts.itemManager.PlayerHasWeapon("flail")) {
                 // give the player a red die if wielding a flail
-                GenerateSingleDie(UnityEngine.Random.Range(1, 7), "red", "player", "red", initialSix:true);
+                GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
             }
             if (scripts.player.charNum == 1) { 
                 // if player character #2 (maul armor helm), give player yellow die
-                scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+                scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
             }
             if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
                 // if devil
                 foreach (string typeToGen in scripts.itemManager.statArr) {
                     // generate a die for every stat
-                    GenerateSingleDie(UnityEngine.Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
+                    GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
                     // attach it to the devil
                 }
             }
@@ -139,7 +139,7 @@ public class DiceSummoner : MonoBehaviour
         else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
         int diceColorIndex;
         // reference variable for the die's color index relative to scripts.color.coloArr
-        diceColorIndex = diceType is null ? Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]) : Array.IndexOf(scripts.colors.colorNameArr, diceType);
+        diceColorIndex = diceType == null ? Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]) : Array.IndexOf(scripts.colors.colorNameArr, diceType);
         // else create one of the specified type
         GameObject number = Instantiate(numArr[diceNum - 1], instantiationPos, Quaternion.identity);
         GameObject indivBase = Instantiate(diceBase, instantiationPos, Quaternion.identity);
@@ -225,7 +225,7 @@ public class DiceSummoner : MonoBehaviour
             Save.game.diceRerolled.Add(dice.isRerolled);
             // add its info to the info 
         }
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         // make sure to Save it
     }
 
@@ -250,7 +250,7 @@ public class DiceSummoner : MonoBehaviour
         // remove a green
         for (int d = 0; d < 8; d++) {
             // remove dice needed to get just 6
-            generatedTypes.RemoveAt(UnityEngine.Random.Range(0, generatedTypes.Count));
+            generatedTypes.RemoveAt(Random.Range(0, generatedTypes.Count));
         }
         // this generates a set of die identical to malleus die generation, as far as i can tell
     }

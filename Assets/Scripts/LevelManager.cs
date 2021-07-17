@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
-using UnityEngine.SceneManagement;
-using System.IO;
-
+using UnityEngine;
 public class LevelManager : MonoBehaviour {
     [SerializeField] private GameObject levelBox;
     [SerializeField] private GameObject loadingCircle;
@@ -16,25 +12,25 @@ public class LevelManager : MonoBehaviour {
     SpriteRenderer boxSR;
     Color temp;
     Scripts scripts;
-    private float[] balanced = new float[] { 0f, 10f, 10f, 0f };
-    private float[] fast =     new float[] { 0f, 20f, 10f, 0f };
-    private float[] damage =   new float[] { 10f, 3f, 23f, 3f };
-    private float[] defense =  new float[] { 2f, 10f, 2f, 23f };
-    private float[] mix =      new float[] { 2f, -10f, 18f, 18f };
+    private float[] balanced = { 0f, 10f, 10f, 0f };
+    private float[] fast =     { 0f, 20f, 10f, 0f };
+    private float[] damage =   { 10f, 3f, 23f, 3f };
+    private float[] defense =  { 2f, 10f, 2f, 23f };
+    private float[] mix =      { 2f, -10f, 18f, 18f };
     [SerializeField] public int level;
     [SerializeField] public int sub;
-    private Dictionary<string, float[]> levelStats = new Dictionary<string, float[]>() {
+    private Dictionary<string, float[]> levelStats = new() {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
-        { "11", new float[] { 10f, 10f, 10f, 10f, 0f,    10f, 0f, 0f, 0f, 0f } },
-        { "12", new float[] { 10f, 10f, 10f, 10f, 0f,    4f, 2f, 2f, 1f, 1f  } },
-        { "13", new float[] { 10f, 10f, 10f, 10f, 0.75f, 3f, 2f, 2f, 2f, 1f  } },
-        { "21", new float[] { 10f, 10f, 10f, 10f, 1f,    3f, 2f, 2f, 2f, 1f  } },
-        { "22", new float[] { 10f, 15f, 10f, 10f, 1f,    2f, 2f, 2f, 2f, 2f  } },
-        { "23", new float[] { 10f, 10f, 11f, 11f, 1.25f, 2f, 2f, 2f, 2f, 2f  } },
-        { "31", new float[] { 10f, 10f, 12f, 12f, 1.25f, 1f, 3f, 2f, 2f, 2f  } },
-        { "32", new float[] { 12f, 15f, 14f, 14f, 1.5f,  0f, 2f, 3f, 2f, 3f  } },
-        { "33", new float[] { 15f, 15f, 15f, 15f, 3f,    2f, 2f, 2f, 2f, 2f  } }
+        { "11", new[] { 10f, 10f, 10f, 10f, 0f,    10f, 0f, 0f, 0f, 0f } },
+        { "12", new[] { 10f, 10f, 10f, 10f, 0f,    4f, 2f, 2f, 1f, 1f  } },
+        { "13", new[] { 10f, 10f, 10f, 10f, 0.75f, 3f, 2f, 2f, 2f, 1f  } },
+        { "21", new[] { 10f, 10f, 10f, 10f, 1f,    3f, 2f, 2f, 2f, 1f  } },
+        { "22", new[] { 10f, 15f, 10f, 10f, 1f,    2f, 2f, 2f, 2f, 2f  } },
+        { "23", new[] { 10f, 10f, 11f, 11f, 1.25f, 2f, 2f, 2f, 2f, 2f  } },
+        { "31", new[] { 10f, 10f, 12f, 12f, 1.25f, 1f, 3f, 2f, 2f, 2f  } },
+        { "32", new[] { 12f, 15f, 14f, 14f, 1.5f,  0f, 2f, 3f, 2f, 3f  } },
+        { "33", new[] { 15f, 15f, 15f, 15f, 3f,    2f, 2f, 2f, 2f, 2f  } }
         // something to make it more probable that genstats will gen more difficult enemies later
     };
     [SerializeField] public bool lockActions = false;
@@ -60,12 +56,12 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
-        if (scripts.tutorial is null) {
+        if (scripts.tutorial == null) {
             if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
             else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
             { levelText.text = $"(level {level}-{sub}*)"; }
             else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
-            else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = $"(level ???)"; }
+            else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = "(level ???)"; }
             else { levelText.text = $"(level {level}-{sub})"; }
         }
         else { levelText.text = ""; }
@@ -76,36 +72,32 @@ public class LevelManager : MonoBehaviour {
     /// </summary>
     public float[] GenStats(string lichOrDevilOrNormal = "normal") {
         if (lichOrDevilOrNormal != "normal") {
-            if (lichOrDevilOrNormal == "lich") { return new float[] { 1f, 1f, 1f, 1f }; }
+            if (lichOrDevilOrNormal == "lich") { return new[] { 1f, 1f, 1f, 1f }; }
             // lich has 1/1/1/1
-            else if (lichOrDevilOrNormal == "devil") { return new float[] { 2f, 2f, 2f, 2f }; }
+            if (lichOrDevilOrNormal == "devil") { return new[] { 2f, 2f, 2f, 2f }; }
             // devil has 2/2/2/2
-            else { 
-                // print("invalid enemy to attempt to spawn");
-                return balanced;
-            }
+            // print("invalid enemy to attempt to spawn");
+            return balanced;
             // notify me of error and return a basic one
         }
-        else {
-            float[] stats;
-            if (sub == 4) { return new float[] { 0f, 0f, 0f, 0f }; }
-            // given key is not present in the dictionary for sub-4s, instantly return blank
-            else { stats = levelStats[level.ToString() + sub.ToString()]; }
-            // based on the level and sub, get the stats from the level
-            float[] totalStats = new float[4];
-            float[] baseStats = null;
-            // create empty arrays of floats to store the stats in
-            if (level == 1) { baseStats = GenBaseStats(stats, balanced); }
-            else if (level == 2) { baseStats = GenBaseStats(stats, damage); }
-            else if (level == 3) { baseStats = GenBaseStats(stats, fast); }
-            // generate the stats for the enemy based on level 
-            for (int i = 0; i < 4; i++) {
-                // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
-                totalStats[i] = Mathf.Round((stats[i] + baseStats[i] + UnityEngine.Random.Range(0f, stats[4]))/10f);
-            }
-            return totalStats;
-            // return the total stats
+        float[] stats;
+        if (sub == 4) { return new[] { 0f, 0f, 0f, 0f }; }
+        // given key is not present in the dictionary for sub-4s, instantly return blank
+        stats = levelStats[level + sub.ToString()];
+        // based on the level and sub, get the stats from the level
+        float[] totalStats = new float[4];
+        float[] baseStats = null;
+        // create empty arrays of floats to store the stats in
+        if (level == 1) { baseStats = GenBaseStats(stats, balanced); }
+        else if (level == 2) { baseStats = GenBaseStats(stats, damage); }
+        else if (level == 3) { baseStats = GenBaseStats(stats, fast); }
+        // generate the stats for the enemy based on level 
+        for (int i = 0; i < 4; i++) {
+            // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
+            totalStats[i] = Mathf.Round((stats[i] + baseStats[i] + Random.Range(0f, stats[4]))/10f);
         }
+        return totalStats;
+        // return the total stats
     }
 
     /// <summary>
@@ -119,19 +111,17 @@ public class LevelManager : MonoBehaviour {
             return balanced; 
         }
         // something went wrong while setting up the dictionary, so notify me and return (so compiler is happy)
-        else {
-            int rand = UnityEngine.Random.Range(1, 11);
-            // get a random number from 1-10
-            float[] chances = new float[] { stats[5], stats[5] + stats[6], stats[5] + stats[6] + stats[7], stats[5] + stats[6] + stats[7] + stats[8], 10f };
-            // create a float array of the different chances
-            if (rand >= 0f && rand < chances[0])               { return balanced; }
-            else if (rand >= chances[0] && rand < chances[1])  { return fast; }
-            else if (rand >= chances[1] && rand < chances[2])  { return damage; }
-            else if (rand >= chances[2] && rand < chances[3])  { return defense; }
-            else if (rand >= chances[3] && rand < chances[4])  { return mix; }
-            else { return normal; }
-            // return a stat preset based on the chances and the random number
-        }
+        int rand = Random.Range(1, 11);
+        // get a random number from 1-10
+        float[] chances = { stats[5], stats[5] + stats[6], stats[5] + stats[6] + stats[7], stats[5] + stats[6] + stats[7] + stats[8], 10f };
+        // create a float array of the different chances
+        if (rand >= 0f && rand < chances[0])               { return balanced; }
+        if (rand >= chances[0] && rand < chances[1])  { return fast; }
+        if (rand >= chances[1] && rand < chances[2])  { return damage; }
+        if (rand >= chances[2] && rand < chances[3])  { return defense; }
+        if (rand >= chances[3] && rand < chances[4])  { return mix; }
+        return normal;
+        // return a stat preset based on the chances and the random number
     }
 
     /// <summary>
@@ -165,12 +155,12 @@ public class LevelManager : MonoBehaviour {
                 }
                 print("notify the player they unlocked a new character to play here!");
                 Save.game = new GameData();
-                if (scripts.tutorial is null) { Save.SaveGame(); }
+                if (scripts.tutorial == null) { Save.SaveGame(); }
                 // for some reason file.delete doesn't want to work here
                 Initiate.Fade("Credits", Color.black, 2.5f);
                 // load credits scene
             }
-            scripts.turnManager.ClearVariablesAfterRound();
+            scripts.turnManager.ClearVariablesAfterRound(true);
             // remove variables before going to next level
             foreach (GameObject dice in scripts.diceSummoner.existingDice) {
                 StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
@@ -262,7 +252,7 @@ public class LevelManager : MonoBehaviour {
                 }
                 else { 
                     toSpawn = "normal";
-                    scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); 
+                    scripts.enemy.SpawnNewEnemy(Random.Range(3, 7), true); 
                     levelTransText.text = $"level {level}-{sub}";
                     levelText.text = $"(level {level}-{sub})";
                 }
@@ -298,7 +288,7 @@ public class LevelManager : MonoBehaviour {
             scripts.itemManager.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
             Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-            if (scripts.tutorial is null) { Save.SaveGame(); }
+            if (scripts.tutorial == null) { Save.SaveGame(); }
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
                 scripts.itemManager.lootText.text = "loot:";
@@ -337,16 +327,16 @@ public class LevelManager : MonoBehaviour {
             Save.game.resumeLevel = scripts.levelManager.level;
         }
         Save.SavePersistent();
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
     private char r() { 
         // return a random character
-        return characters[UnityEngine.Random.Range(0, characters.Length)];
+        return characters[Random.Range(0, characters.Length)];
     }
     private char t() { 
         // return a random thin character
-        return thinCharacters[UnityEngine.Random.Range(0, thinCharacters.Length)];
+        return thinCharacters[Random.Range(0, thinCharacters.Length)];
     }
 
     /// <summary>

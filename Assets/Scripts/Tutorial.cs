@@ -1,8 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-
+using UnityEngine;
 public class Tutorial : MonoBehaviour {
     [SerializeField] private Sprite blackBox;
     [SerializeField] private TextMeshProUGUI tutorialText;
@@ -13,7 +12,7 @@ public class Tutorial : MonoBehaviour {
     public bool isAnimating;
     private Coroutine mainScroll;
     private Coroutine statScroll;
-    private List<string> tutorialTextList = new List<string>() {
+    private List<string> tutorialTextList = new() {
         "Welcome to MALLEUS GOBLINIFICARIUM,\na realistic dice-based combat simulator!\n\nYes, a realistic game can contain goblins and scrolls.\n[click] to continue", 
         // ^ 0
         "You can navigate your inventory using\nleft and right [arrow_keys]\nor [left_mouse]\n\n[click] to continue", 

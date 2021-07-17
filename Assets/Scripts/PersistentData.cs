@@ -1,10 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-
-[System.Serializable]
+[Serializable]
 public class PersistentData {
     public int tsLevel;
     public int tsSub;
@@ -60,8 +55,8 @@ public class PersistentData {
         attacksParried = 0;
         woundsReceived = 0;
         woundsInflicted = 0;
-        woundsInflictedArr = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        weaponUses = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+        woundsInflictedArr = new[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+        weaponUses = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
         enemiesSlain = 0;
         staminaUsed = 0;
         armorBroken = 0;

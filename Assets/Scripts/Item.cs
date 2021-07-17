@@ -1,23 +1,22 @@
 ﻿using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-
+using Random = UnityEngine.Random;
 public class Item : MonoBehaviour {
     [SerializeField] public Scripts scripts;
     [SerializeField] public string itemName;
     [SerializeField] public string itemType;
     [SerializeField] public string modifier;
-    [SerializeField] public Dictionary<string, int> weaponStats = new Dictionary<string, int>();
-    [SerializeField] bool hidden = false;
+    [SerializeField] public Dictionary<string, int> weaponStats = new();
     private bool preventPlayingFX = true;
 
     void Awake() {
         scripts = FindObjectOfType<Scripts>();
     }
 
-    private IEnumerator allowFX() {
+    private IEnumerator AllowFX() {
         yield return new WaitForSeconds(0.45f);
         preventPlayingFX = false;
     }
@@ -27,7 +26,7 @@ public class Item : MonoBehaviour {
         // set the object's name to its itemname, so it can be identified in the editor
         if (itemName == "torch" && scripts.player != null) {
             // if the item is a torch
-            if (UnityEngine.Random.Range(0, 2) == 0) {
+            if (Random.Range(0, 2) == 0) {
                 // 1/2 chance
                 if (scripts.levelManager.sub != 4) { modifier = $"{scripts.levelManager.level + 1}-{scripts.levelManager.sub}"; }
                 else { modifier = $"{scripts.levelManager.level + 1}-1"; }
@@ -40,7 +39,7 @@ public class Item : MonoBehaviour {
                 // set fade time to be slightly longer
             }
         }
-        StartCoroutine(allowFX());
+        StartCoroutine(AllowFX());
     }
 
     void OnMouseOver() {
@@ -84,18 +83,12 @@ public class Item : MonoBehaviour {
     /// <summary>
     /// Hide an item, preventing it from being seen.
     /// </summary>
-    public void Hide() {
-        hidden = true;
-        transform.localScale = new Vector2(0, 0);
-    }
+    public void Hide() { transform.localScale = new Vector2(0, 0); }
 
     /// <summary>
     /// Show an item.
     /// </summary>
-    public void UnHide() {
-        hidden = false;
-        transform.localScale = new Vector2(1, 1);
-    }
+    public void UnHide() { transform.localScale = new Vector2(1, 1); }
 
     /// <summary>
     /// Select an item.
@@ -125,7 +118,7 @@ public class Item : MonoBehaviour {
             }
         }
         else {
-            if (scripts.levelManager is null || !scripts.levelManager.lockActions) {
+            if (scripts.levelManager == null || !scripts.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
                 if (scripts.levelManager != null && scripts.enemy.isDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
@@ -156,15 +149,15 @@ public class Item : MonoBehaviour {
                         break;
                     case "necklet":
                         switch (modifier) {
-                            case "arcane": scripts.itemManager.itemDesc.text = $"arcane necklet\nall necklets are more effective"; break;
-                            case "nothing": scripts.itemManager.itemDesc.text = $"necklet of nothing\ndoes nothing"; break;
-                            case "victory": scripts.itemManager.itemDesc.text = $"necklet of victory\nthe victory is in your hands!.."; break;
+                            case "arcane": scripts.itemManager.itemDesc.text = "arcane necklet\nall necklets are more effective"; break;
+                            case "nothing": scripts.itemManager.itemDesc.text = "necklet of nothing\ndoes nothing"; break;
+                            case "victory": scripts.itemManager.itemDesc.text = "necklet of victory\nthe victory is in your hands!.."; break;
                             default: scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{scripts.itemManager.neckletCounter["arcane"]} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; break;
                         }
                         break;
                     case "cheese":
                     case "steak":
-                        if (scripts.player is null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
+                        if (scripts.player == null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
                         else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
                         break;
                     case "moldy cheese":
@@ -185,15 +178,16 @@ public class Item : MonoBehaviour {
                 // set the proper item descriptions based on its name
             }
         }
-        if (scripts.levelManager is null || itemType == "weapon" ||
+        if (scripts.levelManager == null || itemType == "weapon" ||
             scripts.levelManager != null && !scripts.levelManager.lockActions) {
             // only allow weapons to be used when unlocked
             scripts.itemManager.highlight.transform.position = transform.position;
             // move the highlight to the selected item
-            scripts.itemManager.highlightedItem = gameObject;
+            GameObject curItem = gameObject;
+            scripts.itemManager.highlightedItem = curItem;
             // update the highlighted item variable
-            scripts.itemManager.col = scripts.itemManager.curList.IndexOf(gameObject);
             // update the col variable
+            scripts.itemManager.col = scripts.itemManager.curList.IndexOf(curItem);
             if (playAudio && !preventPlayingFX) { scripts.soundManager.PlayClip("click0"); }
             // dont play this if we just came from menu scene
             // play sound clip
@@ -205,7 +199,7 @@ public class Item : MonoBehaviour {
     /// </summary>
     public void Use() {
         if (scripts.levelManager != null && !scripts.levelManager.lockActions) {
-            if (scripts.tutorial is null || scripts.tutorial != null && !scripts.tutorial.preventAttack) { 
+            if (scripts.tutorial == null || scripts.tutorial != null && !scripts.tutorial.preventAttack) { 
                 // only allow item usage in certain conditions
                 if (scripts.itemManager.floorItems.Contains(gameObject)) {
                     // if item is on the floor
@@ -217,9 +211,7 @@ public class Item : MonoBehaviour {
                             return;
                             // go to the next level and end the level
                         }
-                        else { 
-                            Initiate.Fade("Menu", Color.black, 2.5f);
-                        }
+                        Initiate.Fade("Menu", Color.black, 2.5f);
                     }
                     else {
                         // not an arrow
@@ -450,7 +442,7 @@ public class Item : MonoBehaviour {
                             Save.game.potionDmg = scripts.player.potionStats["white"];
                             break;
                         case "might":
-                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", isFromMight:true);
+                            scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", isFromMight:true);
                             break;
                         case "life":
                             scripts.player.woundList.Clear();
@@ -463,7 +455,7 @@ public class Item : MonoBehaviour {
                         case "nothing": break;
                         // default: print("invalid potion modifier detected"); break;
                     }
-                    if (scripts.tutorial is null) { Save.SaveGame(); }
+                    if (scripts.tutorial == null) { Save.SaveGame(); }
                     scripts.statSummoner.SummonStats();
                     scripts.statSummoner.SetDebugInformationFor("player");
                     Remove();
@@ -476,7 +468,7 @@ public class Item : MonoBehaviour {
                     scripts.itemManager.discardableDieCounter++;print("incremented from shuriken!");
                     // increment counter
                     Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                    if (scripts.tutorial is null) { Save.SaveGame(); }
+                    if (scripts.tutorial == null) { Save.SaveGame(); }
                     Remove();
                     scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                     break;
@@ -513,13 +505,13 @@ public class Item : MonoBehaviour {
                             // need 3 stamina
                             scripts.itemManager.usedHelm = true;
                             Save.game.usedHelm = true;
-                            if (scripts.tutorial is null) { Save.SaveGame(); }
+                            if (scripts.tutorial == null) { Save.SaveGame(); }
                             // set variable
                             scripts.turnManager.SetStatusText("you feel mighty");
                             // notify player
                             scripts.turnManager.ChangeStaminaOf("player", -3);
                             // use stamina
-                            scripts.diceSummoner.GenerateSingleDie(UnityEngine.Random.Range(1, 7), "yellow", "player", "red", isFromMight:true);
+                            scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", isFromMight:true);
                             // add yellow die to red stat
                         }
                         else { scripts.turnManager.SetStatusText("not enough stamina"); }
@@ -539,7 +531,7 @@ public class Item : MonoBehaviour {
                             scripts.turnManager.SetStatusText("you feel dodgy");
                             scripts.itemManager.usedBoots = true;
                             Save.game.usedBoots = true;
-                            if (scripts.tutorial is null) { Save.SaveGame(); }
+                            if (scripts.tutorial == null) { Save.SaveGame(); }
                             scripts.turnManager.ChangeStaminaOf("player", -1);
                             scripts.player.SetPlayerStatusEffect("dodge", true);
                         }
@@ -552,7 +544,7 @@ public class Item : MonoBehaviour {
                         scripts.soundManager.PlayClip("click0");
                         scripts.itemManager.usedAnkh = true;
                         Save.game.usedAnkh = true;
-                        if (scripts.tutorial is null) { Save.SaveGame(); }
+                        if (scripts.tutorial == null) { Save.SaveGame(); }
                         foreach (string key in scripts.itemManager.statArr) {
                             scripts.turnManager.ChangeStaminaOf("player", scripts.statSummoner.addedPlayerStamina[key]);
                             scripts.statSummoner.addedPlayerStamina[key] = 0;
@@ -592,13 +584,13 @@ public class Item : MonoBehaviour {
             else {
                 if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
                 Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
-                if (scripts.tutorial is null) { Save.SaveGame(); }
+                if (scripts.tutorial == null) { Save.SaveGame(); }
                 // if trader level increment the number of items dropped for trading
                 if (itemType == "weapon") {
                     scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}");
                 }
                 else if (itemName == "necklet") {
-                    if (modifier == "arcane") { scripts.turnManager.SetStatusText($"you drop arcane necklet"); }
+                    if (modifier == "arcane") { scripts.turnManager.SetStatusText("you drop arcane necklet"); }
                     else { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
                 }
                 else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }

@@ -1,15 +1,13 @@
 using System;
 using System.Collections;
 using System.Linq;
-using UnityEngine;
 using TMPro;
-using System.IO;
-
+using UnityEngine;
 public class Statistics : MonoBehaviour {
     private string persistentPath = "persistentSave.txt";
-    private string[] weaponNames = new string[] { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
-    private WaitForSeconds tenthSecond = new WaitForSeconds(0.1f);
-    private WaitForSeconds oneSecond = new WaitForSeconds(1f);
+    private string[] weaponNames = { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
+    private WaitForSeconds tenthSecond = new(0.1f);
+    private WaitForSeconds oneSecond = new(1f);
     private string baseText = "hold [space] to delete all data - this action is irrecoverable";
     private SoundManager soundManager;
     [SerializeField] private TextMeshProUGUI leftWhite;

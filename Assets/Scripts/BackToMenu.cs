@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-
 public class BackToMenu : MonoBehaviour {
     public float transitionMultiplier = 2.5f;
     private Scripts scripts;
@@ -14,7 +13,7 @@ public class BackToMenu : MonoBehaviour {
             // on escape pressed
             if (scripts != null && scripts.player != null && scripts.turnManager != null && !scripts.turnManager.isMoving) { 
                 // if in game and not moving
-                if (scripts.tutorial is null) { Save.SaveGame(); }
+                if (scripts.tutorial == null) { Save.SaveGame(); }
                 Save.SavePersistent();
                 // Save data first
             }

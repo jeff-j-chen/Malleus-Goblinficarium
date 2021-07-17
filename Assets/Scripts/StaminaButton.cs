@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-
 public class StaminaButton : MonoBehaviour {
     private SpriteRenderer spriteRenderer;
     private Scripts scripts;
@@ -51,7 +50,7 @@ public class StaminaButton : MonoBehaviour {
                 Debug.LogError("StaminaButton is not attached to the correct object");
                 // something is wrong
             }
-            if (scripts.tutorial is null) { Save.SaveGame(); }
+            if (scripts.tutorial == null) { Save.SaveGame(); }
             Save.SavePersistent();
         }
     }

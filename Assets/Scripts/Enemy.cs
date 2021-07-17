@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-
+using Random = UnityEngine.Random;
 public class Enemy : MonoBehaviour {
     [SerializeField] public RuntimeAnimatorController[] controllers;
     [SerializeField] public RuntimeAnimatorController lichDeathController;
@@ -16,16 +16,16 @@ public class Enemy : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI woundGUIElement;
     [SerializeField] public TextMeshProUGUI staminaCounter;
     [SerializeField] public TextMeshProUGUI target;
-    public List<string> woundList = new List<string>();
+    public List<string> woundList = new();
     public bool isDead = false;
     public Dictionary<string, int> stats;
     private readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone" };
     private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
     public int stamina = 1;
     public int targetIndex = 0;
-    private readonly Vector2 basePosition = new Vector2(1.9f, -1.866667f);
-    private readonly Vector2 iconPosition = new Vector2(6.16667f, 3.333333f);
-    private readonly Dictionary<string, Vector2> deathPositions = new Dictionary<string, Vector2>() {
+    private readonly Vector2 basePosition = new(1.9f, -1.866667f);
+    private readonly Vector2 iconPosition = new(6.16667f, 3.333333f);
+    private readonly Dictionary<string, Vector2> deathPositions = new() {
         {"Devil", new Vector2(2.24f, -2.25f)},
         {"Lich", new Vector2(1.9f, -1.865334f)},
         {"Skeleton", new Vector2(2.1686665f, -2.117f)},
@@ -33,11 +33,11 @@ public class Enemy : MonoBehaviour {
         {"Gog", new Vector2(2.0360003f, -2.52f)},
         {"Goblin", new Vector2(2.1f, -2.52f)},
     };
-    private readonly Dictionary<string, Vector2> offsetPositions = new Dictionary<string, Vector2>() {
+    private readonly Dictionary<string, Vector2> offsetPositions = new() {
         {"Devil", new Vector2(1.9f, -1.33334f)},
         {"Tombstone", new Vector2(1.9f, -2.118f)},
     };
-    private readonly Dictionary<string, int> givenStamina = new Dictionary<string, int>() {
+    private readonly Dictionary<string, int> givenStamina = new() {
         {"11", 1},
         {"12", 1},
         {"13", 2},
@@ -51,8 +51,8 @@ public class Enemy : MonoBehaviour {
     };
     private Scripts scripts;
     public int spawnNum;
-    private readonly List<Dice> availableDice = new List<Dice>();
-    private readonly List<int> diceValuations = new List<int>();
+    private readonly List<Dice> availableDice = new();
+    private readonly List<int> diceValuations = new();
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -82,7 +82,7 @@ public class Enemy : MonoBehaviour {
         }
         else { 
             // else some fightable enemy
-            if (Save.game.newGame) { SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); }
+            if (Save.game.newGame) { SpawnNewEnemy(Random.Range(3, 7), true); }
             // if in a new game, spawn a generic enemy
             else { 
                 // else resuming game from teh Savefile
@@ -203,7 +203,7 @@ public class Enemy : MonoBehaviour {
             if (enemyNum == 2) { temp = scripts.levelManager.GenStats("lich"); }
             else if (enemyNum == 0) { temp = scripts.levelManager.GenStats("devil"); }
             else { temp = scripts.levelManager.GenStats(); }
-            stats = new Dictionary<string, int>() {
+            stats = new Dictionary<string, int> {
                 { "green", (int)temp[0] },
                 { "blue", (int)temp[1] },
                 { "red", (int)temp[2] },
@@ -260,7 +260,7 @@ public class Enemy : MonoBehaviour {
             // spawning old enemy
             isDead = Save.game.enemyIsDead;
             // make it dead or not, based on the Save
-            stats = new Dictionary<string, int>() {
+            stats = new Dictionary<string, int> {
                 { "green", Save.game.enemyAcc },
                 { "blue", Save.game.enemySpd },
                 { "red", Save.game.enemyDmg },
@@ -303,7 +303,7 @@ public class Enemy : MonoBehaviour {
         try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
         try { scripts.turnManager.DisplayWounds(); } catch {}
         Save.game.enemyNum = enemyNum;
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
     /// <summary>
@@ -321,8 +321,8 @@ public class Enemy : MonoBehaviour {
         // maybe change this in the future to discard situationally (e.g. discard blue so it can get a first hit if its going to get hit regardless)
         yield return scripts.delays[0.25f];
         // dont discard immediately, otherwise its buggy
-        List<Dice> curAvailableDice = new List<Dice>();
-        List<int> curDiceValuations = new List<int>();
+        List<Dice> curAvailableDice = new();
+        List<int> curDiceValuations = new();
         // create lists to store the information in
         foreach (GameObject curDice in scripts.diceSummoner.existingDice) {
             // for every existing dice

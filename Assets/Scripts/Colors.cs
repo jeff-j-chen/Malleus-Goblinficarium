@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-
 public class Colors : MonoBehaviour {
     [SerializeField] public Color[] colorArr;
-    [SerializeField] public string[] colorNameArr = new string[] { "green", "blue", "red", "white", "yellow" };
+    [SerializeField] public string[] colorNameArr = { "green", "blue", "red", "white", "yellow" };
     public Color green, blue, red, white, yellow, hovered, clicked, disabled;
 
     private void Start() {
@@ -12,7 +11,7 @@ public class Colors : MonoBehaviour {
         ColorUtility.TryParseHtmlString("#D0D0D0", out white);
         ColorUtility.TryParseHtmlString("#FFD171", out yellow);
         // KEEP IT AS STRINGS, FOR SOME REASON REFERENCING THE ARRAY BREAKS EVERYTHING
-        colorArr = new Color[] { green, blue, red, white, yellow };
+        colorArr = new[] { green, blue, red, white, yellow };
         ColorUtility.TryParseHtmlString("#b0aba8", out hovered);
         ColorUtility.TryParseHtmlString("#85807d", out clicked);
         ColorUtility.TryParseHtmlString("#404040", out disabled);

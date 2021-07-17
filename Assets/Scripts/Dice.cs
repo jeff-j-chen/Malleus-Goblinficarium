@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class Dice : MonoBehaviour {
     public int diceNum;
     public string diceType;
@@ -15,7 +14,7 @@ public class Dice : MonoBehaviour {
     private SpriteRenderer childSpriteRenderer;
     private Scripts scripts;
 
-    private readonly WaitForSeconds[] rollTimes = { new WaitForSeconds(0.01f), new WaitForSeconds(0.03f), new WaitForSeconds(0.06f), new WaitForSeconds(0.09f), new WaitForSeconds(0.12f), new WaitForSeconds(0.15f), new WaitForSeconds(0.18f), new WaitForSeconds(0.21f), new WaitForSeconds(0.24f), new WaitForSeconds(0.3f) };
+    private readonly WaitForSeconds[] rollTimes = { new(0.01f), new(0.03f), new(0.06f), new(0.09f), new(0.12f), new(0.15f), new(0.18f), new(0.21f), new(0.24f), new(0.3f) };
     // different times for rolling 
 
     private void Awake()  {
@@ -169,7 +168,7 @@ public class Dice : MonoBehaviour {
                     scripts.itemManager.discardableDieCounter--;
                     // decrease the counter for the number of die 
                     Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
-                    if (scripts.tutorial is null) { Save.SaveGame(); }
+                    if (scripts.tutorial == null) { Save.SaveGame(); }
                 }
                 else if (scripts.enemy.woundList.Contains("chest")) {
                     // if enemy is wounded in the chest
@@ -258,7 +257,7 @@ public class Dice : MonoBehaviour {
             // wait for a set amount of time
             if (playSound) { scripts.soundManager.PlayClip("click0"); }
             // play sound clip if necessary
-            int randNum = UnityEngine.Random.Range(1, 7);
+            int randNum = Random.Range(1, 7);
             // get a random number for the dice 
             spriteRenderer.sprite = scripts.diceSummoner.numArr[randNum - 1].GetComponent<SpriteRenderer>().sprite;
             // assign the sprite to be the necessary sprite with the new number

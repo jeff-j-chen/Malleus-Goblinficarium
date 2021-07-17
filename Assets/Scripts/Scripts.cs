@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-
 public class Scripts : MonoBehaviour {
     [SerializeField] public Animator terrain;
     public Dice dice;
@@ -27,11 +24,11 @@ public class Scripts : MonoBehaviour {
     public HighlightCalculator highlightCalculator;
     private readonly float[] delayArr = { 0.0001f, 0.001f, 0.005f, 0.01f, 0.0125f, 0.02f, 0.025f, 0.03f, 0.033f, 0.05f, 0.1f, 0.15f, 0.2f, 0.25f, 0.4f, 0.45f, 0.5f, 0.55f, 0.6f, 0.65f, 0.75f, 0.8f, 1f, 1.15f, 1.25f, 1.5f, 1.55f, 2f, 2.5f, 3f };
     // array of delays to initiate waitforseconds with, this saves on memory
-    public Dictionary<float, WaitForSeconds> delays = new Dictionary<float, WaitForSeconds>();
+    public Dictionary<float, WaitForSeconds> delays = new();
 
     private void Start() {
         tutorial = FindObjectOfType<Tutorial>();
-        if (tutorial is null) { Save.LoadGame(); }
+        if (tutorial == null) { Save.LoadGame(); }
         else { Save.LoadTutorial(); }
         Save.LoadPersistent();
         dice = FindObjectOfType<Dice>();
@@ -62,20 +59,20 @@ public class Scripts : MonoBehaviour {
         yield return delays[0.25f];
         if (player != null) { Save.game.newGame = false; }
         
-        if (tutorial is null) { Save.SaveGame(); }
+        if (tutorial == null) { Save.SaveGame(); }
         music = FindObjectOfType<Music>();
         // also get the music here, because we need it to set up the singleton pattern first
     }
 
     public void OnApplicationQuit() { 
         if (player != null) { 
-            if (tutorial is null) { Save.SaveGame(); } 
+            if (tutorial == null) { Save.SaveGame(); } 
             Save.SavePersistent(); 
         }
     }
     public void OnApplicationPause() { 
         if (player != null) { 
-            if (tutorial is null) { Save.SaveGame(); } 
+            if (tutorial == null) { Save.SaveGame(); } 
             Save.SavePersistent(); 
         }
     }

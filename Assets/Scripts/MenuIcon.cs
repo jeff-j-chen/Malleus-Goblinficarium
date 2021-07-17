@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-
+﻿using System.Collections;
+using UnityEngine;
 public class MenuIcon : MonoBehaviour {
     private const string DEBUG_KEY = "debug";
     private const string HINTS_KEY = "hints";

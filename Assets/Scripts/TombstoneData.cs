@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System;
 using System.Linq;
+using UnityEngine;
 public class TombstoneData : MonoBehaviour {
     Scripts scripts;
 
@@ -57,7 +55,7 @@ public class TombstoneData : MonoBehaviour {
         // assign the level of which the tombstone will appear on
         Save.game.newGame = true;
         // player died, so make the next game a new one
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         for (int i = 0; i < scripts.itemManager.floorItems.Count; i++){
             scripts.itemManager.MoveToInventory(0, true, false, false);
             // move all items on the floor to the player's inventory
@@ -78,7 +76,7 @@ public class TombstoneData : MonoBehaviour {
         // clear all existing player data
         Save.game.curCharNum = Save.persistent.newCharNum;
         // set the curcharnum to the new one, because it gets set to 0 on new GameData()
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         Save.SavePersistent();
     }
 

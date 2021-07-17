@@ -1,9 +1,7 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
-
 public class CharacterSelector : MonoBehaviour {
     [SerializeField] public int selectionNum;
     [SerializeField] public bool[] unlockedChars = new bool[4] { true, false, false, false };

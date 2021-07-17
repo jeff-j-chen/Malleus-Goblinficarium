@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
-
 public class CharacterSwapButton : MonoBehaviour {
     [SerializeField] private string leftOrRight;
     private CharacterSelector characterSelector;

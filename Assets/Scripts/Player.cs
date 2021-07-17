@@ -1,10 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
-using System;
-using System.Linq;
-
 public class Player : MonoBehaviour {
     [SerializeField] public int charNum;
     [SerializeField] private RuntimeAnimatorController[] controllers;
@@ -14,26 +13,26 @@ public class Player : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI staminaCounter;
     [SerializeField] public TextMeshProUGUI target;
     [SerializeField] public TextMeshProUGUI targetInfo;
-    [SerializeField] public List<GameObject> inventory = new List<GameObject>();
+    [SerializeField] public List<GameObject> inventory = new();
     [SerializeField] public TextMeshProUGUI identifier;
     [SerializeField] private GameObject statusEffectIcon;
     [SerializeField] public GameObject iconGameobject;
-    [SerializeField] public string[] statusEffectNames = new string[] { "dodge", "leech", "fury", "haste", "courage" };
-    [SerializeField] public string[] statusEffectDescs = new string[] { "if you strike first, ignore all damage", "cure the same wound as inflicted", "all picked die turn yellow", "pick 3 dice, enemy gets the rest", "keep 1 of your die till next round" };
+    [SerializeField] public string[] statusEffectNames = { "dodge", "leech", "fury", "haste", "courage" };
+    [SerializeField] public string[] statusEffectDescs = { "if you strike first, ignore all damage", "cure the same wound as inflicted", "all picked die turn yellow", "pick 3 dice, enemy gets the rest", "keep 1 of your die till next round" };
     [SerializeField] public Sprite[] statusEffectSprites;
-    private List<GameObject> statusEffectList = new List<GameObject>();
-    public List<string> woundList = new List<string>();
+    private List<GameObject> statusEffectList = new();
+    public List<string> woundList = new();
     public bool isDead;
     public bool cancelMove = false;
     public float hintTimer;
     public Coroutine coroutine = null;
-    public Dictionary<string, int> stats = new Dictionary<string, int>() {
+    public Dictionary<string, int> stats = new() {
         { "green", 0 },
         { "blue", 0 },
         { "red", 0 },
         { "white", 0 },
     };
-    public Dictionary<string, int> potionStats = new Dictionary<string, int>() {
+    public Dictionary<string, int> potionStats = new() {
         { "green", 0 },
         { "blue", 0 },
         { "red", 0 },
@@ -47,9 +46,9 @@ public class Player : MonoBehaviour {
     public bool isHasty = false;
     public bool isBloodthirsty = false;
     public bool isCourageous = false;
-    private Vector2 basePosition = new Vector2(-2.166667f, -1.866667f);
-    private Vector2 iconPosition = new Vector2(-12.16667f, 3.333333f);
-    private Dictionary<int, Vector2> deathPositions = new Dictionary<int, Vector2>() {
+    private Vector2 basePosition = new(-2.166667f, -1.866667f);
+    private Vector2 iconPosition = new(-12.16667f, 3.333333f);
+    private Dictionary<int, Vector2> deathPositions = new() {
         {0, new Vector2(-2.04f, -2.53f)},
         {1, new Vector2(-2.166667f, -2.53f)},
         {2, new Vector2(-2.166667f, -2.53f)},
@@ -85,7 +84,7 @@ public class Player : MonoBehaviour {
         stamina = Save.game.playerStamina + Save.game.expendedStamina;
         Save.game.expendedStamina = 0;
         staminaCounter.text = stamina.ToString();
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         // give status effects, potion effects, stamina, everything from previous Save
     }
 
@@ -164,7 +163,7 @@ public class Player : MonoBehaviour {
     /// Use the player's weapon, attacking the enemy.
     /// </summary>
     public void UseWeapon() {
-        List<Dice> availableDice = new List<Dice>();
+        List<Dice> availableDice = new();
         // create an empty list to hold die in
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
             // for every die
@@ -204,7 +203,7 @@ public class Player : MonoBehaviour {
                 // if player has mace
                 scripts.turnManager.usedMace = true;
                 Save.game.usedMace = true;
-                if (scripts.tutorial is null) { Save.SaveGame(); }
+                if (scripts.tutorial == null) { Save.SaveGame(); }
                 // prevent player from using mace again
                 scripts.soundManager.PlayClip("click0");
                 foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
@@ -268,28 +267,33 @@ public class Player : MonoBehaviour {
     ///  Sets the status effect of a player.
     /// </summary>
     public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
-        if (statusEffect == "fury") { if (scripts.player.isFurious && onOrOff == true) { return; } else { 
+        if (statusEffect == "fury") {
+            if (scripts.player.isFurious && onOrOff) { return; }
             scripts.player.isFurious = onOrOff; 
             Save.game.isFurious = onOrOff;
-        } }
-        else if (statusEffect == "dodge") { if (scripts.player.isDodgy && onOrOff == true) { return; } else { 
+        }
+        else if (statusEffect == "dodge") {
+            if (scripts.player.isDodgy && onOrOff) { return; }
             scripts.player.isDodgy = onOrOff; 
             Save.game.isDodgy = onOrOff;
-        } }
-        else if (statusEffect == "haste") { if (scripts.player.isHasty && onOrOff == true) { return; } else { 
+        }
+        else if (statusEffect == "haste") {
+            if (scripts.player.isHasty && onOrOff) { return; }
             scripts.player.isHasty = onOrOff; 
             Save.game.isHasty = onOrOff;
-        } }
-        else if (statusEffect == "leech") { if (scripts.player.isBloodthirsty && onOrOff == true) { return; } else { 
+        }
+        else if (statusEffect == "leech") {
+            if (scripts.player.isBloodthirsty && onOrOff) { return; }
             scripts.player.isBloodthirsty = onOrOff; 
             Save.game.isBloodthirsty = onOrOff;
-        } }
-        else if (statusEffect == "courage") { if (scripts.player.isCourageous && onOrOff == true) { return; } else { 
+        }
+        else if (statusEffect == "courage") {
+            if (scripts.player.isCourageous && onOrOff) { return; }
             scripts.player.isCourageous = onOrOff; 
             Save.game.isCourageous = onOrOff;
-        } }
+        }
         // set as desired, if turning on something already on then instantly exit function
-        if (onOrOff == true) {
+        if (onOrOff) {
             // if turning on
             identifier.text = ":";
             // set colon (instead of you)

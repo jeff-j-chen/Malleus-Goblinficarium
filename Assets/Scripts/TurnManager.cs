@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-
+using Random = UnityEngine.Random;
 public class TurnManager : MonoBehaviour {
     [SerializeField] public GameObject blackBox;
     public Vector3 onScreen = new Vector2(2.4f, 10.01f);
@@ -30,7 +30,7 @@ public class TurnManager : MonoBehaviour {
         SetTargetOf("enemy");
         scripts.enemy.TargetBest();
         scripts.statSummoner.ResetDiceAndStamina();
-        if (scripts.tutorial is null) {
+        if (scripts.tutorial == null) {
             if (!(scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) && scripts.levelManager.sub != 4) {
                 if (Save.game.newGame) { scripts.diceSummoner.SummonDice(true, true); }
                 else { scripts.diceSummoner.SummonDice(true, false); }
@@ -142,10 +142,6 @@ public class TurnManager : MonoBehaviour {
             text.color = temp;
         }
         // fade out
-        if (scripts.player.charNum == 3 && scripts.player.woundList.Count != 3 && scripts.enemy.target.text != "face") {
-            // 4th char gets stamina refresh upon wound, assuming he doesn't get killed instantly
-            scripts.turnManager.ChangeStaminaOf("player", 3);
-        }
         DisplayWounds();
         // update the wound display
         for (int i = 0; i < 40; i++) {
@@ -252,17 +248,17 @@ public class TurnManager : MonoBehaviour {
         if (playerOrEnemy == "player") {
             scripts.player.stamina += amount;
             // change stamina
+            if (scripts.player.stamina >= 10 && scripts.player.charNum == 3) {
+                // heal wounds at 10 stamina, only applies for foods (during attack is handled elsewhere)
+                scripts.player.woundList.Clear();
+                StartCoroutine(HealAfterDelay());
+            }
             scripts.player.staminaCounter.text = scripts.player.stamina.ToString();
             // update counter
             RecalculateMaxFor(playerOrEnemy);
             // recalculate max (in case stamina was taken from green)
-            if (scripts.player.stamina >= 10 && scripts.player.charNum == 3) {
-                // heal wounds at 10 stamina
-                scripts.player.woundList.Clear();
-                StartCoroutine(HealAfterDelay());
-            }
             Save.game.playerStamina = scripts.player.stamina;
-            if (scripts.tutorial is null) { Save.SaveGame(); }
+            if (scripts.tutorial == null) { Save.SaveGame(); }
         }
         else if (playerOrEnemy == "enemy") {
             scripts.enemy.stamina += amount;
@@ -281,7 +277,7 @@ public class TurnManager : MonoBehaviour {
         // reset the scimitar parry (if set true from a previous round)
         isMoving = true;
         // set the variable to true so that certain actions can check this and make sure actions are not taken when they shouldn't be
-        List<Dice> availableDice = new List<Dice>();
+        List<Dice> availableDice = new();
         RunEnemyCalculations();
         // make enemy add stamina to stats as necessary
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
@@ -419,9 +415,9 @@ public class TurnManager : MonoBehaviour {
                     yield return scripts.delays[0.1f];
                     // wait
                 }
-                if (dieSavedFromLastRound is null && scripts.diceSummoner.existingDice.Count > 0) {
+                if (dieSavedFromLastRound == null && scripts.diceSummoner.existingDice.Count > 0) {
                     // player has not discarded enough dice in the 5s time slot, so choose a random one
-                    dieSavedFromLastRound = (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList()[UnityEngine.Random.Range(0, (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList().Count)];
+                    dieSavedFromLastRound = (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList()[Random.Range(0, (from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isOnPlayerOrEnemy == "player" select a).ToList().Count)];
                     // Save random die
                 }
                 actionsAvailable = false;
@@ -445,17 +441,17 @@ public class TurnManager : MonoBehaviour {
             DetermineMove(true);
             // make the next person go again
         }
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         Save.SavePersistent();
         yield return scripts.delays[0.45f];
         // small delay
-        ClearVariablesAfterRound();
+        ClearVariablesAfterRound(false);
     }
 
     /// <summary>
     /// Reset all variables used in preparation for the next round.
     /// </summary>
-    public void ClearVariablesAfterRound() {
+    public void ClearVariablesAfterRound(bool nextRound) {
         ClearPotionStats();
         scripts.player.SetPlayerStatusEffect("fury", false);
         scripts.player.SetPlayerStatusEffect("dodge", false);
@@ -469,20 +465,21 @@ public class TurnManager : MonoBehaviour {
         scripts.itemManager.usedBoots = false;
         scripts.itemManager.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
-        if (scripts.player.woundList.Contains("head")) {
-            scripts.itemManager.discardableDieCounter = 1;
-            Save.game.discardableDieCounter = 1;
-        }
-        else {
+        if (nextRound) {
             scripts.itemManager.discardableDieCounter = 0;
             Save.game.discardableDieCounter = 0;
+        }
+        else if (scripts.enemy.woundList.Contains("head")) {
+            // only allow discarding if enemy has head wound and we arent going to the next round
+            scripts.itemManager.discardableDieCounter = 1;
+            Save.game.discardableDieCounter = 1;
         }
         Save.game.usedMace = false;
         Save.game.usedAnkh = false;
         Save.game.usedBoots = false;
         Save.game.usedHelm = false;
         Save.game.expendedStamina = 0;
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !scripts.enemy.isDead) {
             scripts.enemy.stamina = 3;
             // refresh lich's stamina
@@ -507,7 +504,7 @@ public class TurnManager : MonoBehaviour {
         Save.game.potionSpd = 0;
         Save.game.potionDmg = 0;
         Save.game.potionDef = 0;
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
     /// <summary>
@@ -518,12 +515,12 @@ public class TurnManager : MonoBehaviour {
         else if (playerOrEnemy == "enemy") { scripts.enemy.isDead = true; }
         // make sure whoever is killed is set to be dead
         Save.game.enemyIsDead = true;
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         yield return scripts.delays[0.55f];
         // short delay
         if (playerOrEnemy == "player") {
             if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
-                SetStatusText($"devil twists claws into you... you die");
+                SetStatusText("devil twists claws into you... you die");
             }
             else {
                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you die");
@@ -538,11 +535,11 @@ public class TurnManager : MonoBehaviour {
             // set status text and play the animation
         }
         // else { print("invalid string passed"); }
-        ClearVariablesAfterRound();
+        ClearVariablesAfterRound(false);
         Save.persistent.enemiesSlain++;
         Save.game.expendedStamina = 0;
         Save.SavePersistent();
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         yield return scripts.delays[0.45f];
         isMoving = false;
     }
@@ -792,15 +789,15 @@ public class TurnManager : MonoBehaviour {
                 }
                 else {
                     if (scripts.enemy.target.text != "face") {
-                        // if player is not targeting face
+                        // if enemy is not targeting face
                         if (scripts.enemy.target.text.Contains("*")) {
                             // if previously wounded
                             if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
                                 SetStatusText($"devil twists claws in your {scripts.enemy.target.text.Substring(1)}!");
                             }
                             SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text.Substring(1)}!");
-                            Save.persistent.woundsReceived++;
                             // notify player
+                            Save.persistent.woundsReceived++;
                         }
                         else {
                             if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
@@ -809,8 +806,8 @@ public class TurnManager : MonoBehaviour {
                             if (scripts.player.woundList.Count != 2) {
                                 // if player won't die
                                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text}!");
-                                Save.persistent.woundsReceived++;
                                 // notify player
+                                Save.persistent.woundsReceived++;
                             }
                         }
                         if (scripts.itemManager.PlayerHas("phylactery")) {
@@ -826,23 +823,36 @@ public class TurnManager : MonoBehaviour {
             // play animation + sound for the attack
             if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text.Substring(1)) || armor || scripts.player.isDodgy)) {
                 // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
-                scripts.player.woundList.Add(scripts.enemy.target.text);
-                // add the hit
-                Save.game.playerWounds = scripts.player.woundList;
-                if (scripts.tutorial is null) { Save.SaveGame(); }
-                StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
-                // make it change
-                RecalculateMaxFor("player");
-                // reset stuff
-                if (scripts.player.woundList.Count > 0) {
-                    // wounds were not healed, so apply them normally
-                    return ApplyInjuriesDuringMove(scripts.enemy.target.text, "player");
+                if (scripts.player.charNum == 3 && scripts.player.woundList.Count < 2 && scripts.enemy.target.text != "face" && scripts.player.stamina >= 7) {
+                    // if on the 4th char, they are able to heal back (wont die instantly), and has sufficient stamina to heal the next move
+                    print($"healing, because player only has {scripts.player.woundList.Count} wounds!");
+                    scripts.player.woundList.Clear();
+                    StartCoroutine(HealAfterDelay());
+                    // decrementing and healing handled in the coro
                 }
                 else {
+                    print("proceeding as normal");
+                    if (scripts.player.charNum == 3 && scripts.player.stamina < 7) {
+                        // on the 4th char but does not have sufficient stamina to heal
+                        ChangeStaminaOf("player", 3);
+                        // so merely increment their stamina
+                    }
+                    scripts.player.woundList.Add(scripts.enemy.target.text);
+                    // add the hit
+                    Save.game.playerWounds = scripts.player.woundList;
+                    // make it change
+                    RecalculateMaxFor("player");
+                    // reset stuff
+                    if (scripts.tutorial == null) { Save.SaveGame(); }
+                    StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
+                    if (scripts.player.woundList.Count > 0) {
+                        // wounds were not healed, so apply them normally
+                        return ApplyInjuriesDuringMove(scripts.enemy.target.text, "player");
+                    }
                     // wounds were healed, so don't apply them and don't kill the player
-                    return false;
                 }
-                // return if player died or not
+                return false;
+                // return that the player did not ie
             }
         }
         else {
@@ -876,7 +886,9 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     public IEnumerator HealAfterDelay() {
         yield return scripts.delays[1f];
-        scripts.turnManager.ChangeStaminaOf("player", -10);
+        scripts.turnManager.ChangeStaminaOf("player", -7);
+        // bypass changestaminaof and instead directly change the stamina, to differentiate from healing from eating
+        if (scripts.tutorial == null) { Save.SaveGame(); }
         scripts.soundManager.PlayClip("blip0");
         DisplayWounds();
     }
@@ -953,7 +965,7 @@ public class TurnManager : MonoBehaviour {
                             scripts.enemy.woundList.Add(scripts.player.target.text);
                             // add the wound
                             Save.game.enemyWounds = scripts.enemy.woundList;
-                            if (scripts.tutorial is null) { Save.SaveGame(); }
+                            if (scripts.tutorial == null) { Save.SaveGame(); }
                             if (scripts.player.charNum == 2) {
                                 scripts.turnManager.ChangeStaminaOf("player", 1);
                                 // increment stamina if on 3rd character
@@ -1014,12 +1026,12 @@ public class TurnManager : MonoBehaviour {
         StartCoroutine(ApplyInjuriesDuringMoveCoro(injury, appliedTo));
         // start applying the injuries
         if (scripts.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
-        else if (injury == "face" && !(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) {
+        if (injury == "face" && !(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) {
             return true;
         }
-        else if (appliedTo == "player" && scripts.player.woundList.Count == 3) { return true; }
-        else if (appliedTo == "enemy" && scripts.enemy.woundList.Count == 3) { return true; }
-        else { return false; }
+        if (appliedTo == "player" && scripts.player.woundList.Count == 3) { return true; }
+        if (appliedTo == "enemy" && scripts.enemy.woundList.Count == 3) { return true; }
+        return false;
         // return true or false here, based on whether the enemy was killed or not.
     }
 
@@ -1058,7 +1070,7 @@ public class TurnManager : MonoBehaviour {
                     }
                 }
                 // for every stat (g b r w), shift the die over by the amount of stamina added
-                scripts.statSummoner.addedPlayerStamina = new Dictionary<string, int>() {
+                scripts.statSummoner.addedPlayerStamina = new Dictionary<string, int> {
                     { "green", 0 },
                     { "blue", 0 },
                     { "red", 0 },
@@ -1072,7 +1084,7 @@ public class TurnManager : MonoBehaviour {
                         dice.instantiationPos = dice.transform.position;
                     }
                 }
-                scripts.statSummoner.addedEnemyStamina = new Dictionary<string, int>() {
+                scripts.statSummoner.addedEnemyStamina = new Dictionary<string, int> {
                     { "green", 0 },
                     { "blue", 0 },
                     { "red", 0 },
@@ -1184,7 +1196,7 @@ public class TurnManager : MonoBehaviour {
             // update the debug
         }
         Save.game.enemyStamina = scripts.enemy.stamina;
-        if (scripts.tutorial is null) { Save.SaveGame(); }
+        if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
     /// <summary>

@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-
 public class HighlightCalculator : MonoBehaviour {
     [SerializeField] private GameObject highlighter;
     private readonly GameObject[] highlights = new GameObject[4];
     private readonly BoxCollider2D[] highlightColliders = new BoxCollider2D[4];
     private Scripts scripts;
-    private readonly Vector2 offScreen = new Vector2(0, 20);
+    private readonly Vector2 offScreen = new(0, 20);
     public int diceTakenByPlayer = 0;
-    private readonly Vector2 small = new Vector2(10f, 1f);
-    private readonly Vector2 large = new Vector2(10f, 10f);
+    private readonly Vector2 small = new(10f, 1f);
+    private readonly Vector2 large = new(10f, 10f);
 
 
     private void Start() {

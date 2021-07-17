@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.IO;
 using UnityEngine;
-
 public class MenuButton : MonoBehaviour {
     private float transitionMultiplier;
     private SoundManager soundManager;
