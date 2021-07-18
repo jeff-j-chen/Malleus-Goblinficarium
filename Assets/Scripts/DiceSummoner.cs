@@ -137,9 +137,8 @@ public class DiceSummoner : MonoBehaviour
         }
         // set the instantiation pos to be by the correct stat with the correct position
         else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
-        int diceColorIndex;
         // reference variable for the die's color index relative to scripts.color.coloArr
-        diceColorIndex = diceType == null ? Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]) : Array.IndexOf(scripts.colors.colorNameArr, diceType);
+        int diceColorIndex = diceType == null ? Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]) : Array.IndexOf(scripts.colors.colorNameArr, diceType);
         // else create one of the specified type
         GameObject number = Instantiate(numArr[diceNum - 1], instantiationPos, Quaternion.identity);
         GameObject indivBase = Instantiate(diceBase, instantiationPos, Quaternion.identity);
@@ -215,9 +214,9 @@ public class DiceSummoner : MonoBehaviour
         Save.game.dicePlayerOrEnemy.Clear();
         Save.game.diceRerolled.Clear();
         // make sure to clear everything before saving new data
-        for (int i = 0; i < existingDice.Count; i++) { 
+        foreach (GameObject g in existingDice) {
             // for every existing dice
-            Dice dice = existingDice[i].GetComponent<Dice>();
+            Dice dice = g.GetComponent<Dice>();
             Save.game.diceNumbers.Add(dice.diceNum);
             Save.game.diceTypes.Add(dice.diceType);
             Save.game.diceAttachedToStat.Add(dice.statAddedTo);

@@ -186,7 +186,9 @@ public class ItemManager : MonoBehaviour {
             switch (scripts.player.charNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                    // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                    // MoveToInventory(0, true, false, false);
+                    CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
                     MoveToInventory(0, true, false, false);
                     // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     // MoveToInventory(0, true, false, false);
@@ -198,6 +200,10 @@ public class ItemManager : MonoBehaviour {
                         CreateItem("torch", "common");
                         MoveToInventory(0, true, false, false);
                     }
+                    
+                    CreateItem("potion", "common", "speed");
+                    MoveToInventory(0, true, false, false);
+                    
                     break;
                 }
                 case 1: {
@@ -323,9 +329,11 @@ public class ItemManager : MonoBehaviour {
         else if (itemType == "common") { 
             int rand = Random.Range(0, commonItemSprites.Length);
             // get a random item from the list of names
-            if (rand == 0 || rand == 8) { 
-                if (Random.Range(0, 2) == 0) { sprite = commonItemSprites[rand]; } 
-                else { sprite = commonItemSprites[Random.Range(0, commonItemSprites.Length)]; }
+            if (rand is 0 or 8) {
+                sprite = Random.Range(0, 2) == 0 
+                    ? commonItemSprites[rand] 
+                    : commonItemSprites[Random.Range(0, commonItemSprites.Length)];
+                // if rolled originally to armor or skeleton key, 50% chance it changes again (as they are intended to be rarer)
             }
             // armor and skeleton keys are about 2x rarer than other items
             else { sprite = commonItemSprites[rand]; }
@@ -573,9 +581,10 @@ public class ItemManager : MonoBehaviour {
                         if (tempItem.itemType == "weapon") { 
                             scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
                         }
-                        if (tempItem.itemName == "necklet")  { 
-                            if (tempItem.modifier == "arcane") { scripts.turnManager.SetStatusText("you take arcane necklet"); }
-                            else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
+                        if (tempItem.itemName == "necklet") {
+                            scripts.turnManager.SetStatusText(tempItem.modifier == "arcane" 
+                                                                  ? "you take arcane necklet" 
+                                                                  : $"you take {tempItem.itemName} of {tempItem.modifier}");
                         }
                         else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
                         else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName}"); }
@@ -642,16 +651,20 @@ public class ItemManager : MonoBehaviour {
                 // normal enemy
                 int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
                 // count the number of torches
-                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + Random.Range(-2, 0), 0, 5);
+                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + Random.Range(-2, 1), 0, 5);
                 // create a spawn count 
                 CreateRandomWeapon();
                 // create a random weapon at index 0
+                if (Random.Range(0, 13) == 0) { 
+                    // low chance to produce rare
+                    CreateItem("rare");
+                    spawnCount = spawnCount - 1 < 0 ? 0 : spawnCount - 1;
+                    // if spawned a rare, decrement spawncount (making sure it stays above 0)
+                }
                 for (int i = 0; i < spawnCount; i++) {
                     CreateItem("common");
                     // create a random number of items based on the spawn count
                 }
-                if (Random.Range(0, 13) == 0) { CreateItem("rare"); }
-                // low chance to produce rare
             }
         }
         else { 
@@ -672,7 +685,7 @@ public class ItemManager : MonoBehaviour {
         lootText.text = "goods:";
         // set the test
         for (int i = 0; i < 3; i++) { CreateItem("common", tempOffset); }
-        // create 3 common items, negativelyoffesting by the deletionq
+        // create 3 common items, negatively offesting by the deletion
         CreateItem("arrow", "arrow", tempOffset);
         // create the next level arrow
         SaveFloorItems();

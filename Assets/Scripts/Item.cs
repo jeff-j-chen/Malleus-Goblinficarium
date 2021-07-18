@@ -9,7 +9,7 @@ public class Item : MonoBehaviour {
     [SerializeField] public string itemName;
     [SerializeField] public string itemType;
     [SerializeField] public string modifier;
-    [SerializeField] public Dictionary<string, int> weaponStats = new();
+    public Dictionary<string, int> weaponStats = new();
     private bool preventPlayingFX = true;
 
     void Awake() {
@@ -21,7 +21,7 @@ public class Item : MonoBehaviour {
         preventPlayingFX = false;
     }
 
-    void Start() {
+    private void Start() {
         gameObject.name = itemName;
         // set the object's name to its itemname, so it can be identified in the editor
         if (itemName == "torch" && scripts.player != null) {
@@ -42,7 +42,7 @@ public class Item : MonoBehaviour {
         StartCoroutine(AllowFX());
     }
 
-    void OnMouseOver() {
+    private void OnMouseOver() {
         if (Input.GetMouseButtonDown(0)) {
             // left click
             if (scripts.itemManager.highlightedItem == gameObject) { Use(); }
@@ -52,10 +52,10 @@ public class Item : MonoBehaviour {
                 // otherwise select it
                 if (scripts.player != null) {
                     // in game
-                    if (scripts.player.inventory.Contains(gameObject)) { scripts.itemManager.curList = scripts.player.inventory; }
-                    // selection occured in inventory, so assign the curlist variable as such
-                    else { scripts.itemManager.curList = scripts.itemManager.floorItems; }
-                    // selection was on floor so         "  "               
+                    scripts.itemManager.curList = scripts.player.inventory.Contains(gameObject) 
+                        ? scripts.player.inventory 
+                        : scripts.itemManager.floorItems;
+                    // depending on where the selection occurred, assign the curlist variable to be there      
                 }
                 else {
                     // in character select 
@@ -96,10 +96,10 @@ public class Item : MonoBehaviour {
     public void Select(bool playAudio = true) {
         if (itemType == "weapon") {
             // if the item is a weapon
-            if (scripts.itemManager.descriptionDict[itemName.Split(' ')[1]] == "") { scripts.itemManager.itemDesc.text = itemName; }
-            // if no description, just display the itemname
-            else { scripts.itemManager.itemDesc.text = $"{itemName}\n- {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}"; }
-            // if description, then display it
+            scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName.Split(' ')[1]] == "" 
+                ? itemName 
+                : $"{itemName}\n- {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}";
+            // if description, then display it, else just display it normally
             if (scripts.itemManager.floorItems.Contains(gameObject) && scripts.player != null) {
                 // if item on the floor and not in character select
                 scripts.enemy.stats = weaponStats;
@@ -148,12 +148,12 @@ public class Item : MonoBehaviour {
                         }
                         break;
                     case "necklet":
-                        switch (modifier) {
-                            case "arcane": scripts.itemManager.itemDesc.text = "arcane necklet\nall necklets are more effective"; break;
-                            case "nothing": scripts.itemManager.itemDesc.text = "necklet of nothing\ndoes nothing"; break;
-                            case "victory": scripts.itemManager.itemDesc.text = "necklet of victory\nthe victory is in your hands!.."; break;
-                            default: scripts.itemManager.itemDesc.text = $"necklet of {modifier}\n+{scripts.itemManager.neckletCounter["arcane"]} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"; break;
-                        }
+                        scripts.itemManager.itemDesc.text = modifier switch {
+                            "arcane" => "arcane necklet\nall necklets are more effective",
+                            "nothing" => "necklet of nothing\ndoes nothing",
+                            "victory" => "necklet of victory\nthe victory is in your hands!..",
+                            _ => $"necklet of {modifier}\n+{scripts.itemManager.neckletCounter["arcane"]} {scripts.itemManager.statArr1[Array.IndexOf(scripts.itemManager.neckletTypes, modifier)]}"
+                        };
                         break;
                     case "cheese":
                     case "steak":
@@ -274,7 +274,7 @@ public class Item : MonoBehaviour {
     /// </summary>
     private void UseCommon() {
         if (scripts.enemy.isDead) {
-            if (itemName == "steak" || itemName == "cheese" || itemName == "retry" || itemName == "arrow") {
+            if (itemName is "steak" or "cheese" or "retry" or "arrow") {
                 // only allow those 4 items to be used if the enemy is dead, otherwise its a waste
                 StartCoroutine(UseCommonCoro());
             }
@@ -295,8 +295,7 @@ public class Item : MonoBehaviour {
                     // eating steak
                     Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
-                    if (scripts.player.charNum == 0) { scripts.turnManager.ChangeStaminaOf("player", 7); }
-                    else { scripts.turnManager.ChangeStaminaOf("player", 5); }
+                    scripts.turnManager.ChangeStaminaOf("player", scripts.player.charNum == 0 ? 7 : 5);
                     // change stamina based on the character
                     scripts.turnManager.SetStatusText("you swallow steak");
                     // status text
@@ -313,8 +312,7 @@ public class Item : MonoBehaviour {
                 case "cheese" when scripts.enemy.enemyName.text != "Tombstone":
                     Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
-                    if (scripts.player.charNum == 0) { scripts.turnManager.ChangeStaminaOf("player", 5); }
-                    else { scripts.turnManager.ChangeStaminaOf("player", 3); }
+                    scripts.turnManager.ChangeStaminaOf("player", scripts.player.charNum == 0 ? 5 : 3);
                     scripts.turnManager.SetStatusText("you swallow cheese");
                     Remove();
                     break;
@@ -422,25 +420,30 @@ public class Item : MonoBehaviour {
                     // notify player
                     switch (modifier) {
                         case "accuracy":
+                            scripts.statSummoner.ShiftDiceAccordingly("green", 
+                                scripts.statSummoner.RawSumOfStat("green", "player") == -1 ? 1 : 3);
                             scripts.player.potionStats["green"] += 3;
-                            scripts.statSummoner.ShiftDiceAccordingly("green", 3);
                             Save.game.potionAcc = scripts.player.potionStats["green"];
                             break;
                         case "speed":
+                            scripts.statSummoner.ShiftDiceAccordingly("blue", 
+                                scripts.statSummoner.RawSumOfStat("blue", "player") == -1 ? 1 : 3);
                             scripts.player.potionStats["blue"] += 3;
-                            scripts.statSummoner.ShiftDiceAccordingly("blue", 3);
                             Save.game.potionSpd = scripts.player.potionStats["blue"];
                             break;
                         case "strength":
+                            scripts.statSummoner.ShiftDiceAccordingly("red", 
+                                scripts.statSummoner.RawSumOfStat("red", "player") == -1 ? 1 : 3);
                             scripts.player.potionStats["red"] += 3;
-                            scripts.statSummoner.ShiftDiceAccordingly("red", 3);
                             Save.game.potionDef = scripts.player.potionStats["red"];
                             break;
                         case "defense":
+                            scripts.statSummoner.ShiftDiceAccordingly("white", 
+                                scripts.statSummoner.RawSumOfStat("white", "player") == -1 ? 1 : 3);
                             scripts.player.potionStats["white"] += 3;
-                            scripts.statSummoner.ShiftDiceAccordingly("white", 3);
                             Save.game.potionDmg = scripts.player.potionStats["white"];
                             break;
+                        // for regular potions, shift the stats by varying amounts depending if the sum without die is -1 or not (or knee injury), making sure the dice stay in the correct position
                         case "might":
                             scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", isFromMight:true);
                             break;
@@ -518,7 +521,7 @@ public class Item : MonoBehaviour {
                         // notify player
                     }
                     else { scripts.turnManager.SetStatusText("helm can help you no further"); }
-                    // notfiy player
+                    // notify player
                     break;
                 // these are pretty self explanatory
                 case "kapala":
@@ -590,8 +593,9 @@ public class Item : MonoBehaviour {
                     scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}");
                 }
                 else if (itemName == "necklet") {
-                    if (modifier == "arcane") { scripts.turnManager.SetStatusText("you drop arcane necklet"); }
-                    else { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
+                    scripts.turnManager.SetStatusText(modifier == "arcane" 
+                                                          ? "you drop arcane necklet" 
+                                                          : $"you drop {itemName} of {modifier}");
                 }
                 else if (itemName == "potion" || itemName == "scroll") { scripts.turnManager.SetStatusText($"you drop {itemName} of {modifier}"); }
                 else { scripts.turnManager.SetStatusText($"you drop {itemName}"); }

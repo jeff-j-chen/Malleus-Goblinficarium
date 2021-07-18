@@ -1,25 +1,27 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 public class LevelManager : MonoBehaviour {
     [SerializeField] private GameObject levelBox;
     [SerializeField] private GameObject loadingCircle;
-    Vector3 onScreen = new Vector2(0.0502f, -1.533f);
-    Vector3 offScreen = new Vector2(-20f, 15f);
     [SerializeField] private TextMeshProUGUI levelTransText;
     [SerializeField] private TextMeshProUGUI levelText;
-    SpriteRenderer boxSR;
-    Color temp;
-    Scripts scripts;
-    private float[] balanced = { 0f, 10f, 10f, 0f };
-    private float[] fast =     { 0f, 20f, 10f, 0f };
-    private float[] damage =   { 10f, 3f, 23f, 3f };
-    private float[] defense =  { 2f, 10f, 2f, 23f };
-    private float[] mix =      { 2f, -10f, 18f, 18f };
     [SerializeField] public int level;
     [SerializeField] public int sub;
-    private Dictionary<string, float[]> levelStats = new() {
+    [SerializeField] public bool lockActions = false;
+    [SerializeField] private string characters = "";
+    [SerializeField] private string thinCharacters = "";
+    private readonly Vector3 onScreen = new Vector2(0.0502f, -1.533f);
+    private readonly Vector3 offScreen = new Vector2(-20f, 15f);
+    private readonly float[] balanced = { 0f, 10f, 10f, 0f };
+    private readonly float[] fast =     { 0f, 20f, 10f, 0f };
+    private readonly float[] damage =   { 10f, 3f, 23f, 3f };
+    private readonly float[] defense =  { 2f, 10f, 2f, 23f };
+    private readonly float[] mix =      { 2f, -10f, 18f, 18f };
+    private readonly Dictionary<string, float[]> levelStats = new() {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
         { "11", new[] { 10f, 10f, 10f, 10f, 0f,    10f, 0f, 0f, 0f, 0f } },
@@ -33,16 +35,16 @@ public class LevelManager : MonoBehaviour {
         { "33", new[] { 15f, 15f, 15f, 15f, 3f,    2f, 2f, 2f, 2f, 2f  } }
         // something to make it more probable that genstats will gen more difficult enemies later
     };
-    [SerializeField] public bool lockActions = false;
-    [SerializeField] private string characters = "";
-    [SerializeField] private string thinCharacters = "";
     private Coroutine transGlitchCoro;
     private Coroutine debugGlitchCoro;
+    private SpriteRenderer boxSR;
+    private Color temp;
+    private Scripts scripts;
 
-    void Start() {
+    private void Start() {
         scripts = FindObjectOfType<Scripts>();
-        if (PlayerPrefs.GetString("debug") == "on") { levelText.gameObject.SetActive(true); }
-        else { levelText.gameObject.SetActive(false); }
+        levelText.gameObject.SetActive(PlayerPrefs.GetString("debug") == "on");
+        // show the level text only if debug is on
         level = Save.game.resumeLevel;
         sub = Save.game.resumeSub;
         boxSR = levelBox.GetComponent<SpriteRenderer>();
@@ -72,25 +74,27 @@ public class LevelManager : MonoBehaviour {
     /// </summary>
     public float[] GenStats(string lichOrDevilOrNormal = "normal") {
         if (lichOrDevilOrNormal != "normal") {
-            if (lichOrDevilOrNormal == "lich") { return new[] { 1f, 1f, 1f, 1f }; }
-            // lich has 1/1/1/1
-            if (lichOrDevilOrNormal == "devil") { return new[] { 2f, 2f, 2f, 2f }; }
-            // devil has 2/2/2/2
-            // print("invalid enemy to attempt to spawn");
-            return balanced;
-            // notify me of error and return a basic one
+            return lichOrDevilOrNormal switch {
+                "lich" => new[] { 1f, 1f, 1f, 1f },
+                // lich has 1/1/1/1
+                "devil" => new[] { 2f, 2f, 2f, 2f },
+                // devil has 2/2/2/2
+                _ => balanced
+                // all regular enemies
+            };
         }
-        float[] stats;
         if (sub == 4) { return new[] { 0f, 0f, 0f, 0f }; }
         // given key is not present in the dictionary for sub-4s, instantly return blank
-        stats = levelStats[level + sub.ToString()];
+        float[] stats = levelStats[level + sub.ToString()];
         // based on the level and sub, get the stats from the level
         float[] totalStats = new float[4];
-        float[] baseStats = null;
-        // create empty arrays of floats to store the stats in
-        if (level == 1) { baseStats = GenBaseStats(stats, balanced); }
-        else if (level == 2) { baseStats = GenBaseStats(stats, damage); }
-        else if (level == 3) { baseStats = GenBaseStats(stats, fast); }
+        float[] baseStats = level switch {
+            // create empty arrays of floats to store the stats in
+            1 => GenBaseStats(stats, balanced),
+            2 => GenBaseStats(stats, damage),
+            3 => GenBaseStats(stats, fast),
+            _ => null
+        };
         // generate the stats for the enemy based on level 
         for (int i = 0; i < 4; i++) {
             // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
@@ -106,7 +110,8 @@ public class LevelManager : MonoBehaviour {
     private float[] GenBaseStats(float[] stats, float[] normal) {
         float sum = stats[5] + stats[6] + stats[7] + stats[8] + stats[9];
         // get the sum of the present chances
-        if (sum != 10f) { 
+        const double tolerance = 0.01f;
+        if (Math.Abs(sum - 10f) > tolerance) { 
             // print("not 10f"); 
             return balanced; 
         }
@@ -133,15 +138,15 @@ public class LevelManager : MonoBehaviour {
     /// <summary>
     /// Do not call this coroutine, use NextLevel() instead.
     /// </summary>
-    public IEnumerator NextLevelCoroutine(bool isLich=false) {
+    private IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
             lockActions = true;
-            Color temp = boxSR.color;
-            temp.a = 0f;
-            boxSR.color = temp;
+            Color tempColor = boxSR.color;
+            tempColor.a = 0f;
+            boxSR.color = tempColor;
             // hide the level loading box
             scripts = FindObjectOfType<Scripts>();
-            // reget scripts
+            // re-get scripts
             scripts.soundManager.PlayClip("next");
             // play sound clip
             if (level == 4 && sub == 1) {
@@ -182,11 +187,11 @@ public class LevelManager : MonoBehaviour {
                 }
                 else { scripts.music.FadeVolume(); }
             }
-            string toSpawn = "";
+            string toSpawn;
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
-                temp.a += 1f/15f;
-                boxSR.color = temp;
+                tempColor.a += 1f/15f;
+                boxSR.color = tempColor;
             }
             // fade in the box
             loadingCircle.transform.position = onScreen;
@@ -310,8 +315,8 @@ public class LevelManager : MonoBehaviour {
             // make it so that the player auto targets chest, rather than their previous attack
             for (int i = 0; i < 15; i++) {
                 yield return scripts.delays[0.033f];
-                temp.a -= 1f/15f;
-                boxSR.color = temp;
+                tempColor.a -= 1f/15f;
+                boxSR.color = tempColor;
             }
             if (toSpawn == "tombstone") { scripts.turnManager.SetStatusText("you come across a humble tombstone"); }
             else if (toSpawn == "lich") { scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects"); }
@@ -330,11 +335,11 @@ public class LevelManager : MonoBehaviour {
         if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
-    private char r() { 
+    private char R() { 
         // return a random character
         return characters[Random.Range(0, characters.Length)];
     }
-    private char t() { 
+    private char T() { 
         // return a random thin character
         return thinCharacters[Random.Range(0, thinCharacters.Length)];
     }
@@ -344,17 +349,17 @@ public class LevelManager : MonoBehaviour {
     /// </summary>
     private IEnumerator GlitchyLevelText() {
         for (int i = 0; i < 12; i++) {
-            levelTransText.text = $"level {r()}-{r()}";
+            levelTransText.text = $"level {R()}-{R()}";
             yield return scripts.delays[0.033f];
             // 12 times, 'level z-w'
         }
         for (int i = 0; i < 12; i++) {
-            levelTransText.text = $"lev{r()} {r()}{r()}{r()}";
+            levelTransText.text = $"lev{R()} {R()}{R()}{R()}";
             yield return scripts.delays[0.033f];
             // 12 times, 'levnU p0y'
         }
         for (int i = 0; i < 12; i++) {
-            levelTransText.text = $"{r()}{r()}{r()}{r()} {r()}{r()}{r()}";
+            levelTransText.text = $"{R()}{R()}{R()}{R()} {R()}{R()}{R()}";
             yield return scripts.delays[0.05f];
             // 12 times, 'OQI"k Hl9'
         }
@@ -365,7 +370,7 @@ public class LevelManager : MonoBehaviour {
     /// </summary>
     private IEnumerator GlitchyDebugText() {
         while (true){ 
-            levelText.text = $"level {t()}-{t()}";
+            levelText.text = $"level {T()}-{T()}";
             yield return scripts.delays[0.05f];
             // forever until interrupted, 'level i-!'
         }

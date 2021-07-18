@@ -238,8 +238,7 @@ public class Enemy : MonoBehaviour {
                 // set normal position
                 transform.position = basePosition;
             }
-            if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
-            else { enemyName.text = enemyArr[enemyNum]; }
+            enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
             // set the name, when spawning the cloaked just set it to be "Devil"
             if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") {
                 stamina = 0;
@@ -272,8 +271,7 @@ public class Enemy : MonoBehaviour {
             // try displaying wounds
             iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
             // set its sprite
-            if (isDead) { GetComponent<Animator>().enabled = false; }
-            else { GetComponent<Animator>().enabled = true; }
+            GetComponent<Animator>().enabled = !isDead;
             // enable/disable the animator, depending on if the enemy is dead or not
             try { GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
             catch { 
@@ -290,8 +288,8 @@ public class Enemy : MonoBehaviour {
             }
             else { transform.position = basePosition; }
             // devil and tombstone have special positions
-            if (enemyArr[enemyNum] == "Cloaked") { enemyName.text = "Devil"; }
-            else { enemyName.text = enemyArr[enemyNum]; }
+            enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
+            // devil should only be called 'cloaked', not devil
             if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { stamina = 0; }
             else if (enemyArr[enemyNum] == "Lich") { stamina = 3; }
             else { stamina = Save.game.enemyStamina; }

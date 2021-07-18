@@ -117,6 +117,25 @@ public class StatSummoner : MonoBehaviour {
     }
 
     /// <summary>
+    /// Gets the sum of the specified stat from the player or enemy, disregarding wounds and dice.
+    /// </summary>
+    public int RawSumOfStat(string stat, string playerOrEnemy) {
+        if (stat != "green" && stat != "blue" && stat != "red" && stat != "white") {
+            // make sure they are getting a valid stat
+            Debug.LogError("Invalid stat to get the sum of");
+            return 0;
+        }
+        if (playerOrEnemy == "player") {
+            return scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];
+        }
+        if (playerOrEnemy == "enemy") {
+            return scripts.enemy.stats[stat] + addedEnemyStamina[stat];
+        }
+        Debug.LogError("Can only get the stats of a player or an enemy");
+        return 0;
+    }
+
+    /// <summary>
     /// Instantiate the player's stamina buttons.
     /// </summary>
     private void SummonStaminaButtons() {
@@ -225,17 +244,17 @@ public class StatSummoner : MonoBehaviour {
     /// <param name="isPositive">true to make a positive square, false to make a negative square.</param>
     /// <param name="isSquare">true to create a square, false to create a circle.</param>
     private GameObject SpawnGeneratedShape(int i, Color statColor, int k, float coord, float offset, bool isPositive, bool isSquare=true) {
-        Vector3 instantationPos = new Vector2(coord + (k * offset), yCoords[i]);
+        Vector3 instantiationsPos = new Vector2(coord + (k * offset), yCoords[i]);
         // set where the shape will be created
         GameObject spawnedShape = null;
         if (isPositive) { 
-            if (isSquare) { spawnedShape = Instantiate(square, instantationPos, Quaternion.identity);  }
-            else { spawnedShape = Instantiate(circle, new Vector2(instantationPos.x, instantationPos.y), Quaternion.identity);  }
+            if (isSquare) { spawnedShape = Instantiate(square, instantiationsPos, Quaternion.identity);  }
+            else { spawnedShape = Instantiate(circle, new Vector2(instantiationsPos.x, instantiationsPos.y), Quaternion.identity);  }
         }
         else { 
-            if (instantationPos.x <= 0) { spawnedShape = Instantiate(negSquare, instantationPos, Quaternion.identity);  }
+            if (instantiationsPos.x <= 0) { spawnedShape = Instantiate(negSquare, instantiationsPos, Quaternion.identity);  }
             else { 
-                spawnedShape = Instantiate(negSquare, instantationPos, Quaternion.identity);  
+                spawnedShape = Instantiate(negSquare, instantiationsPos, Quaternion.identity);  
                 spawnedShape.GetComponent<SpriteRenderer>().flipX = true;
             }
             // depending on stat type and position, set the correct sprite.

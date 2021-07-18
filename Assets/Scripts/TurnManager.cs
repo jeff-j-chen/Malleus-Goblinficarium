@@ -424,6 +424,7 @@ public class TurnManager : MonoBehaviour {
                 discardDieBecauseCourage = false;
                 scripts.player.SetPlayerStatusEffect("courage", false);
                 // reset necessary variables
+                ClearVariablesAfterRound(false);
             }
             isMoving = false;
             // stop moving
@@ -445,7 +446,6 @@ public class TurnManager : MonoBehaviour {
         Save.SavePersistent();
         yield return scripts.delays[0.45f];
         // small delay
-        ClearVariablesAfterRound(false);
     }
 
     /// <summary>
@@ -495,6 +495,7 @@ public class TurnManager : MonoBehaviour {
     /// Clear the stats gained from potions from the player.
     /// </summary>
     public void ClearPotionStats() {
+        print("now clearing potion stats!");
         scripts.player.potionStats["green"] = 0;
         scripts.player.potionStats["blue"] = 0;
         scripts.player.potionStats["red"] = 0;
@@ -535,7 +536,6 @@ public class TurnManager : MonoBehaviour {
             // set status text and play the animation
         }
         // else { print("invalid string passed"); }
-        ClearVariablesAfterRound(false);
         Save.persistent.enemiesSlain++;
         Save.game.expendedStamina = 0;
         Save.SavePersistent();
@@ -662,7 +662,7 @@ public class TurnManager : MonoBehaviour {
         }
         scripts.statSummoner.ResetDiceAndStamina();
         // clear them
-        ClearPotionStats();
+        ClearVariablesAfterRound(false);
         // clear potion stats
         scripts.statSummoner.SetDebugInformationFor("player");
         // set debug (only player needed here)
@@ -825,13 +825,11 @@ public class TurnManager : MonoBehaviour {
                 // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
                 if (scripts.player.charNum == 3 && scripts.player.woundList.Count < 2 && scripts.enemy.target.text != "face" && scripts.player.stamina >= 7) {
                     // if on the 4th char, they are able to heal back (wont die instantly), and has sufficient stamina to heal the next move
-                    print($"healing, because player only has {scripts.player.woundList.Count} wounds!");
                     scripts.player.woundList.Clear();
                     StartCoroutine(HealAfterDelay());
                     // decrementing and healing handled in the coro
                 }
                 else {
-                    print("proceeding as normal");
                     if (scripts.player.charNum == 3 && scripts.player.stamina < 7) {
                         // on the 4th char but does not have sufficient stamina to heal
                         ChangeStaminaOf("player", 3);
