@@ -165,7 +165,7 @@ public class LevelManager : MonoBehaviour {
                 Initiate.Fade("Credits", Color.black, 2.5f);
                 // load credits scene
             }
-            scripts.turnManager.ClearVariablesAfterRound(true);
+            scripts.turnManager.ClearVariablesAfterRound();
             // remove variables before going to next level
             foreach (GameObject dice in scripts.diceSummoner.existingDice) {
                 StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));

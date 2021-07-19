@@ -85,9 +85,11 @@ public class StaminaButton : MonoBehaviour {
         // depending on the situation, set a variable so teh die either shift forwards or backwards
         foreach (Dice dice in scripts.statSummoner.addedPlayerDice[stat]) {
             // for every die in the stat
-            dice.transform.position = new Vector2(dice.transform.position.x + scripts.statSummoner.xOffset * Mathf.Abs(shiftAmount) * modifier, dice.transform.position.y);
+            Vector3 position = dice.transform.position;
+            position = new Vector2(position.x + scripts.statSummoner.xOffset * Mathf.Abs(shiftAmount) * modifier, position.y);
+            dice.transform.position = position;
             // shift the die correctly
-            dice.instantiationPos = dice.transform.position;
+            dice.instantiationPos = position;
             // update the instantiation position of the die
         }
     }

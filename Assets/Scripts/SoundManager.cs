@@ -1,13 +1,13 @@
 ﻿using System;
 using UnityEngine;
 public class SoundManager : MonoBehaviour {
-    [SerializeField] AudioClip[] audioClips;
-    [SerializeField] string[] audioClipNames;
-    AudioSource audioSource;
-    void Start() {
+    [SerializeField] private AudioClip[] audioClips;
+    [SerializeField] private string[] audioClipNames;
+    private AudioSource audioSource;
+
+    private void Start() {
         audioSource = GetComponent<AudioSource>();
-        if (PlayerPrefs.GetString("sounds") == "on") { audioSource.volume = 1f; }
-        else { audioSource.volume = 0f; }
+        audioSource.volume = PlayerPrefs.GetString("sounds") == "on" ? 1f : 0f;
     }
 
     /// <summary>

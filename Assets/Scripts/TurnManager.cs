@@ -189,34 +189,38 @@ public class TurnManager : MonoBehaviour {
                     }
                 }
                 else {
-                    if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
-                        // if devil
-                        if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
-                        // add an asterisks if already injured
-                        else {
-                            if (targetArr[scripts.player.targetIndex] == "face") {
-                                // can't aim at the devil's face, so notify player
-                                scripts.turnManager.SetStatusText("you cannot aim at his face");
-                                scripts.player.targetIndex--;
-                            }
+                    if (!isMoving) { 
+                        // prevents a nasty bug where wounds would not be applied properly due to the * being added
+                        if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
+                            // if devil
+                            if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
+                            // add an asterisks if already injured
                             else {
-                                scripts.player.target.text = targetArr[scripts.player.targetIndex];
+                                if (targetArr[scripts.player.targetIndex] == "face") {
+                                    // can't aim at the devil's face, so notify player
+                                    scripts.turnManager.SetStatusText("you cannot aim at his face");
+                                    scripts.player.targetIndex--;
+                                }
+                                else {
+                                    scripts.player.target.text = targetArr[scripts.player.targetIndex];
+                                }
+                            }
+                            if (targetArr[scripts.player.targetIndex] != "face") {
+                                scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
                             }
                         }
-                        if (targetArr[scripts.player.targetIndex] != "face") {
-                            scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex];
+                        else {
+                            // set the player's attack indicator + description based on the target index
+                            if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
+                            // add an asteriks if already injured
+                            else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
+
+                            if (scripts.enemy.enemyName.text == "Lich") { scripts.player.targetInfo.text = "no effect since enemy is immune"; }
+                            // different text for lich (letting player know)
+                            else { scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex]; }
                         }
                     }
-                    else {
-                        // set the player's attack indicator + description based on the target index
-                        if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
-                        // add an asteriks if already injured
-                        else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
-
-                        if (scripts.enemy.enemyName.text == "Lich") { scripts.player.targetInfo.text = "no effect since enemy is immune"; }
-                        // different text for lich (letting player know)
-                        else { scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex]; }
-                    }
+                    
                 }
             }
         }
@@ -291,11 +295,8 @@ public class TurnManager : MonoBehaviour {
             }
             else {
                 // enemy was killed
-                SetTargetOf("player");
-                // reset target
                 StartCoroutine(Kill("enemy"));
-                // make the enemy die
-                // reset ismoving
+                // execute the proper commands
             }
         }
         else {
@@ -322,7 +323,6 @@ public class TurnManager : MonoBehaviour {
     /// Start the second round of attack, with the specified player or enemy attacking.
     /// </summary>
     private IEnumerator RoundTwo(string toMove) {
-        // variables to hold stats
         isMoving = true;
         // make the player ready to move
         yield return scripts.delays[2f];
@@ -334,7 +334,6 @@ public class TurnManager : MonoBehaviour {
                 scripts.turnManager.SetStatusText("discard enemy's die");
                 // notify player
                 scripts.itemManager.discardableDieCounter++;
-                print("incremented from scimitar!");
                 // increment # is discardable die
                 actionsAvailable = true;
                 // allow for player to take actions
@@ -391,7 +390,6 @@ public class TurnManager : MonoBehaviour {
                 // play animation
             }
         }
-        // else { print("error passing into ienumerator attack"); }
         if (!scripts.player.isDead && !scripts.enemy.isDead) {
             // if neither player or enemy is dead
             yield return scripts.delays[2f];
@@ -424,8 +422,12 @@ public class TurnManager : MonoBehaviour {
                 discardDieBecauseCourage = false;
                 scripts.player.SetPlayerStatusEffect("courage", false);
                 // reset necessary variables
-                ClearVariablesAfterRound(false);
             }
+            // make the next person go again
+            yield return scripts.delays[0.45f];
+            ClearVariablesAfterRound();
+            SetTargetOf("player");
+            RecalculateMaxFor("enemy");
             isMoving = false;
             // stop moving
             scripts.statSummoner.ResetDiceAndStamina();
@@ -436,22 +438,17 @@ public class TurnManager : MonoBehaviour {
             // summon the stats again
             // RecalculateMaxFor("player");
             scripts.player.targetIndex = 0;
-            SetTargetOf("player");
-            RecalculateMaxFor("enemy");
             // make sure the player and enemy are aiming at the correct place
             DetermineMove(true);
-            // make the next person go again
         }
         if (scripts.tutorial == null) { Save.SaveGame(); }
         Save.SavePersistent();
-        yield return scripts.delays[0.45f];
-        // small delay
     }
 
     /// <summary>
     /// Reset all variables used in preparation for the next round.
     /// </summary>
-    public void ClearVariablesAfterRound(bool nextRound) {
+    public void ClearVariablesAfterRound() {
         ClearPotionStats();
         scripts.player.SetPlayerStatusEffect("fury", false);
         scripts.player.SetPlayerStatusEffect("dodge", false);
@@ -465,11 +462,7 @@ public class TurnManager : MonoBehaviour {
         scripts.itemManager.usedBoots = false;
         scripts.itemManager.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
-        if (nextRound) {
-            scripts.itemManager.discardableDieCounter = 0;
-            Save.game.discardableDieCounter = 0;
-        }
-        else if (scripts.enemy.woundList.Contains("head")) {
+        if (scripts.enemy.woundList.Contains("head")) {
             // only allow discarding if enemy has head wound and we arent going to the next round
             scripts.itemManager.discardableDieCounter = 1;
             Save.game.discardableDieCounter = 1;
@@ -495,7 +488,6 @@ public class TurnManager : MonoBehaviour {
     /// Clear the stats gained from potions from the player.
     /// </summary>
     public void ClearPotionStats() {
-        print("now clearing potion stats!");
         scripts.player.potionStats["green"] = 0;
         scripts.player.potionStats["blue"] = 0;
         scripts.player.potionStats["red"] = 0;
@@ -535,7 +527,6 @@ public class TurnManager : MonoBehaviour {
             StartCoroutine(PlayDeathAnimation("enemy"));
             // set status text and play the animation
         }
-        // else { print("invalid string passed"); }
         Save.persistent.enemiesSlain++;
         Save.game.expendedStamina = 0;
         Save.SavePersistent();
@@ -655,14 +646,13 @@ public class TurnManager : MonoBehaviour {
             // hide the enemy's stats
             if (scripts.tutorial != null) { scripts.tutorial.Increment(); }
         }
-        // else { print("invalid string passed"); }
         foreach (GameObject dice in scripts.diceSummoner.existingDice) {
             StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
             // fade out all existing die
         }
         scripts.statSummoner.ResetDiceAndStamina();
         // clear them
-        ClearVariablesAfterRound(false);
+        ClearVariablesAfterRound();
         // clear potion stats
         scripts.statSummoner.SetDebugInformationFor("player");
         // set debug (only player needed here)
@@ -924,7 +914,7 @@ public class TurnManager : MonoBehaviour {
                 else {
                     // enemy will not die
                     StartCoroutine(DoStuffForAttack("hit", "enemy"));
-                    // play sound and animation
+                    // play sound and animation 
                     if (scripts.enemy.spawnNum == 0) {
                         SetStatusText("you hit devil... his cloak shatters");
                     }
@@ -1024,15 +1014,13 @@ public class TurnManager : MonoBehaviour {
         StartCoroutine(ApplyInjuriesDuringMoveCoro(injury, appliedTo));
         // start applying the injuries
         if (scripts.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
-        if (injury == "face" && !(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) {
-            return true;
-        }
+        if (injury == "face" && !(appliedTo == "enemy" && scripts.enemy.enemyName.text == "Lich")) { return true; }
         if (appliedTo == "player" && scripts.player.woundList.Count == 3) { return true; }
         if (appliedTo == "enemy" && scripts.enemy.woundList.Count == 3) { return true; }
         return false;
         // return true or false here, based on whether the enemy was killed or not.
     }
-
+    // hello 
     /// <summary>
     /// Do not call this coroutine, use ApplyInjuriesDuringMove() instead.
     /// </summary>
@@ -1098,7 +1086,6 @@ public class TurnManager : MonoBehaviour {
             }
             else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
                 scripts.itemManager.discardableDieCounter++;
-                print("incremented from wound!");
             }
         }
         else if (injury == "hand") {
@@ -1221,11 +1208,7 @@ public class TurnManager : MonoBehaviour {
     /// Make the enemy use stamina on a given stat.
     /// </summary>
     private void UseEnemyStaminaOn(string stat, int amount) {
-        if (scripts.enemy.stamina < amount) {
-            //print("too much stamina to use!"); 
-        }
-        // restrict just in case
-        else {
+        if (scripts.enemy.stamina >= amount) {
             scripts.statSummoner.addedEnemyStamina[stat] += amount;
             // incrase stat
             scripts.turnManager.ChangeStaminaOf("enemy", -amount);

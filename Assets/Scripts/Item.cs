@@ -540,7 +540,7 @@ public class Item : MonoBehaviour {
                         }
                         else { scripts.turnManager.SetStatusText("not enough stamina"); }
                     }
-                    else { scripts.turnManager.SetStatusText("boots can help you no further"); }
+                    else { scripts.turnManager.SetStatusText("you are already dodgy"); }
                     break;
                 case "ankh":
                     if (!scripts.itemManager.usedAnkh) {

@@ -70,10 +70,4 @@ public class Scripts : MonoBehaviour {
             Save.SavePersistent(); 
         }
     }
-    public void OnApplicationPause() { 
-        if (player != null) { 
-            if (tutorial == null) { Save.SaveGame(); } 
-            Save.SavePersistent(); 
-        }
-    }
 }

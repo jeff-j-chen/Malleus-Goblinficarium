@@ -5,7 +5,8 @@ public class MenuButton : MonoBehaviour {
     private SoundManager soundManager;
     private Arrow arrow;
     private Scripts scripts;
-    void Start() {
+
+    private void Start() {
         Save.LoadGame();
         Save.LoadPersistent();
         scripts = FindObjectOfType<Scripts>();
@@ -33,7 +34,7 @@ public class MenuButton : MonoBehaviour {
         // play sound clip
         switch (buttonName) {
             case "Continue":
-                if (Save.game.enemyNum == 0 || Save.game.enemyNum == 1 || Save.game.enemyNum == 2) { 
+                if (Save.game.enemyNum is 0 or 1 or 2) { 
                     if (scripts.music.audioSource.clip.name != "LaBossa") { scripts.music.FadeVolume("LaBossa"); }
                 }
                 else if (Save.game.resumeSub == 4) { 

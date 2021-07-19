@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 public class OnClickToggle : MonoBehaviour {
-    Scripts scripts;
-    void Start() {
+    private Scripts scripts;
+
+    private void Start() {
         scripts = FindObjectOfType<Scripts>();
     }
 
-    void OnMouseDown() {
+    private void OnMouseDown() {
         if (gameObject.name == "tumblr") {
             Application.OpenURL("https://ampersandbear.tumblr.com/"); 
             scripts.soundManager.PlayClip("click0");

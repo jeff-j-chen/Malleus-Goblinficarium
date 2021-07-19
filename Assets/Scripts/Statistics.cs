@@ -4,18 +4,19 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 public class Statistics : MonoBehaviour {
-    private string persistentPath = "persistentSave.txt";
-    private string[] weaponNames = { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
-    private WaitForSeconds tenthSecond = new(0.1f);
-    private WaitForSeconds oneSecond = new(1f);
-    private string baseText = "hold [space] to delete all data - this action is irrecoverable";
-    private SoundManager soundManager;
     [SerializeField] private TextMeshProUGUI leftWhite;
     [SerializeField] private TextMeshProUGUI leftGray;
     [SerializeField] private TextMeshProUGUI favWeapon;
     [SerializeField] private TextMeshProUGUI rightWhite;
     [SerializeField] private TextMeshProUGUI rightGray;
     [SerializeField] private TextMeshProUGUI bottomText;
+    private readonly string[] weaponNames = 
+        { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
+    private readonly WaitForSeconds tenthSecond = new(0.1f);
+    private readonly WaitForSeconds oneSecond = new(1f);
+    private readonly string baseText = "hold [space] to delete all data - this action is irrecoverable";
+    private SoundManager soundManager;
+    
     private void Start() {
         soundManager = FindObjectOfType<SoundManager>();
         ShowStatistics();
@@ -40,7 +41,7 @@ public class Statistics : MonoBehaviour {
     /// </summary>
     private IEnumerator DataClearCountdown() {
         float time = 5f; 
-        // total time htye have to hold down the bottom
+        // total time the reset button must be held down
         for (int i = 0; i < 50; i++) { 
             // 50 times, decrease by 0.1s
             if (i % 10 == 0) {

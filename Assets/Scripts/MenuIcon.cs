@@ -1,23 +1,24 @@
 ﻿using System.Collections;
 using UnityEngine;
 public class MenuIcon : MonoBehaviour {
-    private const string DEBUG_KEY = "debug";
-    private const string HINTS_KEY = "hints";
-    private const string SOUNDS_KEY = "sounds";
-    private const string MUSIC_KEY = "music";
     [SerializeField] GameObject debug;
     [SerializeField] GameObject hints;
     [SerializeField] GameObject sound;
     [SerializeField] GameObject music;
-    SpriteRenderer debugSR;
-    SpriteRenderer soundsSR;
-    SpriteRenderer hintsSR;
-    SpriteRenderer musicSR;
+    [SerializeField] private AudioSource musicPlayer;
+    [SerializeField] private AudioSource sfxPlayer;
     public Color gray;
-    [SerializeField] AudioSource musicPlayer;
-    [SerializeField] AudioSource sfxPlayer;
-    Scripts scripts;
-    void Start() {
+    private const string DEBUG_KEY = "debug";
+    private const string HINTS_KEY = "hints";
+    private const string SOUNDS_KEY = "sounds";
+    private const string MUSIC_KEY = "music";
+    private SpriteRenderer debugSR;
+    private SpriteRenderer soundsSR;
+    private SpriteRenderer hintsSR;
+    private SpriteRenderer musicSR;
+    private Scripts scripts;
+    
+    private void Start() {
         scripts = FindObjectOfType<Scripts>();
         debugSR = debug.GetComponent<SpriteRenderer>();
         hintsSR = hints.GetComponent<SpriteRenderer>();
@@ -39,7 +40,7 @@ public class MenuIcon : MonoBehaviour {
         musicPlayer = FindObjectOfType<Music>().GetComponent<AudioSource>();
     }
 
-    void Update() {
+    private void Update() {
         if (Input.GetKeyDown("d")) { PlayerPrefSetter(DEBUG_KEY, debugSR); }
         else if (Input.GetKeyDown("h")) { PlayerPrefSetter(HINTS_KEY, hintsSR); }
         else if (Input.GetKeyDown("s")) { PlayerPrefSetter(SOUNDS_KEY, soundsSR); }

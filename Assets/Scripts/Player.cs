@@ -20,12 +20,12 @@ public class Player : MonoBehaviour {
     [SerializeField] public string[] statusEffectNames = { "dodge", "leech", "fury", "haste", "courage" };
     [SerializeField] public string[] statusEffectDescs = { "if you strike first, ignore all damage", "cure the same wound as inflicted", "all picked die turn yellow", "pick 3 dice, enemy gets the rest", "keep 1 of your die till next round" };
     [SerializeField] public Sprite[] statusEffectSprites;
-    private List<GameObject> statusEffectList = new();
+    private readonly List<GameObject> statusEffectList = new();
     public List<string> woundList = new();
     public bool isDead;
     public bool cancelMove = false;
     public float hintTimer;
-    public Coroutine coroutine = null;
+    private Coroutine coroutine = null;
     public Dictionary<string, int> stats = new() {
         { "green", 0 },
         { "blue", 0 },
@@ -46,9 +46,9 @@ public class Player : MonoBehaviour {
     public bool isHasty = false;
     public bool isBloodthirsty = false;
     public bool isCourageous = false;
-    private Vector2 basePosition = new(-2.166667f, -1.866667f);
-    private Vector2 iconPosition = new(-12.16667f, 3.333333f);
-    private Dictionary<int, Vector2> deathPositions = new() {
+    private readonly Vector2 basePosition = new(-2.166667f, -1.866667f);
+    [SerializeField] private Vector2 iconPosition = new(-12.16667f, 3.333333f);
+    private readonly Dictionary<int, Vector2> deathPositions = new() {
         {0, new Vector2(-2.04f, -2.53f)},
         {1, new Vector2(-2.166667f, -2.53f)},
         {2, new Vector2(-2.166667f, -2.53f)},
@@ -58,10 +58,9 @@ public class Player : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // something here to check if we are continuing or starting a new game
-        if (Save.game.newGame) { charNum = Save.persistent.newCharNum; }
-        else { charNum = Save.game.curCharNum; }
+        charNum = Save.game.newGame ? Save.persistent.newCharNum : Save.game.curCharNum;
         Save.game.curCharNum = charNum;
-        scripts.itemManager.GiveStarterItems(charNum);
+        scripts.itemManager.GiveStarterItems();
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
         woundList = Save.game.playerWounds;
@@ -125,7 +124,7 @@ public class Player : MonoBehaviour {
             }
             else {
                 if (!scripts.levelManager.lockActions) {
-                    // don't let player restart while actions are lockedd
+                    // don't let player restart while actions are locked
                     // player wants to restart
                     // player death on r is instant, so don't do animation stuff
                     isDead = true;
@@ -239,7 +238,7 @@ public class Player : MonoBehaviour {
     /// <summary>
     /// Coroutine for hinting to the player that they are targeting a wounded body part.
     /// </summary>
-    public IEnumerator HintTargetingWounded() {
+    private IEnumerator HintTargetingWounded() {
         // pretty much the exact same thing has hintface
         scripts.turnManager.SetStatusText("note: you are targeting a wounded body part");
         for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.025f) {
@@ -304,9 +303,8 @@ public class Player : MonoBehaviour {
         }
         if (onOrOff == false) {
             // turning off
-            GameObject matchingIcon = null;
             try {
-                matchingIcon = (from icon in statusEffectList where icon.GetComponent<SpriteRenderer>().sprite.name == statusEffect select icon).ToList()[0];
+                GameObject matchingIcon = (from icon in statusEffectList where icon.GetComponent<SpriteRenderer>().sprite.name == statusEffect select icon).ToList()[0];
                 // get the icon
                 int shiftFrom = statusEffectList.IndexOf(matchingIcon);
                 // try to shift each status effect over by 1

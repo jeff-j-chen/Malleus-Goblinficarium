@@ -9,22 +9,23 @@ using UnityEngine;
 // lich has boss music as well
 
 public class Music : MonoBehaviour {
-    [SerializeField] AudioClip[] musicPieces;
-    [SerializeField] string[] musicPieceNames;
+    [SerializeField] private AudioClip[] musicPieces;
+    [SerializeField] private string[] musicPieceNames;
     public AudioSource audioSource;
     private Scripts scripts;
     private bool shouldPlayMusic;
+    
     private void Awake() {
         SetUpSingleton();
         audioSource = GetComponent<AudioSource>();
         scripts = FindObjectOfType<Scripts>();
         shouldPlayMusic = PlayerPrefs.GetString("music") == "on" ? true : false;
-        if (shouldPlayMusic) { audioSource.volume = 0.5f; }
-        else { audioSource.volume = 0f; }
+        audioSource.volume = shouldPlayMusic ? 0.4f : 0f;
     }
+    
     private void Start() {
         PlayMusic("Intro");
-        // play the intro music when intialized
+        // play the intro music when initialized
     }
 
     /// <summary>

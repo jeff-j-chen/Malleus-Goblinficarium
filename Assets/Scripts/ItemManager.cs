@@ -181,14 +181,12 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Give the player their starting items, based on chosen class.
     /// </summary>
-    public void GiveStarterItems(int charNum) {
-        if (Save.game.newGame) {
+    public void GiveStarterItems() {
+        if (Save.game.newGame) { 
             switch (scripts.player.charNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-                    // MoveToInventory(0, true, false, false);
-                    CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+                    CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                     MoveToInventory(0, true, false, false);
                     // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     // MoveToInventory(0, true, false, false);
@@ -200,10 +198,6 @@ public class ItemManager : MonoBehaviour {
                         CreateItem("torch", "common");
                         MoveToInventory(0, true, false, false);
                     }
-                    
-                    CreateItem("potion", "common", "speed");
-                    MoveToInventory(0, true, false, false);
-                    
                     break;
                 }
                 case 1: {
