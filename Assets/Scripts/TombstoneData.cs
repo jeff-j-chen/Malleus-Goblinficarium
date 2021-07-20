@@ -2,9 +2,9 @@
 using System.Linq;
 using UnityEngine;
 public class TombstoneData : MonoBehaviour {
-    Scripts scripts;
+    private Scripts scripts;
 
-    void Start() {
+    private void Start() {
         scripts = FindObjectOfType<Scripts>();
     }
 
@@ -25,13 +25,13 @@ public class TombstoneData : MonoBehaviour {
         Save.persistent.tsItemNames[0] = item.itemName.Split(' ')[1];
         Save.persistent.tsItemTypes[0] = item.itemType;
         Save.persistent.tsItemMods[0] = item.modifier;
-        // Save the wepon first
+        // Save the weapon first
         for (int i = 1; i < scripts.player.inventory.Count; i++) {
             item = scripts.player.inventory[i].GetComponent<Item>();
             Save.persistent.tsItemNames[i] = item.itemName;
             Save.persistent.tsItemTypes[i] = item.itemType;
             Save.persistent.tsItemMods[i] = item.modifier;
-            // Save everyhting about the current items
+            // Save everything about the current items
         }
         if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) { 
             Save.persistent.tsLevel = 3;
@@ -72,9 +72,10 @@ public class TombstoneData : MonoBehaviour {
         // create retry button
         scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true, false, false);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
-        Save.game = new GameData();
+        Save.game = new GameData {
+            curCharNum = Save.persistent.newCharNum
+        };
         // clear all existing player data
-        Save.game.curCharNum = Save.persistent.newCharNum;
         // set the curcharnum to the new one, because it gets set to 0 on new GameData()
         if (scripts.tutorial == null) { Save.SaveGame(); }
         Save.SavePersistent();
@@ -104,7 +105,7 @@ public class TombstoneData : MonoBehaviour {
     /// <summary>
     /// Do not call this coroutine, use SpawnSavedTSItems() instead.
     /// </summary>
-    public IEnumerator SpawnSavedTSItemsCoro(bool delay) {
+    private IEnumerator SpawnSavedTSItemsCoro(bool delay) {
         if (delay) { yield return new WaitForSeconds(0.01f); }
         // optional slight delay so that resuming on a tombstone level doesn't mess things up
         scripts = FindObjectOfType<Scripts>();
@@ -138,7 +139,7 @@ public class TombstoneData : MonoBehaviour {
     /// <summary>
     /// Do not call this coroutine, use SpawnSavedFloorItems() instead.
     /// </summary>
-    public IEnumerator SpawnSavedFloorItemsCoro(bool delay) { 
+    private IEnumerator SpawnSavedFloorItemsCoro(bool delay) { 
         if (delay) { yield return new WaitForSeconds(0.01f); }
         // quick delay so its not super buggy
         scripts = FindObjectOfType<Scripts>();
@@ -146,7 +147,7 @@ public class TombstoneData : MonoBehaviour {
         // spawn the floor's weapon first
         for (int i = 1; i < 9; i++) {  
             if (Save.game.floorItemNames[i] != null && Save.game.floorItemNames[i] != "") {
-                GameObject created = scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemTypes[i], Save.game.floorItemMods[i]);
+                scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemTypes[i], Save.game.floorItemMods[i]);
             }
         }
         // then put all remaining items onto the floor
@@ -155,12 +156,12 @@ public class TombstoneData : MonoBehaviour {
     /// <summary>
     /// Do not call this coroutine, use SpawnSavedMerchantItems() instead.
     /// </summary>
-    public IEnumerator SpawnSavedMerchantItemsCoro(bool delay) { 
+    private IEnumerator SpawnSavedMerchantItemsCoro(bool delay) { 
         if (delay) { yield return new WaitForSeconds(0.01f); }
         scripts = FindObjectOfType<Scripts>();
         for (int i = 0; i < 9; i++) {  
             if (Save.game.floorItemNames[i] != null && Save.game.floorItemNames[i] != "") {
-                GameObject created = scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemTypes[i], Save.game.floorItemMods[i]);
+                scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemTypes[i], Save.game.floorItemMods[i]);
             }
         }
         // merchant does not have items, so just spawn them in right away

@@ -428,7 +428,7 @@ public class TurnManager : MonoBehaviour {
             ClearVariablesAfterRound();
             SetTargetOf("player");
             RecalculateMaxFor("enemy");
-            isMoving = false;
+            
             // stop moving
             scripts.statSummoner.ResetDiceAndStamina();
             // reset die and stamina
@@ -440,6 +440,8 @@ public class TurnManager : MonoBehaviour {
             scripts.player.targetIndex = 0;
             // make sure the player and enemy are aiming at the correct place
             DetermineMove(true);
+            yield return scripts.delays[0.35f];
+            isMoving = false;
         }
         if (scripts.tutorial == null) { Save.SaveGame(); }
         Save.SavePersistent();
@@ -531,7 +533,7 @@ public class TurnManager : MonoBehaviour {
         Save.game.expendedStamina = 0;
         Save.SavePersistent();
         if (scripts.tutorial == null) { Save.SaveGame(); }
-        yield return scripts.delays[0.45f];
+        yield return scripts.delays[1.4f];  
         isMoving = false;
     }
 

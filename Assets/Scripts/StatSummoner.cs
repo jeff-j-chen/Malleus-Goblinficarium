@@ -11,22 +11,22 @@ public class StatSummoner : MonoBehaviour {
     [SerializeField] private GameObject circle;
     [SerializeField] private TextMeshProUGUI playerDebug;
     [SerializeField] private TextMeshProUGUI enemyDebug;
-    public readonly float xCoord = -10.5f;
+    private readonly float xCoord = -10.5f;
     public readonly float xOffset = 0.65f;
-    public readonly float highlightOffset = 0.85f;
+    private readonly float highlightOffset = 0.85f;
     public readonly float diceOffset = 1f;
     private readonly float buttonXCoord = -11.7f;
     private readonly float buttonXOffset = -0.6f;
     public readonly float[] yCoords = { 8.77f, 7.77f, 6.77f, 5.77f };
-    public readonly Vector2 baseDebugPos = new(-1.667f, 7.333f);
+    private readonly Vector2 baseDebugPos = new(-1.667f, 7.333f);
     private List<GameObject> existingStatSquares = new();
-    [SerializeField] public Dictionary<string, List<Dice>> addedPlayerDice = new() {
+    public readonly Dictionary<string, List<Dice>> addedPlayerDice = new() {
         { "green", new List<Dice>() },
         { "blue", new List<Dice>() },
         { "red", new List<Dice>() },
         { "white", new List<Dice>() },
     };
-    public Dictionary<string, List<Dice>> addedEnemyDice = new() {
+    public readonly Dictionary<string, List<Dice>> addedEnemyDice = new() {
         { "green", new List<Dice>() },
         { "blue", new List<Dice>() },
         { "red", new List<Dice>() },
@@ -63,7 +63,7 @@ public class StatSummoner : MonoBehaviour {
     }
 
     /// <summary>
-    /// Summon the stats quares for the player.
+    /// Summon the stats squares for the player.
     /// </summary>
     public void SummonStats() {
         foreach (GameObject stat in existingStatSquares) {
@@ -192,7 +192,9 @@ public class StatSummoner : MonoBehaviour {
                 // if player's total stats (without stamina) are greater than 0
                 for (int j = scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName]; j < scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
                     GameObject addedStaminaSquare = SpawnGeneratedShape(i, scripts.colors.yellow, j, xCoord, xOffset, true);
-                    addedStaminaSquare.transform.position = new Vector2(addedStaminaSquare.transform.position.x - 0.01f, addedStaminaSquare.transform.position.y);
+                    Vector3 position = addedStaminaSquare.transform.position;
+                    position = new Vector2(position.x - 0.01f, position.y);
+                    addedStaminaSquare.transform.position = position;
                     // move it over a tiny bit
                     addedStaminaSquare.GetComponent<SpriteRenderer>().sortingOrder = 1;
                     // make sure the sorting order is higher than that of other squares
@@ -246,10 +248,9 @@ public class StatSummoner : MonoBehaviour {
     private GameObject SpawnGeneratedShape(int i, Color statColor, int k, float coord, float offset, bool isPositive, bool isSquare=true) {
         Vector3 instantiationsPos = new Vector2(coord + (k * offset), yCoords[i]);
         // set where the shape will be created
-        GameObject spawnedShape = null;
-        if (isPositive) { 
-            if (isSquare) { spawnedShape = Instantiate(square, instantiationsPos, Quaternion.identity);  }
-            else { spawnedShape = Instantiate(circle, new Vector2(instantiationsPos.x, instantiationsPos.y), Quaternion.identity);  }
+        GameObject spawnedShape;
+        if (isPositive) {
+            spawnedShape = isSquare ? Instantiate(square, instantiationsPos, Quaternion.identity) : Instantiate(circle, new Vector2(instantiationsPos.x, instantiationsPos.y), Quaternion.identity);
         }
         else { 
             if (instantiationsPos.x <= 0) { spawnedShape = Instantiate(negSquare, instantiationsPos, Quaternion.identity);  }
@@ -271,11 +272,11 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Make a stamina +/- button.
     /// </summary>
-    private GameObject SpawnButton(GameObject buttonType, Vector3 instantationPos) {
-        GameObject spawnedButton = Instantiate(buttonType, instantationPos, Quaternion.identity);
+    private GameObject SpawnButton(GameObject buttonType, Vector3 instantiationPos) {
+        GameObject spawnedButton = Instantiate(buttonType, instantiationPos, Quaternion.identity);
         // create a button
         spawnedButton.transform.parent = transform;
-        // child the button to this stat summmoner
+        // child the button to this stat summoner
         return spawnedButton;
         // return the created button
     }
@@ -318,7 +319,7 @@ public class StatSummoner : MonoBehaviour {
     /// Return the outermost player's x coordinate to add dice onto.
     /// </summary>
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
-        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; };
+        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; }
         // not setting the optional variable will just default it to the base stat type
         return xCoord + ((Mathf.Abs(scripts.player.stats[statType] + scripts.player.potionStats[statType] + scripts.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
@@ -327,8 +328,7 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Get the outermost enemy's x coordinate to add dice onto.
     /// </summary>
-    public float OutermostEnemyX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
-        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; };
+    public float OutermostEnemyX(string statType) {
         return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) + addedEnemyStamina[statType] - 1) * -xOffset)  - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
         // similar to outermostplayerx
     }
@@ -340,8 +340,8 @@ public class StatSummoner : MonoBehaviour {
         if (scripts.tutorial == null) {
             if (playerOrEnemy == "player") {
                 float furthest = (new[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
-                if (furthest >= -3.8) { playerDebug.transform.position = new Vector2(furthest + 1.333f, baseDebugPos.y); }
-                else { playerDebug.transform.position = new Vector2(baseDebugPos.x, baseDebugPos.y); }
+                playerDebug.transform.position = furthest >= -3.8 ? new Vector2(furthest + 1.333f, baseDebugPos.y) : new Vector2(baseDebugPos.x, baseDebugPos.y);
+                // if the outermost position to too far, start moving the debug for plaer over
                 playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";
             }
             else if (playerOrEnemy == "enemy") {
@@ -364,9 +364,11 @@ public class StatSummoner : MonoBehaviour {
     public void ShiftDiceAccordingly(string stat, int shiftAmount) {
         foreach (Dice dice in addedPlayerDice[stat]) {
             // for every die in the specified stat
-            dice.transform.position = new Vector2(dice.transform.position.x + xOffset * shiftAmount, dice.transform.position.y);
+            Vector3 position = dice.transform.position;
+            position = new Vector2(position.x + xOffset * shiftAmount, position.y);
+            dice.transform.position = position;
             // shift the die by the specified amount
-            dice.instantiationPos = dice.transform.position;
+            dice.instantiationPos = position;
             // update the instantiation position
         }
         SetDebugInformationFor("player");
