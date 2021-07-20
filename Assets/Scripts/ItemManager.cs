@@ -30,6 +30,18 @@ public class ItemManager : MonoBehaviour {
         { "spear",    new Dictionary<string, int> { { "green", 2 }, { "blue",-1 }, { "red", 3 }, { "white", 1 } } },
         { "sword",    new Dictionary<string, int> { { "green", 1 }, { "blue", 2 }, { "red", 1 }, { "white", 2 } } },
     };  
+    private readonly Dictionary<string, int> dropDict = new() {
+        { "armor",  2 },
+        { "cheese",  3 },
+        { "torch",  3 },
+        { "steak",  3 },
+        { "scroll",  3 },
+        { "potion",  3 },
+        { "shuriken",  3 },
+        { "necklet",  3 },
+        { "skeleton_key",  2 },
+    };
+    private List<string> dropTable;
     public string[] weaponNames = { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
     private readonly Dictionary<string, Dictionary<string, int>> modifierDict = new() {
         { "accurate0", new Dictionary<string, int> { { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
@@ -115,6 +127,11 @@ public class ItemManager : MonoBehaviour {
         allSprites = commonItemSprites.ToArray().Concat(rareItemSprites.ToArray()).Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
         // create a list containing all of the sprites
         scripts = FindObjectOfType<Scripts>();
+        dropTable = new List<string>();
+        foreach (KeyValuePair<string, int> entry in dropDict) {
+            for (int i = 0; i < entry.Value; i++) { dropTable.Add(entry.Key); }
+        }
+        // assemble a weighted drop table based on the dictionary above
         if (isCharSelect) {
             // in character selection screen
             curList = floorItems;
@@ -142,7 +159,7 @@ public class ItemManager : MonoBehaviour {
         // assign variables based on the Save, preventing cheating
     }
 
-    void Update() {
+    private void Update() {
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl)) {
             // if pressing one of the ctrl keys
             if (!isCharSelect) {
@@ -315,27 +332,17 @@ public class ItemManager : MonoBehaviour {
     /// Create an item with specified type.
     /// </summary>
     private void CreateItem(string itemType, int negativeOffset = 0) {
-        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
-        // create an item object at the correct position
         Sprite sprite = null;
-        // create a variable of which we can place the sprite upon to depending on the item type
         if (itemType == "weapon") { sprite = weaponSprites[Random.Range(0, weaponSprites.Length)]; }
-        else if (itemType == "common") { 
-            int rand = Random.Range(0, commonItemSprites.Length);
-            // get a random item from the list of names
-            if (rand is 0 or 8) {
-                sprite = Random.Range(0, 2) == 0 
-                    ? commonItemSprites[rand] 
-                    : commonItemSprites[Random.Range(0, commonItemSprites.Length)];
-                // if rolled originally to armor or skeleton key, 50% chance it changes again (as they are intended to be rarer)
-            }
-            // armor and skeleton keys are about 2x rarer than other items
-            else { sprite = commonItemSprites[rand]; }
+        else if (itemType == "common") {
+            CreateItem(dropTable[Random.Range(0, dropTable.Count)], "common");
+            return;
+            // if creating a common item, pull from the drop table and pass it into the next function (so we can call createItem() of common normally without having to pull the rand every time)
         }
         else if (itemType == "rare") { sprite = rareItemSprites[Random.Range(0, rareItemSprites.Length)]; }
-        // depending on the type, give it a corresponding random sprite.
-        // else { print("bad item type to create"); }
         // can only create item types of weapon, common, and rare
+        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
+        // create an item object at the correct position
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = sprite;
         // give the sprite renderer the proper sprite 
         instantiatedItem.transform.parent = gameObject.transform;

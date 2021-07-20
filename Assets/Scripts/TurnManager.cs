@@ -32,8 +32,7 @@ public class TurnManager : MonoBehaviour {
         scripts.statSummoner.ResetDiceAndStamina();
         if (scripts.tutorial == null) {
             if (!(scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) && scripts.levelManager.sub != 4) {
-                if (Save.game.newGame) { scripts.diceSummoner.SummonDice(true, true); }
-                else { scripts.diceSummoner.SummonDice(true, false); }
+                scripts.diceSummoner.SummonDice(true, Save.game.newGame);
             }
         }
         scripts.statSummoner.SummonStats();
@@ -130,7 +129,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Fade and change the color of the player or enemy's wound text.
     /// </summary>
-    public IEnumerator InjuredTextChange(TextMeshProUGUI text) {
+    private IEnumerator InjuredTextChange(TextMeshProUGUI text) {
         yield return scripts.delays[0.55f];
         // set a delay
         Color temp = text.color;
@@ -215,9 +214,9 @@ public class TurnManager : MonoBehaviour {
                             // add an asteriks if already injured
                             else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
 
-                            if (scripts.enemy.enemyName.text == "Lich") { scripts.player.targetInfo.text = "no effect since enemy is immune"; }
-                            // different text for lich (letting player know)
-                            else { scripts.player.targetInfo.text = targetInfoArr[scripts.player.targetIndex]; }
+                            scripts.player.targetInfo.text = scripts.enemy.enemyName.text == "Lich" 
+                                ? "no effect since enemy is immune" 
+                                : targetInfoArr[scripts.player.targetIndex];
                         }
                     }
                     
@@ -281,7 +280,6 @@ public class TurnManager : MonoBehaviour {
         // reset the scimitar parry (if set true from a previous round)
         isMoving = true;
         // set the variable to true so that certain actions can check this and make sure actions are not taken when they shouldn't be
-        List<Dice> availableDice = new();
         RunEnemyCalculations();
         // make enemy add stamina to stats as necessary
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
@@ -505,7 +503,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Coroutine to play the death animation, set status text, toggle variables, etc.
     /// </summary>
-    public IEnumerator Kill(string playerOrEnemy) {
+    private IEnumerator Kill(string playerOrEnemy) {
         if (playerOrEnemy == "player") { scripts.player.isDead = true; }
         else if (playerOrEnemy == "enemy") { scripts.enemy.isDead = true; }
         // make sure whoever is killed is set to be dead
@@ -580,7 +578,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Play the death animation for the player or enemy. Also handle things like clearing potion stats.
     /// </summary>
-    public IEnumerator PlayDeathAnimation(string playerOrEnemy) {
+    private IEnumerator PlayDeathAnimation(string playerOrEnemy) {
         SpriteRenderer spriteRenderer = playerOrEnemy == "player" ? scripts.player.GetComponent<SpriteRenderer>() : scripts.enemy.GetComponent<SpriteRenderer>();
         // get the proper spriterenderer
         // conditional is true ? yes : no
@@ -701,7 +699,7 @@ public class TurnManager : MonoBehaviour {
 
         // BRIEFLY GLITCHES!
 
-        if (!(text == statusText.text)) {
+        if (text != statusText.text) {
             // if the message is not already displayed
             statusText.text = "";
             // clear the status text
@@ -715,7 +713,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Perform actions (sound, animation) for when a player or enemy is hit.
     /// </summary>
-    public IEnumerator DoStuffForAttack(string hitOrParry, string playerOrEnemy, bool showAnimation = true, bool armor = false) {
+    private IEnumerator DoStuffForAttack(string hitOrParry, string playerOrEnemy, bool showAnimation = true, bool armor = false) {
         yield return scripts.delays[0.55f];
         // wait
         if (scripts.statSummoner.SumOfStat("green", "player") < 0 && playerOrEnemy == "enemy") {
@@ -866,7 +864,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Coroutine to remove the player's armor after being hit.
     /// </summary>
-    public IEnumerator RemoveArmorAfterDelay() {
+    private IEnumerator RemoveArmorAfterDelay() {
         yield return scripts.delays[0.45f];
         scripts.itemManager.GetPlayerItem("armor").GetComponent<Item>().Remove(armorFade:true);
     }
@@ -874,7 +872,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Coroutine to heal the player's wounds, used by the 4th character.
     /// </summary>
-    public IEnumerator HealAfterDelay() {
+    private IEnumerator HealAfterDelay() {
         yield return scripts.delays[1f];
         scripts.turnManager.ChangeStaminaOf("player", -7);
         // bypass changestaminaof and instead directly change the stamina, to differentiate from healing from eating
@@ -1051,7 +1049,7 @@ public class TurnManager : MonoBehaviour {
         else if (injury == "hip") {
             // if hip, remove all applied stamina
             if (appliedTo == "player") {
-                foreach (String stat in scripts.itemManager.statArr) {
+                foreach (string stat in scripts.itemManager.statArr) {
                     foreach (Dice dice in scripts.statSummoner.addedPlayerDice[stat]) {
                         dice.transform.position = new Vector2(dice.transform.position.x + scripts.statSummoner.xOffset * -scripts.statSummoner.addedPlayerStamina[stat], dice.transform.position.y);
                         dice.instantiationPos = dice.transform.position;
@@ -1066,7 +1064,7 @@ public class TurnManager : MonoBehaviour {
                 };
             }
             else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
-                foreach (String stat in scripts.itemManager.statArr) {
+                foreach (string stat in scripts.itemManager.statArr) {
                     foreach (Dice dice in scripts.statSummoner.addedEnemyDice[stat]) {
                         dice.transform.position = new Vector2(dice.transform.position.x + scripts.statSummoner.xOffset * scripts.statSummoner.addedEnemyStamina[stat], dice.transform.position.y);
                         dice.instantiationPos = dice.transform.position;
@@ -1129,8 +1127,6 @@ public class TurnManager : MonoBehaviour {
             // for every die in the stat we want to remove from
             if (dice.diceType == diceType) {
                 // if the die type matches
-                int index = diceList.IndexOf(dice);
-                // get where the die is currently in the array
                 scripts.diceSummoner.existingDice.Remove(dice.gameObject);
                 diceList.Remove(dice);
                 Destroy(dice.gameObject);
