@@ -152,9 +152,9 @@ public class LevelManager : MonoBehaviour {
             if (level == 4 && sub == 1) {
                 if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
                 // going to next level after having defeated devil
-                if (scripts.player.charNum != 3) { 
+                if (Save.game.curCharNum != 3) { 
                     // give player the next character, as long as they aren't on the last one\
-                    Save.persistent.unlockedChars[scripts.player.charNum + 1] = true;
+                    Save.persistent.unlockedChars[Save.game.curCharNum + 1] = true;
                     Save.persistent.successfulRuns++;
                     Save.SavePersistent();
                 }
@@ -290,9 +290,8 @@ public class LevelManager : MonoBehaviour {
             loadingCircle.transform.position = offScreen;
             levelBox.transform.position = offScreen;
             // clear the loading text and move the box offscreen
-            scripts.itemManager.numItemsDroppedForTrade = 0;
+            Save.game.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
-            Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
             if (scripts.tutorial == null) { Save.SaveGame(); }
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items

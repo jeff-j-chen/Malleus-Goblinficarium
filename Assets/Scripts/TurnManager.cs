@@ -18,7 +18,6 @@ public class TurnManager : MonoBehaviour {
     public bool actionsAvailable = false;
     public bool alterationDuringMove = false;
     public bool scimitarParry = false;
-    public bool usedMace = false;
     public GameObject dieSavedFromLastRound = null;
     public bool discardDieBecauseCourage = false;
     public bool dontRemoveLeechYet = false;
@@ -37,7 +36,6 @@ public class TurnManager : MonoBehaviour {
         }
         scripts.statSummoner.SummonStats();
         DetermineMove(true);
-        usedMace = Save.game.usedMace;
     }
 
     /// <summary>
@@ -251,7 +249,7 @@ public class TurnManager : MonoBehaviour {
         if (playerOrEnemy == "player") {
             scripts.player.stamina += amount;
             // change stamina
-            if (scripts.player.stamina >= 10 && scripts.player.charNum == 3) {
+            if (scripts.player.stamina >= 10 && Save.game.curCharNum == 3) {
                 // heal wounds at 10 stamina, only applies for foods (during attack is handled elsewhere)
                 scripts.player.woundList.Clear();
                 StartCoroutine(HealAfterDelay());
@@ -331,7 +329,7 @@ public class TurnManager : MonoBehaviour {
                 // if they parried and had a scimitar
                 scripts.turnManager.SetStatusText("discard enemy's die");
                 // notify player
-                scripts.itemManager.discardableDieCounter++;
+                Save.game.discardableDieCounter++;
                 // increment # is discardable die
                 actionsAvailable = true;
                 // allow for player to take actions
@@ -358,10 +356,10 @@ public class TurnManager : MonoBehaviour {
         }
         else if (toMove == "enemy") {
             // enemy is the one attacking
-            if (scripts.enemy.woundList.Contains("chest") && Rerollable() && scripts.enemy.enemyName.text != "Lich" || scripts.itemManager.discardableDieCounter > 0 && scripts.enemy.enemyName.text != "Lich") {
+            if (scripts.enemy.woundList.Contains("chest") && Rerollable() && scripts.enemy.enemyName.text != "Lich" || Save.game.discardableDieCounter > 0 && scripts.enemy.enemyName.text != "Lich") {
                 // if player can reroll or discard enemy's die and hints are on
                 if (PlayerPrefs.GetString("hints") == "on") {
-                    if (scripts.itemManager.discardableDieCounter > 0) { SetStatusText("note: you can discard enemy's die"); }
+                    if (Save.game.discardableDieCounter > 0) { SetStatusText("note: you can discard enemy's die"); }
                     else if (scripts.enemy.woundList.Contains("chest")) { SetStatusText("note: you can reroll enemy's dice"); }
                 }
                 // notify the player
@@ -388,7 +386,7 @@ public class TurnManager : MonoBehaviour {
                 // play animation
             }
         }
-        if (!scripts.player.isDead && !scripts.enemy.isDead) {
+        if (!scripts.player.isDead && !Save.game.enemyIsDead) {
             // if neither player or enemy is dead
             yield return scripts.delays[2f];
             // wait for status text/animation etc.
@@ -457,14 +455,14 @@ public class TurnManager : MonoBehaviour {
             scripts.player.SetPlayerStatusEffect("leech", false);
         }
         scripts.highlightCalculator.diceTakenByPlayer = 0;
-        usedMace = false;
-        scripts.itemManager.usedAnkh = false;
-        scripts.itemManager.usedBoots = false;
-        scripts.itemManager.usedHelm = false;
+        Save.game.usedMace = false;
+        Save.game.usedAnkh = false;
+        Save.game.usedBoots = false;
+        Save.game.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
         if (scripts.enemy.woundList.Contains("head")) {
             // only allow discarding if enemy has head wound and we arent going to the next round
-            scripts.itemManager.discardableDieCounter = 1;
+            Save.game.discardableDieCounter = 1;
             Save.game.discardableDieCounter = 1;
         }
         Save.game.usedMace = false;
@@ -473,7 +471,7 @@ public class TurnManager : MonoBehaviour {
         Save.game.usedHelm = false;
         Save.game.expendedStamina = 0;
         if (scripts.tutorial == null) { Save.SaveGame(); }
-        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !scripts.enemy.isDead) {
+        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !Save.game.enemyIsDead) {
             scripts.enemy.stamina = 3;
             // refresh lich's stamina
             scripts.soundManager.PlayClip("blip1");
@@ -505,7 +503,7 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     private IEnumerator Kill(string playerOrEnemy) {
         if (playerOrEnemy == "player") { scripts.player.isDead = true; }
-        else if (playerOrEnemy == "enemy") { scripts.enemy.isDead = true; }
+        else if (playerOrEnemy == "enemy") { Save.game.enemyIsDead = true; }
         // make sure whoever is killed is set to be dead
         Save.game.enemyIsDead = true;
         if (scripts.tutorial == null) { Save.SaveGame(); }
@@ -813,14 +811,14 @@ public class TurnManager : MonoBehaviour {
             // play animation + sound for the attack
             if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text.Substring(1)) || armor || scripts.player.isDodgy)) {
                 // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
-                if (scripts.player.charNum == 3 && scripts.player.woundList.Count < 2 && scripts.enemy.target.text != "face" && scripts.player.stamina >= 7) {
+                if (Save.game.curCharNum == 3 && scripts.player.woundList.Count < 2 && scripts.enemy.target.text != "face" && scripts.player.stamina >= 7) {
                     // if on the 4th char, they are able to heal back (wont die instantly), and has sufficient stamina to heal the next move
                     scripts.player.woundList.Clear();
                     StartCoroutine(HealAfterDelay());
                     // decrementing and healing handled in the coro
                 }
                 else {
-                    if (scripts.player.charNum == 3 && scripts.player.stamina < 7) {
+                    if (Save.game.curCharNum == 3 && scripts.player.stamina < 7) {
                         // on the 4th char but does not have sufficient stamina to heal
                         ChangeStaminaOf("player", 3);
                         // so merely increment their stamina
@@ -954,7 +952,7 @@ public class TurnManager : MonoBehaviour {
                             // add the wound
                             Save.game.enemyWounds = scripts.enemy.woundList;
                             if (scripts.tutorial == null) { Save.SaveGame(); }
-                            if (scripts.player.charNum == 2) {
+                            if (Save.game.curCharNum == 2) {
                                 scripts.turnManager.ChangeStaminaOf("player", 1);
                                 // increment stamina if on 3rd character
                             }
@@ -1085,7 +1083,7 @@ public class TurnManager : MonoBehaviour {
                 scripts.enemy.DiscardBestPlayerDie();
             }
             else if (appliedTo == "enemy" && scripts.enemy.enemyName.text != "Lich") {
-                scripts.itemManager.discardableDieCounter++;
+                Save.game.discardableDieCounter++;
             }
         }
         else if (injury == "hand") {

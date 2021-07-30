@@ -11,7 +11,7 @@ public class StaminaButton : MonoBehaviour {
 
     private void OnMouseUpAsButton() {
         // when mouse button is released over the button
-        if (!scripts.turnManager.isMoving && !scripts.player.woundList.Contains("hip") && scripts.player.charNum != 1) {
+        if (!scripts.turnManager.isMoving && !scripts.player.woundList.Contains("hip") && Save.game.curCharNum != 1) {
             // if situation allows
             if (name == "plus(Clone)") {
                 // if plus button

@@ -67,7 +67,7 @@ public class DiceSummoner : MonoBehaviour
                 // give the player a red die if wielding a flail
                 GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
             }
-            if (scripts.player.charNum == 1) { 
+            if (Save.game.curCharNum == 1) { 
                 // if player character #2 (maul armor helm), give player yellow die
                 scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
             }

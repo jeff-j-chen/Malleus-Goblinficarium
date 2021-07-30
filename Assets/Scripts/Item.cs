@@ -70,7 +70,7 @@ public class Item : MonoBehaviour {
                 // if highlighted
                 if (itemType != "weapon" && !scripts.itemManager.floorItems.Contains(gameObject)) {
                     // if the item is not weapon and not on the floor
-                    if (scripts.levelManager.sub == 4 || scripts.enemy.isDead || scripts.enemy.enemyName.text == "Tombstone" || scripts.itemManager.PlayerHas("kapala") || (scripts.tutorial != null && modifier == "nothing" && scripts.tutorial.curIndex == 2 && !scripts.tutorial.isAnimating)) {
+                    if (scripts.levelManager.sub == 4 || Save.game.enemyIsDead || scripts.enemy.enemyName.text == "Tombstone" || scripts.itemManager.PlayerHas("kapala") || (scripts.tutorial != null && modifier == "nothing" && scripts.tutorial.curIndex == 2 && !scripts.tutorial.isAnimating)) {
                         // only allow dropping of items if player is trading, enemy is dead, on a tombstone, are offering to kapala, or are dropping scroll in tutorial
                         Remove(true);
                     }
@@ -112,7 +112,7 @@ public class Item : MonoBehaviour {
                 // if item is in inventory
                 if (scripts.enemy != null) {
                     // and not in character select
-                    if (scripts.enemy.isDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
+                    if (Save.game.enemyIsDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
                     // hide the weapon stats if enemy is dead and not clicking on an enemy
                 }
             }
@@ -120,7 +120,7 @@ public class Item : MonoBehaviour {
         else {
             if (scripts.levelManager == null || !scripts.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
-                if (scripts.levelManager != null && scripts.enemy.isDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
+                if (scripts.levelManager != null && Save.game.enemyIsDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
                 switch (itemName) {
                     case "potion":
@@ -157,7 +157,7 @@ public class Item : MonoBehaviour {
                         break;
                     case "cheese":
                     case "steak":
-                        if (scripts.player == null || scripts.player.charNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
+                        if (scripts.player == null || Save.game.curCharNum == 0) { scripts.itemManager.itemDesc.text = $"{itemName}\n+{int.Parse(scripts.itemManager.descriptionDict[itemName]) + 2} stamina"; }
                         else { scripts.itemManager.itemDesc.text = $"{itemName}\n+{scripts.itemManager.descriptionDict[itemName]} stamina"; }
                         break;
                     case "moldy cheese":
@@ -217,10 +217,9 @@ public class Item : MonoBehaviour {
                         // not an arrow
                         if (scripts.levelManager.sub == 4) {
                             // if on the trader level
-                            if (scripts.itemManager.numItemsDroppedForTrade > 0) {
+                            if (Save.game.numItemsDroppedForTrade > 0) {
                                 // if player has dropped items for trading
-                                scripts.itemManager.numItemsDroppedForTrade--;
-                                Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                                Save.game.numItemsDroppedForTrade--;
                                 Save.persistent.itemsTraded++;
                                 // decrement counter
                                 scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(gameObject));
@@ -249,10 +248,10 @@ public class Item : MonoBehaviour {
                             // if player is trying to use weapon
                             if (!scripts.turnManager.isMoving && !scripts.player.isDead) {
                                 // if conditions allow for attack
-                                if (scripts.enemy.isDead) { scripts.turnManager.SetStatusText("he's dead"); }
+                                if (Save.game.enemyIsDead) { scripts.turnManager.SetStatusText("he's dead"); }
                                 else if (scripts.levelManager.sub == 4 || scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.SetStatusText("mind your manners"); }
                                 // send reminders accordingly
-                                else if (!scripts.enemy.isDead) { scripts.player.UseWeapon(); }
+                                else if (!Save.game.enemyIsDead) { scripts.player.UseWeapon(); }
                                 // attack if enemy is not dead or tombstone
                                 // else { print("error!"); }
                             }
@@ -273,7 +272,7 @@ public class Item : MonoBehaviour {
     /// Use a common item.
     /// </summary>
     private void UseCommon() {
-        if (scripts.enemy.isDead) {
+        if (Save.game.enemyIsDead) {
             if (itemName is "steak" or "cheese" or "retry" or "arrow") {
                 // only allow those 4 items to be used if the enemy is dead, otherwise its a waste
                 StartCoroutine(UseCommonCoro());
@@ -295,7 +294,7 @@ public class Item : MonoBehaviour {
                     // eating steak
                     Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
-                    scripts.turnManager.ChangeStaminaOf("player", scripts.player.charNum == 0 ? 7 : 5);
+                    scripts.turnManager.ChangeStaminaOf("player", Save.game.curCharNum == 0 ? 7 : 5);
                     // change stamina based on the character
                     scripts.turnManager.SetStatusText("you swallow steak");
                     // status text
@@ -312,7 +311,7 @@ public class Item : MonoBehaviour {
                 case "cheese" when scripts.enemy.enemyName.text != "Tombstone":
                     Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
-                    scripts.turnManager.ChangeStaminaOf("player", scripts.player.charNum == 0 ? 5 : 3);
+                    scripts.turnManager.ChangeStaminaOf("player", Save.game.curCharNum == 0 ? 5 : 3);
                     scripts.turnManager.SetStatusText("you swallow cheese");
                     Remove();
                     break;
@@ -468,9 +467,8 @@ public class Item : MonoBehaviour {
                     Save.persistent.shurikensThrown++;
                     scripts.soundManager.PlayClip("shuriken");
                     // play sound clip
-                    scripts.itemManager.discardableDieCounter++;print("incremented from shuriken!");
+                    Save.game.discardableDieCounter++;
                     // increment counter
-                    Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
                     if (scripts.tutorial == null) { Save.SaveGame(); }
                     Remove();
                     scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
@@ -499,14 +497,13 @@ public class Item : MonoBehaviour {
     /// </summary>
     private void UseRare() {
         // these are pretty self explanatory
-        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone" && !scripts.enemy.isDead) {
+        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone" && !Save.game.enemyIsDead) {
             switch (itemName) {
                 case "helm of might":
-                    if (!scripts.itemManager.usedHelm) {
+                    if (!Save.game.usedHelm) {
                         if (scripts.player.stamina >= 3) {
                             scripts.soundManager.PlayClip("fwoosh");
                             // need 3 stamina
-                            scripts.itemManager.usedHelm = true;
                             Save.game.usedHelm = true;
                             if (scripts.tutorial == null) { Save.SaveGame(); }
                             // set variable
@@ -528,11 +525,10 @@ public class Item : MonoBehaviour {
                     scripts.turnManager.SetStatusText("offer an item to become furious");
                     break;
                 case "boots of dodge":
-                    if (!scripts.itemManager.usedBoots) {
+                    if (!Save.game.usedBoots) {
                         if (scripts.player.stamina >= 1) {
                             scripts.soundManager.PlayClip("fwoosh");
                             scripts.turnManager.SetStatusText("you feel dodgy");
-                            scripts.itemManager.usedBoots = true;
                             Save.game.usedBoots = true;
                             if (scripts.tutorial == null) { Save.SaveGame(); }
                             scripts.turnManager.ChangeStaminaOf("player", -1);
@@ -543,9 +539,8 @@ public class Item : MonoBehaviour {
                     else { scripts.turnManager.SetStatusText("you are already dodgy"); }
                     break;
                 case "ankh":
-                    if (!scripts.itemManager.usedAnkh) {
+                    if (!Save.game.usedAnkh) {
                         scripts.soundManager.PlayClip("click0");
-                        scripts.itemManager.usedAnkh = true;
                         Save.game.usedAnkh = true;
                         if (scripts.tutorial == null) { Save.SaveGame(); }
                         foreach (string key in scripts.itemManager.statArr) {
@@ -585,8 +580,7 @@ public class Item : MonoBehaviour {
                 }
             }
             else {
-                if (scripts.levelManager.sub == 4) { scripts.itemManager.numItemsDroppedForTrade++; }
-                Save.game.numItemsDroppedForTrade = scripts.itemManager.numItemsDroppedForTrade;
+                if (scripts.levelManager.sub == 4) { Save.game.numItemsDroppedForTrade++; }
                 if (scripts.tutorial == null) { Save.SaveGame(); }
                 // if trader level increment the number of items dropped for trading
                 if (itemType == "weapon") {

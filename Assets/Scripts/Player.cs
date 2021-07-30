@@ -5,7 +5,6 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 public class Player : MonoBehaviour {
-    [SerializeField] public int charNum;
     [SerializeField] private RuntimeAnimatorController[] controllers;
     [SerializeField] private Sprite[] icons;
     [SerializeField] private Sprite[] deathSprites;
@@ -23,7 +22,6 @@ public class Player : MonoBehaviour {
     private readonly List<GameObject> statusEffectList = new();
     public List<string> woundList = new();
     public bool isDead;
-    public bool cancelMove = false;
     public float hintTimer;
     private Coroutine coroutine = null;
     public Dictionary<string, int> stats = new() {
@@ -58,8 +56,7 @@ public class Player : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         // something here to check if we are continuing or starting a new game
-        charNum = Save.game.newGame ? Save.persistent.newCharNum : Save.game.curCharNum;
-        Save.game.curCharNum = charNum;
+        Save.game.curCharNum = Save.game.newGame ? Save.persistent.newCharNum : Save.game.curCharNum;
         scripts.itemManager.GiveStarterItems();
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
@@ -67,9 +64,9 @@ public class Player : MonoBehaviour {
         // set the initial positions
         identifier.text = "You";
         // set the identifier text
-        iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[charNum];
+        iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[Save.game.curCharNum];
         // set the correct sprite
-        GetComponent<Animator>().runtimeAnimatorController = controllers[charNum];
+        GetComponent<Animator>().runtimeAnimatorController = controllers[Save.game.curCharNum];
         // set the correct animation controller (using runtime so that it works in the actual game, and not only the editor)
         SetPlayerStatusEffect("fury", Save.game.isFurious);
         SetPlayerStatusEffect("dodge", Save.game.isDodgy);
@@ -114,7 +111,7 @@ public class Player : MonoBehaviour {
             }
         }
         if (Input.GetKeyDown(KeyCode.R) && !isDead && !scripts.turnManager.isMoving && scripts.tutorial == null) {
-            if (scripts.enemy.isDead) {
+            if (Save.game.enemyIsDead) {
                 // don't let player suicide when enemy is dead, because it is glitchy
                 scripts.turnManager.SetStatusText("you've killed him");
             }
@@ -198,9 +195,8 @@ public class Player : MonoBehaviour {
         }
         else { 
             // dice are available
-            if (scripts.itemManager.PlayerHasWeapon("mace") && !scripts.turnManager.usedMace) {
+            if (scripts.itemManager.PlayerHasWeapon("mace") && !Save.game.usedMace) {
                 // if player has mace
-                scripts.turnManager.usedMace = true;
                 Save.game.usedMace = true;
                 if (scripts.tutorial == null) { Save.SaveGame(); }
                 // prevent player from using mace again
@@ -211,7 +207,7 @@ public class Player : MonoBehaviour {
                     // reroll the die
                 }
             }
-            else if (scripts.itemManager.PlayerHasWeapon("mace") && scripts.turnManager.usedMace) {
+            else if (scripts.itemManager.PlayerHasWeapon("mace") && Save.game.usedMace) {
                 scripts.turnManager.SetStatusText("already rerolled");
             }
             else {
@@ -252,14 +248,14 @@ public class Player : MonoBehaviour {
     /// </summary>
     /// <returns>The sprite tha was found.</returns>
     public Sprite GetDeathSprite() {
-        return deathSprites[charNum];
+        return deathSprites[Save.game.curCharNum];
     }
 
     /// <summary>
     /// Makes the player's corpse move to the correct position on the ground. 
     /// </summary>
     public void SetPlayerPositionAfterDeath() {
-        transform.position = deathPositions[charNum];
+        transform.position = deathPositions[Save.game.curCharNum];
     }
     
     /// <summary>

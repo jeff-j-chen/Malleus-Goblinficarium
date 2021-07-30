@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class CharacterSelector : MonoBehaviour {
     [SerializeField] public int selectionNum;
-    [SerializeField] public bool[] unlockedChars = new bool[4] { true, false, false, false };
-    [SerializeField] public bool easy = false;
     [SerializeField] private Sprite[] icons;
     [SerializeField] private Sprite releasedButton;
     [SerializeField] private Sprite pressedButton;
@@ -15,13 +13,13 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI perkText;
     [SerializeField] public SimpleFadeIn simpleFadeIn;
     [SerializeField] public GameObject itemHider;
-    private readonly string[] quotes = new string[4] {
+    private readonly string[] quotes = {
         "- \"they say 68% of adventurers die of starvation...\"",
         "- \"what comedy is your defiance, beasts!\"",
         "- \"...breastplate costs a fortune; dodging is free...\"",
         "- \"honestly all the carnage is making me sleepy...\"",
     }; 
-    private readonly string[] perks = new string[4] {
+    private readonly string[] perks = {
         "* Food restores more stamina",
         "* Gains a yellow die each round\n* Cannot use stamina",
         "* All white dice are set to 1\n* Gains 1 stamina upon inflicting a wound",
@@ -34,10 +32,8 @@ public class CharacterSelector : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         // get necessary objects
-        unlockedChars = Save.persistent.unlockedChars;
-        easy = Save.persistent.easyMode;
         // pull in data from the Savefile
-        if (easy) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
+        if (Save.persistent.easyMode) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
         else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
         // hide the item if normal mode, if easy mode then show it
         selectionNum = 0;
@@ -74,7 +70,7 @@ public class CharacterSelector : MonoBehaviour {
         // space toggles easy mode
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) { 
             // enter selects the character
-            if (unlockedChars[selectionNum]) { StartCoroutine(LoadMenuScene()); }
+            if (Save.persistent.unlockedChars[selectionNum]) { StartCoroutine(LoadMenuScene()); }
             // but only if its already unlocked
         }
     }
@@ -103,7 +99,7 @@ public class CharacterSelector : MonoBehaviour {
             // only allow selections between the number of available characters
             selectionNum = num;
             // set the current selection num
-            if (unlockedChars[selectionNum]) {
+            if (Save.persistent.unlockedChars[selectionNum]) {
                 // if the current selected character is unlocked
                 itemHider.SetActive(false);
                 // show that character's items
@@ -212,11 +208,10 @@ public class CharacterSelector : MonoBehaviour {
             // don't allow toggle of easy if we are fading rn
             scripts.soundManager.PlayClip("click1");
             // play clip
-            easy = !easy;
+            Save.persistent.easyMode = !Save.persistent.easyMode;
             // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
             // fade to black and then back
-            Save.persistent.easyMode = easy; 
             Save.SavePersistent();
             // apply it to the Save file so the next game will have the correct character
         }

@@ -17,7 +17,6 @@ public class Enemy : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI staminaCounter;
     [SerializeField] public TextMeshProUGUI target;
     public List<string> woundList = new();
-    public bool isDead = false;
     public Dictionary<string, int> stats;
     private readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone" };
     private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
@@ -195,7 +194,6 @@ public class Enemy : MonoBehaviour {
     public void SpawnNewEnemy(int enemyNum, bool isNewEnemy) {
         if (isNewEnemy) {
             // creating new enemy
-            isDead = false;
             Save.game.enemyIsDead = false;
             // make sure enemy is not dead
             float[] temp;
@@ -257,8 +255,6 @@ public class Enemy : MonoBehaviour {
         }
         else { 
             // spawning old enemy
-            isDead = Save.game.enemyIsDead;
-            // make it dead or not, based on the Save
             stats = new Dictionary<string, int> {
                 { "green", Save.game.enemyAcc },
                 { "blue", Save.game.enemySpd },
@@ -271,7 +267,7 @@ public class Enemy : MonoBehaviour {
             // try displaying wounds
             iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
             // set its sprite
-            GetComponent<Animator>().enabled = !isDead;
+            GetComponent<Animator>().enabled = !Save.game.enemyIsDead;
             // enable/disable the animator, depending on if the enemy is dead or not
             try { GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
             catch { 

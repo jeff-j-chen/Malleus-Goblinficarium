@@ -116,11 +116,6 @@ public class ItemManager : MonoBehaviour {
     private Scripts scripts;
     public int col = 0;
     public List<GameObject> curList;
-    public int discardableDieCounter = 0;
-    public bool usedAnkh = false;
-    public bool usedHelm = false;
-    public bool usedBoots = false;
-    public int numItemsDroppedForTrade = 0;
     public bool isCharSelect = false;
 
     private void Start() {
@@ -151,11 +146,6 @@ public class ItemManager : MonoBehaviour {
             // assign the curlist variable for item selection navigation
             // need to implement a check if continuing or new game
         }
-        usedAnkh = Save.game.usedAnkh;
-        usedBoots = Save.game.usedBoots;
-        usedHelm = Save.game.usedHelm;
-        numItemsDroppedForTrade = Save.game.numItemsDroppedForTrade;
-        discardableDieCounter = Save.game.discardableDieCounter;
         // assign variables based on the Save, preventing cheating
     }
 
@@ -200,7 +190,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     public void GiveStarterItems() {
         if (Save.game.newGame) { 
-            switch (scripts.player.charNum) {
+            switch (Save.game.curCharNum) {
                 // new game, so give the base weapons
                 case 0: {
                     CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);

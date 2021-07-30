@@ -159,15 +159,14 @@ public class Dice : MonoBehaviour {
             // if an action can be performed on the dice (discard, reroll)
             if (!scripts.turnManager.isMoving || scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable) {
                 // if the situation allows for an action to be performed
-                if (scripts.itemManager.discardableDieCounter > 0) {
+                if (Save.game.discardableDieCounter > 0) {
                     // if can discard from another source
                     if (scripts.turnManager.scimitarParry) { scripts.diceSummoner.breakOutOfScimitarParryLoop = true; }
                     // if source is from scimitarParry, break out of the waiting loop
                     DiscardFromEnemy();
                     // discard from the enemy
-                    scripts.itemManager.discardableDieCounter--;
+                    Save.game.discardableDieCounter--;
                     // decrease the counter for the number of die 
-                    Save.game.discardableDieCounter = scripts.itemManager.discardableDieCounter;
                     if (scripts.tutorial == null) { Save.SaveGame(); }
                 }
                 else if (scripts.enemy.woundList.Contains("chest")) {

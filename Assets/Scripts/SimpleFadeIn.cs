@@ -52,7 +52,7 @@ public class SimpleFadeIn : MonoBehaviour
             temp.a += 1f/7f;
             boxSR.color = temp;
         }
-        if (scripts.characterSelector.easy) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
+        if (Save.persistent.easyMode) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
         else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
         scripts.itemManager.floorItems[1].GetComponent<Item>().Select(false);
         for (int i = 0; i < 7; i++) {

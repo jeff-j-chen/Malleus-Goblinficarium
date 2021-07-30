@@ -10,7 +10,6 @@ public class HighlightCalculator : MonoBehaviour {
     private readonly Vector2 small = new(10f, 1f);
     private readonly Vector2 large = new(10f, 10f);
 
-
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         HandleHighlightInitiation();
@@ -47,7 +46,7 @@ public class HighlightCalculator : MonoBehaviour {
             // not yellow
             if (dice.diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger")) { ShowSingleHighlight("red"); }
             // if player is using dagger, show highlights for red when picking green dice
-            else if (dice.diceType == "white" && scripts.player.charNum == 3) { ShowSingleHighlight("red"); }
+            else if (dice.diceType == "white" && Save.game.curCharNum == 3) { ShowSingleHighlight("red"); }
             // if player is 4th char, show highlights for red when picking white dice
             else { ShowSingleHighlight(dice.diceType); }
             // no special conditions, so show highlights for the corresponding colors
@@ -148,7 +147,7 @@ public class HighlightCalculator : MonoBehaviour {
                         // make the die drop for red
                         moveable = false;
                     }
-                    else if (dice.diceType == "white" && scripts.player.charNum == 3) { 
+                    else if (dice.diceType == "white" && Save.game.curCharNum == 3) { 
                         // white dice buff damage on 4th character
                         HandleNormalDrop("red", dice);
                         moveable = false;
@@ -222,7 +221,7 @@ public class HighlightCalculator : MonoBehaviour {
         if (scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
         if (dice.diceType == "red" && scripts.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
         else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
-        else if (dice.diceType == "white" && scripts.player.charNum == 2) { dice.SetToOne(); }
+        else if (dice.diceType == "white" && Save.game.curCharNum == 2) { dice.SetToOne(); }
         // take actions depending on injuries and die types, and character numbers
         // chest wounds are handled elsewhere, so dont worry about it here
         scripts.diceSummoner.SaveDiceValues();
