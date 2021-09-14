@@ -5,7 +5,7 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 637617461810000000
+      ticks: 637632653600000000
     m_Hash: 2838977932
   m_LockFileStatus:
     m_FilePath: /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Packages/packages-lock.json
@@ -13,7 +13,7 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 637617461810000000
+      ticks: 637632653600000000
     m_Hash: 2220416630
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
@@ -549,6 +549,7 @@ m_ResolvedPackages:
     - 0.1.16-preview
     - 0.1.17-preview
     - 0.1.18-preview
+    - 0.1.19-preview
     compatible:
     - 0.1.5-preview
     - 0.1.6-preview
@@ -563,6 +564,7 @@ m_ResolvedPackages:
     - 0.1.16-preview
     - 0.1.17-preview
     - 0.1.18-preview
+    - 0.1.19-preview
     verified: 
   dependencies:
   - name: com.unity.sysroot
