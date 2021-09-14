@@ -26,7 +26,7 @@ namespace UnityEngine.UI
 
         public static bool SetClass<T>(ref T currentValue, T newValue) where T : class
         {
-            if ((currentValue == null && newValue == null) || (currentValue is not null && currentValue.Equals(newValue)))
+            if ((currentValue == null && newValue == null) || (currentValue != null && currentValue.Equals(newValue)))
                 return false;
 
             currentValue = newValue;

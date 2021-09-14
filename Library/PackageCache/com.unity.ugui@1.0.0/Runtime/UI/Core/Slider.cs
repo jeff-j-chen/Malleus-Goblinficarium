@@ -456,14 +456,14 @@ namespace UnityEngine.UI
             // We also need to ensure the value stays within min/max.
             m_Value = ClampValue(m_Value);
             float oldNormalizedValue = normalizedValue;
-            if (m_FillContainerRect is not null)
+            if (m_FillContainerRect != null)
             {
-                if (m_FillImage is not null && m_FillImage.type == Image.Type.Filled)
+                if (m_FillImage != null && m_FillImage.type == Image.Type.Filled)
                     oldNormalizedValue = m_FillImage.fillAmount;
                 else
                     oldNormalizedValue = (reverseValue ? 1 - m_FillRect.anchorMin[(int)axis] : m_FillRect.anchorMax[(int)axis]);
             }
-            else if (m_HandleContainerRect is not null)
+            else if (m_HandleContainerRect != null)
                 oldNormalizedValue = (reverseValue ? 1 - m_HandleRect.anchorMin[(int)axis] : m_HandleRect.anchorMin[(int)axis]);
 
             UpdateVisuals();
@@ -481,7 +481,7 @@ namespace UnityEngine.UI
             {
                 m_FillTransform = m_FillRect.transform;
                 m_FillImage = m_FillRect.GetComponent<Image>();
-                if (m_FillTransform.parent is not null)
+                if (m_FillTransform.parent != null)
                     m_FillContainerRect = m_FillTransform.parent.GetComponent<RectTransform>();
             }
             else
@@ -494,7 +494,7 @@ namespace UnityEngine.UI
             if (m_HandleRect && m_HandleRect != (RectTransform)transform)
             {
                 m_HandleTransform = m_HandleRect.transform;
-                if (m_HandleTransform.parent is not null)
+                if (m_HandleTransform.parent != null)
                     m_HandleContainerRect = m_HandleTransform.parent.GetComponent<RectTransform>();
             }
             else
@@ -568,13 +568,13 @@ namespace UnityEngine.UI
 
             m_Tracker.Clear();
 
-            if (m_FillContainerRect is not null)
+            if (m_FillContainerRect != null)
             {
                 m_Tracker.Add(this, m_FillRect, DrivenTransformProperties.Anchors);
                 Vector2 anchorMin = Vector2.zero;
                 Vector2 anchorMax = Vector2.one;
 
-                if (m_FillImage is not null && m_FillImage.type == Image.Type.Filled)
+                if (m_FillImage != null && m_FillImage.type == Image.Type.Filled)
                 {
                     m_FillImage.fillAmount = normalizedValue;
                 }
@@ -590,7 +590,7 @@ namespace UnityEngine.UI
                 m_FillRect.anchorMax = anchorMax;
             }
 
-            if (m_HandleContainerRect is not null)
+            if (m_HandleContainerRect != null)
             {
                 m_Tracker.Add(this, m_HandleRect, DrivenTransformProperties.Anchors);
                 Vector2 anchorMin = Vector2.zero;
@@ -605,7 +605,7 @@ namespace UnityEngine.UI
         void UpdateDrag(PointerEventData eventData, Camera cam)
         {
             RectTransform clickRect = m_HandleContainerRect ?? m_FillContainerRect;
-            if (clickRect is not null && clickRect.rect.size[(int)axis] > 0)
+            if (clickRect != null && clickRect.rect.size[(int)axis] > 0)
             {
                 Vector2 position = Vector2.zero;
                 if (!MultipleDisplayUtilities.GetRelativeMousePositionForDrag(eventData, ref position))
@@ -634,7 +634,7 @@ namespace UnityEngine.UI
             base.OnPointerDown(eventData);
 
             m_Offset = Vector2.zero;
-            if (m_HandleContainerRect is not null && RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
+            if (m_HandleContainerRect != null && RectTransformUtility.RectangleContainsScreenPoint(m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.enterEventCamera))
             {
                 Vector2 localMousePos;
                 if (RectTransformUtility.ScreenPointToLocalPointInRectangle(m_HandleRect, eventData.pointerPressRaycast.screenPosition, eventData.pressEventCamera, out localMousePos))

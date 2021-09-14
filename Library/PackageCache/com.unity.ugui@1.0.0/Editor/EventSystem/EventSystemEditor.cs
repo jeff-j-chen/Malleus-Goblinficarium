@@ -18,7 +18,7 @@ namespace UnityEditor.EventSystems
             if (eventSystem == null)
                 return;
 
-            if (eventSystem.GetComponent<BaseInputModule>() is not null)
+            if (eventSystem.GetComponent<BaseInputModule>() != null)
                 return;
 
             // no input modules :(

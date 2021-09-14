@@ -40,7 +40,7 @@ namespace UnityEngine.UI
                     return;
 
                 m_ShowMaskGraphic = value;
-                if (graphic is not null)
+                if (graphic != null)
                     graphic.SetMaterialDirty();
             }
         }
@@ -65,7 +65,7 @@ namespace UnityEngine.UI
         protected Mask()
         {}
 
-        public virtual bool MaskEnabled() { return IsActive() && graphic is not null; }
+        public virtual bool MaskEnabled() { return IsActive() && graphic != null; }
 
         [Obsolete("Not used anymore.")]
         public virtual void OnSiblingGraphicEnabledDisabled() {}
@@ -73,7 +73,7 @@ namespace UnityEngine.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (graphic is not null)
+            if (graphic != null)
             {
                 graphic.canvasRenderer.hasPopInstruction = true;
                 graphic.SetMaterialDirty();
@@ -93,7 +93,7 @@ namespace UnityEngine.UI
             // correct value when we notify the children
             // that the mask state has changed.
             base.OnDisable();
-            if (graphic is not null)
+            if (graphic != null)
             {
                 graphic.SetMaterialDirty();
                 graphic.canvasRenderer.hasPopInstruction = false;
@@ -119,7 +119,7 @@ namespace UnityEngine.UI
             if (!IsActive())
                 return;
 
-            if (graphic is not null)
+            if (graphic != null)
             {
                 // Default the graphic to being the maskable graphic if its found.
                 if (graphic is MaskableGraphic)

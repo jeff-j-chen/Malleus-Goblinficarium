@@ -279,7 +279,7 @@ namespace UnityEngine.UI
             for (int i = 0; i < count; i++)
             {
                 RectTransform t = transform.GetChild(i) as RectTransform;
-                if (t is not null && t.sizeDelta != m_Sizes[i])
+                if (t != null && t.sizeDelta != m_Sizes[i])
                 {
                     dirty = true;
                     m_Sizes[i] = t.sizeDelta;

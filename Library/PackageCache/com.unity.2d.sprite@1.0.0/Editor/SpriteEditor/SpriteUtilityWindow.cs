@@ -132,7 +132,7 @@ namespace UnityEditor.U2D.Sprites
             set
             {
                 var mipCount = 1;
-                if (m_Texture is not null)
+                if (m_Texture != null)
                     mipCount = Mathf.Max(mipCount, TextureUtil.GetMipmapCount(m_Texture));
                 m_MipLevel = Mathf.Clamp(value, 0, mipCount - 1);
             }
@@ -271,7 +271,7 @@ namespace UnityEditor.U2D.Sprites
             if (m_ShowAlpha)
             {
                 // check if we have a valid alpha texture
-                if (m_TextureAlphaOverride is not null)
+                if (m_TextureAlphaOverride != null)
                     EditorGUI.DrawTextureTransparent(m_TextureRect, m_TextureAlphaOverride, ScaleMode.StretchToFill, 0, mipLevel);
                 // else use the original texture and display its alpha
                 else
@@ -313,7 +313,7 @@ namespace UnityEditor.U2D.Sprites
         protected Rect DoAlphaZoomToolbarGUI(Rect area)
         {
             int mipCount = 1;
-            if (m_Texture is not null)
+            if (m_Texture != null)
                 mipCount = Mathf.Max(mipCount, TextureUtil.GetMipmapCount(m_Texture));
 
             Rect drawArea = new Rect(area.width, 0, 0, area.height);
@@ -412,7 +412,7 @@ namespace UnityEditor.U2D.Sprites
 
         internal override void OnResized()
         {
-            if (m_Texture is not null && UnityEvent.current is not null)
+            if (m_Texture != null && UnityEvent.current != null)
                 HandleZoom();
             base.OnResized();
         }

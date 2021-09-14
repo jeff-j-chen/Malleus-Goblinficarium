@@ -141,7 +141,7 @@ namespace UnityEngine.UI
 
         protected override void OnDestroy()
         {
-            if (m_Group is not null)
+            if (m_Group != null)
                 m_Group.EnsureValidState();
             base.OnDestroy();
         }
@@ -163,7 +163,7 @@ namespace UnityEngine.UI
         {
             // Check if isOn has been changed by the animation.
             // Unfortunately there is no way to check if we don�t have a graphic.
-            if (graphic is not null)
+            if (graphic != null)
             {
                 bool oldValue = !Mathf.Approximately(graphic.canvasRenderer.GetColor().a, 0);
                 if (m_IsOn != oldValue)
@@ -180,7 +180,7 @@ namespace UnityEngine.UI
         {
             // Sometimes IsActive returns false in OnDisable so don't check for it.
             // Rather remove the toggle too often than too little.
-            if (m_Group is not null)
+            if (m_Group != null)
                 m_Group.UnregisterToggle(this);
 
             // At runtime the group variable should be set but not when calling this method from OnEnable or OnDisable.
@@ -189,12 +189,12 @@ namespace UnityEngine.UI
                 m_Group = newGroup;
 
             // Only register to the new group if this Toggle is active.
-            if (newGroup is not null && IsActive())
+            if (newGroup != null && IsActive())
                 newGroup.RegisterToggle(this);
 
             // If we are in a new group, and this toggle is on, notify group.
             // Note: Don't refer to m_Group here as it's not guaranteed to have been set.
-            if (newGroup is not null && isOn && IsActive())
+            if (newGroup != null && isOn && IsActive())
                 newGroup.NotifyToggleOn(this);
         }
 
@@ -264,7 +264,7 @@ namespace UnityEngine.UI
 
             // if we are in a group and set to true, do group logic
             m_IsOn = value;
-            if (m_Group is not null && m_Group.isActiveAndEnabled && IsActive())
+            if (m_Group != null && m_Group.isActiveAndEnabled && IsActive())
             {
                 if (m_IsOn || (!m_Group.AnyTogglesOn() && !m_Group.allowSwitchOff))
                 {

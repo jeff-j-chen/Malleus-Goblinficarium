@@ -279,7 +279,7 @@ namespace UnityEngine.UI
             get { return m_Sprite; }
             set
             {
-                if (m_Sprite is not null)
+                if (m_Sprite != null)
                 {
                     if (m_Sprite != value)
                     {
@@ -291,7 +291,7 @@ namespace UnityEngine.UI
                         TrackSprite();
                     }
                 }
-                else if (value is not null)
+                else if (value != null)
                 {
                     m_SkipLayoutUpdate = value.rect.size == Vector2.zero;
                     m_SkipMaterialUpdate = value.texture == null;
@@ -387,7 +387,7 @@ namespace UnityEngine.UI
             }
         }
 
-        private Sprite activeSprite { get { return m_OverrideSprite is not null ? m_OverrideSprite : sprite; } }
+        private Sprite activeSprite { get { return m_OverrideSprite != null ? m_OverrideSprite : sprite; } }
 
         /// How the Image is drawn.
         [SerializeField] private Type m_Type = Type.Simple;
@@ -664,7 +664,7 @@ namespace UnityEngine.UI
             {
                 if (activeSprite == null)
                 {
-                    if (material is not null && material.mainTexture is not null)
+                    if (material != null && material.mainTexture != null)
                     {
                         return material.mainTexture;
                     }
@@ -683,7 +683,7 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (activeSprite is not null)
+                if (activeSprite != null)
                 {
                     Vector4 v = activeSprite.border;
                     return v.sqrMagnitude > 0f;
@@ -739,14 +739,14 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (m_Material is not null)
+                if (m_Material != null)
                     return m_Material;
 #if UNITY_EDITOR
-                if (Application.isPlaying && activeSprite && activeSprite.associatedAlphaSplitTexture is not null)
+                if (Application.isPlaying && activeSprite && activeSprite.associatedAlphaSplitTexture != null)
                     return defaultETC1GraphicMaterial;
 #else
 
-                if (activeSprite && activeSprite.associatedAlphaSplitTexture is not null)
+                if (activeSprite && activeSprite.associatedAlphaSplitTexture != null)
                     return defaultETC1GraphicMaterial;
 #endif
 
@@ -841,7 +841,7 @@ namespace UnityEngine.UI
         /// </remarks>
         public override void SetNativeSize()
         {
-            if (activeSprite is not null)
+            if (activeSprite != null)
             {
                 float w = activeSprite.rect.width / pixelsPerUnit;
                 float h = activeSprite.rect.height / pixelsPerUnit;
@@ -884,7 +884,7 @@ namespace UnityEngine.UI
 
         private void TrackSprite()
         {
-            if (activeSprite is not null && activeSprite.texture == null)
+            if (activeSprite != null && activeSprite.texture == null)
             {
                 TrackImage(this);
                 m_Tracked = true;
@@ -923,7 +923,7 @@ namespace UnityEngine.UI
 
             Texture2D alphaTex = activeSprite.associatedAlphaSplitTexture;
 
-            if (alphaTex is not null)
+            if (alphaTex != null)
             {
                 canvasRenderer.SetAlphaTexture(alphaTex);
             }
@@ -953,7 +953,7 @@ namespace UnityEngine.UI
         void GenerateSimpleSprite(VertexHelper vh, bool lPreserveAspect)
         {
             Vector4 v = GetDrawingDimensions(lPreserveAspect);
-            var uv = (activeSprite is not null) ? Sprites.DataUtility.GetOuterUV(activeSprite) : Vector4.zero;
+            var uv = (activeSprite != null) ? Sprites.DataUtility.GetOuterUV(activeSprite) : Vector4.zero;
 
             var color32 = color;
             vh.Clear();
@@ -1019,7 +1019,7 @@ namespace UnityEngine.UI
 
             Vector4 outer, inner, padding, border;
 
-            if (activeSprite is not null)
+            if (activeSprite != null)
             {
                 outer = Sprites.DataUtility.GetOuterUV(activeSprite);
                 inner = Sprites.DataUtility.GetInnerUV(activeSprite);
@@ -1092,7 +1092,7 @@ namespace UnityEngine.UI
             Vector4 outer, inner, border;
             Vector2 spriteSize;
 
-            if (activeSprite is not null)
+            if (activeSprite != null)
             {
                 outer = Sprites.DataUtility.GetOuterUV(activeSprite);
                 inner = Sprites.DataUtility.GetInnerUV(activeSprite);
@@ -1132,7 +1132,7 @@ namespace UnityEngine.UI
             if (tileHeight <= 0)
                 tileHeight = yMax - yMin;
 
-            if (activeSprite is not null && (hasBorder || activeSprite.packed || activeSprite.texture.wrapMode != TextureWrapMode.Repeat))
+            if (activeSprite != null && (hasBorder || activeSprite.packed || activeSprite.texture.wrapMode != TextureWrapMode.Repeat))
             {
                 // Sprite has border, or is not in repeat mode, or cannot be repeated because of packing.
                 // We cannot use texture tiling so we will generate a mesh of quads to tile the texture.
@@ -1401,7 +1401,7 @@ namespace UnityEngine.UI
                 return;
 
             Vector4 v = GetDrawingDimensions(preserveAspect);
-            Vector4 outer = activeSprite is not null ? Sprites.DataUtility.GetOuterUV(activeSprite) : Vector4.zero;
+            Vector4 outer = activeSprite != null ? Sprites.DataUtility.GetOuterUV(activeSprite) : Vector4.zero;
             UIVertex uiv = UIVertex.simpleVert;
             uiv.color = color;
 

@@ -83,7 +83,7 @@ namespace UnityEditor.Events
 
         public override bool HasPreviewGUI()
         {
-            return m_TargetEvents is not null && m_InterceptsAnyEvent;
+            return m_TargetEvents != null && m_InterceptsAnyEvent;
         }
 
         public override void OnPreviewGUI(Rect r, GUIStyle background)
@@ -213,7 +213,7 @@ namespace UnityEditor.Events
                         }
                     }
 
-                    if (events is not null)
+                    if (events != null)
                     {
                         componentEvent = new ComponentInterceptedEvents();
                         componentEvent.componentName = new GUIContent(type.Name);
@@ -229,7 +229,7 @@ namespace UnityEditor.Events
                 }
 
 
-                if (componentEvent is not null)
+                if (componentEvent != null)
                 {
                     componentEvents.Add(componentEvent);
                 }
@@ -240,7 +240,7 @@ namespace UnityEditor.Events
 
         private static void InitializeEvetnsInterfaceCacheIfNeeded()
         {
-            if (s_EventSystemInterfaces is not null)
+            if (s_EventSystemInterfaces != null)
                 return;
 
             s_EventSystemInterfaces = new List<Type>();

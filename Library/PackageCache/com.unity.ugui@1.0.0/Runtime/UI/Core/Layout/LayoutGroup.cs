@@ -344,7 +344,7 @@ namespace UnityEngine.UI
         /// <param name="newValue">The new value.</param>
         protected void SetProperty<T>(ref T currentValue, T newValue)
         {
-            if ((currentValue == null && newValue == null) || (currentValue is not null && currentValue.Equals(newValue)))
+            if ((currentValue == null && newValue == null) || (currentValue != null && currentValue.Equals(newValue)))
                 return;
             currentValue = newValue;
             SetDirty();
