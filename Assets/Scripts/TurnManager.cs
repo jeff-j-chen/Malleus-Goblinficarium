@@ -24,6 +24,13 @@ public class TurnManager : MonoBehaviour {
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
+        if (PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on") {
+            statusText.transform.localPosition = new Vector3(0f, -199.33f, 0f);
+        }
+        else { 
+            statusText.transform.localPosition = new Vector3(0f, -262.5f, 0f);
+        }
+        // depending on whether the mobile buttons are toggled on or not, move the status text out of the way
         DisplayWounds();
         SetTargetOf("player");
         SetTargetOf("enemy");
@@ -31,6 +38,7 @@ public class TurnManager : MonoBehaviour {
         scripts.statSummoner.ResetDiceAndStamina();
         if (scripts.tutorial == null) {
             if (!(scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) && scripts.levelManager.sub != 4) {
+                // spawn in new dice based on the state of the game
                 scripts.diceSummoner.SummonDice(true, Save.game.newGame);
             }
         }
@@ -358,7 +366,7 @@ public class TurnManager : MonoBehaviour {
             // enemy is the one attacking
             if (scripts.enemy.woundList.Contains("chest") && Rerollable() && scripts.enemy.enemyName.text != "Lich" || Save.game.discardableDieCounter > 0 && scripts.enemy.enemyName.text != "Lich") {
                 // if player can reroll or discard enemy's die and hints are on
-                if (PlayerPrefs.GetString("hints") == "on") {
+                if (PlayerPrefs.GetString(scripts.HINTS_KEY) == "on") {
                     if (Save.game.discardableDieCounter > 0) { SetStatusText("note: you can discard enemy's die"); }
                     else if (scripts.enemy.woundList.Contains("chest")) { SetStatusText("note: you can reroll enemy's dice"); }
                 }

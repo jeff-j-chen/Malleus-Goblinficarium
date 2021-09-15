@@ -130,7 +130,7 @@ namespace UnityEditor.U2D.Sprites
 
         public static implicit operator List<SpriteOutline>(SpriteOutlineList list)
         {
-            return list is not null ? list.m_SpriteOutlines : null;
+            return list != null ? list.m_SpriteOutlines : null;
         }
 
         public int Count { get { return m_SpriteOutlines.Count; } }
@@ -245,7 +245,7 @@ namespace UnityEditor.U2D.Sprites
 
         public override bool ApplyRevert(bool apply)
         {
-            if (m_Outline is not null)
+            if (m_Outline != null)
             {
                 if (apply)
                 {
@@ -365,7 +365,7 @@ namespace UnityEditor.U2D.Sprites
         void GenerateOutlineIfNotExist()
         {
             var rectCache = spriteEditorWindow.GetDataProvider<ISpriteEditorDataProvider>().GetSpriteRects();
-            if (rectCache is not null)
+            if (rectCache != null)
             {
                 bool needApply = false;
                 for (int i = 0; i < rectCache.Length; ++i)
@@ -396,7 +396,7 @@ namespace UnityEditor.U2D.Sprites
             CleanupShapeEditors();
             m_Selected = null;
             spriteEditorWindow.enableMouseMoveEvent = false;
-            if (m_Outline is not null)
+            if (m_Outline != null)
             {
                 undoSystem.ClearUndo(m_Outline);
                 ScriptableObject.DestroyImmediate(m_Outline);
@@ -455,7 +455,7 @@ namespace UnityEditor.U2D.Sprites
 
                 if (drawArea.width > 0)
                 {
-                    float tesselationValue = m_Selected is not null ? m_Outline[m_Selected.spriteID].tessellationDetail : 0;
+                    float tesselationValue = m_Selected != null ? m_Outline[m_Selected.spriteID].tessellationDetail : 0;
                     EditorGUI.BeginChangeCheck();
                     float oldFieldWidth = EditorGUIUtility.fieldWidth;
                     float oldLabelWidth = EditorGUIUtility.labelWidth;
@@ -566,7 +566,7 @@ namespace UnityEditor.U2D.Sprites
 
         private void HandleCreateNewOutline()
         {
-            if (m_WasRectSelecting && m_ShapeSelectionUI.isSelecting == false && m_SelectionRect is not null && m_Selected is not null)
+            if (m_WasRectSelecting && m_ShapeSelectionUI.isSelecting == false && m_SelectionRect != null && m_Selected != null)
             {
                 bool createNewOutline = true;
                 foreach (var se in m_ShapeEditors)
@@ -588,7 +588,7 @@ namespace UnityEditor.U2D.Sprites
         {
             SetupShapeEditor();
 
-            if (m_Selected is not null)
+            if (m_Selected != null)
             {
                 IEvent currentEvent = eventSystem.current;
                 var wantsDelete = currentEvent.type == EventType.ExecuteCommand && (currentEvent.commandName == k_SoftDeleteCommandName || currentEvent.commandName == k_DeleteCommandName);
@@ -646,7 +646,7 @@ namespace UnityEditor.U2D.Sprites
 
         private void CleanupShapeEditors()
         {
-            if (m_ShapeEditors is not null)
+            if (m_ShapeEditors != null)
             {
                 for (int i = 0; i < m_ShapeEditors.Length; ++i)
                 {
@@ -668,7 +668,7 @@ namespace UnityEditor.U2D.Sprites
                 m_Selected = spriteEditorWindow.selectedSpriteRect;
                 CleanupShapeEditors();
 
-                if (m_Selected is not null)
+                if (m_Selected != null)
                 {
                     if (!HasShapeOutline(m_Selected))
                         SetupShapeEditorOutline(m_Selected);
@@ -711,8 +711,8 @@ namespace UnityEditor.U2D.Sprites
 
         protected virtual bool HasShapeOutline(SpriteRect spriteRect)
         {
-            var outline = m_Outline[spriteRect.spriteID] is not null ? m_Outline[spriteRect.spriteID].spriteOutlines : null;
-            return outline is not null;
+            var outline = m_Outline[spriteRect.spriteID] != null ? m_Outline[spriteRect.spriteID].spriteOutlines : null;
+            return outline != null;
         }
 
         protected virtual void SetupShapeEditorOutline(SpriteRect spriteRect)
@@ -816,7 +816,7 @@ namespace UnityEditor.U2D.Sprites
             if (eventSystem.current.type == EventType.Repaint)
             {
                 var selected = spriteEditorWindow.selectedSpriteRect;
-                if (selected is not null)
+                if (selected != null)
                 {
                     SpriteEditorUtility.BeginLines(styles.spriteBorderColor);
                     SpriteEditorUtility.DrawBox(selected.rect);
@@ -829,7 +829,7 @@ namespace UnityEditor.U2D.Sprites
         {
             List<SpriteOutline> outline = new List<SpriteOutline>();
             var texture = textureProvider.GetReadableTexture2D();
-            if (texture is not null)
+            if (texture != null)
             {
                 Vector2[][] paths;
 
@@ -891,7 +891,7 @@ namespace UnityEditor.U2D.Sprites
 
             RecordUndo();
             var rectCache = spriteEditorWindow.GetDataProvider<ISpriteEditorDataProvider>().GetSpriteRects();
-            if (rectCache is not null)
+            if (rectCache != null)
             {
                 foreach (var spriteRect in rectCache)
                 {

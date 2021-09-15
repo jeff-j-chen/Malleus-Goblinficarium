@@ -4,10 +4,12 @@ public class SoundManager : MonoBehaviour {
     [SerializeField] private AudioClip[] audioClips;
     [SerializeField] private string[] audioClipNames;
     private AudioSource audioSource;
+    private Scripts scripts;
 
     private void Start() {
+        scripts = FindObjectOfType<Scripts>();
         audioSource = GetComponent<AudioSource>();
-        audioSource.volume = PlayerPrefs.GetString("sounds") == "on" ? 1f : 0f;
+        audioSource.volume = PlayerPrefs.GetString(scripts.SOUNDS_KEY) == "on" ? 1f : 0f;
     }
 
     /// <summary>

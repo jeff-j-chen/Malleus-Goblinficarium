@@ -9,11 +9,6 @@ public class MenuIcon : MonoBehaviour {
     [SerializeField] private AudioSource musicPlayer;
     [SerializeField] private AudioSource sfxPlayer;
     public Color gray;
-    private const string DEBUG_KEY = "debug";
-    private const string HINTS_KEY = "hints";
-    private const string SOUNDS_KEY = "sounds";
-    private const string MUSIC_KEY = "music";
-    private const string BUTTON_KEY = "button";
     private SpriteRenderer debugSR;
     private SpriteRenderer soundsSR;
     private SpriteRenderer hintsSR;
@@ -31,11 +26,11 @@ public class MenuIcon : MonoBehaviour {
         ColorUtility.TryParseHtmlString("#404040", out gray);
         // get the necessary components and colors
         // assign var gray to the html string parsed
-        PlayerPrefSetter(DEBUG_KEY, debugSR, false);
-        PlayerPrefSetter(HINTS_KEY, hintsSR, false);
-        PlayerPrefSetter(SOUNDS_KEY, soundsSR, false);
-        PlayerPrefSetter(MUSIC_KEY, musicSR, false);
-        PlayerPrefSetter(MUSIC_KEY, buttonsSR, false);
+        PlayerPrefSetter(scripts.DEBUG_KEY, debugSR, false);
+        PlayerPrefSetter(scripts.HINTS_KEY, hintsSR, false);
+        PlayerPrefSetter(scripts.SOUNDS_KEY, soundsSR, false);
+        PlayerPrefSetter(scripts.MUSIC_KEY, musicSR, false);
+        PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR, false);
         // set the default preferences
         StartCoroutine(FindMusicLate());
     }
@@ -46,11 +41,11 @@ public class MenuIcon : MonoBehaviour {
     }
 
     private void Update() {
-        if (Input.GetKeyDown("d")) { PlayerPrefSetter(DEBUG_KEY, debugSR); }
-        else if (Input.GetKeyDown("h")) { PlayerPrefSetter(HINTS_KEY, hintsSR); }
-        else if (Input.GetKeyDown("s")) { PlayerPrefSetter(SOUNDS_KEY, soundsSR); }
-        else if (Input.GetKeyDown("m")) { PlayerPrefSetter(MUSIC_KEY, musicSR); }
-        else if (Input.GetKeyDown("b")) { PlayerPrefSetter(BUTTON_KEY, buttonsSR); }
+        if (Input.GetKeyDown("d")) { PlayerPrefSetter(scripts.DEBUG_KEY, debugSR); }
+        else if (Input.GetKeyDown("h")) { PlayerPrefSetter(scripts.HINTS_KEY, hintsSR); }
+        else if (Input.GetKeyDown("s")) { PlayerPrefSetter(scripts.SOUNDS_KEY, soundsSR); }
+        else if (Input.GetKeyDown("m")) { PlayerPrefSetter(scripts.MUSIC_KEY, musicSR); }
+        else if (Input.GetKeyDown("b")) { PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR); }
     }
     // toggle player preferences based on the keys pressed
 
@@ -86,21 +81,8 @@ public class MenuIcon : MonoBehaviour {
     private void TurnOn(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = Color.white;
         // make the icon white
-        switch (key) {
-            case DEBUG_KEY:
-                break;
-            case HINTS_KEY:
-                break;
-            case SOUNDS_KEY:
-                sfxPlayer.volume = 1f;
-                break;
-            case MUSIC_KEY:
-                musicPlayer.volume = 0.5f;
-                break;
-            case BUTTON_KEY:
-                break;
-            // do the correct action
-        }
+        if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 1f; }
+        else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0.5f; }
     }
 
     /// <summary>
@@ -109,20 +91,7 @@ public class MenuIcon : MonoBehaviour {
     private void TurnOff(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = gray;
         // make the icon gray
-        switch (key) {
-            case DEBUG_KEY:
-                break;
-            case HINTS_KEY:
-                break;
-            case SOUNDS_KEY:
-                sfxPlayer.volume = 0f;
-                break;
-            case MUSIC_KEY:
-                musicPlayer.volume = 0f;
-                break;
-            case BUTTON_KEY:
-                break;
-            // do the correct action
-        }
+        if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 0f; }
+        else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0f; }
     }
 }

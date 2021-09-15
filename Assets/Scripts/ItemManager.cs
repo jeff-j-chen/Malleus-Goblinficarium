@@ -173,11 +173,7 @@ public class ItemManager : MonoBehaviour {
         }
         else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) {
             // if pressing return or enter
-            if (scripts.turnManager != null && !scripts.turnManager.isMoving && !isCharSelect) {
-                // if not moving and in game
-                highlightedItem.GetComponent<Item>().Use();
-                // use the item
-            }
+            UseCurrentItem();
         }
         else if (Input.GetKeyDown(KeyCode.N)) {
             CreateItem("common");
@@ -187,6 +183,16 @@ public class ItemManager : MonoBehaviour {
     // kept in individual functions so that they may be called by buttons
     public void SelectLeft() { Select(curList, col - 1, false); }
     public void SelectRight() { Select(curList, col + 1, false); }
+    public void UseCurrentItem() { 
+        if (scripts.turnManager != null && !scripts.turnManager.isMoving && !isCharSelect) {
+            // if not moving and in game
+            highlightedItem.GetComponent<Item>().Use();
+            // use the item
+        }
+    }
+    public void DropCurrentItem() { 
+        highlightedItem.GetComponent<Item>().DropItem();
+    }
 
     /// <summary>
     /// Give the player their starting items, based on chosen class.

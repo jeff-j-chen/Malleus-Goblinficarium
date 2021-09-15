@@ -88,26 +88,10 @@ public class Player : MonoBehaviour {
         if (!(scripts.tutorial != null && targetIndex == 7)) { 
             // lock tutorial to attacking face once its targeted
             if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f && !scripts.turnManager.isMoving)) {
-                // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
-                // set the available targets to make sure the player can do that
-                if (targetIndex < Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "player"), 0, 7)) {
-                    // if player can target there
-                    if (hintTimer > 0.05f) { hintTimer += 0.1f; }
-                    // if there is still time left on the hint timer (for targeting face or targeting wounded body part)
-                    targetIndex++;
-                    // increment target index
-                    scripts.turnManager.SetTargetOf("player");
-                    // and set target based off the new target index
-                    if (scripts.tutorial != null && targetIndex == 7) { scripts.tutorial.Increment(); }
-                }
+                MoveTargetDown();
             }
             else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
-                // pretty much the same as above
-                if (targetIndex > 0) {  
-                    if (hintTimer > 0.05f) { hintTimer += 0.1f; }
-                    targetIndex--;
-                    scripts.turnManager.SetTargetOf("player");
-                }
+                MoveTargetUp();
             }
         }
         if (Input.GetKeyDown(KeyCode.R) && !isDead && !scripts.turnManager.isMoving && scripts.tutorial == null) {
@@ -155,6 +139,30 @@ public class Player : MonoBehaviour {
         }
     }
 
+    public void MoveTargetDown() { 
+        // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
+        // set the available targets to make sure the player can do that
+        if (targetIndex < Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "player"), 0, 7)) {
+            // if player can target there
+            if (hintTimer > 0.05f) { hintTimer += 0.1f; }
+            // if there is still time left on the hint timer (for targeting face or targeting wounded body part)
+            targetIndex++;
+            // increment target index
+            scripts.turnManager.SetTargetOf("player");
+            // and set target based off the new target index
+            if (scripts.tutorial != null && targetIndex == 7) { scripts.tutorial.Increment(); }
+        }
+    }
+
+    public void MoveTargetUp() {
+        // pretty much the same as above
+        if (targetIndex > 0) {  
+            if (hintTimer > 0.05f) { hintTimer += 0.1f; }
+            targetIndex--;
+            scripts.turnManager.SetTargetOf("player");
+        }
+    }
+
     /// <summary>
     /// Use the player's weapon, attacking the enemy.
     /// </summary>
@@ -181,12 +189,12 @@ public class Player : MonoBehaviour {
                 scripts.turnManager.RoundOne();
                 // begin the round
             }
-            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString("hints") == "on" && scripts.enemy.enemyName.text != "Devil" && scripts.enemy.enemyName.text != "Lich" && !scripts.itemManager.PlayerHasWeapon("maul")) {
+            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString(scripts.HINTS_KEY) == "on" && scripts.enemy.enemyName.text != "Devil" && scripts.enemy.enemyName.text != "Lich" && !scripts.itemManager.PlayerHasWeapon("maul")) {
                 // if player wants hints, can aim for the face, but is not doing so, and doesn't have a maul
                 coroutine = StartCoroutine(HintFace());
                 // hint the player
             }
-            else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString("hints") == "on") {
+            else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString(scripts.HINTS_KEY) == "on") {
                 // if body part is already wounded
                 coroutine = StartCoroutine(HintTargetingWounded());
                 // hint the player

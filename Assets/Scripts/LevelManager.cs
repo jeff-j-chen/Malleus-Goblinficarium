@@ -43,7 +43,7 @@ public class LevelManager : MonoBehaviour {
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
-        levelText.gameObject.SetActive(PlayerPrefs.GetString("debug") == "on");
+        levelText.gameObject.SetActive(PlayerPrefs.GetString(scripts.DEBUG_KEY) == "on");
         // show the level text only if debug is on
         level = Save.game.resumeLevel;
         sub = Save.game.resumeSub;

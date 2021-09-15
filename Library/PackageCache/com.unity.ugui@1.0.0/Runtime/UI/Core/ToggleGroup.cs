@@ -129,7 +129,7 @@ namespace UnityEngine.UI
         /// <returns>Are and of the toggles on?</returns>
         public bool AnyTogglesOn()
         {
-            return m_Toggles.Find(x => x.isOn) is not null;
+            return m_Toggles.Find(x => x.isOn) != null;
         }
 
         /// <summary>

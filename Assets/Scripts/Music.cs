@@ -19,7 +19,7 @@ public class Music : MonoBehaviour {
         SetUpSingleton();
         audioSource = GetComponent<AudioSource>();
         scripts = FindObjectOfType<Scripts>();
-        shouldPlayMusic = PlayerPrefs.GetString("music") == "on" ? true : false;
+        shouldPlayMusic = PlayerPrefs.GetString(scripts.MUSIC_KEY) == "on";
         audioSource.volume = shouldPlayMusic ? 0.4f : 0f;
     }
     
@@ -41,7 +41,7 @@ public class Music : MonoBehaviour {
     /// Fade the volume out, then back in.
     /// </summary>
     public void FadeVolume() { 
-        shouldPlayMusic = PlayerPrefs.GetString("music") == "on" ? true : false;
+        shouldPlayMusic = PlayerPrefs.GetString(scripts.MUSIC_KEY) == "on";
         if (shouldPlayMusic) { 
             audioSource.volume = 0.5f;
             StartCoroutine(FadeVolumeCoro()); 
@@ -52,7 +52,7 @@ public class Music : MonoBehaviour {
     /// Fade the volume out, change the track, and fade back in.
     /// </summary>
     public void FadeVolume(String pieceName) { 
-        shouldPlayMusic = PlayerPrefs.GetString("music") == "on" ? true : false;
+        shouldPlayMusic = PlayerPrefs.GetString(scripts.MUSIC_KEY) == "on";
         if (shouldPlayMusic) { 
             audioSource.volume = 0.5f;
             StartCoroutine(FadeVolumeCoro(pieceName)); 

@@ -64,20 +64,23 @@ public class Item : MonoBehaviour {
             }
         }
         if (Input.GetMouseButtonDown(1)) {
-            // print("right clicked, does player have kapala? " + scripts.itemManager.PlayerHas("kapala"));
-            // right click
-            if (scripts.itemManager.highlightedItem == gameObject) {
-                // if highlighted
-                if (itemType != "weapon" && !scripts.itemManager.floorItems.Contains(gameObject)) {
-                    // if the item is not weapon and not on the floor
-                    if (scripts.levelManager.sub == 4 || Save.game.enemyIsDead || scripts.enemy.enemyName.text == "Tombstone" || scripts.itemManager.PlayerHas("kapala") || (scripts.tutorial != null && modifier == "nothing" && scripts.tutorial.curIndex == 2 && !scripts.tutorial.isAnimating)) {
-                        // only allow dropping of items if player is trading, enemy is dead, on a tombstone, are offering to kapala, or are dropping scroll in tutorial
-                        Remove(true);
-                    }
+            DropItem();
+        }
+    }
+
+    public void DropItem() { 
+        // right click
+        if (scripts.itemManager.highlightedItem == gameObject) {
+            // if highlighted
+            if (itemType != "weapon" && !scripts.itemManager.floorItems.Contains(gameObject)) {
+                // if the item is not weapon and not on the floor
+                if (scripts.levelManager.sub == 4 || Save.game.enemyIsDead || scripts.enemy.enemyName.text == "Tombstone" || scripts.itemManager.PlayerHas("kapala") || (scripts.tutorial != null && modifier == "nothing" && scripts.tutorial.curIndex == 2 && !scripts.tutorial.isAnimating)) {
+                    // only allow dropping of items if player is trading, enemy is dead, on a tombstone, are offering to kapala, or are dropping scroll in tutorial
+                    Remove(true);
                 }
             }
-            // could combine these but it's beyond hideous and unreadable
         }
+        // could combine these but it's beyond hideous and unreadable
     }
 
     /// <summary>

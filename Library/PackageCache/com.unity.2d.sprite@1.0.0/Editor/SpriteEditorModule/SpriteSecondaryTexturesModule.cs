@@ -42,7 +42,7 @@ namespace UnityEditor._2D.Sprite.Editor
 
 
                 // Remove invalid entries.
-                var validEntries = secondaryTextureList.FindAll(x => (x.name is not null && x.name != "" && x.texture is not null));
+                var validEntries = secondaryTextureList.FindAll(x => (x.name != null && x.name != "" && x.texture != null));
                 if (validEntries.Count < secondaryTextureList.Count)
                     Debug.Log(Styles.invalidEntriesWarning);
 
@@ -55,7 +55,7 @@ namespace UnityEditor._2D.Sprite.Editor
         public override bool CanBeActivated()
         {
             var dataProvider = spriteEditor.GetDataProvider<ISpriteEditorDataProvider>();
-            return dataProvider is not null && dataProvider.spriteImportMode != SpriteImportMode.None;
+            return dataProvider != null && dataProvider.spriteImportMode != SpriteImportMode.None;
         }
 
         public override void DoPostGUI()
@@ -147,7 +147,7 @@ namespace UnityEditor._2D.Sprite.Editor
             int width = 0, height = 0;
 
             var textureDataProvider = spriteEditor.GetDataProvider<ITextureDataProvider>();
-            if (textureDataProvider is not null)
+            if (textureDataProvider != null)
             {
                 previewTexture = textureDataProvider.previewTexture;
                 textureDataProvider.GetTextureActualWidthAndHeight(out width, out height);
@@ -156,7 +156,7 @@ namespace UnityEditor._2D.Sprite.Editor
             if (m_ReorderableList.index >= 0 && m_ReorderableList.index < secondaryTextureList.Count)
                 previewTexture = secondaryTextureList[m_ReorderableList.index].texture;
 
-            if (previewTexture is not null)
+            if (previewTexture != null)
                 spriteEditor.SetPreviewTexture(previewTexture, width, height);
         }
 
@@ -181,7 +181,7 @@ namespace UnityEditor._2D.Sprite.Editor
             dataModified = EditorGUI.EndChangeCheck();
 
             // Suggested names
-            if (m_SuggestedNames is not null)
+            if (m_SuggestedNames != null)
             {
                 var popupRect = new Rect(r.x + r.width, r.y, Styles.textFieldDropDownWidth, EditorGUIUtility.singleLineHeight);
                 EditorGUI.BeginChangeCheck();
@@ -241,7 +241,7 @@ namespace UnityEditor._2D.Sprite.Editor
         void DisplayMainTexture()
         {
             ITextureDataProvider textureDataProvider = spriteEditor.GetDataProvider<ITextureDataProvider>();
-            if (textureDataProvider is not null && textureDataProvider.previewTexture is not null)
+            if (textureDataProvider != null && textureDataProvider.previewTexture != null)
             {
                 Texture2D mainTexture = textureDataProvider.previewTexture;
                 int width = 0, height = 0;

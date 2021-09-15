@@ -437,7 +437,7 @@ namespace UnityEngine.UI
             #endif
 
             if (m_CaptionImage)
-                m_CaptionImage.enabled = (m_CaptionImage.sprite is not null);
+                m_CaptionImage.enabled = (m_CaptionImage.sprite != null);
 
             if (m_Template)
                 m_Template.gameObject.SetActive(false);
@@ -469,7 +469,7 @@ namespace UnityEngine.UI
             //Destroy dropdown and blocker in case user deactivates the dropdown when they click an option (case 935649)
             ImmediateDestroyDropdownList();
 
-            if (m_Blocker is not null)
+            if (m_Blocker != null)
                 DestroyBlocker(m_Blocker);
             m_Blocker = null;
 
@@ -491,7 +491,7 @@ namespace UnityEngine.UI
 
             if (m_CaptionText)
             {
-                if (data is not null && data.text is not null)
+                if (data != null && data.text != null)
                     m_CaptionText.text = data.text;
                 else
                     m_CaptionText.text = "";
@@ -499,11 +499,11 @@ namespace UnityEngine.UI
 
             if (m_CaptionImage)
             {
-                if (data is not null)
+                if (data != null)
                     m_CaptionImage.sprite = data.image;
                 else
                     m_CaptionImage.sprite = null;
-                m_CaptionImage.enabled = (m_CaptionImage.sprite is not null);
+                m_CaptionImage.enabled = (m_CaptionImage.sprite != null);
             }
         }
 
@@ -618,12 +618,12 @@ namespace UnityEngine.UI
                 validTemplate = false;
                 Debug.LogError("The dropdown template is not valid. The child GameObject with a Toggle component (the item) must have a RectTransform on its parent.", template);
             }
-            else if (itemText is not null && !itemText.transform.IsChildOf(itemToggle.transform))
+            else if (itemText != null && !itemText.transform.IsChildOf(itemToggle.transform))
             {
                 validTemplate = false;
                 Debug.LogError("The dropdown template is not valid. The Item Text must be on the item GameObject or children of it.", template);
             }
-            else if (itemImage is not null && !itemImage.transform.IsChildOf(itemToggle.transform))
+            else if (itemImage != null && !itemImage.transform.IsChildOf(itemToggle.transform))
             {
                 validTemplate = false;
                 Debug.LogError("The dropdown template is not valid. The Item Image must be on the item GameObject or children of it.", template);
@@ -644,10 +644,10 @@ namespace UnityEngine.UI
             // Find the Canvas that this dropdown is a part of
             Canvas parentCanvas = null;
             Transform parentTransform = m_Template.parent;
-            while (parentTransform is not null)
+            while (parentTransform != null)
             {
                 parentCanvas = parentTransform.GetComponent<Canvas>();
-                if (parentCanvas is not null)
+                if (parentCanvas != null)
                     break;
 
                 parentTransform = parentTransform.parent;
@@ -658,7 +658,7 @@ namespace UnityEngine.UI
             popupCanvas.sortingOrder = 30000;
 
             // If we have a parent canvas, apply the same raycasters as the parent for consistency.
-            if (parentCanvas is not null)
+            if (parentCanvas != null)
             {
                 Component[] components = parentCanvas.GetComponents<BaseRaycaster>();
                 for (int i = 0; i < components.Length; i++)
@@ -731,7 +731,7 @@ namespace UnityEngine.UI
         /// </summary>
         public void Show()
         {
-            if (!IsActive() || !IsInteractable() || m_Dropdown is not null)
+            if (!IsActive() || !IsInteractable() || m_Dropdown != null)
                 return;
 
             // Get root Canvas.
@@ -813,7 +813,7 @@ namespace UnityEngine.UI
                     item.toggle.Select();
 
                 // Automatically set up explicit navigation
-                if (prev is not null)
+                if (prev != null)
                 {
                     Navigation prevNav = prev.navigation;
                     Navigation toggleNav = item.toggle.navigation;
@@ -915,17 +915,17 @@ namespace UnityEngine.UI
             // Find the Canvas that this dropdown is a part of
             Canvas parentCanvas = null;
             Transform parentTransform = m_Template.parent;
-            while (parentTransform is not null)
+            while (parentTransform != null)
             {
                 parentCanvas = parentTransform.GetComponent<Canvas>();
-                if (parentCanvas is not null)
+                if (parentCanvas != null)
                     break;
 
                 parentTransform = parentTransform.parent;
             }
 
             // If we have a parent canvas, apply the same raycasters as the parent for consistency.
-            if (parentCanvas is not null)
+            if (parentCanvas != null)
             {
                 Component[] components = parentCanvas.GetComponents<BaseRaycaster>();
                 for (int i = 0; i < components.Length; i++)
@@ -1025,9 +1025,9 @@ namespace UnityEngine.UI
             item.rectTransform.SetParent(itemTemplate.rectTransform.parent, false);
 
             item.gameObject.SetActive(true);
-            item.gameObject.name = "Item " + items.Count + (data.text is not null ? ": " + data.text : "");
+            item.gameObject.name = "Item " + items.Count + (data.text != null ? ": " + data.text : "");
 
-            if (item.toggle is not null)
+            if (item.toggle != null)
             {
                 item.toggle.isOn = false;
             }
@@ -1038,7 +1038,7 @@ namespace UnityEngine.UI
             if (item.image)
             {
                 item.image.sprite = data.image;
-                item.image.enabled = (item.image.sprite is not null);
+                item.image.enabled = (item.image.sprite != null);
             }
 
             items.Add(item);
@@ -1075,7 +1075,7 @@ namespace UnityEngine.UI
         /// </summary>
         public void Hide()
         {
-            if (m_Dropdown is not null)
+            if (m_Dropdown != null)
             {
                 AlphaFadeList(m_AlphaFadeSpeed, 0f);
 
@@ -1083,7 +1083,7 @@ namespace UnityEngine.UI
                 if (IsActive())
                     StartCoroutine(DelayedDestroyDropdownList(m_AlphaFadeSpeed));
             }
-            if (m_Blocker is not null)
+            if (m_Blocker != null)
                 DestroyBlocker(m_Blocker);
             m_Blocker = null;
             Select();
@@ -1100,11 +1100,11 @@ namespace UnityEngine.UI
             var itemsCount = m_Items.Count;
             for (int i = 0; i < itemsCount; i++)
             {
-                if (m_Items[i] is not null)
+                if (m_Items[i] != null)
                     DestroyItem(m_Items[i]);
             }
             m_Items.Clear();
-            if (m_Dropdown is not null)
+            if (m_Dropdown != null)
                 DestroyDropdownList(m_Dropdown);
             m_Dropdown = null;
         }

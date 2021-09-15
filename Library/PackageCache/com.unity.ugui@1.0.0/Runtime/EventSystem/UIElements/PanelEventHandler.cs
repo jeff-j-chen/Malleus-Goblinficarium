@@ -51,7 +51,7 @@ namespace UnityEngine.UIElements
 
         void RegisterCallbacks()
         {
-            if (m_Panel is not null)
+            if (m_Panel != null)
             {
                 m_Panel.destroyed += OnPanelDestroyed;
                 m_Panel.visualTree.RegisterCallback<FocusEvent>(OnElementFocus, TrickleDown.TrickleDown);
@@ -61,7 +61,7 @@ namespace UnityEngine.UIElements
 
         void UnregisterCallbacks()
         {
-            if (m_Panel is not null)
+            if (m_Panel != null)
             {
                 m_Panel.destroyed -= OnPanelDestroyed;
                 m_Panel.visualTree.UnregisterCallback<FocusEvent>(OnElementFocus, TrickleDown.TrickleDown);
@@ -76,7 +76,7 @@ namespace UnityEngine.UIElements
 
         void OnElementFocus(FocusEvent e)
         {
-            if (!m_Selecting && eventSystem is not null)
+            if (!m_Selecting && eventSystem != null)
                 eventSystem.SetSelectedGameObject(selectableGameObject);
         }
 
@@ -134,7 +134,7 @@ namespace UnityEngine.UIElements
             if (m_Panel == null || !ReadPointerData(m_PointerEvent, eventData, false))
                 return;
 
-            if (eventSystem is not null)
+            if (eventSystem != null)
                 eventSystem.SetSelectedGameObject(selectableGameObject);
 
             using (var e = PointerDownEvent.GetPooled(m_PointerEvent))
@@ -214,7 +214,7 @@ namespace UnityEngine.UIElements
 
         void Update()
         {
-            if (m_Panel is not null && eventSystem is not null && eventSystem.currentSelectedGameObject == selectableGameObject)
+            if (m_Panel != null && eventSystem != null && eventSystem.currentSelectedGameObject == selectableGameObject)
                 ProcessImguiEvents(true);
         }
 
