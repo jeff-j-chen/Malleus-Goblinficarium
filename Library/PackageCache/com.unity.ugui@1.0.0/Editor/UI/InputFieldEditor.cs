@@ -81,7 +81,7 @@ namespace UnityEditor.UI
 
             EditorGUILayout.PropertyField(m_TextComponent);
 
-            if (m_TextComponent != null && m_TextComponent.objectReferenceValue != null)
+            if (m_TextComponent is not null && m_TextComponent.objectReferenceValue is not null)
             {
                 Text text = m_TextComponent.objectReferenceValue as Text;
                 if (text.supportRichText)

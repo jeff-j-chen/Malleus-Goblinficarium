@@ -209,7 +209,7 @@ public class TurnManager : MonoBehaviour {
                         else {
                             // set the player's attack indicator + description based on the target index
                             if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
-                            // add an asteriks if already injured
+                            // add an asterisks if already injured
                             else { scripts.player.target.text = targetArr[scripts.player.targetIndex]; }
 
                             scripts.player.targetInfo.text = scripts.enemy.enemyName.text == "Lich" 
@@ -438,6 +438,9 @@ public class TurnManager : MonoBehaviour {
             DetermineMove(true);
             yield return scripts.delays[0.35f];
             isMoving = false;
+            SetTargetOf("player");
+            SetTargetOf("enemy");
+            // set the targets after isMoving is set to false, allowing the asterisks to be added without bugs 
         }
         if (scripts.tutorial == null) { Save.SaveGame(); }
         Save.SavePersistent();

@@ -142,7 +142,7 @@ public class StatSummoner : MonoBehaviour {
         for (int i = 0; i < 4; i++) {
             // 1 for every stat
             GameObject spawnedPlusButton = SpawnButton(plus, new Vector2(buttonXCoord, yCoords[i] - 0.01f));
-            // - 0.01 is necessary beacuse otherwise it has a weird visual glitch
+            // - 0.01 is necessary because otherwise it has a weird visual glitch
             GameObject spawnedMinusButton = SpawnButton(minus, new Vector2(buttonXCoord + buttonXOffset, yCoords[i]));
             // create the buttons
             spawnedPlusButton.GetComponent<StaminaButton>().stat = scripts.colors.colorNameArr[i];

@@ -157,7 +157,7 @@ namespace UnityEditor.UI
                         if (GUI.Button(buttonRect, "Auto Generate Animation", EditorStyles.miniButton))
                         {
                             var controller = GenerateSelectableAnimatorContoller((target as Selectable).animationTriggers, target as Selectable);
-                            if (controller != null)
+                            if (controller is not null)
                             {
                                 if (animator == null)
                                     animator = (target as Selectable).gameObject.AddComponent<Animator>();

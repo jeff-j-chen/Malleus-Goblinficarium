@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using UnityEngine;
 public class MenuIcon : MonoBehaviour {
-    [SerializeField] GameObject debug;
-    [SerializeField] GameObject hints;
-    [SerializeField] GameObject sound;
-    [SerializeField] GameObject music;
+    [SerializeField] private GameObject debug;
+    [SerializeField] private GameObject hints;
+    [SerializeField] private GameObject sound;
+    [SerializeField] private GameObject music;
+    [SerializeField] private GameObject buttons;
     [SerializeField] private AudioSource musicPlayer;
     [SerializeField] private AudioSource sfxPlayer;
     public Color gray;
@@ -12,10 +13,12 @@ public class MenuIcon : MonoBehaviour {
     private const string HINTS_KEY = "hints";
     private const string SOUNDS_KEY = "sounds";
     private const string MUSIC_KEY = "music";
+    private const string BUTTON_KEY = "button";
     private SpriteRenderer debugSR;
     private SpriteRenderer soundsSR;
     private SpriteRenderer hintsSR;
     private SpriteRenderer musicSR;
+    private SpriteRenderer buttonsSR;
     private Scripts scripts;
     
     private void Start() {
@@ -24,6 +27,7 @@ public class MenuIcon : MonoBehaviour {
         hintsSR = hints.GetComponent<SpriteRenderer>();
         soundsSR = sound.GetComponent<SpriteRenderer>();
         musicSR = music.GetComponent<SpriteRenderer>();
+        buttonsSR = buttons.GetComponent<SpriteRenderer>();
         ColorUtility.TryParseHtmlString("#404040", out gray);
         // get the necessary components and colors
         // assign var gray to the html string parsed
@@ -31,6 +35,7 @@ public class MenuIcon : MonoBehaviour {
         PlayerPrefSetter(HINTS_KEY, hintsSR, false);
         PlayerPrefSetter(SOUNDS_KEY, soundsSR, false);
         PlayerPrefSetter(MUSIC_KEY, musicSR, false);
+        PlayerPrefSetter(MUSIC_KEY, buttonsSR, false);
         // set the default preferences
         StartCoroutine(FindMusicLate());
     }
@@ -45,6 +50,7 @@ public class MenuIcon : MonoBehaviour {
         else if (Input.GetKeyDown("h")) { PlayerPrefSetter(HINTS_KEY, hintsSR); }
         else if (Input.GetKeyDown("s")) { PlayerPrefSetter(SOUNDS_KEY, soundsSR); }
         else if (Input.GetKeyDown("m")) { PlayerPrefSetter(MUSIC_KEY, musicSR); }
+        else if (Input.GetKeyDown("b")) { PlayerPrefSetter(BUTTON_KEY, buttonsSR); }
     }
     // toggle player preferences based on the keys pressed
 
@@ -91,6 +97,8 @@ public class MenuIcon : MonoBehaviour {
             case MUSIC_KEY:
                 musicPlayer.volume = 0.5f;
                 break;
+            case BUTTON_KEY:
+                break;
             // do the correct action
         }
     }
@@ -111,6 +119,8 @@ public class MenuIcon : MonoBehaviour {
                 break;
             case MUSIC_KEY:
                 musicPlayer.volume = 0f;
+                break;
+            case BUTTON_KEY:
                 break;
             // do the correct action
         }

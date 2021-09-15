@@ -56,7 +56,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public virtual int depth
         {
-            get { return (eventCamera != null) ? (int)eventCamera.depth : 0xFFFFFF; }
+            get { return (eventCamera is not null) ? (int)eventCamera.depth : 0xFFFFFF; }
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public int finalEventMask
         {
-            get { return (eventCamera != null) ? eventCamera.cullingMask & m_EventMask : kNoEventMaskSet; }
+            get { return (eventCamera is not null) ? eventCamera.cullingMask & m_EventMask : kNoEventMaskSet; }
         }
 
         /// <summary>

@@ -74,13 +74,13 @@ namespace UnityEngine.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (graphic != null)
+            if (graphic is not null)
                 graphic.SetVerticesDirty();
         }
 
         protected override void OnDisable()
         {
-            if (graphic != null)
+            if (graphic is not null)
                 graphic.SetVerticesDirty();
             base.OnDisable();
         }
@@ -90,7 +90,7 @@ namespace UnityEngine.UI
         /// </summary>
         protected override void OnDidApplyAnimationProperties()
         {
-            if (graphic != null)
+            if (graphic is not null)
                 graphic.SetVerticesDirty();
             base.OnDidApplyAnimationProperties();
         }
@@ -99,7 +99,7 @@ namespace UnityEngine.UI
         protected override void OnValidate()
         {
             base.OnValidate();
-            if (graphic != null)
+            if (graphic is not null)
                 graphic.SetVerticesDirty();
         }
 

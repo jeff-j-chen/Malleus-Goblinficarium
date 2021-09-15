@@ -22,7 +22,7 @@ namespace UnityEngine.UI
                     continue;
 
                 var toNotify = components[i] as IClippable;
-                if (toNotify != null)
+                if (toNotify is not null)
                     toNotify.RecalculateClipping();
             }
             ListPool<Component>.Release(components);
@@ -42,7 +42,7 @@ namespace UnityEngine.UI
                     continue;
 
                 var toNotify = components[i] as IMaskable;
-                if (toNotify != null)
+                if (toNotify is not null)
                     toNotify.RecalculateMasking();
             }
             ListPool<Component>.Release(components);
@@ -69,7 +69,7 @@ namespace UnityEngine.UI
             }
             ListPool<Canvas>.Release(canvasList);
 
-            return canvas != null ? canvas.transform : null;
+            return canvas is not null ? canvas.transform : null;
         }
 
         /// <summary>
@@ -86,12 +86,12 @@ namespace UnityEngine.UI
 
             var t = transform.parent;
             var components = ListPool<Mask>.Get();
-            while (t != null)
+            while (t is not null)
             {
                 t.GetComponents<Mask>(components);
                 for (var i = 0; i < components.Count; ++i)
                 {
-                    if (components[i] != null && components[i].MaskEnabled() && components[i].graphic.IsActive())
+                    if (components[i] is not null && components[i].MaskEnabled() && components[i].graphic.IsActive())
                     {
                         ++depth;
                         break;
@@ -121,7 +121,7 @@ namespace UnityEngine.UI
             if (father == child)
                 return true;
 
-            while (child.parent != null)
+            while (child.parent is not null)
             {
                 if (child.parent == father)
                     return true;
