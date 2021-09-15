@@ -163,12 +163,12 @@ public class ItemManager : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow) && SceneManager.GetActiveScene().name != "CharSelect") {
             // if pressing left and not in the character select screen
-            Select(curList, col - 1, false);
+            SelectLeft();
             // move the selection left
         }
         else if (Input.GetKeyDown(KeyCode.RightArrow) && SceneManager.GetActiveScene().name != "CharSelect") {
             // if pressing right and not in the character select screen
-            Select(curList, col + 1, false);
+            SelectRight();
             // move the selection to the right 
         }
         else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) {
@@ -182,8 +182,11 @@ public class ItemManager : MonoBehaviour {
         else if (Input.GetKeyDown(KeyCode.N)) {
             CreateItem("common");
         }
-    } 
+    }
 
+    // kept in individual functions so that they may be called by buttons
+    public void SelectLeft() { Select(curList, col - 1, false); }
+    public void SelectRight() { Select(curList, col + 1, false); }
 
     /// <summary>
     /// Give the player their starting items, based on chosen class.

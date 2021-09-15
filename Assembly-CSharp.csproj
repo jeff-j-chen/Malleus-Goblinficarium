@@ -72,6 +72,7 @@
      <Compile Include="Assets\Scripts\PersistentData.cs" />
      <Compile Include="Assets\Scripts\DiceSummoner.cs" />
      <Compile Include="Assets\Scripts\HighlightCalculator.cs" />
+     <Compile Include="Assets\Scripts\MobileButton.cs" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap.shader" />
