@@ -28,15 +28,15 @@ ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/An
 activity#com.unity3d.player.UnityPlayerActivity
 ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:5-11:16
 	android:screenOrientation
-		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:111-155
+		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:111-154
 	android:launchMode
-		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:156-187
+		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:155-186
 	android:hardwareAccelerated
-		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:405-440
+		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:404-439
 	android:resizeableActivity
-		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:370-404
+		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:369-403
 	android:configChanges
-		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:188-369
+		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:187-368
 	android:theme
 		ADDED from /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:69-110
 	android:name

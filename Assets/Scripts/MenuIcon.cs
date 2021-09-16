@@ -31,6 +31,9 @@ public class MenuIcon : MonoBehaviour {
         PlayerPrefSetter(scripts.SOUNDS_KEY, soundsSR, false);
         PlayerPrefSetter(scripts.MUSIC_KEY, musicSR, false);
         PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR, false);
+        if (SystemInfo.deviceType == DeviceType.Handheld) {
+            PlayerPrefs.SetString(scripts.BUTTONS_KEY, "on");
+        }
         // set the default preferences
         StartCoroutine(FindMusicLate());
     }

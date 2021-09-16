@@ -191,13 +191,13 @@ namespace UnityEngine.EventSystems
     ///
     ///     public void OnDrag(PointerEventData data)
     ///     {
-    ///         if (m_DraggingIcon != null)
+    ///         if (m_DraggingIcon is not null)
     ///             SetDraggedPosition(data);
     ///     }
     ///
     ///     private void SetDraggedPosition(PointerEventData data)
     ///     {
-    ///         if (dragOnSurfaces && data.pointerEnter != null && data.pointerEnter.transform as RectTransform != null)
+    ///         if (dragOnSurfaces && data.pointerEnter is not null && data.pointerEnter.transform as RectTransform is not null)
     ///             m_DraggingPlane = data.pointerEnter.transform as RectTransform;
     ///
     ///         var rt = m_DraggingIcon.GetComponent<RectTransform>();
@@ -211,7 +211,7 @@ namespace UnityEngine.EventSystems
     ///
     ///     public void OnEndDrag(PointerEventData eventData)
     ///     {
-    ///         if (m_DraggingIcon != null)
+    ///         if (m_DraggingIcon is not null)
     ///             Destroy(m_DraggingIcon);
     ///     }
     ///
@@ -220,11 +220,11 @@ namespace UnityEngine.EventSystems
     ///         if (go == null) return null;
     ///         var comp = go.GetComponent<T>();
     ///
-    ///         if (comp != null)
+    ///         if (comp is not null)
     ///             return comp;
     ///
     ///         Transform t = go.transform.parent;
-    ///         while (t != null && comp == null)
+    ///         while (t is not null && comp == null)
     ///         {
     ///             comp = t.gameObject.GetComponent<T>();
     ///             t = t.parent;
@@ -271,7 +271,7 @@ namespace UnityEngine.EventSystems
     /// {
     ///     public void OnDrop(PointerEventData data)
     ///     {
-    ///         if (data.pointerDrag != null)
+    ///         if (data.pointerDrag is not null)
     ///         {
     ///             Debug.Log ("Dropped object was: "  + data.pointerDrag);
     ///         }

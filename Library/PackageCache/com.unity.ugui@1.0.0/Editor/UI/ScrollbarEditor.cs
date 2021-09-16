@@ -59,7 +59,7 @@ namespace UnityEditor.UI
                 m_HandleRect.objectReferenceValue = newRectTransform;
             }
 
-            if (m_HandleRect.objectReferenceValue != null)
+            if (m_HandleRect.objectReferenceValue is not null)
             {
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(m_Direction);
@@ -83,9 +83,9 @@ namespace UnityEditor.UI
                     Scrollbar scrollbar = obj as Scrollbar;
                     Scrollbar.Direction dir = scrollbar.direction;
                     if (dir == Scrollbar.Direction.LeftToRight || dir == Scrollbar.Direction.RightToLeft)
-                        warning = (scrollbar.navigation.mode != Navigation.Mode.Automatic && scrollbar.navigation.mode != Navigation.Mode.Horizontal && (scrollbar.FindSelectableOnLeft() != null || scrollbar.FindSelectableOnRight() != null));
+                        warning = (scrollbar.navigation.mode != Navigation.Mode.Automatic && scrollbar.navigation.mode != Navigation.Mode.Horizontal && (scrollbar.FindSelectableOnLeft() is not null || scrollbar.FindSelectableOnRight() is not null));
                     else
-                        warning = (scrollbar.navigation.mode != Navigation.Mode.Automatic && scrollbar.navigation.mode != Navigation.Mode.Vertical && (scrollbar.FindSelectableOnDown() != null || scrollbar.FindSelectableOnUp() != null));
+                        warning = (scrollbar.navigation.mode != Navigation.Mode.Automatic && scrollbar.navigation.mode != Navigation.Mode.Vertical && (scrollbar.FindSelectableOnDown() is not null || scrollbar.FindSelectableOnUp() is not null));
                 }
 
                 if (warning)

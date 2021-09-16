@@ -11,6 +11,7 @@ public class CharacterSelector : MonoBehaviour {
     [SerializeField] private GameObject rightButton;
     [SerializeField] private TextMeshProUGUI quoteText;
     [SerializeField] private TextMeshProUGUI perkText;
+    [SerializeField] private GameObject bottomText;
     [SerializeField] public SimpleFadeIn simpleFadeIn;
     [SerializeField] public GameObject itemHider;
     private readonly string[] quotes = {
@@ -39,6 +40,7 @@ public class CharacterSelector : MonoBehaviour {
         selectionNum = 0;
         SetSelection(selectionNum);
         // select 0 and go to it
+        bottomText.SetActive(PlayerPrefs.GetString(scripts.BUTTONS_KEY) != "on");
         StartCoroutine(AllowFX());
     }
     
@@ -70,9 +72,13 @@ public class CharacterSelector : MonoBehaviour {
         // space toggles easy mode
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) { 
             // enter selects the character
-            if (Save.persistent.unlockedChars[selectionNum]) { StartCoroutine(LoadMenuScene()); }
+            Select();
             // but only if its already unlocked
         }
+    }
+
+    public void Select() {
+        if (Save.persistent.unlockedChars[selectionNum]) { StartCoroutine(LoadMenuScene()); }
     }
 
     /// <summary>
@@ -203,7 +209,7 @@ public class CharacterSelector : MonoBehaviour {
     /// <summary>
     /// Toggles easy mode and handles the hiding.
     /// </summary>
-    private void ToggleEasy() {
+    public void ToggleEasy() {
         if (!simpleFadeIn.lockChanges) {
             // don't allow toggle of easy if we are fading rn
             scripts.soundManager.PlayClip("click1");

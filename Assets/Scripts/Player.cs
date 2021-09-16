@@ -94,7 +94,13 @@ public class Player : MonoBehaviour {
                 MoveTargetUp();
             }
         }
-        if (Input.GetKeyDown(KeyCode.R) && !isDead && !scripts.turnManager.isMoving && scripts.tutorial == null) {
+        if (Input.GetKeyDown(KeyCode.R)) {
+            AttemptSuicide();
+        }
+    }
+    
+    public void AttemptSuicide() {
+        if (!isDead && !scripts.turnManager.isMoving && scripts.tutorial == null) {
             if (Save.game.enemyIsDead) {
                 // don't let player suicide when enemy is dead, because it is glitchy
                 scripts.turnManager.SetStatusText("you've killed him");
@@ -132,7 +138,6 @@ public class Player : MonoBehaviour {
                     scripts.tombstoneData.SetTombstoneData();
                     // allow player to retry
                     Save.persistent.deaths++;
-                    print($"deaths incremented! should now be {Save.persistent.deaths}");
                     Save.SavePersistent();
                 }
             }

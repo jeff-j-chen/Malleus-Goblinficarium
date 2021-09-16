@@ -13,6 +13,7 @@ public class Scripts : MonoBehaviour {
     public Tutorial tutorial;
     public BackToMenu backToMenu;
     public MenuButton menuButton;
+    public Statistics statistics;
     public TurnManager turnManager;
     public ItemManager itemManager;
     public DiceSummoner diceSummoner;
@@ -44,6 +45,7 @@ public class Scripts : MonoBehaviour {
         menuIcon = FindObjectOfType<MenuIcon>();
         backToMenu = FindObjectOfType<BackToMenu>();
         menuButton = FindObjectOfType<MenuButton>();
+        statistics = FindObjectOfType<Statistics>();
         turnManager = FindObjectOfType<TurnManager>();
         itemManager = FindObjectOfType<ItemManager>();
         diceSummoner = FindObjectOfType<DiceSummoner>();

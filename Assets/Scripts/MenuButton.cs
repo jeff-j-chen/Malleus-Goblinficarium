@@ -34,7 +34,7 @@ public class MenuButton : MonoBehaviour {
         // play sound clip
         switch (buttonName) {
             case "Continu":
-                // continu because the button is actuall continu + e, for some reason contiue has the e slightly off
+                // continu because the button is actually continu + e, for some reason continue has the e slightly off
                 if (Save.game.enemyNum is 0 or 1 or 2) { 
                     if (scripts.music.audioSource.clip.name != "LaBossa") { scripts.music.FadeVolume("LaBossa"); }
                 }

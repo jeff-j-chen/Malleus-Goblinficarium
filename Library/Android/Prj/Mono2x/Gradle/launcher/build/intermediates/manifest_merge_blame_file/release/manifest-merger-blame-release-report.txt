@@ -74,8 +74,8 @@
 42-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:31:13-44
 43            android:resizeableActivity="false"
 43-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:32:13-47
-44            android:screenOrientation="reverseLandscape"
-44-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:33:13-57
+44            android:screenOrientation="sensorLandscape"
+44-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:33:13-56
 45            android:theme="@style/UnityThemeSelector" >
 45-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:34:13-54
 46            <intent-filter>

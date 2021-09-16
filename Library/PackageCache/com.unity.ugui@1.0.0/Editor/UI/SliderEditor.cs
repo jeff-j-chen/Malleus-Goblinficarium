@@ -44,7 +44,7 @@ namespace UnityEditor.UI
             EditorGUILayout.PropertyField(m_FillRect);
             EditorGUILayout.PropertyField(m_HandleRect);
 
-            if (m_FillRect.objectReferenceValue != null || m_HandleRect.objectReferenceValue != null)
+            if (m_FillRect.objectReferenceValue is not null || m_HandleRect.objectReferenceValue is not null)
             {
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(m_Direction);
@@ -90,9 +90,9 @@ namespace UnityEditor.UI
                     Slider slider = obj as Slider;
                     Slider.Direction dir = slider.direction;
                     if (dir == Slider.Direction.LeftToRight || dir == Slider.Direction.RightToLeft)
-                        warning = (slider.navigation.mode != Navigation.Mode.Automatic && (slider.FindSelectableOnLeft() != null || slider.FindSelectableOnRight() != null));
+                        warning = (slider.navigation.mode != Navigation.Mode.Automatic && (slider.FindSelectableOnLeft() is not null || slider.FindSelectableOnRight() is not null));
                     else
-                        warning = (slider.navigation.mode != Navigation.Mode.Automatic && (slider.FindSelectableOnDown() != null || slider.FindSelectableOnUp() != null));
+                        warning = (slider.navigation.mode != Navigation.Mode.Automatic && (slider.FindSelectableOnDown() is not null || slider.FindSelectableOnUp() is not null));
                 }
 
                 if (warning)

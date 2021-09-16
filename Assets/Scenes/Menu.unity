@@ -188,6 +188,7 @@ MonoBehaviour:
   - {fileID: 200228153}
   - {fileID: 817555201}
   - {fileID: 5492780742323437078}
+  e: {fileID: 1807980358}
 --- !u!212 &19203710
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -254,7 +255,7 @@ GameObject:
   - component: {fileID: 95664043}
   - component: {fileID: 95664042}
   m_Layer: 0
-  m_Name: buttons
+  m_Name: button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -99,13 +99,13 @@ namespace UnityEditor.U2D.Sprites
             so.FindProperty("m_SpriteSheet.m_InternalID").longValue = m_InternalID;
 
             var sp = so.FindProperty("m_SpriteSheet");
-            if (spriteBone != null)
+            if (spriteBone is not null)
                 SpriteBoneDataTransfer.Apply(sp, spriteBone);
-            if (spriteOutline != null)
+            if (spriteOutline is not null)
                 SpriteOutlineDataTransfer.Apply(sp, spriteOutline);
-            if (spritePhysicsOutline != null)
+            if (spritePhysicsOutline is not null)
                 SpritePhysicsOutlineDataTransfer.Apply(sp, spritePhysicsOutline);
-            if (vertices != null)
+            if (vertices is not null)
                 SpriteMeshDataTransfer.Apply(sp, vertices, indices, edges);
         }
 
@@ -120,13 +120,13 @@ namespace UnityEditor.U2D.Sprites
             sp.FindPropertyRelative("m_SpriteID").stringValue = spriteID.ToString();
             sp.FindPropertyRelative("m_InternalID").longValue = m_InternalID;
 
-            if (spriteBone != null)
+            if (spriteBone is not null)
                 SpriteBoneDataTransfer.Apply(sp, spriteBone);
-            if (spriteOutline != null)
+            if (spriteOutline is not null)
                 SpriteOutlineDataTransfer.Apply(sp, spriteOutline);
-            if (spritePhysicsOutline != null)
+            if (spritePhysicsOutline is not null)
                 SpritePhysicsOutlineDataTransfer.Apply(sp, spritePhysicsOutline);
-            if (vertices != null)
+            if (vertices is not null)
                 SpriteMeshDataTransfer.Apply(sp, vertices, indices, edges);
         }
 

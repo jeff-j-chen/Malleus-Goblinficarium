@@ -3,8 +3,8 @@ using TMPro;
 
 public class MobileButton : MonoBehaviour {
     private Scripts scripts;
-    private SpriteRenderer spriteRenderer;
-    private TextMeshProUGUI text;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private TextMeshProUGUI text;
     private bool usingSR;
     private bool showButtons;
     
@@ -19,15 +19,19 @@ public class MobileButton : MonoBehaviour {
     }
 
     private void OnMouseUpAsButton() {
-        print($"button called from {gameObject.name}!");
-        if (gameObject.name == "UButton") { scripts.player.MoveTargetUp();}
-        else if (gameObject.name == "DButton") { scripts.player.MoveTargetDown(); }
-        else if (gameObject.name == "LButton") { scripts.itemManager.SelectLeft(); }
-        else if (gameObject.name == "use") { scripts.itemManager.UseCurrentItem(); }
-        else if (gameObject.name == "drop") { scripts.itemManager.DropCurrentItem(); }
-        else if (gameObject.name == "RButton") { scripts.itemManager.SelectRight(); }
-        else if (gameObject.name == "menu") { }
-        else if (gameObject.name == "restart") { }
+        switch (gameObject.name) {
+            case "UButton": scripts.player.MoveTargetUp(); break;
+            case "DButton": scripts.player.MoveTargetDown(); break;
+            case "LButton": scripts.itemManager.SelectLeft(); break;
+            case "use": scripts.itemManager.UseCurrentItem(); break;
+            case "drop": scripts.itemManager.DropCurrentItem(); break;
+            case "RButton": scripts.itemManager.SelectRight(); break;
+            case "menu": scripts.backToMenu.GoBack(); break;
+            case "restart": scripts.player.AttemptSuicide(); break;
+            case "select": scripts.characterSelector.Select(); break;
+            case "easy mode": scripts.characterSelector.ToggleEasy(); break;
+            case "reset stats": scripts.statistics.ResetStats(); break;
+        }
     }
     
     // various functions for making either the sprite or the text have some tactile feedback
@@ -38,7 +42,10 @@ public class MobileButton : MonoBehaviour {
     }
 
     private void OnMouseDown() {
-        scripts.soundManager.PlayClip("click0");
+        if (gameObject.name != "LButton" && gameObject.name != "RButton") {
+            // l and r buttons already play click when selecting an item
+            scripts.soundManager.PlayClip("click0");
+        }
         if (usingSR) {  spriteRenderer.color = scripts.colors.clicked; }
         else { text.color = scripts.colors.clicked; }
     }

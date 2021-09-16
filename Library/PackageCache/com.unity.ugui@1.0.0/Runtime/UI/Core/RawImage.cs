@@ -35,7 +35,7 @@ namespace UnityEngine.UI
             {
                 if (m_Texture == null)
                 {
-                    if (material != null && material.mainTexture != null)
+                    if (material is not null && material.mainTexture is not null)
                     {
                         return material.mainTexture;
                     }
@@ -123,7 +123,7 @@ namespace UnityEngine.UI
         public override void SetNativeSize()
         {
             Texture tex = mainTexture;
-            if (tex != null)
+            if (tex is not null)
             {
                 int w = Mathf.RoundToInt(tex.width * uvRect.width);
                 int h = Mathf.RoundToInt(tex.height * uvRect.height);
@@ -136,7 +136,7 @@ namespace UnityEngine.UI
         {
             Texture tex = mainTexture;
             vh.Clear();
-            if (tex != null)
+            if (tex is not null)
             {
                 var r = GetPixelAdjustedRect();
                 var v = new Vector4(r.x, r.y, r.x + r.width, r.y + r.height);

@@ -46,15 +46,15 @@
 28            android:name="com.unity3d.player.UnityPlayerActivity"
 28-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:15-68
 29            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density"
-29-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:188-369
+29-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:187-368
 30            android:hardwareAccelerated="false"
-30-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:405-440
+30-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:404-439
 31            android:launchMode="singleTask"
-31-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:156-187
+31-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:155-186
 32            android:resizeableActivity="false"
-32-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:370-404
-33            android:screenOrientation="reverseLandscape"
-33-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:111-155
+32-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:369-403
+33            android:screenOrientation="sensorLandscape"
+33-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:111-154
 34            android:theme="@style/UnityThemeSelector" >
 34-->/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/src/main/AndroidManifest.xml:4:69-110
 35            <intent-filter>

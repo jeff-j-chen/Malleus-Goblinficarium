@@ -29,7 +29,7 @@ namespace UnityEngine.UI.Tests
         {
             var type = staticType;
             FieldInfo field = null;
-            while (field == null && type != null)
+            while (field is not null && type is not null)
             {
                 field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic);
                 type = type.BaseType;
@@ -44,12 +44,12 @@ namespace UnityEngine.UI.Tests
         {
             var type = o.GetType();
             FieldInfo field = null;
-            while (field == null && type != null)
+            while (field == null && type is not null)
             {
                 field = type.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
                 type = type.BaseType;
             }
-            return field != null ? (T)field.GetValue(o) : default(T);
+            return field is not null ? (T)field.GetValue(o) : default(T);
         }
     }
 }

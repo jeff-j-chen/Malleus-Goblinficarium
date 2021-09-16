@@ -168,7 +168,7 @@ namespace UnityEditor.U2D.Sprites
         public void Clear()
         {
             m_SelectedPoints.Clear();
-            if (m_ShapeEditor != null)
+            if (m_ShapeEditor is not null)
                 m_ShapeEditor.activePoint = -1;
         }
 

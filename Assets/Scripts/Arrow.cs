@@ -18,6 +18,7 @@ public class Arrow : MonoBehaviour {
     private Scripts scripts;
     // necessary for all files
     private bool preventPlayingFX = true;
+    [SerializeField] private GameObject e;
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -25,12 +26,14 @@ public class Arrow : MonoBehaviour {
         Save.LoadGame();
         if (Save.game.newGame) { 
             menuButtons[0].SetActive(false); 
+            e.SetActive(false);
             for (int i = 1; i < menuButtons.Length; i++) { 
                 menuButtons[i].transform.position = buttonPositions[i-1];
             }
         }
         else { 
             menuButtons[0].SetActive(true); 
+            e.SetActive(true);
             for (int i = 0; i < menuButtons.Length; i++) { 
                 menuButtons[i].transform.position = buttonPositions[i];
             }

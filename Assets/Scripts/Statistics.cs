@@ -15,10 +15,11 @@ public class Statistics : MonoBehaviour {
     private readonly WaitForSeconds tenthSecond = new(0.1f);
     private readonly WaitForSeconds oneSecond = new(1f);
     private readonly string baseText = "hold [space] to delete all data - this action is irrecoverable";
-    private SoundManager soundManager;
+    private Scripts scripts;
     
     private void Start() {
-        soundManager = FindObjectOfType<SoundManager>();
+        scripts = FindObjectOfType<Scripts>();
+        bottomText.gameObject.SetActive(PlayerPrefs.GetString(scripts.BUTTONS_KEY) != "on");
         ShowStatistics();
     }
 
@@ -46,7 +47,7 @@ public class Statistics : MonoBehaviour {
             // 50 times, decrease by 0.1s
             if (i % 10 == 0) {
                 bottomText.text = $"[{Mathf.Round(time)}]";
-                soundManager.PlayClip("click0");
+                scripts.soundManager.PlayClip("click0");
                 // whole number, so display it
             }
             if (!Input.GetKey(KeyCode.Space)) { break; }
@@ -57,15 +58,19 @@ public class Statistics : MonoBehaviour {
         yield return tenthSecond;
         if (time <= 0.1f) { 
             // player held it all the way through
-            Save.persistent = new PersistentData();
-            Save.SavePersistent();
-            bottomText.text = "[done]";
-            soundManager.PlayClip("click1");
-            ShowStatistics();
+            ResetStats();
             for (int i = 0; i < 5; i++) { yield return oneSecond; }
             // some tactile feedback, clearing the stats.
             bottomText.text = baseText;
         }
         else { bottomText.text = baseText; }
+    }
+
+    public void ResetStats() {
+        Save.persistent = new PersistentData();
+        Save.SavePersistent();
+        bottomText.text = "[done]";
+        scripts.soundManager.PlayClip("click1");
+        ShowStatistics();
     }
 }
