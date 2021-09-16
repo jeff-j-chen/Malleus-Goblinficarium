@@ -37,7 +37,7 @@ namespace UnityEngine.EventSystems
         {
             if (!eventSystem.isFocused)
             {
-                if (m_InputPointerEvent is not null && m_InputPointerEvent.pointerDrag is not null && m_InputPointerEvent.dragging)
+                if (m_InputPointerEvent != null && m_InputPointerEvent.pointerDrag != null && m_InputPointerEvent.dragging)
                     ExecuteEvents.Execute(m_InputPointerEvent.pointerDrag, m_InputPointerEvent, ExecuteEvents.endDragHandler);
 
                 m_InputPointerEvent = null;
@@ -194,7 +194,7 @@ namespace UnityEngine.EventSystems
                 // Save the drag handler as well
                 pointerEvent.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(currentOverGo);
 
-                if (pointerEvent.pointerDrag is not null)
+                if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
 
                 m_InputPointerEvent = pointerEvent;
@@ -216,7 +216,7 @@ namespace UnityEngine.EventSystems
                 {
                     ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerClickHandler);
                 }
-                else if (pointerEvent.pointerDrag is not null && pointerEvent.dragging)
+                else if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
                 {
                     ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
                 }
@@ -225,7 +225,7 @@ namespace UnityEngine.EventSystems
                 pointerEvent.pointerPress = null;
                 pointerEvent.rawPointerPress = null;
 
-                if (pointerEvent.pointerDrag is not null && pointerEvent.dragging)
+                if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
 
                 pointerEvent.dragging = false;
@@ -252,7 +252,7 @@ namespace UnityEngine.EventSystems
             if (UseFakeInput())
             {
                 var pointerData = GetLastPointerEventData(kMouseLeftId);
-                if (pointerData is not null)
+                if (pointerData != null)
                     sb.AppendLine(pointerData.ToString());
             }
             else

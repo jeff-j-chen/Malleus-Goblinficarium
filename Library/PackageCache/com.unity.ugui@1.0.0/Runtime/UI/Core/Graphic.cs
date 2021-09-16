@@ -276,7 +276,7 @@ namespace UnityEngine.UI
 
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
 
-            if (m_OnDirtyLayoutCallback is not null)
+            if (m_OnDirtyLayoutCallback != null)
                 m_OnDirtyLayoutCallback();
         }
 
@@ -294,7 +294,7 @@ namespace UnityEngine.UI
             m_VertsDirty = true;
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 
-            if (m_OnDirtyVertsCallback is not null)
+            if (m_OnDirtyVertsCallback != null)
                 m_OnDirtyVertsCallback();
         }
 
@@ -312,7 +312,7 @@ namespace UnityEngine.UI
             m_MaterialDirty = true;
             CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
 
-            if (m_OnDirtyMaterialCallback is not null)
+            if (m_OnDirtyMaterialCallback != null)
                 m_OnDirtyMaterialCallback();
         }
 
@@ -467,7 +467,7 @@ namespace UnityEngine.UI
         {
             get
             {
-                return (m_Material is not null) ? m_Material : defaultMaterial;
+                return (m_Material != null) ? m_Material : defaultMaterial;
             }
             set
             {
@@ -547,7 +547,7 @@ namespace UnityEngine.UI
             GraphicRegistry.UnregisterGraphicForCanvas(canvas, this);
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
-            if (canvasRenderer is not null)
+            if (canvasRenderer != null)
                 canvasRenderer.Clear();
 
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
@@ -668,7 +668,7 @@ namespace UnityEngine.UI
 
         private void DoMeshGeneration()
         {
-            if (rectTransform is not null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
+            if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
                 OnPopulateMesh(s_VertexHelper);
             else
                 s_VertexHelper.Clear(); // clear the vertex helper so invalid graphics dont draw.
@@ -687,7 +687,7 @@ namespace UnityEngine.UI
 
         private void DoLegacyMeshGeneration()
         {
-            if (rectTransform is not null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
+            if (rectTransform != null && rectTransform.rect.width >= 0 && rectTransform.rect.height >= 0)
             {
 #pragma warning disable 618
                 OnPopulateMesh(workerMesh);
@@ -784,7 +784,7 @@ namespace UnityEngine.UI
                 if (mb == null)
                     continue;
                 var methodInfo = mb.GetType().GetMethod("OnValidate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (methodInfo is not null)
+                if (methodInfo != null)
                     methodInfo.Invoke(mb, null);
             }
             m_SkipLayoutUpdate = false;
@@ -826,13 +826,13 @@ namespace UnityEngine.UI
             bool ignoreParentGroups = false;
             bool continueTraversal = true;
 
-            while (t is not null)
+            while (t != null)
             {
                 t.GetComponents(components);
                 for (var i = 0; i < components.Count; i++)
                 {
                     var canvas = components[i] as Canvas;
-                    if (canvas is not null && canvas.overrideSorting)
+                    if (canvas != null && canvas.overrideSorting)
                         continueTraversal = false;
 
                     var filter = components[i] as ICanvasRaycastFilter;
@@ -843,7 +843,7 @@ namespace UnityEngine.UI
                     var raycastValid = true;
 
                     var group = components[i] as CanvasGroup;
-                    if (group is not null)
+                    if (group != null)
                     {
                         if (ignoreParentGroups == false && group.ignoreParentGroups)
                         {

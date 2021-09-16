@@ -35,7 +35,7 @@ namespace UnityEngine.UIElements
 
         void RegisterCallbacks()
         {
-            if (m_Panel is not null)
+            if (m_Panel != null)
             {
                 m_Panel.destroyed += OnPanelDestroyed;
             }
@@ -43,7 +43,7 @@ namespace UnityEngine.UIElements
 
         void UnregisterCallbacks()
         {
-            if (m_Panel is not null)
+            if (m_Panel != null)
             {
                 m_Panel.destroyed -= OnPanelDestroyed;
             }

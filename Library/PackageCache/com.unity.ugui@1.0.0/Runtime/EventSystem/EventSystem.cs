@@ -203,7 +203,7 @@ namespace UnityEngine.EventSystems
             {
                 var lhsEventCamera = lhs.module.eventCamera;
                 var rhsEventCamera = rhs.module.eventCamera;
-                if (lhsEventCamera is not null && rhsEventCamera is not null && lhsEventCamera.depth != rhsEventCamera.depth)
+                if (lhsEventCamera != null && rhsEventCamera != null && lhsEventCamera.depth != rhsEventCamera.depth)
                 {
                     // need to reverse the standard compareTo
                     if (lhsEventCamera.depth < rhsEventCamera.depth)
@@ -308,7 +308,7 @@ namespace UnityEngine.EventSystems
         /// </example>
         public bool IsPointerOverGameObject(int pointerId)
         {
-            return m_CurrentInputModule is not null && m_CurrentInputModule.IsPointerOverGameObject(pointerId);
+            return m_CurrentInputModule != null && m_CurrentInputModule.IsPointerOverGameObject(pointerId);
         }
 
 #if PACKAGE_UITOOLKIT
@@ -367,7 +367,7 @@ namespace UnityEngine.EventSystems
 
             if (sendEvents)
             {
-                var eventSystem = activeEventSystem is not null ? activeEventSystem : EventSystem.current;
+                var eventSystem = activeEventSystem != null ? activeEventSystem : EventSystem.current;
                 if (eventSystem.isActiveAndEnabled)
                     UIElementsRuntimeUtility.RegisterEventSystem(activeEventSystem);
             }
@@ -432,7 +432,7 @@ namespace UnityEngine.EventSystems
             UIElementsRuntimeUtility.UnregisterEventSystem(this);
 #endif
 
-            if (m_CurrentInputModule is not null)
+            if (m_CurrentInputModule != null)
             {
                 m_CurrentInputModule.DeactivateModule();
                 m_CurrentInputModule = null;
@@ -448,7 +448,7 @@ namespace UnityEngine.EventSystems
             var systemInputModulesCount = m_SystemInputModules.Count;
             for (var i = 0; i < systemInputModulesCount; i++)
             {
-                if (m_SystemInputModules[i] is not null)
+                if (m_SystemInputModules[i] != null)
                     m_SystemInputModules[i].UpdateModule();
             }
         }
@@ -497,7 +497,7 @@ namespace UnityEngine.EventSystems
                 }
             }
 
-            if (!changedModule && m_CurrentInputModule is not null)
+            if (!changedModule && m_CurrentInputModule != null)
                 m_CurrentInputModule.Process();
 
 #if UNITY_EDITOR
@@ -521,10 +521,10 @@ namespace UnityEngine.EventSystems
             if (m_CurrentInputModule == module)
                 return;
 
-            if (m_CurrentInputModule is not null)
+            if (m_CurrentInputModule != null)
                 m_CurrentInputModule.DeactivateModule();
 
-            if (module is not null)
+            if (module != null)
                 module.ActivateModule();
             m_CurrentInputModule = module;
         }
@@ -535,7 +535,7 @@ namespace UnityEngine.EventSystems
             sb.AppendLine("<b>Selected:</b>" + currentSelectedGameObject);
             sb.AppendLine();
             sb.AppendLine();
-            sb.AppendLine(m_CurrentInputModule is not null ? m_CurrentInputModule.ToString() : "No module");
+            sb.AppendLine(m_CurrentInputModule != null ? m_CurrentInputModule.ToString() : "No module");
             return sb.ToString();
         }
     }

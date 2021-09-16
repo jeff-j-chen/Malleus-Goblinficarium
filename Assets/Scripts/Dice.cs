@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 public class Dice : MonoBehaviour {
@@ -13,6 +14,7 @@ public class Dice : MonoBehaviour {
     private SpriteRenderer spriteRenderer;
     private SpriteRenderer childSpriteRenderer;
     private Scripts scripts;
+    private bool wasClickedRecently = false;
 
     private readonly WaitForSeconds[] rollTimes = { new(0.01f), new(0.03f), new(0.06f), new(0.09f), new(0.12f), new(0.15f), new(0.18f), new(0.21f), new(0.24f), new(0.3f) };
     // different times for rolling 
@@ -45,6 +47,7 @@ public class Dice : MonoBehaviour {
         // else just regular dice down
     }
 
+
     /// <summary>
     /// Handle what happens when the player presses down on a dice.
     /// </summary>
@@ -58,7 +61,7 @@ public class Dice : MonoBehaviour {
             scripts.highlightCalculator.ShowValidHighlights(gameObject.GetComponent<Dice>());
             // call the from class HighlightCalculator to show all valid highlights 
         }
-        // LOOKS BETTER BUT CAUSES GLITCHES, FIX IN THE FUTURE
+        // TODO: LOOKS BETTER BUT CAUSES GLITCHES, FIX IN THE FUTURE
         
         // if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy") {
         //     // if an action can be performed on the dice (discard, reroll)
@@ -144,7 +147,33 @@ public class Dice : MonoBehaviour {
             // if the dice can be moved
             scripts.soundManager.PlayClip("click1");
             // play sound clip
-            scripts.highlightCalculator.SnapToPosition(gameObject.GetComponent<Dice>(), instantiationPos, out moveable, out instantiationPos);
+            if (wasClickedRecently) {
+                // was clicked recently, so select the dice
+                float xOverride;
+                float yOverride;
+                GameObject[] highlights = scripts.highlightCalculator.highlights;
+                // 0: accuracy, 1: speed, 2: damage, 3: parry
+                if (diceType == "yellow" || 
+                    diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger") || diceType == "white" && Save.game.curCharNum == 3) { 
+                    // yellow dice drop onto red by default
+                    // green die + dagger drop onto red
+                    // white die + char 3 do as well
+                    xOverride = highlights[2].transform.position.x;
+                    yOverride = highlights[2].transform.position.y;
+                }
+                else {
+                    // regular die, so drop it to the regular position
+                    int diceIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType);
+                    xOverride = highlights[diceIndex].transform.position.x;
+                    yOverride = highlights[diceIndex].transform.position.y;
+                }
+                scripts.highlightCalculator.SnapToPosition(gameObject.GetComponent<Dice>(), instantiationPos, out moveable, out instantiationPos, xOverride, yOverride);
+            }
+            else { 
+                // dice was not clicked recently, so start the timer
+                StartCoroutine(ClickedTimer());
+                scripts.highlightCalculator.SnapToPosition(gameObject.GetComponent<Dice>(), instantiationPos, out moveable, out instantiationPos);
+            }
             // attempt to snap the position with a function defined in HighlightCalculator
             transform.position = instantiationPos;
             // set the transform position to be where the instantiation position is (snap back to the selection menu if it didn't get snapped in SnapToPosition)
@@ -180,6 +209,14 @@ public class Dice : MonoBehaviour {
             // if discarding can and should discard die from courage
             DiscardFromPlayer();
             // do so 
+        }
+    }
+
+    private IEnumerator ClickedTimer() { 
+        if (!wasClickedRecently) { 
+            wasClickedRecently = true;
+            yield return scripts.delays[0.2f];
+            wasClickedRecently = false;
         }
     }
 
@@ -256,7 +293,7 @@ public class Dice : MonoBehaviour {
             // wait for a set amount of time
             if (playSound) { scripts.soundManager.PlayClip("click0"); }
             // play sound clip if necessary
-            int randNum = Random.Range(1, 7);
+            int randNum = UnityEngine.Random.Range(1, 7);
             // get a random number for the dice 
             spriteRenderer.sprite = scripts.diceSummoner.numArr[randNum - 1].GetComponent<SpriteRenderer>().sprite;
             // assign the sprite to be the necessary sprite with the new number

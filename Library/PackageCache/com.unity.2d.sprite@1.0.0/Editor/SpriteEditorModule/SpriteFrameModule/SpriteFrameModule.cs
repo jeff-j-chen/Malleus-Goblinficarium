@@ -436,7 +436,7 @@ namespace UnityEditor.U2D.Sprites
 
         public void ScaleSpriteRect(Rect r)
         {
-            if (selected is not null)
+            if (selected != null)
             {
                 undoSystem.RegisterCompleteObjectUndo(m_RectsCache, "Scale sprite");
                 selected.rect = ClampSpriteRect(r, textureActualWidth, textureActualHeight);
@@ -496,7 +496,7 @@ namespace UnityEditor.U2D.Sprites
 
         public void DuplicateSprite()
         {
-            if (selected is not null)
+            if (selected != null)
             {
                 undoSystem.RegisterCompleteObjectUndo(m_RectsCache, "Duplicate sprite");
                 var index = 0;
@@ -524,7 +524,7 @@ namespace UnityEditor.U2D.Sprites
 
         public void DeleteSprite()
         {
-            if (selected is not null)
+            if (selected != null)
             {
                 undoSystem.RegisterCompleteObjectUndo(m_RectsCache, "Delete sprite");
                 m_RectsCache.Remove(selected);

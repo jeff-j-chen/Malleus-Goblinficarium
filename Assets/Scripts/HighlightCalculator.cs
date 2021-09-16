@@ -2,8 +2,8 @@
 using UnityEngine;
 public class HighlightCalculator : MonoBehaviour {
     [SerializeField] private GameObject highlighter;
-    private readonly GameObject[] highlights = new GameObject[4];
-    private readonly BoxCollider2D[] highlightColliders = new BoxCollider2D[4];
+    public GameObject[] highlights = new GameObject[4];
+    public BoxCollider2D[] highlightColliders = new BoxCollider2D[4];
     private Scripts scripts;
     private readonly Vector2 offScreen = new(0, 20);
     public int diceTakenByPlayer = 0;
@@ -79,15 +79,21 @@ public class HighlightCalculator : MonoBehaviour {
     /// <summary>
     /// Attempt to snap the die to position (nearest highlight).
     /// </summary>
-    public void SnapToPosition(Dice dice, Vector3 curInstantiationPos, out bool moveable, out Vector3 instantiationPos) {
+    public void SnapToPosition(Dice dice, Vector3 curInstantiationPos, out bool moveable, out Vector3 instantiationPos, float xOverride=100f, float yOverride=100f) {
+        // overrides if we want to drop the dice off at a specific location rather than mouse
+        // can't use vector3 because its non-nullable
         moveable = true;
         // by default make the die still moveable
         instantiationPos = curInstantiationPos;
         // reassign the instantiation position
         Vector3 screenPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 mousePos = new Vector2(screenPos.x, screenPos.y);
+        Vector3 dropPos;
+        if (xOverride > 99 && xOverride < 101) { 
+            dropPos = new Vector2(screenPos.x, screenPos.y);
+        }
+        else { dropPos = new Vector2(xOverride, yOverride); }
         // get the mouse position as a vector
-        HandleAllDiceDrops(dice, ref moveable, ref instantiationPos, mousePos);
+        HandleAllDiceDrops(dice, ref moveable, ref instantiationPos, dropPos);
     }
 
     /// <summary>
