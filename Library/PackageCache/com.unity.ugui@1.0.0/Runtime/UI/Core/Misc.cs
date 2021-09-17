@@ -12,7 +12,7 @@ namespace UnityEngine.UI
 
         static public void Destroy(UnityEngine.Object obj)
         {
-            if (obj is not null)
+            if (obj != null)
             {
                 if (Application.isPlaying)
                 {
@@ -34,7 +34,7 @@ namespace UnityEngine.UI
 
         static public void DestroyImmediate(Object obj)
         {
-            if (obj is not null)
+            if (obj != null)
             {
                 if (Application.isEditor) Object.DestroyImmediate(obj);
                 else Object.Destroy(obj);

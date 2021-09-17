@@ -47,6 +47,8 @@ public class LevelManager : MonoBehaviour {
         // show the level text only if debug is on
         level = Save.game.resumeLevel;
         sub = Save.game.resumeSub;
+        // level = 3;
+        // sub = 4;
         boxSR = levelBox.GetComponent<SpriteRenderer>();
         // get the spriterenderer for the box that covers the screen when the next level is being loaded
         temp = boxSR.color;
@@ -67,7 +69,14 @@ public class LevelManager : MonoBehaviour {
             else { levelText.text = $"(level {level}-{sub})"; }
         }
         else { levelText.text = ""; }
+        
     }
+
+    // private void Update() { 
+    //     if (Input.GetKeyDown(KeyCode.Space)) { 
+    //         NextLevel();
+    //     }
+    // }
 
     /// <summary>
     /// Generate the stats for an enemy.

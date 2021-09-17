@@ -73,8 +73,10 @@ public class DiceSummoner : MonoBehaviour
             }
             if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
                 // if devil
+                yield return scripts.delays[0.05f];
                 foreach (string typeToGen in scripts.itemManager.statArr) {
                     // generate a die for every stat
+                    yield return scripts.delays[0.05f];
                     GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
                     // attach it to the devil
                 }

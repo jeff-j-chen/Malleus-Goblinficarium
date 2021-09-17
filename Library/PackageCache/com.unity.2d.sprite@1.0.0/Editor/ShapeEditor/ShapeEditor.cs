@@ -175,7 +175,7 @@ namespace UnityEditor.U2D.Sprites
 
         public void SetRectSelectionTool(ShapeEditorRectSelectionTool sers)
         {
-            if (m_RectSelectionTool is not null)
+            if (m_RectSelectionTool != null)
             {
                 m_RectSelectionTool.RectSelect -= SelectPointsInRect;
                 m_RectSelectionTool.ClearSelection -= ClearSelectedPoints;
@@ -625,7 +625,7 @@ namespace UnityEditor.U2D.Sprites
 
             float distance = HandleUtility.DistanceToCircle(t0, tangentSize);
 
-            if (lineTexture is not null)
+            if (lineTexture != null)
                 handles.DrawAAPolyLine(lineTexture, new Vector3[] {p0, t0});
             else
                 handles.DrawLine(p0, t0);
@@ -755,7 +755,7 @@ namespace UnityEditor.U2D.Sprites
 
         private float GetHandleSizeForPoint(int index)
         {
-            return Camera.current is not null ? HandleUtility.GetHandleSize(GetPointPosition(index)) * 0.075f : GetHandleSize();
+            return Camera.current != null ? HandleUtility.GetHandleSize(GetPointPosition(index)) * 0.075f : GetHandleSize();
         }
 
         private float GetTangentSizeForPoint(int index)

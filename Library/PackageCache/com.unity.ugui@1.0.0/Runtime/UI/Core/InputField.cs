@@ -327,7 +327,7 @@ namespace UnityEngine.UI
 
         private string compositionString
         {
-            get { return input is not null ? input.compositionString : Input.compositionString; }
+            get { return input != null ? input.compositionString : Input.compositionString; }
         }
 
         // Doesn't include dot and @ on purpose! See usage for details.
@@ -478,7 +478,7 @@ namespace UnityEngine.UI
                 value = value.Replace("\n", "").Replace("\t", "");
 
             // If we have an input validator, validate the input and apply the character limit at the same time.
-            if (onValidateInput is not null || characterValidation != CharacterValidation.None)
+            if (onValidateInput != null || characterValidation != CharacterValidation.None)
             {
                 m_Text = "";
                 OnValidateInput validatorMethod = onValidateInput ?? Validate;
@@ -504,7 +504,7 @@ namespace UnityEngine.UI
             }
 #endif
 
-            if (m_Keyboard is not null)
+            if (m_Keyboard != null)
                 m_Keyboard.text = m_Text;
 
             if (m_CaretPosition > m_Text.Length)
@@ -577,7 +577,7 @@ namespace UnityEngine.UI
             get { return m_TextComponent; }
             set
             {
-                if (m_TextComponent is not null)
+                if (m_TextComponent != null)
                 {
                     m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
                     m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
@@ -587,7 +587,7 @@ namespace UnityEngine.UI
                 if (SetPropertyUtility.SetClass(ref m_TextComponent, value))
                 {
                     EnforceTextHOverflow();
-                    if (m_TextComponent is not null)
+                    if (m_TextComponent != null)
                     {
                         m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
                         m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
@@ -821,7 +821,7 @@ namespace UnityEngine.UI
                 if (SetPropertyUtility.SetStruct(ref m_CharacterLimit, Math.Max(0, value)))
                 {
                     UpdateLabel();
-                    if (m_Keyboard is not null)
+                    if (m_Keyboard != null)
                         m_Keyboard.characterLimit = value;
                 }
             }
@@ -1120,10 +1120,10 @@ namespace UnityEngine.UI
             m_DrawEnd = m_Text.Length;
 
             // If we have a cached renderer then we had OnDisable called so just restore the material.
-            if (m_CachedInputRenderer is not null)
+            if (m_CachedInputRenderer != null)
                 m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
 
-            if (m_TextComponent is not null)
+            if (m_TextComponent != null)
             {
                 m_TextComponent.RegisterDirtyVerticesCallback(MarkGeometryAsDirty);
                 m_TextComponent.RegisterDirtyVerticesCallback(UpdateLabel);
@@ -1138,7 +1138,7 @@ namespace UnityEngine.UI
             m_BlinkCoroutine = null;
 
             DeactivateInputField();
-            if (m_TextComponent is not null)
+            if (m_TextComponent != null)
             {
                 m_TextComponent.UnregisterDirtyVerticesCallback(MarkGeometryAsDirty);
                 m_TextComponent.UnregisterDirtyVerticesCallback(UpdateLabel);
@@ -1147,10 +1147,10 @@ namespace UnityEngine.UI
             CanvasUpdateRegistry.UnRegisterCanvasElementForRebuild(this);
 
             // Clear needs to be called otherwise sync never happens as the object is disabled.
-            if (m_CachedInputRenderer is not null)
+            if (m_CachedInputRenderer != null)
                 m_CachedInputRenderer.Clear();
 
-            if (m_Mesh is not null)
+            if (m_Mesh != null)
                 DestroyImmediate(m_Mesh);
             m_Mesh = null;
 
@@ -1213,7 +1213,7 @@ namespace UnityEngine.UI
 
         private void UpdateCaretMaterial()
         {
-            if (m_TextComponent is not null && m_CachedInputRenderer is not null)
+            if (m_TextComponent != null && m_CachedInputRenderer != null)
                 m_CachedInputRenderer.SetMaterial(m_TextComponent.GetModifiedMaterial(Graphic.defaultGraphicMaterial), Texture2D.whiteTexture);
         }
 
@@ -1404,7 +1404,7 @@ namespace UnityEngine.UI
             // then we make sure to clear all of the caret/highlight state visually and deactivate the input field.
             if (isFocused && InPlaceEditingChanged())
             {
-                if (m_CachedInputRenderer is not null)
+                if (m_CachedInputRenderer != null)
                 {
                     using (var helper = new VertexHelper())
                         helper.FillMesh(mesh);
@@ -1420,7 +1420,7 @@ namespace UnityEngine.UI
 
             if (m_Keyboard == null || m_Keyboard.status != TouchScreenKeyboard.Status.Visible)
             {
-                if (m_Keyboard is not null)
+                if (m_Keyboard != null)
                 {
                     if (!m_ReadOnly)
                         text = m_Keyboard.text;
@@ -1454,7 +1454,7 @@ namespace UnityEngine.UI
                         if (c == '\r' || (int)c == 3)
                             c = '\n';
 
-                        if (onValidateInput is not null)
+                        if (onValidateInput != null)
                             c = onValidateInput(m_Text, m_Text.Length, c);
                         else if (characterValidation != CharacterValidation.None)
                             c = Validate(m_Text, m_Text.Length, c);
@@ -1527,7 +1527,7 @@ namespace UnityEngine.UI
             {
                 pos = m_TextComponent.transform.InverseTransformPoint(screen);
             }
-            else if (theCanvas.worldCamera is not null)
+            else if (theCanvas.worldCamera != null)
             {
                 Ray mouseRay = theCanvas.worldCamera.ScreenPointToRay(screen);
                 float dist;
@@ -1616,7 +1616,7 @@ namespace UnityEngine.UI
             return IsActive() &&
                 IsInteractable() &&
                 eventData.button == PointerEventData.InputButton.Left &&
-                m_TextComponent is not null &&
+                m_TextComponent != null &&
                 (InPlaceEditing() || m_HideMobileInput);
         }
 
@@ -2297,7 +2297,7 @@ namespace UnityEngine.UI
         {
             // Update the TouchKeyboard's text from edit changes
             // if in-place editing is allowed
-            if (m_Keyboard is not null && InPlaceEditing())
+            if (m_Keyboard != null && InPlaceEditing())
             {
                 m_Keyboard.text = m_Text;
             }
@@ -2312,7 +2312,7 @@ namespace UnityEngine.UI
         private void SendOnValueChanged()
         {
             UISystemProfilerApi.AddMarker("InputField.value", this);
-            if (onValueChanged is not null)
+            if (onValueChanged != null)
                 onValueChanged.Invoke(text);
         }
 
@@ -2322,7 +2322,7 @@ namespace UnityEngine.UI
         protected void SendOnEndEdit()
         {
             UISystemProfilerApi.AddMarker("InputField.onEndEdit", this);
-            if (onEndEdit is not null)
+            if (onEndEdit != null)
                 onEndEdit.Invoke(m_Text);
         }
 
@@ -2332,7 +2332,7 @@ namespace UnityEngine.UI
         protected void SendOnSubmit()
         {
             UISystemProfilerApi.AddMarker("InputField.onSubmit", this);
-            if (onSubmit is not null)
+            if (onSubmit != null)
                 onSubmit.Invoke(m_Text);
         }
 
@@ -2395,7 +2395,7 @@ namespace UnityEngine.UI
                 }
             }
 
-            if (onValidateInput is not null)
+            if (onValidateInput != null)
                 input = onValidateInput(validateText, insertionPoint, input);
             else if (characterValidation != CharacterValidation.None)
                 input = Validate(validateText, insertionPoint, input);
@@ -2413,7 +2413,7 @@ namespace UnityEngine.UI
         /// </summary>
         protected void UpdateLabel()
         {
-            if (m_TextComponent is not null && m_TextComponent.font is not null && !m_PreventFontCallback)
+            if (m_TextComponent != null && m_TextComponent.font != null && !m_PreventFontCallback)
             {
                 // TextGenerator.Populate invokes a callback that's called for anything
                 // that needs to be updated when the data for that font has changed.
@@ -2431,7 +2431,7 @@ namespace UnityEngine.UI
                 m_PreventFontCallback = true;
 
                 string fullText;
-                if (EventSystem.current is not null && gameObject == EventSystem.current.currentSelectedGameObject && compositionString.Length > 0)
+                if (EventSystem.current != null && gameObject == EventSystem.current.currentSelectedGameObject && compositionString.Length > 0)
                     fullText = text.Substring(0, m_CaretPosition) + compositionString + text.Substring(m_CaretPosition);
                 else
                     fullText = text;
@@ -2444,7 +2444,7 @@ namespace UnityEngine.UI
 
                 bool isEmpty = string.IsNullOrEmpty(fullText);
 
-                if (m_Placeholder is not null)
+                if (m_Placeholder != null)
                     m_Placeholder.enabled = isEmpty;
 
                 // If not currently editing the text, set the visible range to the whole text.
@@ -2678,7 +2678,7 @@ namespace UnityEngine.UI
             if (!InPlaceEditing() && !shouldHideMobileInput)
                 return;
 
-            if (m_CachedInputRenderer == null && m_TextComponent is not null)
+            if (m_CachedInputRenderer == null && m_TextComponent != null)
             {
                 GameObject go = new GameObject(transform.name + " Input Caret", typeof(RectTransform), typeof(CanvasRenderer));
                 go.hideFlags = HideFlags.DontSave;
@@ -2705,7 +2705,7 @@ namespace UnityEngine.UI
 
         private void AssignPositioningIfNeeded()
         {
-            if (m_TextComponent is not null && caretRectTrans is not null &&
+            if (m_TextComponent != null && caretRectTrans != null &&
                 (caretRectTrans.localPosition != m_TextComponent.rectTransform.localPosition ||
                  caretRectTrans.localRotation != m_TextComponent.rectTransform.localRotation ||
                  caretRectTrans.localScale != m_TextComponent.rectTransform.localScale ||
@@ -2823,7 +2823,7 @@ namespace UnityEngine.UI
             Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(cameraRef, cursorPosition);
             screenPosition.y = screenHeight - screenPosition.y;
 
-            if (input is not null)
+            if (input != null)
                 input.compositionCursorPos = screenPosition;
         }
 
@@ -3048,7 +3048,7 @@ namespace UnityEngine.UI
 
             if (isFocused)
             {
-                if (m_Keyboard is not null && !m_Keyboard.active)
+                if (m_Keyboard != null && !m_Keyboard.active)
                 {
                     m_Keyboard.active = true;
                     m_Keyboard.text = m_Text;
@@ -3073,7 +3073,7 @@ namespace UnityEngine.UI
 
             if (TouchScreenKeyboardShouldBeUsed())
             {
-                if (input is not null && input.touchSupported)
+                if (input != null && input.touchSupported)
                 {
                     TouchScreenKeyboard.hideInput = shouldHideMobileInput;
                 }
@@ -3092,7 +3092,7 @@ namespace UnityEngine.UI
             // Perform normal OnFocus routine if platform supports it
             if (!TouchScreenKeyboard.isSupported || m_TouchKeyboardAllowsInPlaceEditing)
             {
-                if (input is not null)
+                if (input != null)
                     input.imeCompositionMode = IMECompositionMode.On;
                 OnFocus();
             }
@@ -3159,24 +3159,24 @@ namespace UnityEngine.UI
             m_HasDoneFocusTransition = false;
             m_AllowInput = false;
 
-            if (m_Placeholder is not null)
+            if (m_Placeholder != null)
                 m_Placeholder.enabled = string.IsNullOrEmpty(m_Text);
 
-            if (m_TextComponent is not null && IsInteractable())
+            if (m_TextComponent != null && IsInteractable())
             {
                 if (m_WasCanceled)
                     text = m_OriginalText;
 
                 SendOnEndEdit();
 
-                if (m_Keyboard is not null)
+                if (m_Keyboard != null)
                 {
                     m_Keyboard.active = false;
                     m_Keyboard = null;
                 }
 
                 m_CaretPosition = m_CaretSelectPosition = 0;
-                if (input is not null)
+                if (input != null)
                     input.imeCompositionMode = IMECompositionMode.Auto;
             }
 
@@ -3290,7 +3290,7 @@ namespace UnityEngine.UI
 
         void EnforceTextHOverflow()
         {
-            if (m_TextComponent is not null)
+            if (m_TextComponent != null)
                 if (multiLine)
                     m_TextComponent.horizontalOverflow = HorizontalWrapMode.Wrap;
                 else

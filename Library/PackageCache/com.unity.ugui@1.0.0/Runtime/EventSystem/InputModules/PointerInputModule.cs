@@ -383,8 +383,8 @@ namespace UnityEngine.EventSystems
         public override bool IsPointerOverGameObject(int pointerId)
         {
             var lastPointer = GetLastPointerEventData(pointerId);
-            if (lastPointer is not null)
-                return lastPointer.pointerEnter is not null;
+            if (lastPointer != null)
+                return lastPointer.pointerEnter != null;
             return false;
         }
 

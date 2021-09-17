@@ -315,7 +315,7 @@ namespace UnityEditor.U2D.Sprites
             var nameFileIdPairs = m_NameFileIdDataProvider.GetNameFileIdPairs();
             m_RectsCache.SetNameFileIdPairs(nameFileIdPairs);
 
-            if (spriteEditor.selectedSpriteRect is not null)
+            if (spriteEditor.selectedSpriteRect != null)
                 spriteEditor.selectedSpriteRect = m_RectsCache.spriteRects.FirstOrDefault(x => x.spriteID == spriteEditor.selectedSpriteRect.spriteID);
 
             AddMainUI(spriteEditor.GetMainVisualContainer());
@@ -324,7 +324,7 @@ namespace UnityEditor.U2D.Sprites
 
         public override void OnModuleDeactivate()
         {
-            if (m_RectsCache is not null)
+            if (m_RectsCache != null)
             {
                 undoSystem.ClearUndo(m_RectsCache);
                 ScriptableObject.DestroyImmediate(m_RectsCache);
@@ -338,12 +338,12 @@ namespace UnityEditor.U2D.Sprites
         {
             if (apply)
             {
-                var array = m_RectsCache is not null ? m_RectsCache.spriteRects.ToArray() : null;
+                var array = m_RectsCache != null ? m_RectsCache.spriteRects.ToArray() : null;
                 m_SpriteDataProvider.SetSpriteRects(array);
 
                 var spriteNames = m_RectsCache?.spriteNames;
                 var spriteFileIds = m_RectsCache?.spriteFileIds;
-                if (spriteNames is not null && spriteFileIds is not null)
+                if (spriteNames != null && spriteFileIds != null)
                 {
                     var pairList = new List<SpriteNameFileIdPair>(spriteNames.Count);
                     for (var i = 0; i < spriteNames.Count; ++i)
@@ -365,12 +365,12 @@ namespace UnityEditor.U2D.Sprites
                     }
                 }
 
-                if (m_RectsCache is not null)
+                if (m_RectsCache != null)
                     undoSystem.ClearUndo(m_RectsCache);
             }
             else
             {
-                if (m_RectsCache is not null)
+                if (m_RectsCache != null)
                 {
                     undoSystem.ClearUndo(m_RectsCache);
 
@@ -381,7 +381,7 @@ namespace UnityEditor.U2D.Sprites
                     m_RectsCache.SetNameFileIdPairs(nameFileIdPairs);
 
                     spriteEditor.spriteRects = spriteList;
-                    if (spriteEditor.selectedSpriteRect is not null)
+                    if (spriteEditor.selectedSpriteRect != null)
                         spriteEditor.selectedSpriteRect = m_RectsCache.spriteRects.FirstOrDefault(x => x.spriteID == spriteEditor.selectedSpriteRect.spriteID);
                 }
             }
@@ -431,7 +431,7 @@ namespace UnityEditor.U2D.Sprites
 
         public bool hasSelected
         {
-            get { return spriteEditor.selectedSpriteRect is not null; }
+            get { return spriteEditor.selectedSpriteRect != null; }
         }
 
         public SpriteAlignment selectedSpriteAlignment
@@ -456,7 +456,7 @@ namespace UnityEditor.U2D.Sprites
 
         public int CurrentSelectedSpriteIndex()
         {
-            if (m_RectsCache is not null && selected is not null)
+            if (m_RectsCache != null && selected != null)
                 return m_RectsCache.FindIndex(x => x.spriteID == selected.spriteID);
             return -1;
         }

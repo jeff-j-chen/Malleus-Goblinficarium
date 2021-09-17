@@ -203,8 +203,8 @@ public class ItemManager : MonoBehaviour {
                 // new game, so give the base weapons
                 case 0: {
                     CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                    // CreateWeaponWithStats("sword", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
-                    // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     // MoveToInventory(0, true, false, false);
                     // CreateItem("scroll", "common", "challenge");
                     // MoveToInventory(0, true, false, false);

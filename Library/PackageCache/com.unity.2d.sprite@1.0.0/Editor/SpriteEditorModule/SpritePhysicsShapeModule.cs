@@ -27,7 +27,7 @@ namespace UnityEditor.U2D.Sprites
 
         public override bool ApplyRevert(bool apply)
         {
-            if (m_Outline is not null)
+            if (m_Outline != null)
             {
                 if (apply)
                 {
