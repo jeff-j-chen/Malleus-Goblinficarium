@@ -54,7 +54,7 @@
             android:value="True" />
         <meta-data
             android:name="unity.launch-fullscreen"
-            android:value="False" />
+            android:value="True" />
         <meta-data
             android:name="unity.allow-resizable-window"
             android:value="False" />

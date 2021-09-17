@@ -116,11 +116,11 @@
 65            android:value="True" />
 65-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:54:13-33
 66        <meta-data
-66-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:55:9-57:37
+66-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:55:9-57:36
 67            android:name="unity.launch-fullscreen"
 67-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:56:13-51
-68            android:value="False" />
-68-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:57:13-34
+68            android:value="True" />
+68-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:57:13-33
 69        <meta-data
 69-->[:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:58:9-60:37
 70            android:name="unity.allow-resizable-window"

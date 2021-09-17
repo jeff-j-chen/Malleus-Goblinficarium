@@ -85,12 +85,13 @@ public class Player : MonoBehaviour {
     }
 
     private void Update() {
-        if (!(scripts.tutorial != null && targetIndex == 7)) { 
-            // lock tutorial to attacking face once its targeted
-            if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f && !scripts.turnManager.isMoving)) {
-                MoveTargetDown();
-            }
-            else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
+        
+        if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f && !scripts.turnManager.isMoving)) {
+            MoveTargetDown();
+        }
+        else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
+            if (!(scripts.tutorial != null && targetIndex == 7)) { 
+                // lock tutorial to attacking face once its targeted
                 MoveTargetUp();
             }
         }

@@ -12,10 +12,10 @@ public class Tutorial : MonoBehaviour {
     public bool isAnimating;
     private Coroutine mainScroll;
     private Coroutine statScroll;
-    private readonly List<string> tutorialTextList = new() {
+    private readonly List<string> desktopTutorialText = new() {
         "Welcome to MALLEUS GOBLINIFICARIUM,\na realistic dice-based combat simulator!\n\nYes, a realistic game can contain goblins and scrolls.\n[click] to continue", 
         // ^ 0
-        "You can navigate your inventory using\nleft and right [arrow_keys]\nor [left_mouse]\n\n[click] to continue", 
+        "You can navigate your inventory using\n[left/right arrow_keys] or [left_mouse].\n\n[click] to continue", 
         // ^ 1
         "Press [enter] or [left_mouse] to use an item,\n[shift_enter] or [right_mouse] to drop it.\nYou can use or drop selected items only.\n\n[drop the scroll] to continue",
         // ^ 2
@@ -25,9 +25,9 @@ public class Tutorial : MonoBehaviour {
         // ^ 4
         "Accuracy (green) allows you to choose\ndifferent body parts (each applying some\nspecial debuff in damaged) as a target.\n\n[click] to continue", 
         // ^ 5
-        "You can use up and down\n[arrow_keys] or [mouse_wheel]\nto adjust your aim.\n\n[click] to continue", 
+        "You can use [up/down arrow_keys]\n or scroll with the [mouse_wheel]\nto adjust your aim.\n\n[click] to continue", 
         // ^ 6
-        "As you invest into your accuracy,\nyou will have more options\nto choose from.\n\n[click] to continue", 
+        "As you invest into your accuracy,\nyou will have more target options\nto choose from.\n\n[click] to continue", 
         // ^ 7
         "If your damage (red) is higher than\nthe enemy's parry (white), you will wound\nthe body part you are targeting.\n\n[click] to continue", 
         // ^ 8
@@ -37,13 +37,13 @@ public class Tutorial : MonoBehaviour {
         // ^ 10
         "Speed also defines who will start\nthe draft, a process of picking dice,\none by one.\n\n[click] to continue",
         // ^ 11
-        "The die you pick increases\nthe corresponding combat stat.\nYour speed is higher, so choose one!\n\n[click + drag die] to continue", 
+        "The die you pick increases\nthe corresponding combat stat.\nYour speed is higher, so choose one!\n\n[click+drag] or [double click] die to continue", 
         // ^ 12
         "You can notice that your enemy has\ntaken a die as well.\nThis is how draft works.\n\n[pick 2 more dice] to continue",
         // ^ 13
         "Now your damage (7) is higher than\nenemy's parry (3), so you'll inflict a\nwound. You are also safe from his blow.\n\n[click] to continue", 
         // ^ 14
-        "You have the same speed (3)\nas your enemy,which still means you'll\nstrike first.\n\n[click] to continue",
+        "You have the same speed (3)\nas your enemy, which still means\nyou'll strike first.\n\n[click] to continue",
         // ^ 15
         "You can probably start the fight now\nand land a successful hit. Enemy will\ndie once he has 3 wounds.\n\n[click] to continue", 
         // ^ 16
@@ -57,17 +57,77 @@ public class Tutorial : MonoBehaviour {
         // ^ 20
         "\n\nNow use your weapon\n(click the \"sword\" icon) to start the\nfight, and watch him die...",
         // ^ 21
-        "Take the loot now. use [ctrl]\n or [left_mouse] to access his\ninventory.\n\n[take steak] to continue",
+        "Take the loot now. Use [ctrl]\n or [left_mouse] to access his\ninventory.\n\n[take steak] to continue",
         // ^ 22
         "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[click] to continue",
         // ^ 23
         "Finally, use the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of\nMalleus Goblinificarium. \nYou'll learn more as you play more!"
         // ^ 24
     };
+    private readonly List<string> mobileTextList = new() {
+        "Welcome to MALLEUS GOBLINIFICARIUM,\na realistic dice-based combat simulator!\n\nYes, a realistic game can contain goblins and scrolls.\n[tap] to continue", 
+        // ^ 0
+        "You can navigate your inventory using\n[left/right arrows] or [tapping].\n\n[tap] to continue", 
+        // ^ 1
+        "Press [use] or [tap] to use an item,\nand press [drop] to drop it.\nYou can use or drop selected items only.\n\n[drop the scroll] to continue",
+        // ^ 2
+        "\n\n\n\n[tap] to continue", 
+        // ^ 3
+        "\n\n\n\n[tap] to continue", 
+        // ^ 4
+        "Accuracy (green) allows you to choose\ndifferent body parts (each applying some\nspecial debuff in damaged) as a target.\n\n[tap] to continue", 
+        // ^ 5
+        "You can use [up/down arrows]\nto adjust your aim.\n\n[tap] to continue", 
+        // ^ 6
+        "As you invest into your accuracy,\nyou will have more target options\nto choose from.\n\n[tap] to continue", 
+        // ^ 7
+        "If your damage (red) is higher than\nthe enemy's parry (white), you will wound\nthe body part you are targeting.\n\n[tap] to continue", 
+        // ^ 8
+        "Respectively, if your parry (white) isn\nhigher than the enemy's damage (red), his\nattack will deal no harm.\n\n[tap] to continue", 
+        // ^ 9
+        "Speed (blue) defines who will strike first.\nIt matters because all debuffs are\napplied instantly.\n\n[tap] to continue", 
+        // ^ 10
+        "Speed also defines who will start\nthe draft, a process of picking dice,\none by one.\n\n[tap] to continue",
+        // ^ 11
+        "The die you pick increases\nthe corresponding combat stat.\nYour speed is higher, so choose one!\n\n[tap+drag] or [double tap] to continue", 
+        // ^ 12
+        "You can notice that your enemy has\ntaken a die as well.\nThis is how draft works.\n\n[pick 2 more dice] to continue",
+        // ^ 13
+        "Now your damage (7) is higher than\nenemy's parry (3), so you'll inflict a\nwound. You are also safe from his blow.\n\n[tap] to continue", 
+        // ^ 14
+        "You have the same speed (3)\nas your enemy, which still means\nyou'll strike first.\n\n[tap] to continue",
+        // ^ 15
+        "You can probably start the fight now\nand land a successful hit. Enemy will\ndie once he has 3 wounds.\n\n[tap] to continue", 
+        // ^ 16
+        "But it would be wise to use your\nfirst-strike advantage and kill him in\none blow, before he can retaliate!\n\n[tap] to continue", 
+        // ^ 17
+        "The yellow icon above the aim list\nindicates your stamina, a resource\nused to increase your weapon stats.\n\n[tap] to continue", 
+        // ^ 18
+        "\n[tap] the \"-\" and \"+\" to the left\nfrom your weapon stats to throw\n3 stamina into your accuracy (green)",
+        // ^ 19
+        "\nAim to the face, since it's\nthe only wound that is instantly lethal.\nScroll to the bottom of the aim list\nusing the [up/down arrows].",
+        // ^ 20
+        "\n\nNow use your weapon\n(tap the \"sword\" or press [use])\nto start the fight, and watch him die...",
+        // ^ 21
+        "Take the loot now.\n [tap] to access his inventory.\nPress [use] to pick up an item.\n\n[take steak] to continue",
+        // ^ 22
+        "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[tap] to continue",
+        // ^ 23
+        "Finally, [use] the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of\nMalleus Goblinficarium. \nYou'll learn more as you play more!"
+        // ^ 24
+    };
 
-    private void Start() {
+    private List<string> tutorialTextList;
+
+    private void Awake() {
         scripts = FindObjectOfType<Scripts>();
         GetComponent<SpriteRenderer>().sprite = blackBox;
+        if (SystemInfo.deviceType == DeviceType.Handheld || Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer) {
+            tutorialTextList = mobileTextList;
+        }
+        else {
+            tutorialTextList = desktopTutorialText;
+        }
         mainScroll = StartCoroutine(TextAnimation(0));
     }
 
@@ -83,6 +143,7 @@ public class Tutorial : MonoBehaviour {
                 if (curIndex == 3) { 
                     GetComponent<SpriteRenderer>().sprite = null;
                     statText.text = "< These are your weapon stats."; 
+
                 }
                 else if (curIndex == 4) { statText.text = "< Accuracy\n< Speed\n< Damage\n< Parry"; }
                 // some tutorial steps have other text to display
@@ -122,7 +183,9 @@ public class Tutorial : MonoBehaviour {
         isAnimating = true;
         for (int i = 0; i < tutorialTextList[index].Length; i++) { 
             tutorialText.text += tutorialTextList[index][i];
-            yield return scripts.delays[0.02f];
+            // yield return scripts.delays[0.02f];
+            // for some reason scripts.delays dont fucking work here
+            yield return new WaitForSeconds(0.015f);
         }
         isAnimating = false;
         // self explanatory, just add the text step by step for a specific tutorial index
@@ -134,7 +197,9 @@ public class Tutorial : MonoBehaviour {
         isAnimating = true;
         foreach (char c in str) {
             statText.text += c;
-            yield return scripts.delays[0.02f];
+            // yield return scripts.delays[0.02f];
+            // for some reason scripts.delays dont fucking work here
+            yield return new WaitForSeconds(0.015f);
         }
         isAnimating = false;
         // same as above, but instead with a given text

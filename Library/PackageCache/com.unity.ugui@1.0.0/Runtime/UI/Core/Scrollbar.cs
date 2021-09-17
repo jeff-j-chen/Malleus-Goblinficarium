@@ -224,7 +224,7 @@ namespace UnityEngine.UI
 
         void UpdateCachedReferences()
         {
-            if (m_HandleRect && m_HandleRect.parent != null)
+            if (m_HandleRect && m_HandleRect.parent is not null)
                 m_ContainerRect = m_HandleRect.parent.GetComponent<RectTransform>();
             else
                 m_ContainerRect = null;
@@ -278,7 +278,7 @@ namespace UnityEngine.UI
 #endif
             m_Tracker.Clear();
 
-            if (m_ContainerRect != null)
+            if (m_ContainerRect is not null)
             {
                 m_Tracker.Add(this, m_HandleRect, DrivenTransformProperties.Anchors);
                 Vector2 anchorMin = Vector2.zero;
@@ -384,7 +384,7 @@ namespace UnityEngine.UI
             if (!MayDrag(eventData))
                 return;
 
-            if (m_ContainerRect != null)
+            if (m_ContainerRect is not null)
                 UpdateDrag(eventData);
         }
 

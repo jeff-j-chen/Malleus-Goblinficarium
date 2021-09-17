@@ -26,13 +26,22 @@ public class MenuIcon : MonoBehaviour {
         ColorUtility.TryParseHtmlString("#404040", out gray);
         // get the necessary components and colors
         // assign var gray to the html string parsed
+        if(!PlayerPrefs.HasKey(scripts.DEBUG_KEY)) PlayerPrefs.SetString(scripts.DEBUG_KEY, "off");
+        if(!PlayerPrefs.HasKey(scripts.HINTS_KEY)) PlayerPrefs.SetString(scripts.HINTS_KEY, "on");
+        if(!PlayerPrefs.HasKey(scripts.SOUNDS_KEY)) PlayerPrefs.SetString(scripts.SOUNDS_KEY, "on");
+        if(!PlayerPrefs.HasKey(scripts.MUSIC_KEY)) PlayerPrefs.SetString(scripts.MUSIC_KEY, "on");
+        if(!PlayerPrefs.HasKey(scripts.BUTTONS_KEY)) PlayerPrefs.SetString(scripts.BUTTONS_KEY, "off");
+        // set defaults for settings if they dont already exist
         PlayerPrefSetter(scripts.DEBUG_KEY, debugSR, false);
         PlayerPrefSetter(scripts.HINTS_KEY, hintsSR, false);
         PlayerPrefSetter(scripts.SOUNDS_KEY, soundsSR, false);
         PlayerPrefSetter(scripts.MUSIC_KEY, musicSR, false);
         PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR, false);
-        if (SystemInfo.deviceType == DeviceType.Handheld) {
+        // then set the icons
+        if (SystemInfo.deviceType == DeviceType.Handheld || Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer) {
             PlayerPrefs.SetString(scripts.BUTTONS_KEY, "on");
+            PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR, false);
+            // mobile devices always have buttons
         }
         // set the default preferences
         StartCoroutine(FindMusicLate());

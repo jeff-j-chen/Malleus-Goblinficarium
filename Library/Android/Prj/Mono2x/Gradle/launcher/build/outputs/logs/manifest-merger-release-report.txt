@@ -145,9 +145,9 @@ ADDED from [:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinfic
 	android:name
 		ADDED from [:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:53:13-47
 meta-data#unity.launch-fullscreen
-ADDED from [:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:55:9-57:37
+ADDED from [:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:55:9-57:36
 	android:value
-		ADDED from [:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:57:13-34
+		ADDED from [:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:57:13-33
 	android:name
 		ADDED from [:unityLibrary] /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/unityLibrary/build/intermediates/library_manifest/release/AndroidManifest.xml:56:13-51
 meta-data#unity.allow-resizable-window

@@ -238,7 +238,7 @@ namespace UnityEngine.EventSystems
                 return;
 
             var t = root.transform;
-            while (t != null)
+            while (t is not null)
             {
                 eventChain.Add(t);
                 t = t.parent;
@@ -308,7 +308,7 @@ namespace UnityEngine.EventSystems
                 return false;
 
             var behaviour = component as Behaviour;
-            if (behaviour != null)
+            if (behaviour is not null)
                 return behaviour.isActiveAndEnabled;
             return true;
         }
@@ -362,7 +362,7 @@ namespace UnityEngine.EventSystems
                 return null;
 
             Transform t = root.transform;
-            while (t != null)
+            while (t is not null)
             {
                 if (CanHandleEvent<T>(t.gameObject))
                     return t.gameObject;
