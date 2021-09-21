@@ -39,11 +39,6 @@ public class Player : MonoBehaviour {
     public int stamina = 3;
     public int targetIndex = 0;
     private Scripts scripts;
-    public bool isFurious = false;
-    public bool isDodgy = false;
-    public bool isHasty = false;
-    public bool isBloodthirsty = false;
-    public bool isCourageous = false;
     private readonly Vector2 basePosition = new(-2.166667f, -1.866667f);
     [SerializeField] private Vector2 iconPosition = new(-12.16667f, 3.333333f);
     private readonly Dictionary<int, Vector2> deathPositions = new() {
@@ -276,32 +271,13 @@ public class Player : MonoBehaviour {
     ///  Sets the status effect of a player.
     /// </summary>
     public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
-        if (statusEffect == "fury") {
-            if (scripts.player.isFurious && onOrOff) { return; }
-            scripts.player.isFurious = onOrOff; 
-            Save.game.isFurious = onOrOff;
+        switch (statusEffect) {
+            case "fury": Save.game.isFurious = onOrOff; break;
+            case "dodge": Save.game.isDodgy = onOrOff; break;
+            case "haste": Save.game.isHasty = onOrOff; break;
+            case "leech": Save.game.isBloodthirsty = onOrOff; break;
+            case "courage": Save.game.isCourageous = onOrOff; break;
         }
-        else if (statusEffect == "dodge") {
-            if (scripts.player.isDodgy && onOrOff) { return; }
-            scripts.player.isDodgy = onOrOff; 
-            Save.game.isDodgy = onOrOff;
-        }
-        else if (statusEffect == "haste") {
-            if (scripts.player.isHasty && onOrOff) { return; }
-            scripts.player.isHasty = onOrOff; 
-            Save.game.isHasty = onOrOff;
-        }
-        else if (statusEffect == "leech") {
-            if (scripts.player.isBloodthirsty && onOrOff) { return; }
-            scripts.player.isBloodthirsty = onOrOff; 
-            Save.game.isBloodthirsty = onOrOff;
-        }
-        else if (statusEffect == "courage") {
-            if (scripts.player.isCourageous && onOrOff) { return; }
-            scripts.player.isCourageous = onOrOff; 
-            Save.game.isCourageous = onOrOff;
-        }
-        // set as desired, if turning on something already on then instantly exit function
         if (onOrOff) {
             // if turning on
             identifier.text = ":";

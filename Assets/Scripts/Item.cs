@@ -328,7 +328,7 @@ public class Item : MonoBehaviour {
                     Save.persistent.scrollsRead++;
                     switch (modifier) {
                         case "fury":
-                            if (scripts.player.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
+                            if (Save.game.isFurious) { scripts.turnManager.SetStatusText("you are already furious"); }
                             // prevent player from accidentally using two scrolls
                             else {
                                 scripts.soundManager.PlayClip("fwoosh");
@@ -341,7 +341,7 @@ public class Item : MonoBehaviour {
                             }
                             break;
                         case "dodge":
-                            if (scripts.player.isDodgy) { scripts.turnManager.SetStatusText("you are already dodgy"); }
+                            if (Save.game.isDodgy) { scripts.turnManager.SetStatusText("you are already dodgy"); }
                             // prevent player from accidentally using two scrolls
                             else {
                                 scripts.soundManager.PlayClip("fwoosh");
@@ -359,7 +359,7 @@ public class Item : MonoBehaviour {
                             }
                             else {
                                 scripts.soundManager.PlayClip("fwoosh");
-                                if (scripts.player.isHasty) { scripts.turnManager.SetStatusText("you are already winged"); }
+                                if (Save.game.isHasty) { scripts.turnManager.SetStatusText("you are already winged"); }
                                 // prevent player from accidentally using two scrolls
                                 else {
                                     scripts.player.SetPlayerStatusEffect("haste", true);
@@ -371,7 +371,7 @@ public class Item : MonoBehaviour {
                             }
                             break;
                         case "leech":
-                            if (scripts.player.isBloodthirsty) { scripts.turnManager.SetStatusText("you are already bloodthirsty"); }
+                            if (Save.game.isBloodthirsty) { scripts.turnManager.SetStatusText("you are already bloodthirsty"); }
                             // prevent player from accidentally using two scrolls
                             else {
                                 scripts.soundManager.PlayClip("fwoosh");
@@ -383,7 +383,7 @@ public class Item : MonoBehaviour {
                             }
                             break;
                         case "courage":
-                            if (scripts.player.isCourageous) { scripts.turnManager.SetStatusText("you are already courageous"); }
+                            if (Save.game.isCourageous) { scripts.turnManager.SetStatusText("you are already courageous"); }
                             // prevent player from accidentally using two scrolls
                             else {
                                 scripts.soundManager.PlayClip("fwoosh");
@@ -554,6 +554,7 @@ public class Item : MonoBehaviour {
                         scripts.statSummoner.ResetDiceAndStamina();
                         scripts.diceSummoner.SummonDice(false, true);
                         scripts.statSummoner.SummonStats();
+                        scripts.turnManager.DetermineMove(true);
                     }
                     else { scripts.turnManager.SetStatusText("ankh glows with red light"); }
                     break;

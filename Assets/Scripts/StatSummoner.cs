@@ -296,6 +296,7 @@ public class StatSummoner : MonoBehaviour {
             addedPlayerStamina[key] = 0;
             addedEnemyStamina[key] = 0;
         }
+        scripts.highlightCalculator.diceTakenByPlayer = 0;
         SetDebugInformationFor("player");
         SetDebugInformationFor("enemy");
         // set the debug information

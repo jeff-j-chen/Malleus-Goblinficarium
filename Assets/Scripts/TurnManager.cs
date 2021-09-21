@@ -398,7 +398,7 @@ public class TurnManager : MonoBehaviour {
             // if neither player or enemy is dead
             yield return scripts.delays[2f];
             // wait for status text/animation etc.
-            if (scripts.player.isCourageous) {
+            if (Save.game.isCourageous) {
                 // if player is courageous (Save die to next round)
                 actionsAvailable = true;
                 // allow actions
@@ -730,7 +730,7 @@ public class TurnManager : MonoBehaviour {
         }
         else {
             if (hitOrParry == "hit") {
-                if (scripts.player.isDodgy && playerOrEnemy == "player") {
+                if (Save.game.isDodgy && playerOrEnemy == "player") {
                     scripts.soundManager.PlayClip("miss");
                     // play sound clip
                 }
@@ -773,7 +773,7 @@ public class TurnManager : MonoBehaviour {
         // play sound clip
         if (enemyAtt > playerDef) {
             // if enemy is hitting player
-            if (scripts.player.isDodgy) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you dodge"); }
+            if (Save.game.isDodgy) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you dodge"); }
             // if player dodges, notify 
             else {
                 if (scripts.itemManager.PlayerHas("armor")) {
@@ -820,7 +820,7 @@ public class TurnManager : MonoBehaviour {
             }
             StartCoroutine(DoStuffForAttack("hit", "player", true, armor));
             // play animation + sound for the attack
-            if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text.Substring(1)) || armor || scripts.player.isDodgy)) {
+            if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text.Substring(1)) || armor || Save.game.isDodgy)) {
                 // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
                 if (Save.game.curCharNum == 3 && scripts.player.woundList.Count < 2 && scripts.enemy.target.text != "face" && scripts.player.stamina >= 7) {
                     // if on the 4th char, they are able to heal back (wont die instantly), and has sufficient stamina to heal the next move
@@ -947,7 +947,7 @@ public class TurnManager : MonoBehaviour {
                     }
                 }
                 if (scripts.statSummoner.SumOfStat("green", "player") >= 0) {
-                    if (scripts.player.isBloodthirsty) {
+                    if (Save.game.isBloodthirsty) {
                         // if player is wounded
                         try {
                             StartCoroutine(HealSFXFromPhylactery());

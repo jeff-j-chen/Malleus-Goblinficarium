@@ -205,7 +205,7 @@ public class Dice : MonoBehaviour {
                 }
             }
         }
-        if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && scripts.turnManager.discardDieBecauseCourage) {
+        if (isAttached && isOnPlayerOrEnemy == "player" && Save.game.isCourageous && scripts.turnManager.discardDieBecauseCourage) {
             // if discarding can and should discard die from courage
             DiscardFromPlayer();
             // do so 
@@ -215,7 +215,7 @@ public class Dice : MonoBehaviour {
     private IEnumerator ClickedTimer() { 
         if (!wasClickedRecently) { 
             wasClickedRecently = true;
-            yield return scripts.delays[0.2f];
+            yield return scripts.delays[0.3f];
             wasClickedRecently = false;
         }
     }

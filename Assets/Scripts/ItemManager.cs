@@ -172,8 +172,13 @@ public class ItemManager : MonoBehaviour {
             // move the selection to the right 
         }
         else if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) {
-            // if pressing return or enter
-            UseCurrentItem();
+            // if pressing return or enter, depending on whether shift was pressed or not, drop or use the selected item
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                DropCurrentItem();
+            }
+            else { 
+                UseCurrentItem();
+            }
         }
         else if (Input.GetKeyDown(KeyCode.N)) {
             CreateItem("common");
@@ -202,13 +207,16 @@ public class ItemManager : MonoBehaviour {
             switch (Save.game.curCharNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                    // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                     // CreateWeaponWithStats("sword", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("scroll", "common", "challenge");
-                    // MoveToInventory(0, true, false, false);
                     CreateItem("steak", "common");
+                    MoveToInventory(0, true, false, false);
+                    CreateItem("ankh", "rare");
+                    MoveToInventory(0, true, false, false);
+                    CreateItem("scroll", "common", "haste");
+                    MoveToInventory(0, true, false, false);
+                    CreateItem("scroll", "common", "courage");
                     MoveToInventory(0, true, false, false);
                     if (Save.persistent.easyMode) { 
                         CreateItem("torch", "common");
@@ -221,6 +229,8 @@ public class ItemManager : MonoBehaviour {
                     MoveToInventory(0, true, false, false);
                     CreateItem("armor", "common");
                     MoveToInventory(0, true, false, false);
+                    // CreateItem("potion", "common", "might");
+                    // MoveToInventory(0, true, false, false);
                     if (Save.persistent.easyMode) {
                         CreateItem("helm_of_might", "rare");
                         MoveToInventory(0, true, false, false);
@@ -429,6 +439,12 @@ public class ItemManager : MonoBehaviour {
         // child the item to this manager
         instantiatedItem.GetComponent<Item>().itemType = "weapon";
         // set the itemtype to be a weapon
+        if (Random.Range(0, 31) == 0) {
+            // 1 in 30 chance of legendary
+        }
+        else { 
+            
+        }
         string modifier = modifierNames[Random.Range(0, modifierNames.Length)];
         // pull a random modifier from the array
         instantiatedItem.GetComponent<Item>().modifier = modifier.Substring(0, modifier.Length - 1);

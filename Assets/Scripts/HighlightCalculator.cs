@@ -33,7 +33,7 @@ public class HighlightCalculator : MonoBehaviour {
     /// Show all the valid highlights, depending on the die's type. 
     /// </summary>
     public void ShowValidHighlights(Dice dice) {
-        if (dice.diceType == "yellow" || scripts.player.isFurious) {
+        if (dice.diceType == "yellow" || Save.game.isFurious) {
             // if yellow
             MoveOtherDiceAfterYellow(dice.GetComponent<Dice>());
             // shift all die after into place
@@ -133,9 +133,9 @@ public class HighlightCalculator : MonoBehaviour {
                 // if the mouse over the collider
                 instantiationPos = curCollider.transform.position;
                 // set the instantiation position to be where the highlight is
-                if (dice.diceType == "yellow" || scripts.player.isFurious) {
+                if (dice.diceType == "yellow" || Save.game.isFurious) {
                     // if the dice is yellow or player is furious
-                    if (scripts.player.isFurious) {
+                    if (Save.game.isFurious) {
                         if (dice.diceType is "green" or "red" or "blue") { dice.GetComponent<SpriteRenderer>().color = Color.black; }
                         // change the color of the spots to match the die
                         dice.transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
@@ -186,7 +186,7 @@ public class HighlightCalculator : MonoBehaviour {
                         scripts.turnManager.RecalculateMaxFor("player");
                         // recalculate max for the player if necessary
                     }
-                    if (scripts.player.isHasty) {
+                    if (Save.game.isHasty) {
                         // if the player is affected by haste
                         if (diceTakenByPlayer >= 3) {
                             // allow the player to take 3 dice

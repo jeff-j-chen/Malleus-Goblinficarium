@@ -64,10 +64,12 @@ public class DiceSummoner : MonoBehaviour
                 // generate the 6 base die for every round
             }
             if (scripts.itemManager.PlayerHasWeapon("flail")) {
+                yield return scripts.delays[0.05f];
                 // give the player a red die if wielding a flail
                 GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
             }
             if (Save.game.curCharNum == 1) { 
+                yield return scripts.delays[0.05f];
                 // if player character #2 (maul armor helm), give player yellow die
                 scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
             }
@@ -82,6 +84,7 @@ public class DiceSummoner : MonoBehaviour
                 }
             }
             if (lastNum != -1) {
+                yield return scripts.delays[0.05f];
                 // if there is a die Saved from last round (from scroll of courage)
                 GenerateSingleDie(lastNum, lastType, "player", lastStat, initialSix:true);
                 // create the die and add it to the player
