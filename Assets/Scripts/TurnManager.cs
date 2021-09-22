@@ -7,7 +7,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 public class TurnManager : MonoBehaviour {
     [SerializeField] public GameObject blackBox;
-    public Vector3 onScreen = new Vector2(2.4f, 10.01f);
+    public Vector3 onScreen = new Vector2(2.4f, 10.01f-0.12f);
     public Vector3 offScreen = new Vector2(0.33f, 20f);
     private Coroutine coroutine = null;
     [SerializeField] public TextMeshProUGUI statusText;

@@ -2025,11 +2025,6 @@ MonoBehaviour:
   hintTimer: 0
   stamina: 3
   targetIndex: 0
-  isFurious: 0
-  isDodgy: 0
-  isHasty: 0
-  isBloodthirsty: 0
-  isCourageous: 0
   iconPosition: {x: -12.16667, y: 3.333333}
 --- !u!1 &750316795
 GameObject:
@@ -2225,6 +2220,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   highlighter: {fileID: 4282409757762050507, guid: 15e02037518a7fa448f9194ccd2e9151,
     type: 3}
+  highlights:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  highlightColliders:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   diceTakenByPlayer: 0
 --- !u!1001 &822763157
 PrefabInstance:

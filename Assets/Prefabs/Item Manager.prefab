@@ -27,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8629857128417149034}
   m_Father: {fileID: 0}
@@ -49,21 +50,20 @@ MonoBehaviour:
   item: {fileID: 1300743837099708839, guid: 001a97c2624cd624c867cc7d5398cb6c, type: 3}
   highlight: {fileID: 8629857128417149035}
   highlightedItem: {fileID: 0}
-  commonItemSprites:
+  itemSprites:
+  - {fileID: 21300000, guid: 01d06a4ffce03e04d9d9b5e63f50f870, type: 3}
   - {fileID: 21300000, guid: f0fb99b4be47cf84c8f0c16d95a4e986, type: 3}
+  - {fileID: 21300000, guid: 0ee609eede7daa647acd7cc920e037d8, type: 3}
   - {fileID: 21300000, guid: 40dceb242a5c9db488087ecb4567a0f2, type: 3}
-  - {fileID: 21300000, guid: e3be4f2a0ba737247a8d9193d24c7230, type: 3}
-  - {fileID: 21300000, guid: 6030d694c23c4604784ed64320ae40df, type: 3}
-  - {fileID: 21300000, guid: 168c4387d385a3e4083a787d59d2c2ed, type: 3}
-  - {fileID: 21300000, guid: 3382d7f6fe97b5f429f922be5564af2f, type: 3}
-  - {fileID: 21300000, guid: e9bb1dc27ca38774ab9ce3d509a17269, type: 3}
-  - {fileID: 21300000, guid: e2d45f4658f2c08459093be4a9fd4184, type: 3}
-  - {fileID: 21300000, guid: fbeb873f995e3d547bd6d963167a4f6e, type: 3}
-  rareItemSprites:
   - {fileID: 21300000, guid: a6b2a455cd4c73041945c6eba3df840f, type: 3}
   - {fileID: 21300000, guid: e6e43e8ae0aebce49a237f50e68d7e5f, type: 3}
-  - {fileID: 21300000, guid: 01d06a4ffce03e04d9d9b5e63f50f870, type: 3}
-  - {fileID: 21300000, guid: 0ee609eede7daa647acd7cc920e037d8, type: 3}
+  - {fileID: 21300000, guid: e2d45f4658f2c08459093be4a9fd4184, type: 3}
+  - {fileID: 21300000, guid: c3303b3ebe228da4c9665c739494c4b1, type: 3}
+  - {fileID: 21300000, guid: 3382d7f6fe97b5f429f922be5564af2f, type: 3}
+  - {fileID: 21300000, guid: e9bb1dc27ca38774ab9ce3d509a17269, type: 3}
+  - {fileID: 21300000, guid: fbeb873f995e3d547bd6d963167a4f6e, type: 3}
+  - {fileID: 21300000, guid: 6030d694c23c4604784ed64320ae40df, type: 3}
+  - {fileID: 21300000, guid: e3be4f2a0ba737247a8d9193d24c7230, type: 3}
   weaponSprites:
   - {fileID: 21300000, guid: da24a2410e9825747b80ada71e96d102, type: 3}
   - {fileID: 21300000, guid: b798d06b968782340be9160baad4e4a4, type: 3}
@@ -91,6 +91,17 @@ MonoBehaviour:
   - speed
   - damage
   - parry
+  weaponNames:
+  - dagger
+  - flail
+  - hatchet
+  - mace
+  - maul
+  - montante
+  - rapier
+  - scimitar
+  - spear
+  - sword
   neckletTypes:
   - solidity
   - rapidity
@@ -103,11 +114,7 @@ MonoBehaviour:
   itemY: -5.3
   col: 0
   curList: []
-  discardableDieCounter: 0
-  usedAnkh: 0
-  usedHelm: 0
-  usedBoots: 0
-  numItemsDroppedForTrade: 0
+  isCharSelect: 0
 --- !u!1 &8629857128417149035
 GameObject:
   m_ObjectHideFlags: 0
@@ -135,6 +142,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8629857127145482953}
   m_RootOrder: 0
@@ -150,10 +158,12 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

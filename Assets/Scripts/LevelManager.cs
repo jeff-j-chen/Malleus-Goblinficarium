@@ -248,7 +248,7 @@ public class LevelManager : MonoBehaviour {
                     // spawn the tombstone
                 }
                 else if (sub == 4) { 
-                    toSpawn = "trader";
+                    toSpawn = "merchant";
                     scripts.enemy.SpawnNewEnemy(7, true);
                     // create the trader enemy
                     scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
@@ -307,9 +307,9 @@ public class LevelManager : MonoBehaviour {
                 scripts.itemManager.lootText.text = "loot:";
                 scripts.tombstoneData.SpawnSavedTSItems();
             }
-            else if (toSpawn == "trader") {
+            else if (toSpawn == "merchant") {
                 // going to trader, so spawn trader items
-                scripts.itemManager.SpawnTraderItems();
+                scripts.itemManager.SpawnMerchantItems();
             }
             else {
                 // not going to the trader or tombstone

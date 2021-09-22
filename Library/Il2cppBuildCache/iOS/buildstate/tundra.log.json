@@ -1,5 +1,0 @@
-{"msg":"init","dagFile":"/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Il2cppBuildCache/iOS/buildstate/bee.dag","targets":["FinalProgram"]}
-{"msg":"enqueueNode","enqueuedNodeAnnotation":"FinalProgram","enqueuedNodeIndex":2}
-{"msg":"enqueueNode","enqueuedNodeAnnotation":"IL2CPP_CodeGen /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Il2cppBuildCache/iOS/buildstate/artifacts/il2cpp_conv_ykux.traceevents","enqueuedNodeIndex":1,"enqueueingNodeAnnotation":"FinalProgram","enqueueingNodeIndex":2}
-{"msg":"newNode","annotation":"FinalProgram","index":2}
-{"msg":"runNodeAction","annotation":"FinalProgram","index":2}

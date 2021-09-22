@@ -68,7 +68,7 @@ public class TombstoneData : MonoBehaviour {
             }
         }
         // KEEP IT AS FOREACH, for loop doesn't seem to work!
-        GameObject retryButton = scripts.itemManager.CreateItem("retry", "retry");
+        GameObject retryButton = scripts.itemManager.CreateItem("retry");
         // create retry button
         scripts.itemManager.MoveToInventory(scripts.itemManager.floorItems.IndexOf(retryButton), true, false, false);
         // move the button explicitly, because it doesn't seem to want to be moved otherwise
@@ -113,7 +113,7 @@ public class TombstoneData : MonoBehaviour {
         // make the item with worse stats
         for (int i = 1; i < Save.persistent.tsItemNames.Length; i++) {
             if (Save.persistent.tsItemNames[i] != null && Save.persistent.tsItemNames[i] != "") { 
-                GameObject created = scripts.itemManager.CreateItem(Save.persistent.tsItemNames[i].Replace(' ', '_'), Save.persistent.tsItemTypes[i], Save.persistent.tsItemMods[i]);
+                GameObject created = scripts.itemManager.CreateItem(Save.persistent.tsItemNames[i].Replace(' ', '_'), Save.persistent.tsItemMods[i]);
                 switch (created.GetComponent<Item>().itemName) { 
                     case "helm of might":
                         created.GetComponent<Item>().itemName = "broken helm"; break;
@@ -131,9 +131,9 @@ public class TombstoneData : MonoBehaviour {
             }
             // ruin certain items
         }
-        scripts.itemManager.CreateItem("arrow", "arrow");
+        scripts.itemManager.CreateItem("arrow");
         // create the next level arrow
-        scripts.itemManager.SaveTombstoneItems();
+        scripts.itemManager.SaveFloorItems();
     }
 
     /// <summary>
@@ -147,7 +147,7 @@ public class TombstoneData : MonoBehaviour {
         // spawn the floor's weapon first
         for (int i = 1; i < 9; i++) {  
             if (Save.game.floorItemNames[i] != null && Save.game.floorItemNames[i] != "") {
-                scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemTypes[i], Save.game.floorItemMods[i]);
+                scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemMods[i]);
             }
         }
         // then put all remaining items onto the floor
@@ -161,7 +161,7 @@ public class TombstoneData : MonoBehaviour {
         scripts = FindObjectOfType<Scripts>();
         for (int i = 0; i < 9; i++) {  
             if (Save.game.floorItemNames[i] != null && Save.game.floorItemNames[i] != "") {
-                scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemTypes[i], Save.game.floorItemMods[i]);
+                scripts.itemManager.CreateItem(Save.game.floorItemNames[i], Save.game.floorItemMods[i]);
             }
         }
         // merchant does not have items, so just spawn them in right away

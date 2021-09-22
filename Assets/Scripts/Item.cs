@@ -206,7 +206,7 @@ public class Item : MonoBehaviour {
                 // only allow item usage in certain conditions
                 if (scripts.itemManager.floorItems.Contains(gameObject)) {
                     // if item is on the floor
-                    if (itemType == "arrow") {
+                    if (itemName == "arrow") {
                         if (scripts.tutorial == null) { 
                             // if the item is arrow (next level indicator)
                             scripts.levelManager.NextLevel();
@@ -236,7 +236,7 @@ public class Item : MonoBehaviour {
                     }
                 }
                 else {
-                    if (itemType == "retry") {
+                    if (itemName == "retry") {
                         Save.persistent.gamesPlayed++;
                         Save.SavePersistent();
                         scripts.levelManager.lockActions = true;
@@ -260,7 +260,6 @@ public class Item : MonoBehaviour {
                             }
                         }
                         else if (itemType == "common") { UseCommon(); }
-                        else if (itemType == "rare") { UseRare(); }
                         // not item, so use corresponding item type
                     }
                 }
@@ -275,7 +274,7 @@ public class Item : MonoBehaviour {
     /// Use a common item.
     /// </summary>
     private void UseCommon() {
-        if (Save.game.enemyIsDead || scripts.enemy.enemyName.text == "Tombstone") {
+        if (Save.game.enemyIsDead || scripts.enemy.enemyName.text is "Tombstone" or "Merchant") {
             if (itemName is "steak" or "cheese" or "retry" or "arrow") {
                 // only allow those 4 items to be used if the enemy is dead, otherwise its a waste
                 StartCoroutine(UseCommonCoro());
@@ -293,7 +292,7 @@ public class Item : MonoBehaviour {
         if (!scripts.levelManager.lockActions) {
             // don't use items when locked
             switch (itemName) {
-                case "steak" when scripts.enemy.enemyName.text != "Tombstone":
+                case "steak":
                     // eating steak
                     Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
@@ -304,27 +303,27 @@ public class Item : MonoBehaviour {
                     Remove();
                     // remove from player inventory
                     break;
-                case "rotten steak" when scripts.enemy.enemyName.text != "Tombstone":
+                case "rotten steak":
                     Save.persistent.foodEaten++;
                     // don't change stamina for rotten foods
                     scripts.soundManager.PlayClip("eat");
                     scripts.turnManager.SetStatusText("you swallow rotten steak");
                     Remove();
                     break;
-                case "cheese" when scripts.enemy.enemyName.text != "Tombstone":
+                case "cheese":
                     Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     scripts.turnManager.ChangeStaminaOf("player", Save.game.curCharNum == 0 ? 5 : 3);
                     scripts.turnManager.SetStatusText("you swallow cheese");
                     Remove();
                     break;
-                case "moldy cheese" when scripts.enemy.enemyName.text != "Tombstone":
+                case "moldy cheese":
                     Save.persistent.foodEaten++;
                     scripts.soundManager.PlayClip("eat");
                     scripts.turnManager.SetStatusText("you swallow moldy cheese");
                     Remove();
                     break;
-                case "scroll" when scripts.levelManager.sub != 4:
+                case "scroll":
                     Save.persistent.scrollsRead++;
                     switch (modifier) {
                         case "fury":
@@ -413,9 +412,7 @@ public class Item : MonoBehaviour {
                             Remove();
                             break;
                     }
-                    break;
-                case "potion" when scripts.levelManager.sub != 4:
-                    // don't let potions be used at merchant
+                
                     Save.persistent.potionsQuaffed++;
                     scripts.soundManager.PlayClip("gulp");
                     scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
@@ -466,7 +463,7 @@ public class Item : MonoBehaviour {
                     Remove();
                     scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                     break;
-                case "shuriken" when scripts.levelManager.sub != 4:
+                case "shuriken":
                     Save.persistent.shurikensThrown++;
                     scripts.soundManager.PlayClip("shuriken");
                     // play sound clip
@@ -476,7 +473,7 @@ public class Item : MonoBehaviour {
                     Remove();
                     scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                     break;
-                case "skeleton key" when scripts.levelManager.sub != 4:
+                case "skeleton key":
                     if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
                         // can't use skeleton key on the devil
                         scripts.soundManager.PlayClip("shuriken");
@@ -491,17 +488,6 @@ public class Item : MonoBehaviour {
                     Remove();
                     scripts.itemManager.Select(scripts.player.inventory, 0, true, false);
                     break;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Use a rare item. 
-    /// </summary>
-    private void UseRare() {
-        // these are pretty self explanatory
-        if (!scripts.levelManager.lockActions && scripts.levelManager.sub != 4 && scripts.enemy.enemyName.text != "Tombstone" && !Save.game.enemyIsDead) {
-            switch (itemName) {
                 case "helm of might":
                     if (!Save.game.usedHelm) {
                         if (scripts.player.stamina >= 3) {
