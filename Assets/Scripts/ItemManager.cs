@@ -161,36 +161,46 @@ public class ItemManager : MonoBehaviour {
     private List<string> modifierDropTable = new();
     
     public readonly Dictionary<string, string> descriptionDict = new() {
-        {"armor", "protects from one hit"}, 
-        {"arrow", "proceed to the next level"}, 
-        {"ankh", "force new draft"}, 
-        {"boots of dodge", "pay 1 stamina to become dodgy"}, 
-        {"broken helm", ""}, 
-        {"cheese", "3"}, 
-        {"dagger", "green dice buff damage"}, 
-        {"defiled kapala", ""}, 
-        {"flail", "start with red die"}, 
-        {"hatchet", "enemy can't choose yellow die"},  
-        {"helm of might", "pay 3 stamina to gain a yellow die"}, 
-        {"kapala", "offer an item to become furious"}, 
-        {"mace", "reroll all dice still to be picked"}, 
-        {"maul", "any wound is deadly"}, 
-        {"montante", ""}, 
-        {"necklet", ""}, 
-        {"phylactery", "gain \"leech\" buff once wounded"},
-        {"potion", ""}, 
-        {"rapier", "gain 3 stamina upon kill"}, 
-        {"retry", "retry?"}, 
-        {"ruined boots", ""}, 
-        {"scimitar", "discard enemy's die upon parry"},  
-        {"scroll", ""}, 
-        {"shuriken", "discard enemy's die"}, 
-        {"skeleton key", "escape the fight"}, 
-        {"shattered ankh", ""}, 
-        {"spear", "always choose first die"}, 
-        {"steak", "5"}, 
-        {"sword", ""}, 
-        {"torch", "find more loot"} 
+        {"armor",              "protects from one hit"}, 
+        {"arrow",              "proceed to the next level"}, 
+        {"ankh",               "force new draft"}, 
+        {"boots of dodge",     "pay 1 stamina to become dodgy"}, 
+        {"broken helm",        ""}, 
+        {"cheese",             "3"}, 
+        {"dagger",             "green dice buff damage"}, 
+        {"legendary dagger",   "stamina regen (1)"},
+        {"defiled kapala",     ""}, 
+        {"flail",              "start with red die"}, 
+        {"legendary flail",    "start with two red die"}, 
+        {"hatchet",            "enemy can't choose yellow die"},  
+        {"legendary hatchet",  "start with yellow die"},  
+        {"helm of might",      "pay 3 stamina to gain a yellow die"}, 
+        {"kapala",             "offer an item to become furious"}, 
+        {"mace",               "reroll all dice still to be picked"}, 
+        {"legendary mace",     "reroll any number of enemy's dice"}, 
+        {"maul",               "any wound is deadly"}, 
+        {"legendary maul",     "any wound is deadly"}, 
+        {"montante",           ""}, 
+        {"legendary montante", ""}, 
+        {"necklet",            ""}, 
+        {"phylactery",         "gain \"leech\" buff once wounded"},
+        {"potion",             ""}, 
+        {"rapier",             "gain 3 stamina upon kill"}, 
+        {"legendary rapier",   "gain 5 stamina upon kill"}, 
+        {"retry",              "retry?"}, 
+        {"ruined boots",       ""}, 
+        {"scimitar",           "discard enemy's die upon parry"},  
+        {"legendary scimitar", "discard two of enemy's die upon parry"},  
+        {"scroll",             ""}, 
+        {"shuriken",           "discard enemy's die"}, 
+        {"skeleton key",       "escape the fight"}, 
+        {"shattered ankh",     ""}, 
+        {"spear",              "always choose first die"}, 
+        {"legendary spear",    "always choose first two die"}, 
+        {"steak",              "5"}, 
+        {"sword",              ""}, 
+        {"legendary sword",    ""}, 
+        {"torch",              "find more loot"} 
     };
     public string[] neckletTypes = { "solidity", "rapidity", "strength", "defense", "arcane", "nothing", "victory" };
     public readonly Dictionary<string, int> neckletStats = new() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
@@ -295,8 +305,8 @@ public class ItemManager : MonoBehaviour {
             switch (Save.game.curCharNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-                    // CreateWeaponWithStats("sword", "slow", 2, -1, 3, 2);
+                    // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                    CreateWeaponWithStats("dagger", "legendary", 3, 6, 0, 0);
                     // CreateWeaponWithStats("sword", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
                     CreateItem("steak");
@@ -804,6 +814,10 @@ public class ItemManager : MonoBehaviour {
     public bool PlayerHasWeapon(string weaponName) {
         return (scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1] == weaponName);
         // return (from a in scripts.player.inventory where a.GetComponent<Item>().itemName.Split(' ').Length > 1 select a.GetComponent<Item>().itemName.Split(' ')[1]).Contains(weaponName);
+    }
+    
+    public bool PlayerHasLegendary() {
+        return (scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[0] == "legendary");
     }
 
     /// <summary>

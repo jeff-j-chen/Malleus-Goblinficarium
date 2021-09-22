@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 public class TurnManager : MonoBehaviour {
     [SerializeField] public GameObject blackBox;
@@ -17,7 +19,7 @@ public class TurnManager : MonoBehaviour {
     public bool isMoving = false;
     public bool actionsAvailable = false;
     public bool alterationDuringMove = false;
-    public bool scimitarParry = false;
+    public int scimitarParryCount = 0;
     public GameObject dieSavedFromLastRound = null;
     public bool discardDieBecauseCourage = false;
     public bool dontRemoveLeechYet = false;
@@ -282,7 +284,7 @@ public class TurnManager : MonoBehaviour {
     /// Start the first round of attack.
     /// </summary>
     public void RoundOne() {
-        scimitarParry = false;
+        scimitarParryCount = 0;
         // reset the scimitar parry (if set true from a previous round)
         isMoving = true;
         // set the variable to true so that certain actions can check this and make sure actions are not taken when they shouldn't be
@@ -323,6 +325,15 @@ public class TurnManager : MonoBehaviour {
         Save.SavePersistent();
     }
 
+    private IEnumerator AttemptRegenStaminaAfterDelay() {
+        if (scripts.itemManager.PlayerHasWeapon("dagger") && scripts.itemManager.PlayerHasLegendary()) {
+            // only legendary dagger has stamina regen
+            yield return scripts.delays[0.34f];
+            ChangeStaminaOf("player", 1);
+            scripts.soundManager.PlayClip("blip0");
+        }
+    }
+
     /// <summary>
     /// Start the second round of attack, with the specified player or enemy attacking.
     /// </summary>
@@ -333,16 +344,14 @@ public class TurnManager : MonoBehaviour {
         // wait 2 seconds for animation/status text from previous round to finish
         if (toMove == "player") {
             // if player is the one attacking
-            if (scimitarParry) {
+            if (scimitarParryCount > 0) {
                 // if they parried and had a scimitar
-                scripts.turnManager.SetStatusText("discard enemy's die");
-                // notify player
-                Save.game.discardableDieCounter++;
-                // increment # is discardable die
+                scripts.turnManager.SetStatusText(scimitarParryCount == 1 ? "discard enemy's die" : "discard two of enemy's dice");
+                // notify player to discard die, depending on the #
                 actionsAvailable = true;
                 // allow for player to take actions
-                for (float i = 2.5f; i > 0; i -= 0.1f) {
-                    // 2.5s time slot
+                for (float i = 5f; i > 0; i -= 0.1f) {
+                    // 5s time slot to discard
                     if (scripts.diceSummoner.breakOutOfScimitarParryLoop) { break; }
                     // handle the discard somewhere else, if the action was taken then will break out
                     yield return scripts.delays[0.1f];
@@ -350,8 +359,6 @@ public class TurnManager : MonoBehaviour {
                 }
                 actionsAvailable = false;
                 // prevent further action
-                scimitarParry = false;
-                // reset the variable
             }
             // get necessary stats 
             if (PlayerAttacks()) {
@@ -471,19 +478,16 @@ public class TurnManager : MonoBehaviour {
         Save.game.usedBoots = false;
         Save.game.usedHelm = false;
         scripts.diceSummoner.breakOutOfScimitarParryLoop = false;
-        if (scripts.enemy.woundList.Contains("head")) {
-            // only allow discarding if enemy has head wound and we arent going to the next round
-            Save.game.discardableDieCounter = 1;
-            Save.game.discardableDieCounter = 1;
-        }
+        scimitarParryCount = 0;
+        Save.game.discardableDieCounter = scripts.enemy.woundList.Contains("head") ? 1 : 0;
         Save.game.usedMace = false;
         Save.game.usedAnkh = false;
         Save.game.usedBoots = false;
         Save.game.usedHelm = false;
         Save.game.expendedStamina = 0;
         if (scripts.tutorial == null) { Save.SaveGame(); }
-        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < 5 && !Save.game.enemyIsDead) {
-            scripts.enemy.stamina = 3;
+        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < scripts.enemy.lichStamina && !Save.game.enemyIsDead) {
+            scripts.enemy.stamina = scripts.enemy.lichStamina;
             // refresh lich's stamina
             scripts.soundManager.PlayClip("blip1");
             // play sound clip
@@ -491,6 +495,7 @@ public class TurnManager : MonoBehaviour {
         }
         dontRemoveLeechYet = false;
         // set it to be false regardless afterwards, because we only want it to persist for 1 round
+        StartCoroutine(AttemptRegenStaminaAfterDelay());
     }
 
     /// <summary>
@@ -858,7 +863,10 @@ public class TurnManager : MonoBehaviour {
             // play sound and animation
             if (enemyAtt < 0) { SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... the attack is to weak"); }
             else {
-                if (scripts.itemManager.PlayerHasWeapon("scimitar")) { scimitarParry = true; }
+                if (scripts.itemManager.PlayerHasWeapon("scimitar")) {
+                    scimitarParryCount += scripts.itemManager.PlayerHasLegendary() ? 2 : 1;
+                    // legendary scimitar gets 2 discard, regular only gets 1
+                }
                 // player has parried (this resets at the start of every round so we can do it regardless)
                 SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you... you parry");
                 Save.persistent.attacksParried++;

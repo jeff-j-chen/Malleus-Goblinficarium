@@ -52,6 +52,7 @@ public class Enemy : MonoBehaviour {
     public int spawnNum;
     private readonly List<Dice> availableDice = new();
     private readonly List<int> diceValuations = new();
+    public readonly int lichStamina = 3;
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -243,8 +244,8 @@ public class Enemy : MonoBehaviour {
                 // tombstone and merchant don't have stamina
             }
             else if (enemyArr[enemyNum] == "Lich") {
-                // if lich, has 5 stamina by default
-                stamina = 3;
+                // if lich, has 3 stamina by default
+                stamina = lichStamina;
             }
             else {
                 // normal enemy 

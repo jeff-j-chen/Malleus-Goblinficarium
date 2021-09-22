@@ -99,9 +99,13 @@ public class Item : MonoBehaviour {
     public void Select(bool playAudio = true) {
         if (itemType == "weapon") {
             // if the item is a weapon
-            scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[itemName.Split(' ')[1]] == "" 
+            string descSearch;
+            if (modifier == "legendary") { descSearch = itemName; }
+            else { descSearch = itemName.Split(' ')[1]; }   
+            // depending on whether the item is legendary or not, load the correct item
+            scripts.itemManager.itemDesc.text = scripts.itemManager.descriptionDict[descSearch] == "" 
                 ? itemName 
-                : $"{itemName}\n- {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}";
+                : $"{itemName}\n- {scripts.itemManager.descriptionDict[descSearch]}";
             // if description, then display it, else just display it normally
             if (scripts.itemManager.floorItems.Contains(gameObject) && scripts.player != null) {
                 // if item on the floor and not in character select

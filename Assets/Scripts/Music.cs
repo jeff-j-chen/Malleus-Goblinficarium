@@ -18,6 +18,9 @@ public class Music : MonoBehaviour {
     private void Awake() {
         SetUpSingleton();
         audioSource = GetComponent<AudioSource>();
+        for (int i = 0; i < musicPieces.Length; i++) {
+            musicPieceNames[i] = musicPieces[i].name;
+        }
         scripts = FindObjectOfType<Scripts>();
         shouldPlayMusic = PlayerPrefs.GetString(scripts.MUSIC_KEY) == "on";
         audioSource.volume = shouldPlayMusic ? 0.4f : 0f;

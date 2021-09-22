@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.AssetImporters;
 using UnityEngine;
 public class Dice : MonoBehaviour {
     public int diceNum;
@@ -184,19 +185,31 @@ public class Dice : MonoBehaviour {
             // send the die to the background
         }
         if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich") {
+            print("1");
             //  && !scripts.turnManager.isMoving
             // if an action can be performed on the dice (discard, reroll)
             if (!scripts.turnManager.isMoving || scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable) {
+                print("2");
                 // if the situation allows for an action to be performed
-                if (Save.game.discardableDieCounter > 0) {
+                if (Save.game.discardableDieCounter > 0 || scripts.turnManager.scimitarParryCount > 0) {
+                    print("3");
                     // if can discard from another source
-                    if (scripts.turnManager.scimitarParry) { scripts.diceSummoner.breakOutOfScimitarParryLoop = true; }
-                    // if source is from scimitarParry, break out of the waiting loop
+                    if (scripts.turnManager.scimitarParryCount > 1) {
+                        scripts.turnManager.scimitarParryCount = 1;
+                        // decrease the scimitarparry count
+                        if (scripts.tutorial == null) { Save.SaveGame(); }
+                    }
+                    else {
+                        // <= 1 scimitar die parry
+                        scripts.turnManager.scimitarParryCount = 0;
+                        scripts.diceSummoner.breakOutOfScimitarParryLoop = true;
+                        // set the # of parries to 0 and break out of the loop
+                    }
                     DiscardFromEnemy();
                     // discard from the enemy
                     Save.game.discardableDieCounter--;
-                    // decrease the counter for the number of die 
-                    if (scripts.tutorial == null) { Save.SaveGame(); }
+                    // decrease the counter for the number of die able to be discarded
+                    // if source is from scimitarParry, break out of the waiting loop
                 }
                 else if (scripts.enemy.woundList.Contains("chest")) {
                     // if enemy is wounded in the chest
