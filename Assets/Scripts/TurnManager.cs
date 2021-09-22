@@ -631,8 +631,12 @@ public class TurnManager : MonoBehaviour {
             scripts.soundManager.PlayClip("death");
         }
         // play sound clip
-        if (scripts.itemManager.PlayerHasWeapon("rapier") && playerOrEnemy == "enemy") { ChangeStaminaOf("player", 3); }
-        // if player has rapier and the enemy dies, add to their stamina
+        if (scripts.itemManager.PlayerHasWeapon("rapier") && playerOrEnemy == "enemy") {
+            yield return scripts.delays[1.15f];
+            ChangeStaminaOf("player", scripts.itemManager.PlayerHasLegendary() ? 5 : 3); 
+            scripts.soundManager.PlayClip("blip0");
+        }
+        // if player has rapier and the enemy dies, add to their stamina based on whether its legendary or not
         if (playerOrEnemy == "player") {
             scripts.player.GetComponent<SpriteRenderer>().sprite = scripts.player.GetDeathSprite();
             scripts.player.SetPlayerPositionAfterDeath();

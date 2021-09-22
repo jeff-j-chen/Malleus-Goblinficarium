@@ -96,7 +96,7 @@ namespace UnityEditor.UI
             m_UseSpriteMesh         = serializedObject.FindProperty("m_UseSpriteMesh");
             m_PixelsPerUnitMultiplier = serializedObject.FindProperty("m_PixelsPerUnitMultiplier");
 
-            m_ShowType = new AnimBool(m_Sprite.objectReferenceValue is not null);
+            m_ShowType = new AnimBool(m_Sprite.objectReferenceValue != null);
             m_ShowType.valueChanged.AddListener(Repaint);
 
             var typeEnum = (Image.Type)m_Type.enumValueIndex;
@@ -139,7 +139,7 @@ namespace UnityEditor.UI
             RaycastControlsGUI();
             MaskableControlsGUI();
 
-            m_ShowType.target = m_Sprite.objectReferenceValue is not null;
+            m_ShowType.target = m_Sprite.objectReferenceValue != null;
             if (EditorGUILayout.BeginFadeGroup(m_ShowType.faded))
                 TypeGUI();
             EditorGUILayout.EndFadeGroup();
@@ -164,7 +164,7 @@ namespace UnityEditor.UI
         void SetShowNativeSize(bool instant)
         {
             Image.Type type = (Image.Type)m_Type.enumValueIndex;
-            bool showNativeSize = (type == Image.Type.Simple || type == Image.Type.Filled) && m_Sprite.objectReferenceValue is not null;
+            bool showNativeSize = (type == Image.Type.Simple || type == Image.Type.Filled) && m_Sprite.objectReferenceValue != null;
             base.SetShowNativeSize(showNativeSize, instant);
         }
 
@@ -227,14 +227,14 @@ namespace UnityEditor.UI
 
                 if (EditorGUILayout.BeginFadeGroup(m_ShowSliced.faded))
                 {
-                    if (image.sprite is not null && !image.hasBorder)
+                    if (image.sprite != null && !image.hasBorder)
                         EditorGUILayout.HelpBox("This Image doesn't have a border.", MessageType.Warning);
                 }
                 EditorGUILayout.EndFadeGroup();
 
                 if (EditorGUILayout.BeginFadeGroup(m_ShowTiled.faded))
                 {
-                    if (image.sprite is not null && !image.hasBorder && (image.sprite.texture.wrapMode != TextureWrapMode.Repeat || image.sprite.packed))
+                    if (image.sprite != null && !image.hasBorder && (image.sprite.texture.wrapMode != TextureWrapMode.Repeat || image.sprite.packed))
                         EditorGUILayout.HelpBox("It looks like you want to tile a sprite with no border. It would be more efficient to modify the Sprite properties, clear the Packing tag and set the Wrap mode to Repeat.", MessageType.Warning);
                 }
                 EditorGUILayout.EndFadeGroup();
@@ -317,8 +317,8 @@ namespace UnityEditor.UI
             Image image = target as Image;
             Sprite sprite = image.sprite;
 
-            int x = (sprite is not null) ? Mathf.RoundToInt(sprite.rect.width) : 0;
-            int y = (sprite is not null) ? Mathf.RoundToInt(sprite.rect.height) : 0;
+            int x = (sprite != null) ? Mathf.RoundToInt(sprite.rect.width) : 0;
+            int y = (sprite != null) ? Mathf.RoundToInt(sprite.rect.height) : 0;
 
             return string.Format("Image Size: {0}x{1}", x, y);
         }

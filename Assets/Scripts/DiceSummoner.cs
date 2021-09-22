@@ -65,14 +65,25 @@ public class DiceSummoner : MonoBehaviour
             }
             if (scripts.itemManager.PlayerHasWeapon("flail")) {
                 yield return scripts.delays[0.05f];
-                // give the player a red die if wielding a flail
-                GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
+                if (scripts.itemManager.PlayerHasLegendary()) {
+                    // give the player two red die if wielding a legendary flail, else one
+                    GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
+                    GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
+                }
+                else {
+                    GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
+                }
             }
             if (Save.game.curCharNum == 1) { 
                 yield return scripts.delays[0.05f];
                 // if player character #2 (maul armor helm), give player yellow die
                 scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
             }
+            if (scripts.itemManager.PlayerHasWeapon("hatchet") && scripts.itemManager.PlayerHasLegendary()) {
+                yield return scripts.delays[0.05f];
+                // legendary hatchet lets player start out with yellow die
+                scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+            } 
             if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
                 // if devil
                 yield return scripts.delays[0.05f];

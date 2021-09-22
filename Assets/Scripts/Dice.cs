@@ -211,8 +211,8 @@ public class Dice : MonoBehaviour {
                     // decrease the counter for the number of die able to be discarded
                     // if source is from scimitarParry, break out of the waiting loop
                 }
-                else if (scripts.enemy.woundList.Contains("chest")) {
-                    // if enemy is wounded in the chest
+                else if (scripts.enemy.woundList.Contains("chest") || scripts.itemManager.PlayerHasWeapon("mace") && scripts.itemManager.PlayerHasLegendary()) {
+                    // if enemy is wounded in the chest or player has legendary mace
                     Reroll();
                     // reroll the die
                 }

@@ -56,8 +56,8 @@ public class ItemManager : MonoBehaviour {
             { "green", 0 }, { "blue", -1 }, { "red", 5 }, { "white", 0 } } }, 
             // +1g +2r -1w
         { "montante", new Dictionary<string, int> { 
-            { "green", 0 }, { "blue", 0 }, { "red", 4 }, { "white", 4 } } }, 
-            // -1g -1b +1r +2w
+            { "green", 0 }, { "blue", 0 }, { "red", 5 }, { "white", 5 } } }, 
+            // -1g -1b +2r +3w
         { "rapier",   new Dictionary<string, int> { 
             { "green", 7 }, { "blue", 2 }, { "red", 0 }, { "white", 1 } } }, 
             // +3g +1r
@@ -134,7 +134,7 @@ public class ItemManager : MonoBehaviour {
     };
 
     private readonly Dictionary<string, int> modifierDropDict = new() {
-        { "common0",   20 },
+        { "common0",   15 },
         { "legendary0", 5 },
         { "accurate0", 5 },
         { "accurate1", 5 },
@@ -196,10 +196,10 @@ public class ItemManager : MonoBehaviour {
         {"skeleton key",       "escape the fight"}, 
         {"shattered ankh",     ""}, 
         {"spear",              "always choose first die"}, 
-        {"legendary spear",    "always choose first two die"}, 
+        {"legendary spear",    "your speed is always higher than enemy's"}, 
         {"steak",              "5"}, 
         {"sword",              ""}, 
-        {"legendary sword",    ""}, 
+        {"legendary sword",    "find more loot"}, 
         {"torch",              "find more loot"} 
     };
     public string[] neckletTypes = { "solidity", "rapidity", "strength", "defense", "arcane", "nothing", "victory" };
@@ -306,7 +306,7 @@ public class ItemManager : MonoBehaviour {
                 // new game, so give the base weapons
                 case 0: {
                     // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-                    CreateWeaponWithStats("dagger", "legendary", 3, 6, 0, 0);
+                    CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                     // CreateWeaponWithStats("sword", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
                     CreateItem("steak");
@@ -753,9 +753,10 @@ public class ItemManager : MonoBehaviour {
             else {
                 // normal enemy
                 int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
-                // count the number of torches
-                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + Random.Range(-2, 1), 0, 5);
-                // create a spawn count 
+                if (PlayerHasWeapon("sword") && PlayerHasLegendary()) { torchCount++; }
+                // count the number of torches, legendary sword helps find loot
+                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + Random.Range(-2, 1), 0, 6);
+                // create a spawn count, only 5 items can be spawned
                 CreateRandomWeapon();
                 // create a random weapon at index 0
                 for (int i = 0; i < spawnCount; i++) {

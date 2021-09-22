@@ -41,7 +41,7 @@ namespace UnityEngine.UI
             set
             {
                 m_EffectColor = value;
-                if (graphic is not null)
+                if (graphic != null)
                     graphic.SetVerticesDirty();
             }
         }
@@ -69,7 +69,7 @@ namespace UnityEngine.UI
 
                 m_EffectDistance = value;
 
-                if (graphic is not null)
+                if (graphic != null)
                     graphic.SetVerticesDirty();
             }
         }
@@ -83,7 +83,7 @@ namespace UnityEngine.UI
             set
             {
                 m_UseGraphicAlpha = value;
-                if (graphic is not null)
+                if (graphic != null)
                     graphic.SetVerticesDirty();
             }
         }

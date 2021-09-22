@@ -627,7 +627,7 @@ namespace UnityEngine.UI
         /// </example>
         public override bool IsActive()
         {
-            return base.IsActive() && m_Content is not null;
+            return base.IsActive() && m_Content != null;
         }
 
         private void EnsureLayoutHasRebuilt()

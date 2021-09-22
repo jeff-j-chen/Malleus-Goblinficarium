@@ -14,7 +14,7 @@ namespace UnityEngine.UI.Tests
             BindingFlags flags = BindingFlags.Default;
             flags |= BindingFlags.Public;
             flags |= BindingFlags.NonPublic;
-            if (obj is not null)
+            if (obj != null)
                 flags |= BindingFlags.Instance;
             else
                 flags |= BindingFlags.Static;
@@ -28,7 +28,7 @@ namespace UnityEngine.UI.Tests
             catch (AmbiguousMatchException)
             {
                 // If it's ambiguous, then attempt to get it using its params (though nulls would mess things up).
-                method = type.GetMethod(methodName, flags, null, args.Select(a => a is not null ? a.GetType() : null).Where(a => a is not null).ToArray(), new ParameterModifier[0]);
+                method = type.GetMethod(methodName, flags, null, args.Select(a => a != null ? a.GetType() : null).Where(a => a != null).ToArray(), new ParameterModifier[0]);
             }
             Assert.NotNull(method, string.Format("Not method {0} found on object {1}", methodName, obj));
             return method.Invoke(obj, args);

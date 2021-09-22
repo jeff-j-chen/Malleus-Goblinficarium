@@ -185,7 +185,7 @@ namespace UnityEditor.U2D.Sprites
             bool justClosed = nowMilliSeconds < s_LastClosedTime + 50;
             if (!justClosed)
             {
-                if (UnityEvent.current is not null) // Event.current can be null during integration test
+                if (UnityEvent.current != null) // Event.current can be null during integration test
                     UnityEvent.current.Use();
 
                 SpriteEditorMenu spriteEditorMenu = CreateInstance<SpriteEditorMenu>();
@@ -310,8 +310,8 @@ namespace UnityEditor.U2D.Sprites
             int width, height;
             m_TextureDataProvider.GetTextureActualWidthAndHeight(out width, out height);
             var texture = m_TextureDataProvider.GetReadableTexture2D();
-            int maxWidth = texture is not null ? width : 4096;
-            int maxHeight = texture is not null ? height : 4096;
+            int maxWidth = texture != null ? width : 4096;
+            int maxHeight = texture != null ? height : 4096;
 
             if (s_Setting.slicingType == SpriteEditorMenuSetting.SlicingType.GridByCellCount)
             {
@@ -392,7 +392,7 @@ namespace UnityEditor.U2D.Sprites
         {
             float spacing = 38f;
             var texture = m_TextureDataProvider.GetReadableTexture2D();
-            if (texture is not null && UnityEditor.TextureUtil.IsCompressedTextureFormat(texture.format))
+            if (texture != null && UnityEditor.TextureUtil.IsCompressedTextureFormat(texture.format))
             {
                 EditorGUILayout.LabelField(s_Styles.automaticSlicingHintLabel, s_Styles.notice);
                 spacing -= 31f;
@@ -404,8 +404,8 @@ namespace UnityEditor.U2D.Sprites
             int width, height;
             m_TextureDataProvider.GetTextureActualWidthAndHeight(out width, out height);
             var texture = m_TextureDataProvider.GetReadableTexture2D();
-            int maxWidth = texture is not null ? width : 4096;
-            int maxHeight = texture is not null ? height : 4096;
+            int maxWidth = texture != null ? width : 4096;
+            int maxHeight = texture != null ? height : 4096;
 
             {
                 int x = (int)s_Setting.gridSpriteSize.x;
@@ -514,8 +514,8 @@ namespace UnityEditor.U2D.Sprites
             int width, height;
             m_TextureDataProvider.GetTextureActualWidthAndHeight(out width, out height);
             var texture = m_TextureDataProvider.GetReadableTexture2D();
-            int maxWidth = texture is not null ? width : 4096;
-            int maxHeight = texture is not null ? height : 4096;
+            int maxWidth = texture != null ? width : 4096;
+            int maxHeight = texture != null ? height : 4096;
 
             cellSize.x = (maxWidth - s_Setting.gridSpriteOffset.x - (s_Setting.gridSpritePadding.x * s_Setting.gridCellCount.x)) / s_Setting.gridCellCount.x;
             cellSize.y = (maxHeight - s_Setting.gridSpriteOffset.y - (s_Setting.gridSpritePadding.y * s_Setting.gridCellCount.y)) / s_Setting.gridCellCount.y;

@@ -52,7 +52,7 @@ namespace UnityEngine.UI
             IndexedSet<Graphic> graphics;
             instance.m_Graphics.TryGetValue(c, out graphics);
 
-            if (graphics is not null)
+            if (graphics != null)
             {
                 graphics.AddUnique(graphic);
 
@@ -82,7 +82,7 @@ namespace UnityEngine.UI
             IndexedSet<Graphic> graphics;
             instance.m_RaycastableGraphics.TryGetValue(c, out graphics);
 
-            if (graphics is not null)
+            if (graphics != null)
             {
                 graphics.AddUnique(graphic);
 
