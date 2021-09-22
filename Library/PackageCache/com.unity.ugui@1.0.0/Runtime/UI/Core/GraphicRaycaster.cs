@@ -108,7 +108,7 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (m_Canvas != null)
+                if (m_Canvas is not null)
                     return m_Canvas;
 
                 m_Canvas = GetComponent<Canvas>();
@@ -187,14 +187,14 @@ namespace UnityEngine.UI
 
             Ray ray = new Ray();
 
-            if (currentEventCamera != null)
+            if (currentEventCamera is not null)
                 ray = currentEventCamera.ScreenPointToRay(eventPosition);
 
             if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && blockingObjects != BlockingObjects.None)
             {
                 float distanceToClipPlane = 100.0f;
 
-                if (currentEventCamera != null)
+                if (currentEventCamera is not null)
                 {
                     float projectionDirection = ray.direction.z;
                     distanceToClipPlane = Mathf.Approximately(0.0f, projectionDirection)
@@ -204,7 +204,7 @@ namespace UnityEngine.UI
 #if PACKAGE_PHYSICS
                 if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All)
                 {
-                    if (ReflectionMethodsCache.Singleton.raycast3D != null)
+                    if (ReflectionMethodsCache.Singleton.raycast3D is not null)
                     {
                         var hits = ReflectionMethodsCache.Singleton.raycast3DAll(ray, distanceToClipPlane, (int)m_BlockingMask);
                         if (hits.Length > 0)
@@ -215,7 +215,7 @@ namespace UnityEngine.UI
 #if PACKAGE_PHYSICS2D
                 if (blockingObjects == BlockingObjects.TwoD || blockingObjects == BlockingObjects.All)
                 {
-                    if (ReflectionMethodsCache.Singleton.raycast2D != null)
+                    if (ReflectionMethodsCache.Singleton.raycast2D is not null)
                     {
                         var hits = ReflectionMethodsCache.Singleton.getRayIntersectionAll(ray, distanceToClipPlane, (int)m_BlockingMask);
                         if (hits.Length > 0)
@@ -332,7 +332,7 @@ namespace UnityEngine.UI
                 if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, pointerPosition, eventCamera, graphic.raycastPadding))
                     continue;
 
-                if (eventCamera != null && eventCamera.WorldToScreenPoint(graphic.rectTransform.position).z > eventCamera.farClipPlane)
+                if (eventCamera is not null && eventCamera.WorldToScreenPoint(graphic.rectTransform.position).z > eventCamera.farClipPlane)
                     continue;
 
                 if (graphic.Raycast(pointerPosition, eventCamera))

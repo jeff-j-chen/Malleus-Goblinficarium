@@ -377,7 +377,7 @@ public class TurnManager : MonoBehaviour {
                     // 2.5 second time slot
                     if (alterationDuringMove) {
                         // actions handled elsewhere, but if there is an action taken (e.g. discard)
-                        i += 0.75f;
+                        i += 1.5f;
                         // increase time slot
                         alterationDuringMove = false;
                         // allow timer to be changed again
@@ -521,7 +521,7 @@ public class TurnManager : MonoBehaviour {
         yield return scripts.delays[0.55f];
         // short delay
         if (playerOrEnemy == "player") {
-            if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
+            if (scripts.enemy.spawnNum is 0 or 1) {
                 SetStatusText("devil twists claws into you... you die");
             }
             else {

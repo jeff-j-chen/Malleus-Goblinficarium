@@ -216,7 +216,7 @@ namespace UnityEngine.EventSystems
             for (int i = 0, imax = triggers.Count; i < imax; ++i)
             {
                 var ent = triggers[i];
-                if (ent.eventID == id && ent.callback != null)
+                if (ent.eventID == id && ent.callback is not null)
                     ent.callback.Invoke(eventData);
             }
         }

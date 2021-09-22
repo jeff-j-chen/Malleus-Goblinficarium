@@ -9,6 +9,10 @@ public class SoundManager : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         audioSource = GetComponent<AudioSource>();
+        audioClipNames = new string[audioClips.Length];
+        for (int i = 0; i < audioClips.Length; i++) {
+            audioClipNames[i] = audioClips[i].name;
+        }
         audioSource.volume = PlayerPrefs.GetString(scripts.SOUNDS_KEY) == "on" ? 1f : 0f;
     }
 

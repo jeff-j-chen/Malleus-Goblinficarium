@@ -473,7 +473,7 @@ namespace UnityEditor.U2D.Sprites
             if (m_ReadableTexture == null)
             {
                 m_ReadableTexture = UnityEditor.SpriteUtility.CreateTemporaryDuplicate(texture, texture.width, texture.height);
-                if (m_ReadableTexture != null)
+                if (m_ReadableTexture is not null)
                     m_ReadableTexture.filterMode = texture.filterMode;
             }
             return m_ReadableTexture;

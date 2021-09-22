@@ -28,6 +28,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -142,8 +143,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioClips:
   - {fileID: 8300000, guid: 4738dfbb58f8d0848a82c2c52b029909, type: 3}
+  - {fileID: 8300000, guid: 17ab9ffc20b30e548bf29f0ab8320979, type: 3}
+  - {fileID: 8300000, guid: 48c7d5a9a1dca17d08a70c47658bd1c3, type: 3}
+  - {fileID: 8300000, guid: afc8f3aad7b60db0b9a6364dc1dcd2d9, type: 3}
+  - {fileID: 8300000, guid: 1b0fa96e4dac95f099e0027074fec707, type: 3}
   - {fileID: 8300000, guid: 23c44dc9041a7ff43939e4f320bd4bcc, type: 3}
   - {fileID: 8300000, guid: 61698054adb620741afd5f6a7074980d, type: 3}
+  - {fileID: 8300000, guid: 1755c099bc93a7c47af93783796473bb, type: 3}
   - {fileID: 8300000, guid: 9035c7ae9c47c794c98c28566fe248a5, type: 3}
   - {fileID: 8300000, guid: 2260877624c3dcc4e9298e449cb08fd9, type: 3}
   - {fileID: 8300000, guid: 1e32f3c94b30c7246bdefa431b979a65, type: 3}
@@ -153,32 +159,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0619fb037d592ce47a6f31a04a47011d, type: 3}
   - {fileID: 8300000, guid: c9f95d7589b0caf4a8ec21ce3be200ca, type: 3}
   - {fileID: 8300000, guid: b2dab07fbe9959e4daccc0da8405ba70, type: 3}
+  - {fileID: 8300000, guid: f1ad32bc58bc023488648dc826f3e6f7, type: 3}
   - {fileID: 8300000, guid: 335f4ac1094be6a4a9ba4d5dc17f9bb8, type: 3}
   - {fileID: 8300000, guid: a943e29e8b01d074398a156059b44a6e, type: 3}
-  - {fileID: 8300000, guid: 17ab9ffc20b30e548bf29f0ab8320979, type: 3}
-  - {fileID: 8300000, guid: 48c7d5a9a1dca17d08a70c47658bd1c3, type: 3}
-  - {fileID: 8300000, guid: 1755c099bc93a7c47af93783796473bb, type: 3}
-  - {fileID: 8300000, guid: 1b0fa96e4dac95f099e0027074fec707, type: 3}
-  - {fileID: 8300000, guid: afc8f3aad7b60db0b9a6364dc1dcd2d9, type: 3}
-  - {fileID: 8300000, guid: f1ad32bc58bc023488648dc826f3e6f7, type: 3}
-  audioClipNames:
-  - armor
-  - click0
-  - click1
-  - death
-  - eat
-  - fwoosh
-  - glitch
-  - gulp
-  - hit
-  - miss
-  - next
-  - parry
-  - shuriken
-  - swing
-  - blip0
-  - blip1
-  - cloak
-  - clank
-  - clang
-  - scream
+  audioClipNames: []

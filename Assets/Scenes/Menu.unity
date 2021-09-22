@@ -895,6 +895,7 @@ MonoBehaviour:
   tutorial: {fileID: 0}
   backToMenu: {fileID: 0}
   menuButton: {fileID: 0}
+  statistics: {fileID: 0}
   turnManager: {fileID: 0}
   itemManager: {fileID: 0}
   diceSummoner: {fileID: 0}

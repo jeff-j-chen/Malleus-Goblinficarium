@@ -88,7 +88,7 @@ namespace UnityEditor
         public override bool Equals(object obj)
         {
             var pair = obj as SpriteNameFileIdPair;
-            return pair != null && Equals(pair);
+            return pair is not null && Equals(pair);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace UnityEditor
         /// <returns>True if the same. False otherwise.</returns>
         public bool Equals(SpriteNameFileIdPair pair)
         {
-            return pair != null && name == pair.name && GetFileGUID() == pair.GetFileGUID();
+            return pair is not null && name == pair.name && GetFileGUID() == pair.GetFileGUID();
         }
     }
 }

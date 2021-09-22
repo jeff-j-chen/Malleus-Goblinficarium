@@ -476,7 +476,7 @@ namespace UnityEditor.U2D.Sprites
             point = m_SelectedFrameInspector.parent.LocalToWorld(point);
 
             var selectedElement = m_SelectedFrameInspector.panel.Pick(point);
-            if (selectedElement != null
+            if (selectedElement is not null
                 && selectedElement.pickingMode != PickingMode.Ignore
                 && selectedElement.FindCommonAncestor(m_SelectedFrameInspector) == m_SelectedFrameInspector)
                 return true;
@@ -681,11 +681,11 @@ namespace UnityEditor.U2D.Sprites
                 return;
 
             SpriteEditorUtility.BeginLines(new Color(0f, 1f, 0f, 0.7f));
-            var selectedGUID = selected != null ? selected.spriteID : new GUID();
+            var selectedGUID = selected is not null ? selected.spriteID : new GUID();
             for (int i = 0; i < spriteCount; i++)
             {
                 Vector4 border = GetSpriteBorderAt(i);
-                if (m_GizmoMode != GizmoMode.BorderEditing && (m_RectsCache != null && m_RectsCache.spriteRects[i].spriteID != selectedGUID))
+                if (m_GizmoMode != GizmoMode.BorderEditing && (m_RectsCache is not null && m_RectsCache.spriteRects[i].spriteID != selectedGUID))
                 {
                     // border does not contain negative values
                     if (border.sqrMagnitude < Mathf.Epsilon * 8)

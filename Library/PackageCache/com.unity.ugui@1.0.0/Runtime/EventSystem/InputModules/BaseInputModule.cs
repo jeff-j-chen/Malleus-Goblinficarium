@@ -54,7 +54,7 @@ namespace UnityEngine.EventSystems
         {
             get
             {
-                if (m_InputOverride != null)
+                if (m_InputOverride is not null)
                     return m_InputOverride;
 
                 if (m_DefaultInput == null)
@@ -63,7 +63,7 @@ namespace UnityEngine.EventSystems
                     foreach (var baseInput in inputs)
                     {
                         // We dont want to use any classes that derrive from BaseInput for default.
-                        if (baseInput != null && baseInput.GetType() == typeof(BaseInput))
+                        if (baseInput is not null && baseInput.GetType() == typeof(BaseInput))
                         {
                             m_DefaultInput = baseInput;
                             break;
@@ -171,10 +171,10 @@ namespace UnityEngine.EventSystems
                 return null;
 
             var t1 = g1.transform;
-            while (t1 != null)
+            while (t1 is not null)
             {
                 var t2 = g2.transform;
-                while (t2 != null)
+                while (t2 is not null)
                 {
                     if (t1 == t2)
                         return t1.gameObject;
@@ -227,20 +227,20 @@ namespace UnityEngine.EventSystems
             GameObject commonRoot = FindCommonRoot(currentPointerData.pointerEnter, newEnterTarget);
 
             // and we already an entered object from last time
-            if (currentPointerData.pointerEnter != null)
+            if (currentPointerData.pointerEnter is not null)
             {
                 // send exit handler call to all elements in the chain
                 // until we reach the new target, or null!
                 Transform t = currentPointerData.pointerEnter.transform;
 
-                while (t != null)
+                while (t is not null)
                 {
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerExitHandler);
                     currentPointerData.hovered.Remove(t.gameObject);
 
                     // if we reach the common root break out!
-                    if (commonRoot != null && commonRoot.transform == t)
+                    if (commonRoot is not null && commonRoot.transform == t)
                         break;
                     t = t.parent;
                 }
@@ -248,17 +248,17 @@ namespace UnityEngine.EventSystems
 
             // now issue the enter call up to but not including the common root
             currentPointerData.pointerEnter = newEnterTarget;
-            if (newEnterTarget != null)
+            if (newEnterTarget is not null)
             {
                 Transform t = newEnterTarget.transform;
 
-                while (t != null)
+                while (t is not null)
                 {
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerEnterHandler);
                     ExecuteEvents.Execute(t.gameObject, currentPointerData, ExecuteEvents.pointerMoveHandler);
                     currentPointerData.hovered.Add(t.gameObject);
 
-                    if (commonRoot != null && commonRoot.transform == t)
+                    if (commonRoot is not null && commonRoot.transform == t)
                         break;
                     t = t.parent;
                 }

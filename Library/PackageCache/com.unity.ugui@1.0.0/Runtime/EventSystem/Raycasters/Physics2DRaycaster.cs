@@ -67,7 +67,7 @@ namespace UnityEngine.EventSystems
                     Renderer r2d = null;
                     // Case 1198442: Check for 2D renderers when filling in RaycastResults
                     var rendererResult = m_Hits[b].collider.gameObject.GetComponent<Renderer>();
-                    if (rendererResult != null)
+                    if (rendererResult is not null)
                     {
                         if (rendererResult is SpriteRenderer)
                         {
@@ -95,8 +95,8 @@ namespace UnityEngine.EventSystems
                         screenPosition = eventData.position,
                         displayIndex = displayIndex,
                         index = resultAppendList.Count,
-                        sortingLayer =  r2d != null ? r2d.sortingLayerID : 0,
-                        sortingOrder = r2d != null ? r2d.sortingOrder : 0
+                        sortingLayer =  r2d is not null ? r2d.sortingLayerID : 0,
+                        sortingOrder = r2d is not null ? r2d.sortingOrder : 0
                     };
                     resultAppendList.Add(result);
                 }

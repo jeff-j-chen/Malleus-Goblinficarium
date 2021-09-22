@@ -81,7 +81,7 @@ namespace UnityEngine.EventSystems
         /// </summary>
         public bool isValid
         {
-            get { return module != null && gameObject != null; }
+            get { return module is not null && gameObject is not null; }
         }
 
         /// <summary>

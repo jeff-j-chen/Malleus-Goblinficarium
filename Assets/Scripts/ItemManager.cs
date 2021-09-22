@@ -72,21 +72,21 @@ public class ItemManager : MonoBehaviour {
             // +1g +1b +1r +1w
     };  
     private readonly Dictionary<string, int> itemDropDict = new() {
-        { "armor",         3 },
-        { "cheese",        4 },
-        { "torch",         4 },
-        { "steak",         4 },
-        { "scroll",        4 },
-        { "potion",        4 },
-        { "shuriken",      4 },
-        { "necklet",       4 },
-        { "skeleton_key",  3 },
-        { "boots_of_dodge",  1 },
+        { "armor",          3 },
+        { "cheese",         6 },
+        { "torch",          6 },
+        { "steak",          6 },
+        { "scroll",         6 },
+        { "potion",         6 },
+        { "shuriken",       6 },
+        { "necklet",        6 },
+        { "skeleton_key",   4 },
+        { "boots_of_dodge", 1 },
         { "helm_of_might",  1 },
-        { "kapala",  1 },
-        { "ankh",  1 },
+        { "kapala",         1 },
+        { "ankh",           1 },
     };
-    private List<string> itemDropTable;
+    [SerializeField] private List<string> itemDropTable;
     public string[] weaponNames = { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
     private readonly Dictionary<string, Dictionary<string, int>> modifierStatDict = new() {
         { "accurate0", new Dictionary<string, int> { 
@@ -135,7 +135,7 @@ public class ItemManager : MonoBehaviour {
 
     private readonly Dictionary<string, int> modifierDropDict = new() {
         { "common0",   20 },
-        { "legendary0", 3 },
+        { "legendary0", 5 },
         { "accurate0", 5 },
         { "accurate1", 5 },
         { "brisk0",    5 },
@@ -301,12 +301,6 @@ public class ItemManager : MonoBehaviour {
                     MoveToInventory(0, true, false, false);
                     CreateItem("steak");
                     MoveToInventory(0, true, false, false);
-                    // CreateItem("ankh", "rare");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("scroll", "common", "haste");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("scroll", "common", "courage");
-                    // MoveToInventory(0, true, false, false);
                     if (Save.persistent.easyMode) { 
                         CreateItem("torch");
                         MoveToInventory(0, true, false, false);
@@ -430,7 +424,7 @@ public class ItemManager : MonoBehaviour {
     /// Create an item with specified type.
     /// </summary>
     private void CreateRandomItem(int negativeOffset = 0) {
-        Sprite sprite = itemSprites[Random.Range(0, itemSprites.Length)];
+        Sprite sprite = GetItemSprite(itemDropTable[Random.Range(0, itemDropTable.Count)]);
         // can only create item types of weapon, common, and rare
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // create an item object at the correct position
@@ -451,13 +445,14 @@ public class ItemManager : MonoBehaviour {
     /// Create an item with the specified name and type.
     /// </summary>
     public GameObject CreateItem(string itemName, int negativeOffset=0) {
+        Sprite sprite = GetItemSprite(itemName);
         GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
-        instantiatedItem.GetComponent<SpriteRenderer>().sprite = GetItemSprite(itemName);
+        instantiatedItem.GetComponent<SpriteRenderer>().sprite = sprite;
         // give the item the proper sprite
         instantiatedItem.transform.parent = gameObject.transform;
         // make the item childed to this manager
-        instantiatedItem.GetComponent<Item>().itemName = instantiatedItem.GetComponent<SpriteRenderer>().sprite.name.Replace("_", " ");
+        instantiatedItem.GetComponent<Item>().itemName = sprite.name.Replace("_", " ");
         instantiatedItem.GetComponent<Item>().itemType = "common";
         // assign the attributes for the name and the type of the item
         SetItemStatsImmediately(instantiatedItem);
@@ -753,8 +748,8 @@ public class ItemManager : MonoBehaviour {
                 // create a spawn count 
                 CreateRandomWeapon();
                 // create a random weapon at index 0
-                // for (int i = 0; i < spawnCount; i++) {
-                for (int i = 0; i < 6; i++) {
+                for (int i = 0; i < spawnCount; i++) {
+                // for (int i = 0; i < 6; i++) {
                     CreateRandomItem();
                     // create a random number of items based on the spawn count
                 }
@@ -777,7 +772,7 @@ public class ItemManager : MonoBehaviour {
         // get the count now so we can spawn items without fear of it changing
         lootText.text = "goods:";
         // set the test
-        for (int i = 0; i < 3; i++) { CreateItem("common", tempOffset); }
+        for (int i = 0; i < 3; i++) { CreateRandomItem(tempOffset); }
         // create 3 common items, negatively offesting by the deletion
         CreateItem("arrow", tempOffset);
         // create the next level arrow
@@ -840,7 +835,7 @@ public class ItemManager : MonoBehaviour {
     /// Save all inventory items onto the player's local Savefile.
     /// </summary>
     public void SaveInventoryItems() {
-        if (scripts.levelManager != null) { 
+        if (scripts.levelManager != null && !scripts.player.isDead) { 
             Save.game.resumeItemNames = new string[9];
             Save.game.resumeItemTypes = new string[9];
             Save.game.resumeItemMods = new string[9];

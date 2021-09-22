@@ -412,7 +412,8 @@ public class Item : MonoBehaviour {
                             Remove();
                             break;
                     }
-                
+                    break;
+                case "potion":
                     Save.persistent.potionsQuaffed++;
                     scripts.soundManager.PlayClip("gulp");
                     scripts.turnManager.SetStatusText($"you quaff potion of {modifier}");
@@ -509,7 +510,6 @@ public class Item : MonoBehaviour {
                     else { scripts.turnManager.SetStatusText("helm can help you no further"); }
                     // notify player
                     break;
-                // these are pretty self explanatory
                 case "kapala":
                     scripts.turnManager.SetStatusText("offer an item to become furious");
                     break;
