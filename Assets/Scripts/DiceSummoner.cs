@@ -146,15 +146,15 @@ public class DiceSummoner : MonoBehaviour
         if (attachToPlayerOrEnemy == "none") { instantiationPos = new Vector2(xCoords[i], yCoord); }
         // add to the bottom row with correct offset if not attaching
         else if (attachToPlayerOrEnemy == "player")  { 
-            instantiationPos = new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, statToAttachTo)] - 0.01f); 
+            instantiationPos = new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f); 
         }
         else if (attachToPlayerOrEnemy == "enemy") { 
-            instantiationPos = new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - 1, scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, statToAttachTo)] - 0.01f); 
+            instantiationPos = new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - 1, scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f); 
         }
         // set the instantiation pos to be by the correct stat with the correct position
         else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
         // reference variable for the die's color index relative to scripts.color.coloArr
-        int diceColorIndex = diceType == null ? Array.IndexOf(scripts.colors.colorArr, generatedTypes[i]) : Array.IndexOf(scripts.colors.colorNameArr, diceType);
+        int diceColorIndex = diceType == null ? Array.IndexOf(Colors.colorArr, generatedTypes[i]) : Array.IndexOf(Colors.colorNameArr, diceType);
         // else create one of the specified type
         GameObject number = Instantiate(numArr[diceNum - 1], instantiationPos, Quaternion.identity);
         GameObject indivBase = Instantiate(diceBase, instantiationPos, Quaternion.identity);
@@ -163,7 +163,7 @@ public class DiceSummoner : MonoBehaviour
         number.transform.parent = transform;
         // parent the base to the number and the number to this (the manager)
         number.GetComponent<Dice>().diceNum = diceNum;
-        number.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[diceColorIndex];
+        number.GetComponent<Dice>().diceType = Colors.colorNameArr[diceColorIndex];
         number.GetComponent<Dice>().instantiationPos = instantiationPos;
         // set the necessary attributes
         if (attachToPlayerOrEnemy == "player")  {
@@ -188,11 +188,11 @@ public class DiceSummoner : MonoBehaviour
         }
         number.GetComponent<SpriteRenderer>().sortingOrder = 1;
         //set the correct sorting order (so no weird visual glitches)
-        if (scripts.colors.colorArr[diceColorIndex] == scripts.colors.white || scripts.colors.colorArr[diceColorIndex] == scripts.colors.yellow) {
+        if (Colors.colorArr[diceColorIndex] == Colors.white || Colors.colorArr[diceColorIndex] == Colors.yellow) {
             // give the number the correct color relative to the base (e.g. black with yellow or white with red)
             number.GetComponent<SpriteRenderer>().color = Color.black;
         }
-        indivBase.GetComponent<SpriteRenderer>().color = scripts.colors.colorArr[diceColorIndex];
+        indivBase.GetComponent<SpriteRenderer>().color = Colors.colorArr[diceColorIndex];
         // set the color of the base
         // fade in the die
         existingDice.Add(number);
@@ -252,13 +252,13 @@ public class DiceSummoner : MonoBehaviour
         // clear the list so we can start with a new one
         for (int a = 0; a < 3; a++) {
             // create 3 yellow dice
-            generatedTypes.Add(scripts.colors.colorArr[4]);
+            generatedTypes.Add(Colors.colorArr[4]);
         }
         for (int b = 0; b < 4; b++) {
             // for each dice type that is not yellow
             for (int c = 0; c < 3; c++) {
                 // create 3 dice 
-                generatedTypes.Add(scripts.colors.colorArr[b]);
+                generatedTypes.Add(Colors.colorArr[b]);
             }
         }
         generatedTypes.RemoveAt(4);
@@ -279,8 +279,8 @@ public class DiceSummoner : MonoBehaviour
             if (dice.GetComponent<Dice>().isAttached && dice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") {
                 // if the die is attached to the player
                 dice.GetComponent<Dice>().GetComponent<SpriteRenderer>().color = Color.black;
-                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
-                dice.GetComponent<Dice>().diceType = scripts.colors.colorNameArr[4];
+                dice.GetComponent<Dice>().transform.GetChild(0).GetComponent<SpriteRenderer>().color = Colors.yellow;
+                dice.GetComponent<Dice>().diceType = Colors.colorNameArr[4];
                 // make the die yellow
                 dice.GetComponent<Dice>().moveable = true;
                 // allow for moving the die around

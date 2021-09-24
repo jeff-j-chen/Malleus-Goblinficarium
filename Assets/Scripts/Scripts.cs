@@ -7,7 +7,6 @@ public class Scripts : MonoBehaviour {
     public Arrow arrow;
     public Enemy enemy;
     public Music music;
-    public Colors colors;
     public Player player;
     public MenuIcon menuIcon;
     public Tutorial tutorial;
@@ -40,7 +39,6 @@ public class Scripts : MonoBehaviour {
         dice = FindObjectOfType<Dice>();
         arrow = FindObjectOfType<Arrow>();
         enemy = FindObjectOfType<Enemy>();
-        colors = FindObjectOfType<Colors>();
         player = FindObjectOfType<Player>();
         menuIcon = FindObjectOfType<MenuIcon>();
         backToMenu = FindObjectOfType<BackToMenu>();

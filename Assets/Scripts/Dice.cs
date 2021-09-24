@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.AssetImporters;
 using UnityEngine;
 public class Dice : MonoBehaviour {
     public int diceNum;
@@ -164,7 +163,7 @@ public class Dice : MonoBehaviour {
                 }
                 else {
                     // regular die, so drop it to the regular position
-                    int diceIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType);
+                    int diceIndex = Array.IndexOf(Colors.colorNameArr, diceType);
                     xOverride = highlights[diceIndex].transform.position.x;
                     yOverride = highlights[diceIndex].transform.position.y;
                 }

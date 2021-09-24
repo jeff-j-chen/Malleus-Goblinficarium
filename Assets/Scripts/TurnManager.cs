@@ -632,9 +632,7 @@ public class TurnManager : MonoBehaviour {
         }
         // play sound clip
         if (scripts.itemManager.PlayerHasWeapon("rapier") && playerOrEnemy == "enemy") {
-            yield return scripts.delays[1.15f];
-            ChangeStaminaOf("player", scripts.itemManager.PlayerHasLegendary() ? 5 : 3); 
-            scripts.soundManager.PlayClip("blip0");
+            StartCoroutine(RapierGainAfterDelay());
         }
         // if player has rapier and the enemy dies, add to their stamina based on whether its legendary or not
         if (playerOrEnemy == "player") {
@@ -680,6 +678,11 @@ public class TurnManager : MonoBehaviour {
         Save.SavePersistent();
     }
 
+    private IEnumerator RapierGainAfterDelay() { 
+        yield return scripts.delays[1.15f];
+        ChangeStaminaOf("player", scripts.itemManager.PlayerHasLegendary() ? 5 : 3); 
+        scripts.soundManager.PlayClip("blip0");
+    }
     /// <summary>
     /// Coroutine for fading in the status text.
     /// </summary>

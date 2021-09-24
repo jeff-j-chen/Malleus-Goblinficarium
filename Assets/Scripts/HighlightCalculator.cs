@@ -57,9 +57,9 @@ public class HighlightCalculator : MonoBehaviour {
     /// Show a single highlight for a given typ eof dice..
     /// </summary>
     private void ShowSingleHighlight(string diceType) {
-        int diceIndex = Array.IndexOf(scripts.colors.colorNameArr, diceType);
+        int diceIndex = Array.IndexOf(Colors.colorNameArr, diceType);
         // get the index of the color relative to the colorName array
-        highlights[diceIndex].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(scripts.colors.colorNameArr[diceIndex], diceType), scripts.statSummoner.yCoords[diceIndex] - 0.01f);
+        highlights[diceIndex].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(Colors.colorNameArr[diceIndex], diceType), scripts.statSummoner.yCoords[diceIndex] - 0.01f);
         highlights[diceIndex].GetComponent<BoxCollider2D>().size = large;
         // move it to the correct position
     }
@@ -70,7 +70,7 @@ public class HighlightCalculator : MonoBehaviour {
     private void ShowYellowHighlights() {
         for (int i = 0; i < 4; i++) {
             // 4 highlights
-            highlights[i].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(scripts.colors.colorNameArr[i]), scripts.statSummoner.yCoords[i] - 0.01f);
+            highlights[i].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(Colors.colorNameArr[i]), scripts.statSummoner.yCoords[i] - 0.01f);
             highlights[i].GetComponent<BoxCollider2D>().size = small;
             // move the highlight into position with the corresponding stat
         }
@@ -138,11 +138,11 @@ public class HighlightCalculator : MonoBehaviour {
                     if (Save.game.isFurious) {
                         if (dice.diceType is "green" or "red" or "blue") { dice.GetComponent<SpriteRenderer>().color = Color.black; }
                         // change the color of the spots to match the die
-                        dice.transform.GetChild(0).GetComponent<SpriteRenderer>().color = scripts.colors.yellow;
-                        dice.diceType = scripts.colors.colorNameArr[4];
+                        dice.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Colors.yellow;
+                        dice.diceType = Colors.colorNameArr[4];
                         // make the die yellow
                     }
-                    HandleYellowDrop(scripts.colors.colorNameArr[Array.IndexOf(highlightColliders, curCollider)], dice);
+                    HandleYellowDrop(Colors.colorNameArr[Array.IndexOf(highlightColliders, curCollider)], dice);
                     // do stuff for yellow die
                 }
                 else {

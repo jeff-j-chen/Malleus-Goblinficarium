@@ -1,0 +1,731 @@
+Unity Editor version:    2021.2.0b1 (b0978dae4864)
+Branch:                  trunk
+Build type:              Release
+Batch mode:              YES
+System name:             Linux
+Distro version:          #40~20.04.1-Ubuntu SMP Sat Sep 18 02:14:19 UTC 2021
+Kernel version:          5.11.0-36-generic
+Architecture:            x86_64
+Available memory:        3819 MB
+Using pre-set license
+Pro License: NO
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.132: Theme parsing error: gtk.css:5787:0: Expected a valid selector
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.134: Theme parsing error: gtk.css:5791:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.136: Theme parsing error: gtk.css:5794:8: 'window' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.137: Theme parsing error: gtk.css:5801:6: 'window' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5808:6: 'window' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5811:6: 'window' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5819:6: 'window' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5825:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5831:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5835:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5847:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5856:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5863:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5868:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5873:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5876:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.139: Theme parsing error: gtk.css:5881:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.140: Theme parsing error: gtk.css:5886:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.140: Theme parsing error: gtk.css:5896:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.140: Theme parsing error: gtk.css:5903:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.140: Theme parsing error: gtk.css:5906:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.140: Theme parsing error: gtk.css:5908:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.140: Theme parsing error: gtk.css:5910:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5913:7: 'menubar' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5918:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5928:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5931:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5942:29: 'PantheonCalculatorMainWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5944:31: 'PantheonCalculatorMainWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5950:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5953:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5959:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5966:19: 'NoiseLibraryWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5968:21: 'NoiseLibraryWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5970:21: 'NoiseLibraryWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5976:15: 'SnapMainWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5983:13: 'DirectWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5987:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5993:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:5999:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:6007:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:6013:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:6015:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:6025:16: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:6058:18: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.141: Theme parsing error: gtk.css:6067:20: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6071:20: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6073:22: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6076:15: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6084:15: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6089:15: 'UnityDecoration' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6098:16: 'UnityPanelWidget' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6103:16: 'UnityPanelWidget' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6107:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6112:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6116:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6121:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6125:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6135:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6142:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6146:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6152:16: 'SheetStyleDialog' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6155:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6159:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6164:12: 'MsdOsdWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6167:14: 'MsdOsdWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6172:14: 'MsdOsdWindow' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6183:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6187:21: 'ConversationListView' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6189:23: 'ConversationListView' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6192:25: 'ConversationListView' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6195:23: 'ConversationListView' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6198:25: 'ConversationListView' is not a valid property name
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6205:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.142: Theme parsing error: gtk.css:6210:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6216:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6219:4: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6222:4: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6225:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6229:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6237:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6245:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6250:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6255:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6260:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6266:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6276:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6285:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6294:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6303:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6312:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6315:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6319:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6323:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6327:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6331:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6334:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6339:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.143: Theme parsing error: gtk.css:6341:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.144: Theme parsing error: gtk.css:6345:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6353:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6357:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6360:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6369:4: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6372:4: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6378:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6382:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6385:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6389:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6396:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6398:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6400:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.145: Theme parsing error: gtk.css:6407:4: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.146: Theme parsing error: gtk.css:6412:4: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.146: Theme parsing error: gtk.css:6422:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.146: Theme parsing error: gtk.css:6425:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.146: Theme parsing error: gtk.css:6435:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.146: Theme parsing error: gtk.css:6442:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.146: Theme parsing error: gtk.css:6453:0: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.146: Theme parsing error: gtk.css:6461:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.148: Theme parsing error: gtk.css:6463:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.148: Theme parsing error: gtk.css:6468:2: Expected semicolon
+
+(Unity:15704): Gtk-WARNING **: 13:04:58.149: Theme parsing error: gtk.css:6474:0: expected '}' after declarations
+
+(Unity:15704): Gdk-CRITICAL **: 13:04:58.217: gdk_window_get_cursor: assertion 'GDK_IS_WINDOW (window)' failed
+Desktop is 1366 x 768 @ 60 Hz
+Initialize udev device monitor.
+
+COMMAND LINE ARGUMENTS:
+Unity
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker1
+-projectPath
+/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium
+-logFile
+Logs/AssetImportWorker1.log
+-srvPort
+43407
+Successfully changed project path to: /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium
+/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Refreshing native plugins compatible for Editor in 31.86 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 2021.2.0b1 (b0978dae4864)
+[Subsystems] Discovering subsystems at path /home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Assets
+GLX Extensions: GLX_ARB_create_context GLX_ARB_create_context_no_error GLX_ARB_create_context_profile GLX_ARB_create_context_robustness GLX_ARB_fbconfig_float GLX_ARB_framebuffer_sRGB GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_buffer_age GLX_EXT_create_context_es2_profile GLX_EXT_create_context_es_profile GLX_EXT_fbconfig_packed_float GLX_EXT_framebuffer_sRGB GLX_EXT_import_context GLX_EXT_swap_control GLX_EXT_swap_control_tear GLX_EXT_texture_from_pixmap GLX_EXT_visual_info GLX_EXT_visual_rating GLX_INTEL_swap_event GLX_MESA_copy_sub_buffer GLX_MESA_query_renderer GLX_MESA_swap_control GLX_OML_swap_method GLX_OML_sync_control GLX_SGIS_multisample GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SGIX_visual_select_group GLX_SGI_make_current_read GLX_SGI_swap_control GLX_SGI_video_sync 
+Renderer: AMD STONEY (DRM 3.40.0, 5.11.0-36-generic, LLVM 12.0.0)
+Vendor:   AMD
+Version:  4.5 (Core Profile) Mesa 21.0.3
+GLES:     0
+ GL_AMD_conservative_depth GL_AMD_depth_clamp_separate GL_AMD_draw_buffers_blend GL_AMD_framebuffer_multisample_advanced GL_AMD_gpu_shader_int64 GL_AMD_multi_draw_indirect GL_AMD_performance_monitor GL_AMD_pinned_memory GL_AMD_query_buffer_object GL_AMD_seamless_cubemap_per_texture GL_AMD_shader_stencil_export GL_AMD_shader_trinary_minmax GL_AMD_texture_texture4 GL_AMD_vertex_shader_layer GL_AMD_vertex_shader_viewport_index GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ARB_ES2_compatibility GL_ARB_ES3_1_compatibility GL_ARB_ES3_2_compatibility GL_ARB_ES3_compatibility GL_ARB_arrays_of_arrays GL_ARB_base_instance GL_ARB_bindless_texture GL_ARB_blend_func_extended GL_ARB_buffer_storage GL_ARB_clear_buffer_object GL_ARB_clear_texture GL_ARB_clip_control GL_ARB_color_buffer_float GL_ARB_compressed_texture_pixel_storage GL_ARB_compute_shader GL_ARB_compute_variable_group_size GL_ARB_conditional_render_inverted GL_ARB_conservative_depth GL_ARB_copy_buffer GL_ARB_copy_image GL_ARB_cull_dist
+ance GL_ARB_debug_output GL_ARB_depth_buffer_float GL_ARB_depth_clamp GL_ARB_derivative_control GL_ARB_direct_state_access GL_ARB_draw_buffers GL_ARB_draw_buffers_blend GL_ARB_draw_elements_base_vertex GL_ARB_draw_indirect GL_ARB_draw_instanced GL_ARB_enhanced_layouts GL_ARB_explicit_attrib_location GL_ARB_explicit_uniform_location GL_ARB_fragment_coord_conventions GL_ARB_fragment_layer_viewport GL_ARB_fragment_shader GL_ARB_framebuffer_no_attachments GL_ARB_framebuffer_object GL_ARB_framebuffer_sRGB GL_ARB_get_program_binary GL_ARB_get_texture_sub_image GL_ARB_gl_spirv GL_ARB_gpu_shader5 GL_ARB_gpu_shader_fp64 GL_ARB_gpu_shader_int64 GL_ARB_half_float_pixel GL_ARB_half_float_vertex GL_ARB_instanced_arrays GL_ARB_internalformat_query GL_ARB_internalformat_query2 GL_ARB_invalidate_subdata GL_ARB_map_buffer_alignment GL_ARB_map_buffer_range GL_ARB_multi_bind GL_ARB_multi_draw_indirect GL_ARB_occlusion_query2 GL_ARB_parallel_shader_compile GL_ARB_pipeline_statistics_query GL_ARB_pixel_buffer_object GL_ARB_point
+_sprite GL_ARB_polygon_offset_clamp GL_ARB_program_interface_query GL_ARB_provoking_vertex GL_ARB_query_buffer_object GL_ARB_robust_buffer_access_behavior GL_ARB_robustness GL_ARB_sample_shading GL_ARB_sampler_objects GL_ARB_seamless_cube_map GL_ARB_seamless_cubemap_per_texture GL_ARB_separate_shader_objects GL_ARB_shader_atomic_counter_ops GL_ARB_shader_atomic_counters GL_ARB_shader_ballot GL_ARB_shader_bit_encoding GL_ARB_shader_clock GL_ARB_shader_group_vote GL_ARB_shader_image_load_store GL_ARB_shader_image_size GL_ARB_shader_objects GL_ARB_shader_precision GL_ARB_shader_stencil_export GL_ARB_shader_storage_buffer_object GL_ARB_shader_subroutine GL_ARB_shader_texture_image_samples GL_ARB_shader_texture_lod GL_ARB_shader_viewport_layer_array GL_ARB_shading_language_420pack GL_ARB_shading_language_include GL_ARB_shading_language_packing GL_ARB_spirv_extensions GL_ARB_stencil_texturing GL_ARB_sync GL_ARB_tessellation_shader GL_ARB_texture_barrier GL_ARB_texture_buffer_object GL_ARB_texture_buffer_object_rgb
+32 GL_ARB_texture_buffer_range GL_ARB_texture_compression_bptc GL_ARB_texture_compression_rgtc GL_ARB_texture_cube_map_array GL_ARB_texture_filter_anisotropic GL_ARB_texture_float GL_ARB_texture_gather GL_ARB_texture_mirror_clamp_to_edge GL_ARB_texture_multisample GL_ARB_texture_non_power_of_two GL_ARB_texture_query_levels GL_ARB_texture_query_lod GL_ARB_texture_rectangle GL_ARB_texture_rg GL_ARB_texture_rgb10_a2ui GL_ARB_texture_stencil8 GL_ARB_texture_storage GL_ARB_texture_storage_multisample GL_ARB_texture_swizzle GL_ARB_texture_view GL_ARB_timer_query GL_ARB_transform_feedback2 GL_ARB_transform_feedback3 GL_ARB_transform_feedback_instanced GL_ARB_transform_feedback_overflow_query GL_ARB_uniform_buffer_object GL_ARB_vertex_array_bgra GL_ARB_vertex_array_object GL_ARB_vertex_attrib_64bit GL_ARB_vertex_attrib_binding GL_ARB_vertex_buffer_object GL_ARB_vertex_shader GL_ARB_vertex_type_10f_11f_11f_rev GL_ARB_vertex_type_2_10_10_10_rev GL_ARB_viewport_array GL_ATI_blend_equation_separate GL_ATI_meminfo GL_ATI
+_texture_float GL_ATI_texture_mirror_once GL_EXT_EGL_image_storage GL_EXT_EGL_sync GL_EXT_abgr GL_EXT_blend_equation_separate GL_EXT_demote_to_helper_invocation GL_EXT_depth_bounds_test GL_EXT_draw_buffers2 GL_EXT_draw_instanced GL_EXT_framebuffer_blit GL_EXT_framebuffer_multisample GL_EXT_framebuffer_multisample_blit_scaled GL_EXT_framebuffer_object GL_EXT_framebuffer_sRGB GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_packed_depth_stencil GL_EXT_packed_float GL_EXT_pixel_buffer_object GL_EXT_polygon_offset_clamp GL_EXT_provoking_vertex GL_EXT_semaphore GL_EXT_semaphore_fd GL_EXT_shader_image_load_formatted GL_EXT_shader_image_load_store GL_EXT_shader_integer_mix GL_EXT_shader_samples_identical GL_EXT_texture_array GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc GL_EXT_texture_filter_anisotropic GL_EXT_texture_integer GL_EXT_texture_mirror_clamp GL_EXT_texture_sRGB GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_
+shared_exponent GL_EXT_texture_snorm GL_EXT_texture_swizzle GL_EXT_timer_query GL_EXT_transform_feedback GL_EXT_vertex_array_bgra GL_EXT_vertex_attrib_64bit GL_EXT_window_rectangles GL_IBM_multimode_draw_arrays GL_INTEL_blackhole_render GL_KHR_blend_equation_advanced GL_KHR_context_flush_control GL_KHR_debug GL_KHR_no_error GL_KHR_parallel_shader_compile GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_sliced_3d GL_MESA_framebuffer_flip_y GL_MESA_pack_invert GL_MESA_shader_integer_functions GL_MESA_texture_signed_rgba GL_NVX_gpu_memory_info GL_NV_alpha_to_coverage_dither_control GL_NV_compute_shader_derivatives GL_NV_conditional_render GL_NV_copy_image GL_NV_depth_clamp GL_NV_packed_depth_stencil GL_NV_shader_atomic_int64 GL_NV_texture_barrier GL_NV_vdpau_interop GL_OES_EGL_image GL_S3_s3tc
+OPENGL LOG: Creating OpenGL 4.5 graphics device ; Context level  <OpenGL 4.5> ; Context handle -436019712
+Initialize mono
+Mono path[0] = '/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/Managed'
+Mono path[1] = '/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-linux'
+Mono config path = '/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56704
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: /home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+Trying to register platform support module: /home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll (that doesn't exist). Retrying without overrides.
+Platform support module is not available: /home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Register platform support module: /home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/LinuxStandaloneSupport/UnityEditor.LinuxStandalone.Extensions.dll
+Registered in 0.018416 seconds.
+Native extension for LinuxStandalone target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 30.10 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  5.934 seconds
+Domain Reload Profiling:
+	ReloadAssembly (5994ms)
+		BeginReloadAssembly (118ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (0ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (2ms)
+		EndReloadAssembly (2082ms)
+			LoadAssemblies (112ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (647ms)
+			ReleaseScriptCaches (0ms)
+			RebuildScriptCaches (53ms)
+			SetupLoadedEditorAssemblies (1207ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (24ms)
+				SetLoadedEditorAssemblies (1ms)
+				RefreshPlugins (30ms)
+				BeforeProcessingInitializeOnLoad (3ms)
+				ProcessInitializeOnLoadAttributes (921ms)
+				ProcessInitializeOnLoadMethodAttributes (227ms)
+				AfterProcessingInitializeOnLoad (0ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (0ms)
+Platform modules already initialized, skipping
+Registering precompiled user dll's ...
+Registered in 0.000595 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for LinuxStandalone target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.38 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  2.416 seconds
+Domain Reload Profiling:
+	ReloadAssembly (2495ms)
+		BeginReloadAssembly (347ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (14ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (65ms)
+		EndReloadAssembly (1914ms)
+			LoadAssemblies (73ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (577ms)
+			ReleaseScriptCaches (1ms)
+			RebuildScriptCaches (116ms)
+			SetupLoadedEditorAssemblies (708ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (50ms)
+				SetLoadedEditorAssemblies (2ms)
+				RefreshPlugins (1ms)
+				BeforeProcessingInitializeOnLoad (105ms)
+				ProcessInitializeOnLoadAttributes (484ms)
+				ProcessInitializeOnLoadMethodAttributes (52ms)
+				AfterProcessingInitializeOnLoad (15ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (11ms)
+Platform modules already initialized, skipping
+========================================================================
+Worker process is ready to serve import requests
+Launched and connected shader compiler UnityShaderCompiler after 1.21 seconds
+Refreshing native plugins compatible for Editor in 0.39 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 776 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 11 unused Assets / (114.5 KB). Loaded Objects now: 1247.
+Memory consumption went from 47.1 MB to 47.0 MB.
+Total: 12.281565 ms (FindLiveObjects: 0.479896 ms CreateObjectMapping: 0.166378 ms MarkObjects: 11.178818 ms  DeleteObjects: 0.451490 ms)
+
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+========================================================================
+Received Import Request.
+  Time since last request: 6536.682780 seconds.
+  path: Assets/Scripts/Colors.cs
+  artifactKey: Guid(0512490241a681544ae8acdc213c95e2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Colors.cs using Guid(0512490241a681544ae8acdc213c95e2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '4efcacf5a710545a2bc7464c431856bc') in 0.010194 seconds 
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.000817 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for LinuxStandalone target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.88 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  2.162 seconds
+Domain Reload Profiling:
+	ReloadAssembly (2263ms)
+		BeginReloadAssembly (301ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (13ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (80ms)
+		EndReloadAssembly (1702ms)
+			LoadAssemblies (80ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (534ms)
+			ReleaseScriptCaches (1ms)
+			RebuildScriptCaches (81ms)
+			SetupLoadedEditorAssemblies (572ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (52ms)
+				SetLoadedEditorAssemblies (1ms)
+				RefreshPlugins (2ms)
+				BeforeProcessingInitializeOnLoad (87ms)
+				ProcessInitializeOnLoadAttributes (362ms)
+				ProcessInitializeOnLoadMethodAttributes (53ms)
+				AfterProcessingInitializeOnLoad (14ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (10ms)
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.44 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 760 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6 unused Assets / (96.5 KB). Loaded Objects now: 1250.
+Memory consumption went from 46.0 MB to 45.9 MB.
+Total: 6.255437 ms (FindLiveObjects: 0.206146 ms CreateObjectMapping: 0.067454 ms MarkObjects: 5.697793 ms  DeleteObjects: 0.279706 ms)
+
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+========================================================================
+Received Import Request.
+  Time since last request: 136.576491 seconds.
+  path: Assets/Scripts/Colors.cs
+  artifactKey: Guid(0512490241a681544ae8acdc213c95e2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Colors.cs using Guid(0512490241a681544ae8acdc213c95e2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '9e98b9f5cbc5020e091814eed219b8db') in 0.008045 seconds 
+========================================================================
+Received Import Request.
+  Time since last request: 164.301750 seconds.
+  path: Assets/Scenes/Credits.unity
+  artifactKey: Guid(f4d6ee472c570734cbe7608521d0c1e9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scenes/Credits.unity using Guid(f4d6ee472c570734cbe7608521d0c1e9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: 'd76d480dd930e01c97ccb666cbcee985') in 0.104910 seconds 
+========================================================================
+Received Import Request.
+  Time since last request: 15.505454 seconds.
+  path: Assets/Scenes/Game.unity
+  artifactKey: Guid(a41785a39f008e44fa15f9c8c90344a0) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scenes/Game.unity using Guid(a41785a39f008e44fa15f9c8c90344a0) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '2d5d835bc5c8390cbdf46eeba2a28430') in 0.002192 seconds 
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.000509 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for LinuxStandalone target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  3.611 seconds
+Domain Reload Profiling:
+	ReloadAssembly (3725ms)
+		BeginReloadAssembly (326ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (33ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (92ms)
+		EndReloadAssembly (2988ms)
+			LoadAssemblies (161ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (855ms)
+			ReleaseScriptCaches (2ms)
+			RebuildScriptCaches (156ms)
+			SetupLoadedEditorAssemblies (1077ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (98ms)
+				SetLoadedEditorAssemblies (2ms)
+				RefreshPlugins (1ms)
+				BeforeProcessingInitializeOnLoad (165ms)
+				ProcessInitializeOnLoadAttributes (662ms)
+				ProcessInitializeOnLoadMethodAttributes (115ms)
+				AfterProcessingInitializeOnLoad (34ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (27ms)
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.71 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 760 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6 unused Assets / (96.5 KB). Loaded Objects now: 1253.
+Memory consumption went from 46.0 MB to 45.9 MB.
+Total: 23.822378 ms (FindLiveObjects: 0.203224 ms CreateObjectMapping: 0.074296 ms MarkObjects: 23.086059 ms  DeleteObjects: 0.455495 ms)
+
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.000538 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for LinuxStandalone target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.44 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  2.734 seconds
+Domain Reload Profiling:
+	ReloadAssembly (2802ms)
+		BeginReloadAssembly (234ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (14ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (90ms)
+		EndReloadAssembly (2277ms)
+			LoadAssemblies (89ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (705ms)
+			ReleaseScriptCaches (2ms)
+			RebuildScriptCaches (138ms)
+			SetupLoadedEditorAssemblies (829ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (58ms)
+				SetLoadedEditorAssemblies (1ms)
+				RefreshPlugins (1ms)
+				BeforeProcessingInitializeOnLoad (123ms)
+				ProcessInitializeOnLoadAttributes (573ms)
+				ProcessInitializeOnLoadMethodAttributes (57ms)
+				AfterProcessingInitializeOnLoad (16ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (13ms)
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.39 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 760 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6 unused Assets / (96.6 KB). Loaded Objects now: 1256.
+Memory consumption went from 46.0 MB to 45.9 MB.
+Total: 7.954608 ms (FindLiveObjects: 0.186022 ms CreateObjectMapping: 0.056224 ms MarkObjects: 7.096244 ms  DeleteObjects: 0.612719 ms)
+
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+========================================================================
+Received Import Request.
+  Time since last request: 300.849804 seconds.
+  path: Assets/Scripts/Colors.cs
+  artifactKey: Guid(0512490241a681544ae8acdc213c95e2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Scripts/Colors.cs using Guid(0512490241a681544ae8acdc213c95e2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)  -> (artifact id: '423200f0619dac7fc6592bf28b6fb7dd') in 0.008267 seconds 
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.000558 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for LinuxStandalone target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.42 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  2.781 seconds
+Domain Reload Profiling:
+	ReloadAssembly (2859ms)
+		BeginReloadAssembly (296ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (42ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (110ms)
+		EndReloadAssembly (2201ms)
+			LoadAssemblies (105ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (867ms)
+			ReleaseScriptCaches (3ms)
+			RebuildScriptCaches (110ms)
+			SetupLoadedEditorAssemblies (663ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (48ms)
+				SetLoadedEditorAssemblies (1ms)
+				RefreshPlugins (1ms)
+				BeforeProcessingInitializeOnLoad (78ms)
+				ProcessInitializeOnLoadAttributes (469ms)
+				ProcessInitializeOnLoadMethodAttributes (48ms)
+				AfterProcessingInitializeOnLoad (17ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (15ms)
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.54 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 760 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6 unused Assets / (96.6 KB). Loaded Objects now: 1259.
+Memory consumption went from 46.0 MB to 45.9 MB.
+Total: 7.750890 ms (FindLiveObjects: 0.208698 ms CreateObjectMapping: 0.067878 ms MarkObjects: 7.050022 ms  DeleteObjects: 0.421119 ms)
+
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.000818 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for LinuxStandalone target not found
+Native extension for OSXStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 1.97 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  3.194 seconds
+Domain Reload Profiling:
+	ReloadAssembly (3275ms)
+		BeginReloadAssembly (382ms)
+			ExecutionOrderSort (0ms)
+			DisableScriptedObjects (24ms)
+			BackupInstance (0ms)
+			ReleaseScriptingObjects (0ms)
+			CreateAndSetChildDomain (135ms)
+		EndReloadAssembly (2489ms)
+			LoadAssemblies (171ms)
+			RebuildTransferFunctionScriptingTraits (0ms)
+			SetupTypeCache (1010ms)
+			ReleaseScriptCaches (1ms)
+			RebuildScriptCaches (123ms)
+			SetupLoadedEditorAssemblies (723ms)
+				LogAssemblyErrors (0ms)
+				InitializePlatformSupportModulesInManaged (96ms)
+				SetLoadedEditorAssemblies (1ms)
+				RefreshPlugins (2ms)
+				BeforeProcessingInitializeOnLoad (106ms)
+				ProcessInitializeOnLoadAttributes (454ms)
+				ProcessInitializeOnLoadMethodAttributes (50ms)
+				AfterProcessingInitializeOnLoad (13ms)
+				EditorAssembliesLoaded (0ms)
+			ExecutionOrderSort2 (0ms)
+			AwakeInstancesAfterBackupRestoration (13ms)
+Platform modules already initialized, skipping
+Refreshing native plugins compatible for Editor in 0.42 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 760 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6 unused Assets / (96.6 KB). Loaded Objects now: 1262.
+Memory consumption went from 46.0 MB to 45.9 MB.
+Total: 9.379879 ms (FindLiveObjects: 0.224415 ms CreateObjectMapping: 0.064511 ms MarkObjects: 8.704173 ms  DeleteObjects: 0.382781 ms)
+
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 

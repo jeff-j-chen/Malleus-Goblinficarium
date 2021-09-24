@@ -95,12 +95,12 @@ public class StaminaButton : MonoBehaviour {
     }
 
     private void OnMouseEnter() {
-        spriteRenderer.color = scripts.colors.hovered;
+        spriteRenderer.color = Colors.hovered;
     }
 
     private void OnMouseDown() {
         scripts.soundManager.PlayClip("click0");
-        spriteRenderer.color = scripts.colors.clicked;
+        spriteRenderer.color = Colors.clicked;
     }
 
     private void OnMouseExit() {

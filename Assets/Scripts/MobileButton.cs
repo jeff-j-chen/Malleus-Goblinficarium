@@ -37,8 +37,8 @@ public class MobileButton : MonoBehaviour {
     // various functions for making either the sprite or the text have some tactile feedback
 
     private void OnMouseEnter() {
-        if (usingSR) {  spriteRenderer.color = scripts.colors.hovered; }
-        else { text.color = scripts.colors.hovered; }
+        if (usingSR) {  spriteRenderer.color = Colors.hovered; }
+        else { text.color = Colors.hovered; }
     }
 
     private void OnMouseDown() {
@@ -46,8 +46,8 @@ public class MobileButton : MonoBehaviour {
             // l and r buttons already play click when selecting an item
             scripts.soundManager.PlayClip("click0");
         }
-        if (usingSR) {  spriteRenderer.color = scripts.colors.clicked; }
-        else { text.color = scripts.colors.clicked; }
+        if (usingSR) {  spriteRenderer.color = Colors.clicked; }
+        else { text.color = Colors.clicked; }
     }
 
     private void OnMouseExit() {

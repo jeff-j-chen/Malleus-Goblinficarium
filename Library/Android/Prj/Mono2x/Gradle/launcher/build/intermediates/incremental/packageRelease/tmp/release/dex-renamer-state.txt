@@ -1,4 +1,4 @@
-#Thu Sep 16 20:43:29 PDT 2021
+#Thu Sep 23 10:24:40 PDT 2021
 base.0=/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/build/intermediates/dex/release/out/classes.dex
 path.0=classes.dex
 renamed.0=classes.dex

@@ -165,7 +165,7 @@ public class Enemy : MonoBehaviour {
                 chosenDie.statAddedTo = chosenDie.diceType;
                 scripts.statSummoner.AddDiceToEnemy(chosenDie.diceType, chosenDie);
                 // add it to the corresponding dice type
-                chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX(chosenDie.diceType), scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, chosenDie.diceType)] - 0.01f);
+                chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX(chosenDie.diceType), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, chosenDie.diceType)] - 0.01f);
                 // set the correct transform position
                 if ((chosenDie.diceType == "red" && woundList.Contains("armpits")) || (chosenDie.diceType == "white" && woundList.Contains("hand"))) {
                     if (enemyName.text != "Lich") { StartCoroutine(chosenDie.FadeOut(false)); }
@@ -177,7 +177,7 @@ public class Enemy : MonoBehaviour {
                 chosenDie.statAddedTo = "red";
                 scripts.statSummoner.AddDiceToEnemy("red", chosenDie); 
                 // attach to red
-                chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX("red"), scripts.statSummoner.yCoords[Array.IndexOf(scripts.colors.colorNameArr, "red")] - 0.01f);
+                chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX("red"), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, "red")] - 0.01f);
                 // set the correct transform position
                 if (scripts.itemManager.PlayerHasWeapon("hatchet")) { StartCoroutine(chosenDie.FadeOut(false)); }
                 // fade out the dice if the enemy picked a yellow

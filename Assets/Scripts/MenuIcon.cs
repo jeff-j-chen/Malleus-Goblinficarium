@@ -8,7 +8,6 @@ public class MenuIcon : MonoBehaviour {
     [SerializeField] private GameObject buttons;
     [SerializeField] private AudioSource musicPlayer;
     [SerializeField] private AudioSource sfxPlayer;
-    public Color gray;
     private SpriteRenderer debugSR;
     private SpriteRenderer soundsSR;
     private SpriteRenderer hintsSR;
@@ -23,9 +22,7 @@ public class MenuIcon : MonoBehaviour {
         soundsSR = sound.GetComponent<SpriteRenderer>();
         musicSR = music.GetComponent<SpriteRenderer>();
         buttonsSR = buttons.GetComponent<SpriteRenderer>();
-        ColorUtility.TryParseHtmlString("#404040", out gray);
         // get the necessary components and colors
-        // assign var gray to the html string parsed
         if(!PlayerPrefs.HasKey(scripts.DEBUG_KEY)) PlayerPrefs.SetString(scripts.DEBUG_KEY, "off");
         if(!PlayerPrefs.HasKey(scripts.HINTS_KEY)) PlayerPrefs.SetString(scripts.HINTS_KEY, "on");
         if(!PlayerPrefs.HasKey(scripts.SOUNDS_KEY)) PlayerPrefs.SetString(scripts.SOUNDS_KEY, "on");
@@ -101,7 +98,7 @@ public class MenuIcon : MonoBehaviour {
     /// Turn on the player preference with the associated key.
     /// </summary>
     private void TurnOff(string key, SpriteRenderer spriteRenderer) {
-        spriteRenderer.color = gray;
+        spriteRenderer.color = Colors.disabled;
         // make the icon gray
         if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 0f; }
         else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0f; }

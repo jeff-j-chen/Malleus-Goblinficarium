@@ -50,8 +50,8 @@ public class StatSummoner : MonoBehaviour {
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
         if (PlayerPrefs.GetString("debug") == "on") {
-            playerDebug.color = scripts.colors.disabled;
-            enemyDebug.color = scripts.colors.disabled;
+            playerDebug.color = Colors.disabled;
+            enemyDebug.color = Colors.disabled;
         }
         else {
             playerDebug.color = Color.black;
@@ -73,7 +73,7 @@ public class StatSummoner : MonoBehaviour {
         existingStatSquares.Clear();
         // clear the array
         for (int i = 0; i < 4; i++) {
-            GenerateForStat(i, scripts.colors.colorNameArr[i]);
+            GenerateForStat(i, Colors.colorNameArr[i]);
             // generate stat squares for every stat
         }
         SetDebugInformationFor("player");
@@ -147,8 +147,8 @@ public class StatSummoner : MonoBehaviour {
             // - 0.01 is necessary because otherwise it has a weird visual glitch
             GameObject spawnedMinusButton = SpawnButton(minus, new Vector2(buttonXCoord + buttonXOffset, yCoords[i]));
             // create the buttons
-            spawnedPlusButton.GetComponent<StaminaButton>().stat = scripts.colors.colorNameArr[i];
-            spawnedMinusButton.GetComponent<StaminaButton>().stat = scripts.colors.colorNameArr[i];
+            spawnedPlusButton.GetComponent<StaminaButton>().stat = Colors.colorNameArr[i];
+            spawnedMinusButton.GetComponent<StaminaButton>().stat = Colors.colorNameArr[i];
             // assign stats to the buttons
         }
     }
@@ -157,8 +157,8 @@ public class StatSummoner : MonoBehaviour {
     /// Generate the stat squares for the given stat.
     /// </summary>
     private void GenerateForStat(int i, string colorName) {
-        // could use scripts.colors.colorNameArr[i] instead of colorName but that takes up way more space and its much more confusing
-        Color statColor = scripts.colors.colorArr[Array.IndexOf(scripts.colors.colorNameArr, colorName)];
+        // could use Colors.colorNameArr[i] instead of colorName but that takes up way more space and its much more confusing
+        Color statColor = Colors.colorArr[Array.IndexOf(Colors.colorNameArr, colorName)];
         // get the color of the given colorname
         if (scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName] > 0) {
             // if player's stats are greater than 0
@@ -193,7 +193,7 @@ public class StatSummoner : MonoBehaviour {
             if (scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] > 0) {
                 // if player's total stats (without stamina) are greater than 0
                 for (int j = scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName]; j < scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
-                    GameObject addedStaminaSquare = SpawnGeneratedShape(i, scripts.colors.yellow, j, xCoord, xOffset, true);
+                    GameObject addedStaminaSquare = SpawnGeneratedShape(i, Colors.yellow, j, xCoord, xOffset, true);
                     Vector3 position = addedStaminaSquare.transform.position;
                     position = new Vector2(position.x - 0.01f, position.y);
                     addedStaminaSquare.transform.position = position;
@@ -207,7 +207,7 @@ public class StatSummoner : MonoBehaviour {
             else {
                 // player's total stats w/o stamina are less than 0
                 for (int j = 0; j < scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
-                    SpawnGeneratedShape(i, scripts.colors.yellow, j, xCoord, xOffset, true);
+                    SpawnGeneratedShape(i, Colors.yellow, j, xCoord, xOffset, true);
                 }
                 // make yellow squares in the correct place
             }
@@ -225,12 +225,12 @@ public class StatSummoner : MonoBehaviour {
         if (addedEnemyStamina[colorName] > 0 && scripts.enemy.stats[colorName] + addedEnemyStamina[colorName] > 0) {
             if (scripts.enemy.stats[colorName] > 0) {
                 for (int n = scripts.enemy.stats[colorName]; n < scripts.enemy.stats[colorName] + addedEnemyStamina[colorName]; n++) {
-                    SpawnGeneratedShape(i, scripts.colors.yellow, n, -xCoord + 1, -xOffset, true);
+                    SpawnGeneratedShape(i, Colors.yellow, n, -xCoord + 1, -xOffset, true);
                 }
             }
             else {
                 for (int n = 0; n < scripts.enemy.stats[colorName] + addedEnemyStamina[colorName]; n++) {
-                    SpawnGeneratedShape(i, scripts.colors.yellow, n, -xCoord + 1, -xOffset, true);
+                    SpawnGeneratedShape(i, Colors.yellow, n, -xCoord + 1, -xOffset, true);
                 }
             }
         }
