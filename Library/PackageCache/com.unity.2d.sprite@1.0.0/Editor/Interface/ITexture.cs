@@ -30,7 +30,7 @@ namespace UnityEditor.U2D.Sprites
         {
             if (object.ReferenceEquals(t1, null))
             {
-                return !object.ReferenceEquals(t2, null) && t2 != null;
+                return !object.ReferenceEquals(t2, null) && t2 is not null;
             }
 
             return !t1.Equals(t2);

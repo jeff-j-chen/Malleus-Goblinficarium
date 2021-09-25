@@ -48,7 +48,7 @@ namespace UnityEditor.UI
 
         void SetShowNativeSize(bool instant)
         {
-            base.SetShowNativeSize(m_Texture.objectReferenceValue != null, instant);
+            base.SetShowNativeSize(m_Texture.objectReferenceValue is not null, instant);
         }
 
         private static Rect Outer(RawImage rawImage)

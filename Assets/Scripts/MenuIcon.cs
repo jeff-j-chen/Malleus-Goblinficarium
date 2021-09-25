@@ -1,11 +1,18 @@
 ﻿using System.Collections;
 using UnityEngine;
+using TMPro; 
+
 public class MenuIcon : MonoBehaviour {
-    [SerializeField] private GameObject debug;
-    [SerializeField] private GameObject hints;
-    [SerializeField] private GameObject sound;
-    [SerializeField] private GameObject music;
-    [SerializeField] private GameObject buttons;
+    [SerializeField] public GameObject debug;
+    [SerializeField] public GameObject hints;
+    [SerializeField] public GameObject sound;
+    [SerializeField] public GameObject music;
+    [SerializeField] public GameObject buttons;
+    [SerializeField] public GameObject debugText;
+    [SerializeField] public GameObject soundsText;
+    [SerializeField] public GameObject hintsText;
+    [SerializeField] public GameObject musicText;
+    [SerializeField] public GameObject buttonsText;
     [SerializeField] private AudioSource musicPlayer;
     [SerializeField] private AudioSource sfxPlayer;
     private SpriteRenderer debugSR;
@@ -14,6 +21,8 @@ public class MenuIcon : MonoBehaviour {
     private SpriteRenderer musicSR;
     private SpriteRenderer buttonsSR;
     private Scripts scripts;
+    public GameObject[] menuIconOrdering;
+    public GameObject[] menuIconTextOrdering;
     
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -23,7 +32,7 @@ public class MenuIcon : MonoBehaviour {
         musicSR = music.GetComponent<SpriteRenderer>();
         buttonsSR = buttons.GetComponent<SpriteRenderer>();
         // get the necessary components and colors
-        if(!PlayerPrefs.HasKey(scripts.DEBUG_KEY)) PlayerPrefs.SetString(scripts.DEBUG_KEY, "off");
+        if(!PlayerPrefs.HasKey(scripts.DEBUG_KEY)) PlayerPrefs.SetString(scripts.DEBUG_KEY, "on");
         if(!PlayerPrefs.HasKey(scripts.HINTS_KEY)) PlayerPrefs.SetString(scripts.HINTS_KEY, "on");
         if(!PlayerPrefs.HasKey(scripts.SOUNDS_KEY)) PlayerPrefs.SetString(scripts.SOUNDS_KEY, "on");
         if(!PlayerPrefs.HasKey(scripts.MUSIC_KEY)) PlayerPrefs.SetString(scripts.MUSIC_KEY, "on");
@@ -92,6 +101,7 @@ public class MenuIcon : MonoBehaviour {
         // make the icon white
         if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 1f; }
         else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0.5f; }
+        else if (key == scripts.BUTTONS_KEY) { scripts.mobileResizer.FlipMenuIconMode(); }
     }
 
     /// <summary>
@@ -102,5 +112,6 @@ public class MenuIcon : MonoBehaviour {
         // make the icon gray
         if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 0f; }
         else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0f; }
+        else if (key == scripts.BUTTONS_KEY) { scripts.mobileResizer.FlipMenuIconMode(); }
     }
 }

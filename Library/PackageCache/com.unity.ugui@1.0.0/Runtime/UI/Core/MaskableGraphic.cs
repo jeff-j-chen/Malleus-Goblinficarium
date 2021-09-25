@@ -267,14 +267,14 @@ namespace UnityEngine.UI
             var newParent = (maskable && IsActive()) ? MaskUtilities.GetRectMaskForClippable(this) : null;
 
             // if the new parent is different OR is now inactive
-            if (m_ParentMask != null && (newParent != m_ParentMask || !newParent.IsActive()))
+            if (m_ParentMask is not null && (newParent != m_ParentMask || !newParent.IsActive()))
             {
                 m_ParentMask.RemoveClippable(this);
                 UpdateCull(false);
             }
 
             // don't re-add it if the newparent is inactive
-            if (newParent != null && newParent.IsActive())
+            if (newParent is not null && newParent.IsActive())
                 newParent.AddClippable(this);
 
             m_ParentMask = newParent;

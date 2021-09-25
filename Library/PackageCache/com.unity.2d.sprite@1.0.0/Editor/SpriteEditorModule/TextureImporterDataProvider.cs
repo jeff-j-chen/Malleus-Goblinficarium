@@ -14,7 +14,7 @@ namespace UnityEditor.U2D.Sprites
         public ISpriteEditorDataProvider CreateDataProvider(Texture2D obj)
         {
             var ti = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(obj)) as TextureImporter;
-            if (ti != null)
+            if (ti is not null)
                 return new TextureImporterDataProvider(ti);
             return null;
         }
@@ -22,7 +22,7 @@ namespace UnityEditor.U2D.Sprites
         public ISpriteEditorDataProvider CreateDataProvider(Sprite obj)
         {
             var ti = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(obj)) as TextureImporter;
-            if (ti != null)
+            if (ti is not null)
                 return new TextureImporterDataProvider(ti);
             return null;
         }
@@ -30,10 +30,10 @@ namespace UnityEditor.U2D.Sprites
         public ISpriteEditorDataProvider CreateDataProvider(GameObject obj)
         {
             var spriteRenderer = obj.GetComponent<SpriteRenderer>();
-            if (spriteRenderer != null && spriteRenderer.sprite != null)
+            if (spriteRenderer is not null && spriteRenderer.sprite is not null)
             {
                 var ti = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(spriteRenderer.sprite)) as TextureImporter;
-                if (ti != null)
+                if (ti is not null)
                     return new TextureImporterDataProvider(ti);
             }
             return null;
@@ -48,10 +48,10 @@ namespace UnityEditor.U2D.Sprites
         static string GetAssetPathFromSpriteRenderer(UnityEngine.Object obj)
         {
             var go = obj as GameObject;
-            if (go != null)
+            if (go is not null)
             {
                 var spriteRenderer = go.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null && spriteRenderer.sprite != null)
+                if (spriteRenderer is not null && spriteRenderer.sprite is not null)
                     return AssetDatabase.GetAssetPath(spriteRenderer.sprite);
             }
             return null;
@@ -61,10 +61,10 @@ namespace UnityEditor.U2D.Sprites
         static Sprite GetSpriteObjectFromSpriteRenderer(UnityEngine.Object obj)
         {
             var go = obj as GameObject;
-            if (go != null)
+            if (go is not null)
             {
                 var spriteRenderer = go.GetComponent<SpriteRenderer>();
-                if (spriteRenderer != null)
+                if (spriteRenderer is not null)
                     return spriteRenderer.sprite;
             }
             return null;
@@ -84,7 +84,7 @@ namespace UnityEditor.U2D.Sprites
         internal TextureImporterDataProvider(TextureImporter importer)
         {
             m_TextureImporter = importer;
-            if (m_TextureImporter != null)
+            if (m_TextureImporter is not null)
             {
                 m_SpriteImportMode = m_TextureImporter.spriteImportMode;
                 m_CachedSerializedObject = new SerializedObject(m_TextureImporter);
@@ -163,7 +163,7 @@ namespace UnityEditor.U2D.Sprites
                 {
                     var newSpriteRect = new SpriteDataExt(newSprite);
                     var nameIdPair = nameIdTable.FirstOrDefault(x => x.GetFileGUID() == newSprite.spriteID);
-                    if (nameIdPair != null && !internalIdUsed.Contains(nameIdPair.internalID))
+                    if (nameIdPair is not null && !internalIdUsed.Contains(nameIdPair.internalID))
                     {
                         newSpriteRect.internalID = nameIdPair.internalID;
                         internalIdUsed.Add(nameIdPair.internalID);
@@ -176,7 +176,7 @@ namespace UnityEditor.U2D.Sprites
                 {
                     var newSpriteRect = new SpriteDataExt(newSprite);
                     var nameIdPair = nameIdTable.FirstOrDefault(x => x.name == newSprite.name);
-                    if (nameIdPair != null && !internalIdUsed.Contains(nameIdPair.internalID))
+                    if (nameIdPair is not null && !internalIdUsed.Contains(nameIdPair.internalID))
                         newSpriteRect.internalID = nameIdPair.internalID;
 
                     internalIdUsed.Add(newSpriteRect.internalID);
@@ -200,13 +200,13 @@ namespace UnityEditor.U2D.Sprites
                 long internalId = guid.GetHashCode();
                 //check if guid is in current name id table
                 var idPair = m_NameFileIdPairs.FirstOrDefault(x => x.GetFileGUID() == guid);
-                if (idPair != null)
+                if (idPair is not null)
                     internalId = idPair.internalID;
                 else
                 {
                     // check if guid is in current sprite list
                     var sr = m_SpritesMultiple.FirstOrDefault(x => x.spriteID == guid);
-                    if (sr != null)
+                    if (sr is not null)
                         internalId = sr.internalID;
                 }
                 newFileIdPair[count] = new SpriteNameFileIdPairExt(pair.name, guid, internalId);
@@ -337,7 +337,7 @@ namespace UnityEditor.U2D.Sprites
                     // check if this internal nid is already in one of the sprite.
                     // We don't check name as changing internal id can cause reference to be lost
                     var spriteRect = m_SpritesMultiple.FirstOrDefault(x => x.internalID == spriteNameFileId.internalID);
-                    if (spriteRect != null)
+                    if (spriteRect is not null)
                         spriteNameFileId.SetFileGUID(spriteRect.spriteID);
                     nameFileIdPairs[i] = spriteNameFileId;
                     sp.Next(false);

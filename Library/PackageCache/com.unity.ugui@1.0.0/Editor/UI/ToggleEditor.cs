@@ -47,7 +47,7 @@ namespace UnityEditor.UI
 
                 toggle.isOn = m_IsOnProperty.boolValue;
 
-                if (group != null && group.isActiveAndEnabled && toggle.IsActive())
+                if (group is not null && group.isActiveAndEnabled && toggle.IsActive())
                 {
                     if (toggle.isOn || (!group.AnyTogglesOn() && !group.allowSwitchOff))
                     {
