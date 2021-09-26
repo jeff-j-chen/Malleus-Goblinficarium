@@ -28,17 +28,45 @@ public class MobileResizer : MonoBehaviour {
     private readonly Vector2[] menuIconMobilePos = { 
         new(0.32f, -3.06f), 
         new(6.8f, -3.06f), 
-        new(12.72f, -3.06f), 
+        new(12.94f, -3.06f), 
         new(20.11f, -3.06f), 
-        new(9.8f, -1.41f) 
+        new(9.11f, -1.366f) 
     };
     private readonly Vector2[] menuIconTextMobilePos = { 
         new(-235.2f, -264.4f), 
         new(-43.1f, -264.4f), 
         new(141.2f, -264.4f), 
         new(357.7f, -264.4f), 
-        new(47.4f, -213.23f),
+        new(20.4f, -213.23f),
     };
+    [SerializeField] private GameObject[] menuButtons;
+    private readonly Vector3 menuButtonDesktopScale = new(1f, 1f, 1f);
+    private readonly Vector2[] menuButtonDesktopPos = { 
+        new(46.6f, 45f), 
+        new(46.6f, 15f), 
+        new(46.6f, -15f), 
+        new(46.6f, -45f), 
+        new(46.6f, -75f), 
+        new(46.6f, -105f), 
+    };
+    private readonly Vector3 menuButtonMobileScale = new(1.5f, 1.5f, 1f);
+    private readonly Vector2[] menuButtonMobilePos = { 
+        new(70.5f, 75f+15f), 
+        new(70.5f, 30f+15f), 
+        new(70.5f, -15f+15f), 
+        new(70.5f, -60f+15f), 
+        new(70.5f, -105f+15f), 
+        new(70.5f, -150f+15f), 
+    };
+    [SerializeField] private GameObject titleText;
+    private readonly Vector2 titleTextDesktopPos = new(0f, 200f);
+    private readonly Vector2 titleTextMobilePos = new(0f, 205f);
+    private readonly Vector3 titleTextDesktopScale = new(1f, 1f, 1f);
+    [SerializeField] private GameObject subtitleText;
+    private readonly Vector3 titleTextMobileScale = new(1.5f, 1.5f, 1f);
+    private readonly Vector2 subtitleTextDesktopPos = new(0f, 175f);
+    private readonly Vector2 subtitleTextMobilePos = new(0f, 175f);
+    
     
     
     private void Start() {
@@ -49,22 +77,76 @@ public class MobileResizer : MonoBehaviour {
     }
 
     public void FlipMenuIconMode() {
-        mobileMode = PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on";
-        if (mobileMode) {
-            for (int i = 0; i < 5; i++) {
-                scripts.menuIcon.menuIconOrdering[i].transform.localScale = menuIconMobileScale;
-                scripts.menuIcon.menuIconOrdering[i].transform.localPosition = menuIconMobilePos[i];
-                scripts.menuIcon.menuIconTextOrdering[i].GetComponent<TextMeshProUGUI>().fontSize = mobileFontSize;
-                scripts.menuIcon.menuIconTextOrdering[i].transform.localPosition = menuIconTextMobilePos[i];
+        mobileMode = PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on";    
+        if (!mobileMode) {
+            // desktop mode
+            SetMenuIcons(menuIconDesktopScale, menuIconDesktopPos, desktopFontSize, menuIconTextDesktopPos);
+            SetMenuButtons(menuButtonDesktopScale, menuButtonDesktopPos);
+            SetTitlePosition(titleTextDesktopScale, titleTextDesktopPos, subtitleTextDesktopPos);
+        }
+        else {
+            // mobile mode
+            SetMenuIcons(menuIconMobileScale, menuIconMobilePos, mobileFontSize, menuIconTextMobilePos);
+            SetMenuButtons(menuButtonMobileScale, menuButtonMobilePos);
+            SetTitlePosition(titleTextMobileScale, titleTextMobilePos, subtitleTextMobilePos);
+        }
+        SetArrowPos();
+    }
+    
+    private void SetMenuIcons(Vector3 iconScale, IReadOnlyList<Vector2> iconPositionArr, float fontSize, IReadOnlyList<Vector2> textPositionArr) {
+        for (int i = 0; i < 5; i++) {
+            scripts.menuIcon.menuIconOrdering[i].transform.localScale = iconScale;
+            scripts.menuIcon.menuIconOrdering[i].transform.localPosition = iconPositionArr[i];
+            scripts.menuIcon.menuIconTextOrdering[i].GetComponent<TextMeshProUGUI>().fontSize = fontSize;
+            scripts.menuIcon.menuIconTextOrdering[i].transform.localPosition = textPositionArr[i];
+        }
+    }
+
+    private void SetMenuButtons(Vector3 scale, IReadOnlyList<Vector2> buttonPosArr) {
+        Save.LoadGame();
+        if (Save.game.newGame) { 
+            menuButtons[0].SetActive(false); 
+            for (int i = 1; i < menuButtons.Length; i++) {
+                menuButtons[i].transform.localScale = scale;
+                menuButtons[i].transform.localPosition = buttonPosArr[i-1];
+            }
+        }
+        else { 
+            menuButtons[0].SetActive(true); 
+            for (int i = 0; i < menuButtons.Length; i++) { 
+                menuButtons[i].transform.localScale = scale;
+                menuButtons[i].transform.localPosition = buttonPosArr[i];
+            }
+        }
+        foreach (GameObject button in menuButtons) {
+            button.GetComponent<MenuButton>().GetComponent<TextMeshProUGUI>().color = Color.white;
+        }
+    }
+
+    private void SetArrowPos() {
+        if (!mobileMode) {
+            if (Save.game.newGame) {
+                scripts.arrow.transform.localPosition = new Vector2(
+                    menuButtons[1].transform.position.x + scripts.arrow.xOffset,
+                    menuButtons[1].transform.position.y + scripts.arrow.yOffset
+                );
+            }
+            else {
+                scripts.arrow.transform.localPosition = new Vector2(
+                    menuButtons[0].transform.position.x + scripts.arrow.xOffset,
+                    menuButtons[0].transform.position.y + scripts.arrow.yOffset
+                );
             }
         }
         else {
-            for (int i = 0; i < 5; i++) {
-                scripts.menuIcon.menuIconOrdering[i].transform.localScale = menuIconDesktopScale;
-                scripts.menuIcon.menuIconOrdering[i].transform.localPosition = menuIconDesktopPos[i];
-                scripts.menuIcon.menuIconTextOrdering[i].GetComponent<TextMeshProUGUI>().fontSize = desktopFontSize;
-                scripts.menuIcon.menuIconTextOrdering[i].transform.localPosition = menuIconTextDesktopPos[i];
-            }
+            scripts.arrow.transform.localPosition = new Vector2(1000f, 0);
         }
+    }
+
+    private void SetTitlePosition(Vector3 scale, Vector3 titlePos, Vector3 subtitleTextPos) {
+        titleText.transform.localScale = scale;
+        subtitleText.transform.localScale = scale;
+        titleText.transform.localPosition = titlePos;
+        subtitleText.transform.localPosition = subtitleTextPos;
     }
 }

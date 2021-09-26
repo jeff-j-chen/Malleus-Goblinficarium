@@ -93,7 +93,7 @@ public class StatSummoner : MonoBehaviour {
         if (playerOrEnemy == "player") {
             // get for player
             if (stat == "blue") {
-                if (scripts.enemy.woundList.Contains("knee") && scripts.enemy.enemyName.text != "Lich" || (scripts.itemManager.PlayerHasWeapon("spear") && scripts.itemManager.PlayerHasLegendary())) { return 99; }
+                if (scripts.enemy.woundList.Contains("knee") && scripts.enemy.enemyName.text != "Lich" || !scripts.player.isDead && scripts.itemManager.PlayerHasWeapon("spear") && scripts.itemManager.PlayerHasLegendary()) { return 99; }
                 // return 99 speed if enemy has knee wound (lich not affected by wounds), or the player has legendary spear
             }
             int sum = scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];

@@ -101,7 +101,10 @@ public class MenuIcon : MonoBehaviour {
         // make the icon white
         if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 1f; }
         else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0.5f; }
-        else if (key == scripts.BUTTONS_KEY) { scripts.mobileResizer.FlipMenuIconMode(); }
+        else if (key == scripts.BUTTONS_KEY) { 
+            scripts.mobileResizer.FlipMenuIconMode();
+            scripts.arrow = FindObjectOfType<Arrow>();
+        }
     }
 
     /// <summary>
@@ -112,6 +115,9 @@ public class MenuIcon : MonoBehaviour {
         // make the icon gray
         if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 0f; }
         else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0f; }
-        else if (key == scripts.BUTTONS_KEY) { scripts.mobileResizer.FlipMenuIconMode(); }
+        else if (key == scripts.BUTTONS_KEY) { 
+            scripts.mobileResizer.FlipMenuIconMode();
+            scripts.arrow = FindObjectOfType<Arrow>();
+        }
     }
 }

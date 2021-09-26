@@ -1,24 +1,28 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
+using TMPro;
 public class MenuButton : MonoBehaviour {
     private float transitionMultiplier;
-    private SoundManager soundManager;
-    private Arrow arrow;
     private Scripts scripts;
+    private TextMeshProUGUI text;
 
     private void Start() {
         Save.LoadGame();
         Save.LoadPersistent();
         scripts = FindObjectOfType<Scripts>();
+        text = GetComponent<TextMeshProUGUI>();
         transitionMultiplier = FindObjectOfType<BackToMenu>().transitionMultiplier;
-        soundManager = FindObjectOfType<SoundManager>();
-        arrow = FindObjectOfType<Arrow>();
-        arrow.MoveToButtonPos(1);
+        if (scripts.arrow != null) {
+            scripts.arrow = FindObjectOfType<Arrow>();
+            scripts.arrow.MoveToButtonPos(1);
+        }
     }
 
     public void OnMouseEnter() {
-        arrow.MoveToButtonPos(Array.IndexOf(arrow.menuButtons, gameObject));
+        if (scripts.arrow != null) { scripts.arrow.MoveToButtonPos(Array.IndexOf(scripts.arrow.menuButtons, gameObject)); }
         // when the cursor moves over a menu button, make the arrow go there
+        if (PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on") { text.color = Colors.hovered; }
     }
 
     public void OnMouseDown() {
@@ -30,18 +34,20 @@ public class MenuButton : MonoBehaviour {
     /// Handle when one of the menu buttons is pressed.
     /// </summary>
     public void ButtonPress(string buttonName) {
-        soundManager.PlayClip("click0");
+        scripts.soundManager.PlayClip("click0");
+        if (PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on") { text.color = Colors.clicked; }
         // play sound clip
         switch (buttonName) {
-            case "Continu":
+
+            case "Continue":
                 // continu because the button is actually continu + e, for some reason continue has the e slightly off
-                if (Save.game.enemyNum is 0 or 1 or 2) { 
+                if (Save.game.enemyNum is 0 or 1 or 2) {
                     if (scripts.music.audioSource.clip.name != "LaBossa") { scripts.music.FadeVolume("LaBossa"); }
                 }
-                else if (Save.game.resumeSub == 4) { 
+                else if (Save.game.resumeSub == 4) {
                     if (scripts.music.audioSource.clip.name != "Smoke") { scripts.music.FadeVolume("Smoke"); }
                 }
-                else { 
+                else {
                     if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
                 }
                 // fade music in based on what the player is currently on, but only if the same music is not already playing
@@ -55,7 +61,7 @@ public class MenuButton : MonoBehaviour {
                 Save.SavePersistent();
                 Initiate.Fade("Game", Color.black, transitionMultiplier);
                 break;
-            case "Tutorial": 
+            case "Tutorial":
                 if (scripts.music.audioSource.clip.name != "Through") { scripts.music.FadeVolume("Through"); }
                 Initiate.Fade("Tutorial", Color.black, transitionMultiplier);
                 break;
@@ -64,6 +70,14 @@ public class MenuButton : MonoBehaviour {
                 break;
             // go to the associated level
         }
+    }
+
+    private void OnMouseExit() {
+        if (PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on") { text.color = Color.white; }
+    }
+
+    private void OnMouseUp() {
+        if (PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on") { text.color = Color.white; }
     }
 
 }
