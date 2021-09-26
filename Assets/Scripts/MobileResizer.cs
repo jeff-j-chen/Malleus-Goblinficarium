@@ -77,7 +77,7 @@ public class MobileResizer : MonoBehaviour {
     }
 
     public void FlipMenuIconMode() {
-        mobileMode = PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on";    
+        mobileMode = PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on";
         if (!mobileMode) {
             // desktop mode
             SetMenuIcons(menuIconDesktopScale, menuIconDesktopPos, desktopFontSize, menuIconTextDesktopPos);

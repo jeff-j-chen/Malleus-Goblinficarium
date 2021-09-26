@@ -9,8 +9,13 @@ using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 public class TurnManager : MonoBehaviour {
     [SerializeField] public GameObject blackBox;
-    public Vector3 onScreen = new Vector2(2.4f, 10.01f-0.12f);
-    public Vector3 offScreen = new Vector2(0.33f, 20f);
+    private readonly Vector3 mobileScale = new(1.45f, 0.65f, 1f);
+    private readonly Vector2 mobileOnScreen = new(2.29f, 10.29f);
+    private readonly Vector3 desktopScale = new(1.45f, 0.55f, 1f);
+    private readonly Vector2 desktopOnScreen = new(-0.2f, 10.89f);
+    public Vector3 onScreen;
+    public Vector3 offScreen;
+    public Vector3 scale;
     private Coroutine coroutine = null;
     [SerializeField] public TextMeshProUGUI statusText;
     [SerializeField] public string[] targetArr = { "chest", "guts", "knee", "hip", "head", "hand", "armpits", "face" };
@@ -26,11 +31,15 @@ public class TurnManager : MonoBehaviour {
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
-        if (PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on") {
+        if (scripts.mobileMode) {
             statusText.transform.localPosition = new Vector3(0f, -199.33f, 0f);
+            onScreen = mobileOnScreen;
+            blackBox.transform.localScale = mobileScale;
         }
         else { 
             statusText.transform.localPosition = new Vector3(0f, -262.5f, 0f);
+            onScreen = desktopOnScreen;
+            blackBox.transform.localScale = desktopScale;
         }
         // depending on whether the mobile buttons are toggled on or not, move the status text out of the way
         DisplayWounds();
@@ -658,7 +667,7 @@ public class TurnManager : MonoBehaviour {
             // if enemy dies, set sprite and proper position
             scripts.itemManager.SpawnItems();
             // spawn items
-            blackBox.transform.position = onScreen;
+            blackBox.transform.localPosition = onScreen;
             // hide the enemy's stats
             if (scripts.tutorial != null) { scripts.tutorial.Increment(); }
         }

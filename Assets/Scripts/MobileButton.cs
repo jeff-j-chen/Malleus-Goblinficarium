@@ -27,7 +27,7 @@ public class MobileButton : MonoBehaviour {
             case "drop": scripts.itemManager.DropCurrentItem(); break;
             case "RButton": scripts.itemManager.SelectRight(); break;
             case "menu": scripts.backToMenu.GoBack(); break;
-            case "restart": scripts.player.AttemptSuicide(); break;
+            case "items": scripts.itemManager.ChangeItemList(); break;
             case "select": scripts.characterSelector.Select(); break;
             case "easy mode": scripts.characterSelector.ToggleEasy(); break;
             case "reset stats": scripts.statistics.ResetStats(); break;

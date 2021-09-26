@@ -925,7 +925,7 @@ GameObject:
   - component: {fileID: 461545824}
   - component: {fileID: 461545823}
   m_Layer: 5
-  m_Name: restart
+  m_Name: menu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1011,7 +1011,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: retry
+  m_text: menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 153c2cc2c59f4064695fb26abfea98e2, type: 2}
   m_sharedMaterial: {fileID: -7047417035543559013, guid: 153c2cc2c59f4064695fb26abfea98e2,
@@ -1497,7 +1497,7 @@ GameObject:
   - component: {fileID: 628451209}
   - component: {fileID: 628451208}
   m_Layer: 5
-  m_Name: menu
+  m_Name: items
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1583,7 +1583,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: menu
+  m_text: items
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 153c2cc2c59f4064695fb26abfea98e2, type: 2}
   m_sharedMaterial: {fileID: -7047417035543559013, guid: 153c2cc2c59f4064695fb26abfea98e2,
@@ -2961,6 +2961,10 @@ MonoBehaviour:
   circle: {fileID: 1281468849503083375, guid: 84944decd8677024cb00f934a58685a8, type: 3}
   playerDebug: {fileID: 755440570}
   enemyDebug: {fileID: 1128740619}
+  diceOffset: 0
+  xOffset: 0
+  highlightOffset: 0
+  yCoords: []
 --- !u!1 &1190361760
 GameObject:
   m_ObjectHideFlags: 0
@@ -4118,6 +4122,7 @@ MonoBehaviour:
   blackBox: {fileID: 1585409375}
   onScreen: {x: -0.2, y: 10.89, z: 0}
   offScreen: {x: 0.33, y: 20, z: 0}
+  scale: {x: 0, y: 0, z: 0}
   statusText: {fileID: 119983209}
   targetArr:
   - chest
@@ -4287,6 +4292,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 1325612827}
+  border: {fileID: 1293399222}
   dice: {fileID: 0}
   arrow: {fileID: 0}
   enemy: {fileID: 0}
@@ -4304,8 +4310,10 @@ MonoBehaviour:
   levelManager: {fileID: 0}
   statSummoner: {fileID: 0}
   tombstoneData: {fileID: 0}
+  mobileResizer: {fileID: 0}
   characterSelector: {fileID: 0}
   highlightCalculator: {fileID: 0}
+  mobileMode: 0
 --- !u!1 &1701131698
 GameObject:
   m_ObjectHideFlags: 0

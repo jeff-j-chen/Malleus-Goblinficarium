@@ -184,14 +184,11 @@ public class Dice : MonoBehaviour {
             // send the die to the background
         }
         if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich") {
-            print("1");
             //  && !scripts.turnManager.isMoving
             // if an action can be performed on the dice (discard, reroll)
             if (!scripts.turnManager.isMoving || scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable) {
-                print("2");
                 // if the situation allows for an action to be performed
                 if (Save.game.discardableDieCounter > 0 || scripts.turnManager.scimitarParryCount > 0) {
-                    print("3");
                     // if can discard from another source
                     if (scripts.turnManager.scimitarParryCount > 1) {
                         scripts.turnManager.scimitarParryCount = 1;

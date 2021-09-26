@@ -57,7 +57,7 @@ public class Tutorial : MonoBehaviour {
         // ^ 20
         "\n\nNow use your weapon\n(click the \"sword\" icon) to start the\nfight, and watch him die...",
         // ^ 21
-        "Take the loot now. Use [ctrl]\n or [left_mouse] to access his\ninventory.\n\n[take steak] to continue",
+        "Take the loot now. Use [ctrl]\nor [left_mouse] to access his\ninventory.\n\n[take steak] to continue",
         // ^ 22
         "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[click] to continue",
         // ^ 23
@@ -109,7 +109,7 @@ public class Tutorial : MonoBehaviour {
         // ^ 20
         "\n\nNow use your weapon\n(tap the \"sword\" or press [use])\nto start the fight, and watch him die...",
         // ^ 21
-        "Take the loot now.\n [tap] to access his inventory.\nPress [use] to pick up an item.\n\n[take steak] to continue",
+        "Take the loot now.\nPress [item] to switch to his items.\nPress [use] to take an item.\n\n[take steak] to continue",
         // ^ 22
         "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[tap] to continue",
         // ^ 23
@@ -122,12 +122,8 @@ public class Tutorial : MonoBehaviour {
     private void Awake() {
         scripts = FindObjectOfType<Scripts>();
         GetComponent<SpriteRenderer>().sprite = blackBox;
-        if (SystemInfo.deviceType == DeviceType.Handheld || Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer) {
-            tutorialTextList = mobileTextList;
-        }
-        else {
-            tutorialTextList = desktopTutorialText;
-        }
+        tutorialTextList = PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on" ? mobileTextList : desktopTutorialText;
+        // cant use scripts.mobilemode for some reason, so oh well 
         mainScroll = StartCoroutine(TextAnimation(0));
     }
 

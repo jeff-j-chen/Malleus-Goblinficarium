@@ -25,7 +25,10 @@ public class HighlightCalculator : MonoBehaviour {
             highlights[i] = highlight;
             highlights[i].transform.parent = transform;
             highlightColliders[i] = highlight.GetComponent<BoxCollider2D>();
-            // put the data of each highlight in
+            highlightColliders[i].transform.localScale = scripts.mobileMode 
+                ? scripts.diceSummoner.mobileDiceScale 
+                : scripts.diceSummoner.desktopDiceScale;
+            // put the data of each highlight in, and scale it based on the size
         }
     }
 

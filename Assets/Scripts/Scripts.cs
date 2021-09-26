@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Scripts : MonoBehaviour {
     [SerializeField] public Animator terrain;
+    [SerializeField] private GameObject border;
     public Dice dice;
     public Arrow arrow;
     public Enemy enemy;
@@ -31,12 +32,14 @@ public class Scripts : MonoBehaviour {
     public readonly string SOUNDS_KEY = "sounds";
     public readonly string MUSIC_KEY = "music";
     public readonly string BUTTONS_KEY = "button";
+    public bool mobileMode; // only for use in-game, don't use this for menu screen!
 
     private void Start() {
         tutorial = FindObjectOfType<Tutorial>();
         if (tutorial == null) { Save.LoadGame(); }
         else { Save.LoadTutorial(); }
         Save.LoadPersistent();
+        mobileMode = PlayerPrefs.GetString(BUTTONS_KEY) == "on";
         dice = FindObjectOfType<Dice>();
         arrow = FindObjectOfType<Arrow>();
         enemy = FindObjectOfType<Enemy>();
@@ -58,6 +61,7 @@ public class Scripts : MonoBehaviour {
         foreach (float delay in delayArr) {
             delays.Add(delay, new WaitForSeconds(delay));
         }
+        if (border != null) { border.SetActive(!mobileMode); }
         StartCoroutine(SaveAfterDelay());
     }
 

@@ -26,18 +26,8 @@ public class Item : MonoBehaviour {
         // set the object's name to its itemname, so it can be identified in the editor
         if (itemName == "torch" && scripts.player != null) {
             // if the item is a torch
-            if (Random.Range(0, 2) == 0) {
-                // 1/2 chance
-                if (scripts.levelManager.sub != 4) { modifier = $"{scripts.levelManager.level + 1}-{scripts.levelManager.sub}"; }
-                else { modifier = $"{scripts.levelManager.level + 1}-1"; }
-                // set fade time to be default
-            }
-            else {
-                // 1/2 chance
-                if (scripts.levelManager.sub + 1 == 4 || scripts.levelManager.sub + 1 == 5) { modifier = $"{scripts.levelManager.level + 1}-2"; }
-                else { modifier = $"{scripts.levelManager.level + 1}-{scripts.levelManager.sub + 1}"; }
-                // set fade time to be slightly longer
-            }
+            modifier = $"{scripts.levelManager.level + 1}-{Mathf.Clamp(scripts.levelManager.sub-1, 1, 3)}";
+            // set the fade time of the torch to be the next level but with previous sub (clamping to prevent bugs)
         }
         StartCoroutine(AllowFX());
     }
@@ -112,14 +102,14 @@ public class Item : MonoBehaviour {
                 scripts.enemy.stats = weaponStats;
                 scripts.statSummoner.SummonStats();
                 scripts.statSummoner.SetDebugInformationFor("enemy");
-                scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
+                scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.offScreen;
                 // display the stats for the player to see
             }
             else {
                 // if item is in inventory
                 if (scripts.enemy != null) {
                     // and not in character select
-                    if (Save.game.enemyIsDead) { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
+                    if (Save.game.enemyIsDead) { scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen; }
                     // hide the weapon stats if enemy is dead and not clicking on an enemy
                 }
             }
@@ -127,7 +117,7 @@ public class Item : MonoBehaviour {
         else {
             if (scripts.levelManager == null || !scripts.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
-                if (scripts.levelManager != null && Save.game.enemyIsDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen; }
+                if (scripts.levelManager != null && Save.game.enemyIsDead || scripts.levelManager != null && scripts.enemy.enemyName.text == "Tombstone") { scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen; }
                 // hide the weapon stats if enemy is dead and not clicking on an enemy
                 switch (itemName) {
                     case "potion":

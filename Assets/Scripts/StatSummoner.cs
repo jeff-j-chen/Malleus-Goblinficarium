@@ -12,12 +12,27 @@ public class StatSummoner : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI playerDebug;
     [SerializeField] private TextMeshProUGUI enemyDebug;
     private readonly float xCoord = -10.5f;
-    public readonly float xOffset = 0.65f;
-    private readonly float highlightOffset = 0.85f;
-    public readonly float diceOffset = 1f;
-    private readonly float buttonXCoord = -11.7f;
-    private readonly float buttonXOffset = -0.6f;
-    public readonly float[] yCoords = { 8.77f, 7.77f, 6.77f, 5.77f };
+    private readonly float desktopDiceOffset = 1f;
+    private readonly float mobileDiceOffset = 1f*1.5f;
+    public float diceOffset;
+    private readonly float desktopXOffset = 0.65f;
+    private readonly float desktopHighlightOffset = 0.85f;
+    private readonly float mobileXOffset = 0.65f;
+    private readonly float mobileHighlightOffset = 0.85f*1.25f;
+    public float xOffset;
+    public float highlightOffset;
+    private readonly float desktopButtonXCoord = -11.7f;
+    private readonly float desktopButtonXOffset = -0.6f;
+    private readonly float mobileButtonXCoord = -11.7f;
+    private readonly float mobileButtonXOffset = -1f;
+    private readonly Vector3 desktopButtonScale = new Vector3(1f, 1f, 1f);
+    private readonly Vector3 mobileButtonScale = new Vector3(1.5f, 1.5f, 1f);
+    private Vector3 buttonScale;
+    private float buttonXCoord;
+    private float buttonXOffset;
+    private readonly float[] desktopYCoords = { 8.77f, 7.77f, 6.77f, 5.77f };
+    private readonly float[] mobileYCoords = { 0.5f+8.77f, 0.5f+7.77f-0.5f*1, 0.5f+6.77f-0.5f*2, 0.5f+5.77f-0.5f*3 };
+    public float[] yCoords;
     private readonly Vector2 baseDebugPos = new(-1.667f, 7.333f);
     private List<GameObject> existingStatSquares = new();
     public readonly Dictionary<string, List<Dice>> addedPlayerDice = new() {
@@ -58,6 +73,24 @@ public class StatSummoner : MonoBehaviour {
             enemyDebug.color = Color.black;
         }
         // set the debug color if needed
+        if (scripts.mobileMode) {
+            diceOffset = mobileDiceOffset;
+            xOffset = mobileXOffset;
+            highlightOffset = mobileHighlightOffset;
+            buttonXCoord = mobileButtonXCoord;
+            buttonXOffset = mobileButtonXOffset;
+            yCoords = mobileYCoords;
+            buttonScale = mobileButtonScale;
+        }
+        else {
+            diceOffset = desktopDiceOffset;
+            xOffset = desktopXOffset;
+            highlightOffset = desktopHighlightOffset;
+            buttonXCoord = desktopButtonXCoord;
+            buttonXOffset = desktopButtonXOffset;
+            yCoords = desktopYCoords;
+            buttonScale = desktopButtonScale;
+        }
         SummonStaminaButtons();
         // create the stamina buttons
     }
@@ -150,6 +183,8 @@ public class StatSummoner : MonoBehaviour {
             spawnedPlusButton.GetComponent<StaminaButton>().stat = Colors.colorNameArr[i];
             spawnedMinusButton.GetComponent<StaminaButton>().stat = Colors.colorNameArr[i];
             // assign stats to the buttons
+            spawnedPlusButton.transform.localScale = buttonScale;
+            spawnedMinusButton.transform.localScale = buttonScale;
         }
     }
 
@@ -322,7 +357,7 @@ public class StatSummoner : MonoBehaviour {
     /// Return the outermost player's x coordinate to add dice onto.
     /// </summary>
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
-        if (optionalDiceOffsetStatToMultiplyBy == null) { optionalDiceOffsetStatToMultiplyBy = statType; }
+        optionalDiceOffsetStatToMultiplyBy ??= statType;
         // not setting the optional variable will just default it to the base stat type
         return xCoord + ((Mathf.Abs(scripts.player.stats[statType] + scripts.player.potionStats[statType] + scripts.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset

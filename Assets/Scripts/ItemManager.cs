@@ -252,15 +252,7 @@ public class ItemManager : MonoBehaviour {
 
     private void Update() {
         if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl)) {
-            // if pressing one of the ctrl keys
-            if (!isCharSelect) {
-                // if not in char select scene
-                if (curList == scripts.player.inventory) { Select(floorItems, 0); }
-                else if (curList == floorItems) { Select(scripts.player.inventory, 0); }
-                // swap the curList (used for selection) to the other
-                // else { print("invalid list to select from"); }
-                // something is wrong here
-            }
+            ChangeItemList();
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow) && SceneManager.GetActiveScene().name != "CharSelect") {
             // if pressing left and not in the character select screen
@@ -280,6 +272,18 @@ public class ItemManager : MonoBehaviour {
             else { 
                 UseCurrentItem();
             }
+        }
+    }
+    
+    public void ChangeItemList() {
+        // if pressing one of the ctrl keys
+        if (!isCharSelect) {
+            // if not in char select scene
+            if (curList == scripts.player.inventory) { Select(floorItems, 0); }
+            else if (curList == floorItems) { Select(scripts.player.inventory, 0); }
+            // swap the curList (used for selection) to the other
+            // else { print("invalid list to select from"); }
+            // something is wrong here
         }
     }
 
@@ -322,8 +326,6 @@ public class ItemManager : MonoBehaviour {
                     MoveToInventory(0, true, false, false);
                     CreateItem("armor");
                     MoveToInventory(0, true, false, false);
-                    // CreateItem("potion", "common", "might");
-                    // MoveToInventory(0, true, false, false);
                     if (Save.persistent.easyMode) {
                         CreateItem("helm_of_might");
                         MoveToInventory(0, true, false, false);
@@ -632,7 +634,7 @@ public class ItemManager : MonoBehaviour {
                         scripts.statSummoner.SummonStats();
                         scripts.statSummoner.SetDebugInformationFor("player");
                         // update debug, because player just took a new weapon
-                        scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
+                        scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
                     }
                     else {
                         scripts.player.inventory.Add(floorItems[index]);

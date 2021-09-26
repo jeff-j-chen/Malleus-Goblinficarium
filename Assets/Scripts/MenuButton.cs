@@ -1,7 +1,7 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
-using TMPro;
+
 public class MenuButton : MonoBehaviour {
     private float transitionMultiplier;
     private Scripts scripts;

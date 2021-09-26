@@ -56,7 +56,7 @@ public class Enemy : MonoBehaviour {
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
-        scripts.turnManager.blackBox.transform.position = scripts.turnManager.offScreen;
+        scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.offScreen;
         // make sure to show the enemy's stats at the start
         if (scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) {
             // on the tombstone level
@@ -66,7 +66,7 @@ public class Enemy : MonoBehaviour {
             // indicate that the player can loot
             scripts.tombstoneData.SpawnSavedTSItems(true);
             // spawn the Saved tombstone items
-            scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
+            scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
             // hide the stats (don't fight tombstones)
         }
         else if (scripts.levelManager.sub == 4) {
@@ -77,7 +77,7 @@ public class Enemy : MonoBehaviour {
             // indicate that the player should trade
             scripts.tombstoneData.SpawnSavedMerchantItems(true);
             // spawn the Saved merchant items
-            scripts.turnManager.blackBox.transform.position = scripts.turnManager.onScreen;
+            scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
             // hide the stats (don't fight merchants)
         }
         else { 
@@ -253,6 +253,8 @@ public class Enemy : MonoBehaviour {
                 // assign stamina based on level and sub
             }
             woundList.Clear();
+            Save.game.enemyStamina = stamina;
+            Save.SaveGame();
         }
         else { 
             // spawning old enemy

@@ -94,8 +94,8 @@ public class Player : MonoBehaviour {
             AttemptSuicide();
         }
     }
-    
-    public void AttemptSuicide() {
+
+    private void AttemptSuicide() {
         if (!isDead && !scripts.turnManager.isMoving && scripts.tutorial == null) {
             if (Save.game.enemyIsDead) {
                 // don't let player suicide when enemy is dead, because it is glitchy
@@ -151,16 +151,17 @@ public class Player : MonoBehaviour {
             // increment target index
             scripts.turnManager.SetTargetOf("player");
             // and set target based off the new target index
-            if (scripts.tutorial != null && targetIndex == 7) { scripts.tutorial.Increment(); }
+            if (scripts.tutorial != null && targetIndex == 7 && scripts.tutorial.curIndex == 20) { scripts.tutorial.Increment(); }
         }
     }
 
     public void MoveTargetUp() {
-        // pretty much the same as above
         if (targetIndex > 0) {  
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
-            targetIndex--;
-            scripts.turnManager.SetTargetOf("player");
+            if (!(scripts.tutorial != null && targetIndex == 7)) {
+                targetIndex--;
+                scripts.turnManager.SetTargetOf("player");
+            }
         }
     }
 

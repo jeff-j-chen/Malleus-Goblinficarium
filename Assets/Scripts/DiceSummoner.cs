@@ -12,14 +12,29 @@ public class DiceSummoner : MonoBehaviour
     private Scripts scripts;
     public List<GameObject> existingDice = new();
     public float yCoord = -5.51f;
-    private readonly float[] xCoords = { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
+    private readonly float[] desktopXCoords = { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
+    private readonly float[] mobileXCoords = { -2.75f*1.49f, -1.65f*1.49f, -0.55f*1.49f, 0.55f*1.49f, 1.65f*1.49f, 2.75f*1.49f };
+    private float[] xCoords;
     private readonly List<Color> generatedTypes = new();
     public int lastNum;
     public string lastType;
     public string lastStat;
+    public readonly Vector3 desktopDiceScale = new(1f, 1f, 1f);
+    public readonly Vector3 mobileDiceScale = new(1.499f, 1.499f, 1f);
+    private Vector3 diceScale;
+    // 1.50f causes strange visual bugs on the dice, so 1.499f it is
+    
     
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
+        if (scripts.mobileMode) {
+            xCoords = mobileXCoords;
+            diceScale = mobileDiceScale;
+        }
+        else {
+            xCoords = desktopXCoords;
+            diceScale = desktopDiceScale;
+        }
     }
 
     // private void Update() {
@@ -83,15 +98,19 @@ public class DiceSummoner : MonoBehaviour
                 yield return scripts.delays[0.05f];
                 // legendary hatchet lets player start out with yellow die
                 scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
-            } 
+            }
             if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
                 // if devil
                 yield return scripts.delays[0.05f];
                 foreach (string typeToGen in scripts.itemManager.statArr) {
                     // generate a die for every stat
                     yield return scripts.delays[0.05f];
-                    GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
+                    Dice created = GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
                     // attach it to the devil
+                    if (typeToGen == "red" && scripts.enemy.woundList.Contains("armpits") || typeToGen == "white" && scripts.enemy.woundList.Contains("hand")) {
+                        StartCoroutine(created.FadeOut(true));
+                    }
+                    // devil doesn't get to take its starting red and white if its wounded there
                 }
             }
             if (lastNum != -1) {
@@ -140,19 +159,25 @@ public class DiceSummoner : MonoBehaviour
     /// <summary>
     /// Create a single die with specified variables.
     /// </summary>
-    public void GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0, bool initialSix=false,bool isFromMight=false) {
+    public Dice GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0, bool initialSix=false,bool isFromMight=false) {
         Vector2 instantiationPos;
-        // reference variable for the die's attribute
-        if (attachToPlayerOrEnemy == "none") { instantiationPos = new Vector2(xCoords[i], yCoord); }
-        // add to the bottom row with correct offset if not attaching
-        else if (attachToPlayerOrEnemy == "player")  { 
-            instantiationPos = new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f); 
+        switch (attachToPlayerOrEnemy) {
+            // reference variable for the die's attribute
+            case "none":
+                instantiationPos = new Vector2(xCoords[i], yCoord);
+                break;
+            // add to the bottom row with correct offset if not attaching
+            case "player":
+                instantiationPos = new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f);
+                break;
+            case "enemy":
+                instantiationPos = new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - scripts.statSummoner.diceOffset, scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f);
+                break;
+            // set the instantiation pos to be by the correct stat with the correct position
+            default:
+                instantiationPos = new Vector2(0,0);
+                break;
         }
-        else if (attachToPlayerOrEnemy == "enemy") { 
-            instantiationPos = new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - 1, scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f); 
-        }
-        // set the instantiation pos to be by the correct stat with the correct position
-        else { instantiationPos = new Vector2(0,0);print("cannot attach to specified thing"); }
         // reference variable for the die's color index relative to scripts.color.coloArr
         int diceColorIndex = diceType == null ? Array.IndexOf(Colors.colorArr, generatedTypes[i]) : Array.IndexOf(Colors.colorNameArr, diceType);
         // else create one of the specified type
@@ -162,6 +187,8 @@ public class DiceSummoner : MonoBehaviour
         indivBase.transform.parent = number.transform;
         number.transform.parent = transform;
         // parent the base to the number and the number to this (the manager)
+        number.transform.localScale = diceScale;
+        // scale the number based on whether we are playing in mobile mode or not (base is auto scaled with parent)
         number.GetComponent<Dice>().diceNum = diceNum;
         number.GetComponent<Dice>().diceType = Colors.colorNameArr[diceColorIndex];
         number.GetComponent<Dice>().instantiationPos = instantiationPos;
@@ -209,6 +236,7 @@ public class DiceSummoner : MonoBehaviour
         else if (attachToPlayerOrEnemy == "enemy") { scripts.statSummoner.SetDebugInformationFor("enemy"); }
         // set the necessary debug information
         if (!initialSix) { SaveDiceValues(); }
+        return number.GetComponent<Dice>();
     }
 
     /// <summary>
