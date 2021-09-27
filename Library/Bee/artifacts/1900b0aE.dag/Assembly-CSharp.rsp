@@ -318,6 +318,8 @@
 "Assets/Scripts/LevelManager.cs"
 "Assets/Scripts/MenuButton.cs"
 "Assets/Scripts/MenuIcon.cs"
+"Assets/Scripts/MobileButton.cs"
+"Assets/Scripts/MobileResizer.cs"
 "Assets/Scripts/Music.cs"
 "Assets/Scripts/OnClickToggle.cs"
 "Assets/Scripts/PersistentData.cs"

@@ -128,8 +128,8 @@ public class DiceSummoner : MonoBehaviour
                     // so create it and attach directly
                 }
             }
-        }
-        SaveDiceValues();
+        } 
+        SaveDiceValues(0.35f);
     }
 
     private IEnumerator SpawnFlailDice() {
@@ -267,15 +267,15 @@ public class DiceSummoner : MonoBehaviour
     /// <summary>
     /// Used to Save all the dice properties and values into the player's local file/
     /// </summary>
-    public void SaveDiceValues() { 
-        StartCoroutine(SaveDiceValuesCoro());
+    public void SaveDiceValues(float waitTime=0.1f) { 
+        StartCoroutine(SaveDiceValuesCoro(waitTime));
     }
 
     /// <summary>
     /// Do not call this coroutine, use SaveDiceValues() instead
     /// </summary>
-    private IEnumerator SaveDiceValuesCoro() { 
-        yield return scripts.delays[0.1f];
+    private IEnumerator SaveDiceValuesCoro(float waitTime) { 
+        yield return scripts.delays[waitTime];
         // KEEP THIS DELAY HERE, WITHOUT IT THE DICE WILL NOT SAVE PROPERLY!!!
         Save.game.diceNumbers.Clear();
         Save.game.diceTypes.Clear();

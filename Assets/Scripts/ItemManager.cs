@@ -74,11 +74,11 @@ public class ItemManager : MonoBehaviour {
     };  
     private readonly Dictionary<string, int> itemDropDict = new() {
         { "armor",          3 },
-        { "cheese",         6 },
-        { "torch",          6 },
-        { "steak",          6 },
+        { "cheese",         7 },
+        { "torch",          4 },
+        { "steak",          5 },
         { "scroll",         6 },
-        { "potion",         6 },
+        { "potion",         10 },
         { "shuriken",       6 },
         { "necklet",        6 },
         { "skeleton_key",   4 },
@@ -322,8 +322,8 @@ public class ItemManager : MonoBehaviour {
                     break;
                 }
                 case 1: {
-                    // CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
-                    CreateWeaponWithStats("scimitar", "common", -1, 5, 5, 5);
+                    CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+                    // CreateWeaponWithStats("scimitar", "common", -1, 5, 5, 5);
                     MoveToInventory(0, true, false, false);
                     CreateItem("armor");
                     MoveToInventory(0, true, false, false);

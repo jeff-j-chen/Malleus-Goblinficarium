@@ -885,6 +885,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 0}
+  border: {fileID: 0}
   dice: {fileID: 0}
   arrow: {fileID: 0}
   enemy: {fileID: 0}
@@ -905,6 +906,7 @@ MonoBehaviour:
   mobileResizer: {fileID: 0}
   characterSelector: {fileID: 0}
   highlightCalculator: {fileID: 0}
+  mobileMode: 0
 --- !u!4 &555086514
 Transform:
   m_ObjectHideFlags: 0
