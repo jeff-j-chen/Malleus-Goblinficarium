@@ -212,8 +212,8 @@ public class TurnManager : MonoBehaviour {
                             if (scripts.enemy.woundList.Contains(targetArr[scripts.player.targetIndex])) { scripts.player.target.text = "*" + targetArr[scripts.player.targetIndex]; }
                             // add an asterisks if already injured
                             else {
-                                if (targetArr[scripts.player.targetIndex] == "face") {
-                                    // can't aim at the devil's face, so notify player
+                                if (targetArr[scripts.player.targetIndex] == "face" && !Save.game.enemyIsDead) {
+                                    // can't aim at the devil's face if hes alive, so notify player
                                     scripts.turnManager.SetStatusText("you cannot aim at his face");
                                     scripts.player.targetIndex--;
                                 }
@@ -951,7 +951,7 @@ public class TurnManager : MonoBehaviour {
                         if (scripts.itemManager.PlayerHasWeapon("maul")) {}
                         // don't say anything for maul (we want it to show that it is an instant kill)
                         else if (scripts.enemy.spawnNum == 0) {}
-                        // don't say anything for cloaked devil (shattering his cloak handlded later on)
+                        // don't say anything for cloaked devil (shattering his cloak handled later on)
                         else {
                             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
                         }
@@ -986,7 +986,10 @@ public class TurnManager : MonoBehaviour {
                         // make the text change
                         RecalculateMaxFor("enemy");
                         // recalculate max
-                        return ApplyInjuriesDuringMove(scripts.player.target.text, "enemy");
+                        if (scripts.enemy.spawnNum != 0) {
+                            // cloaked devil is unaffected by all wounds
+                            return ApplyInjuriesDuringMove(scripts.player.target.text, "enemy");
+                        }
                         // return if the enemy dies and at the same time apply wounds instantly
                         
                     }

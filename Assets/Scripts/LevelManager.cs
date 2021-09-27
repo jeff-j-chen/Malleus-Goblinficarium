@@ -160,18 +160,20 @@ public class LevelManager : MonoBehaviour {
             if (level == 4 && sub == 1) {
                 if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
                 // going to next level after having defeated devil
-                if (Save.game.curCharNum != 3) { 
-                    // give player the next character, as long as they aren't on the last one\
+                if (Save.game.curCharNum != 3 && !Save.persistent.unlockedChars[Save.game.curCharNum + 1]) { 
+                    // unlock the next character and let them know if it has not yet been unlocked
+                    StartCoroutine(IndicateUnlock());
                     Save.persistent.unlockedChars[Save.game.curCharNum + 1] = true;
                     Save.persistent.successfulRuns++;
                     Save.SavePersistent();
                 }
-                print("notify the player they unlocked a new character to play here!");
+                else {
+                    Initiate.Fade("Credits", Color.black, 2.5f);
+                }
                 Save.game = new GameData();
                 if (scripts.tutorial == null) { Save.SaveGame(); }
                 // for some reason file.delete doesn't want to work here
-                Initiate.Fade("Credits", Color.black, 2.5f);
-                // load credits scene
+                yield break;
             }
             scripts.turnManager.ClearVariablesAfterRound();
             // remove variables before going to next level
@@ -349,6 +351,24 @@ public class LevelManager : MonoBehaviour {
     private char T() { 
         // return a random thin character
         return thinCharacters[UnityEngine.Random.Range(0, thinCharacters.Length)];
+    }
+
+    private IEnumerator IndicateUnlock() {
+        // fade in the black box, let the player know that they unlocked a new character, then go to credits
+        Color tempColor = boxSR.color;
+        tempColor.a = 0f;
+        boxSR.color = tempColor;
+        for (int i = 0; i < 15; i++) {
+            yield return scripts.delays[0.033f];
+            tempColor.a += 1f/15f;
+            boxSR.color = tempColor;
+        }
+        loadingCircle.transform.position = onScreen;
+        levelTransText.text = "New character unlocked!";
+        yield return scripts.delays[2f];
+        levelTransText.text = "";
+        loadingCircle.transform.position = offScreen;
+        Initiate.Fade("Credits", Color.black, 4f);
     }
 
     /// <summary>

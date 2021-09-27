@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.TextCore.Text;
 public class ItemManager : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI lootText;
     [SerializeField] public TextMeshProUGUI itemDesc;
@@ -309,9 +310,8 @@ public class ItemManager : MonoBehaviour {
             switch (Save.game.curCharNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    // CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
                     CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
-                    // CreateWeaponWithStats("sword", "administrative", 10, 10, 10, 10);
+                    // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
                     CreateItem("steak");
                     MoveToInventory(0, true, false, false);
@@ -503,7 +503,8 @@ public class ItemManager : MonoBehaviour {
     private void SetItemStatsImmediately(GameObject instantiatedItem) {
         // this needs to be done here rather than in Item.Start() or Awake() because the timing will be off and errors will be thrown
         if (instantiatedItem.GetComponent<Item>().itemName == "necklet") {
-            instantiatedItem.GetComponent<Item>().modifier = neckletTypes[Random.Range(0, 5)];
+            int rand = Random.Range(0, 5);
+            instantiatedItem.GetComponent<Item>().modifier = neckletTypes[rand];
         }
         else if (instantiatedItem.GetComponent<Item>().itemName == "scroll") {
             instantiatedItem.GetComponent<Item>().modifier = scrollTypes[Random.Range(0, scrollTypes.Length)];
@@ -714,6 +715,9 @@ public class ItemManager : MonoBehaviour {
                     // attempt to select the next item of where it was
                 }
             }
+            else {
+                scripts.turnManager.SetStatusText("you can't carry any more");
+            }
         }
         else {
             Destroy(floorItems[index]);
@@ -758,7 +762,7 @@ public class ItemManager : MonoBehaviour {
                 int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
                 if (PlayerHasWeapon("sword") && PlayerHasLegendary()) { torchCount++; }
                 // count the number of torches, legendary sword helps find loot
-                int spawnCount = Mathf.Clamp(torchCount + scripts.levelManager.level + 1 + Random.Range(-2, 1), 0, 6);
+                int spawnCount = Mathf.Clamp(Random.Range(1, torchCount+1) + scripts.levelManager.level + 1 + Random.Range(-2, 1), 0, 6);
                 // create a spawn count, only 5 items can be spawned
                 CreateRandomWeapon();
                 // create a random weapon at index 0

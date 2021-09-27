@@ -269,8 +269,8 @@ public class Item : MonoBehaviour {
     /// </summary>
     private void UseCommon() {
         if (Save.game.enemyIsDead || scripts.enemy.enemyName.text is "Tombstone" or "Merchant") {
-            if (itemName is "steak" or "cheese" or "retry" or "arrow") {
-                // only allow those 4 items to be used if the enemy is dead, otherwise its a waste
+            if (itemName is "steak" or "cheese" or "retry" or "arrow" || itemName == "potion" && modifier == "life") {
+                // only these specific items can be used at a merchant/tombstone, otherwise it doesn't make sense or is a waste
                 StartCoroutine(UseCommonCoro());
             }
         }
