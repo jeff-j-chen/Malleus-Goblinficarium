@@ -393,6 +393,7 @@ public class Dice : MonoBehaviour {
                 }
                 // same situation as above, shift the die (except forwards this time)
             }
+            
             // else { print("something is wrong with this die"); }
         }
         try { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
@@ -404,6 +405,7 @@ public class Dice : MonoBehaviour {
         // destroy the die
         scripts.diceSummoner.SaveDiceValues();
         // Save the dice values to the Save file
+        scripts.turnManager.RecalculateMaxFor(isOnPlayerOrEnemy);
         scripts.statSummoner.SetDebugInformationFor("enemy");
         scripts.statSummoner.SetDebugInformationFor("player");
     }

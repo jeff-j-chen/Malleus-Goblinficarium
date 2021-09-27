@@ -322,7 +322,8 @@ public class ItemManager : MonoBehaviour {
                     break;
                 }
                 case 1: {
-                    CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+                    // CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+                    CreateWeaponWithStats("scimitar", "common", -1, 5, 5, 5);
                     MoveToInventory(0, true, false, false);
                     CreateItem("armor");
                     MoveToInventory(0, true, false, false);

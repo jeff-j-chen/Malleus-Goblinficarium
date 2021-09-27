@@ -658,6 +658,7 @@ public class Item : MonoBehaviour {
         }
         Destroy(gameObject);
         ShiftItems(index, selectNew);
+        scripts.itemManager.SaveInventoryItems();
     }
 
     /// <summary>

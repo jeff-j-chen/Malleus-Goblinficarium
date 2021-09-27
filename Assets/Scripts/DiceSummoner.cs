@@ -75,55 +75,31 @@ public class DiceSummoner : MonoBehaviour
             // clear the list so we have a fresh array
             GenerateDiceTypes();
             for (int i = 0; i < 6; i++) {
+                yield return scripts.delays[0.05f];
                 GenerateSingleDie(Random.Range(1, 7), null, "none", null, i, initialSix:true);
                 // generate the 6 base die for every round
             }
             if (scripts.itemManager.PlayerHasWeapon("flail")) {
-                yield return scripts.delays[0.05f];
-                if (scripts.itemManager.PlayerHasLegendary()) {
-                    // give the player two red die if wielding a legendary flail, else one
-                    GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
-                    GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
-                }
-                else {
-                    GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true);
-                }
+                StartCoroutine(SpawnFlailDice());
             }
-            if (Save.game.curCharNum == 1) { 
-                yield return scripts.delays[0.05f];
-                // if player character #2 (maul armor helm), give player yellow die
-                scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+            if (Save.game.curCharNum == 1) {
+                StartCoroutine(SpawnCharOneDice());
             }
             if (scripts.itemManager.PlayerHasWeapon("hatchet") && scripts.itemManager.PlayerHasLegendary()) {
-                yield return scripts.delays[0.05f];
-                // legendary hatchet lets player start out with yellow die
-                scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+                StartCoroutine(SpawnHatchetDice());
             }
             if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
-                // if devil
-                yield return scripts.delays[0.05f];
-                foreach (string typeToGen in scripts.itemManager.statArr) {
-                    // generate a die for every stat
-                    yield return scripts.delays[0.05f];
-                    Dice created = GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
-                    // attach it to the devil
-                    if (typeToGen == "red" && scripts.enemy.woundList.Contains("armpits") || typeToGen == "white" && scripts.enemy.woundList.Contains("hand")) {
-                        StartCoroutine(created.FadeOut(true));
-                    }
-                    // devil doesn't get to take its starting red and white if its wounded there
-                }
+                StartCoroutine(SpawnDevilDice());
             }
             if (lastNum != -1) {
-                yield return scripts.delays[0.05f];
-                // if there is a die Saved from last round (from scroll of courage)
-                GenerateSingleDie(lastNum, lastType, "player", lastStat, initialSix:true);
-                // create the die and add it to the player
+                StartCoroutine(SpawnCourageDice());
             }
         }
         else { 
             existingDice.Clear();
             int initialSpawnCount = 0;
             for (int i = 0; i < Save.game.diceTypes.Count; i++) {
+                yield return scripts.delays[0.05f];
                 // for every die
                 if (Save.game.dicePlayerOrEnemy[i] == "none") {
                     // if its not attached, its part of the 6 pickup-able
@@ -156,28 +132,77 @@ public class DiceSummoner : MonoBehaviour
         SaveDiceValues();
     }
 
+    private IEnumerator SpawnFlailDice() {
+        yield return scripts.delays[0.2f];
+        if (scripts.itemManager.PlayerHasLegendary()) {
+            // give the player two red die if wielding a legendary flail, else one
+            StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
+            yield return scripts.delays[0.1f];
+            StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
+        }
+        else {
+            StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
+        }
+    }
+
+    private IEnumerator SpawnCharOneDice() {
+        yield return scripts.delays[0.2f];
+        // if player character #2 (maul armor helm), give player yellow die
+        StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true)));
+    }
+
+    private IEnumerator SpawnHatchetDice() {
+        yield return scripts.delays[0.2f];
+        // legendary hatchet lets player start out with yellow die
+        scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+    }
+
+    private IEnumerator SpawnDevilDice() {
+        // if devil
+        yield return scripts.delays[0.2f];
+        foreach (string typeToGen in scripts.itemManager.statArr) {
+            // generate a die for every stat
+            yield return scripts.delays[0.05f];
+            Dice created = GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
+            // attach it to the devil
+            if (typeToGen == "red" && scripts.enemy.woundList.Contains("armpits") || typeToGen == "white" && scripts.enemy.woundList.Contains("hand")) {
+                StartCoroutine(created.FadeOut(true));
+            }
+            // devil doesn't get to take its starting red and white if its wounded there
+        }
+    }
+
+    private IEnumerator SpawnCourageDice() {
+        yield return scripts.delays[0.2f];
+        // if there is a die Saved from last round (from scroll of courage)
+        StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(lastNum, lastType, "player", lastStat, initialSix:true)));
+        // create the die and add it to the player
+    }
+
+    private IEnumerator ApplyWoundsToDice(Dice dice) {
+        yield return scripts.delays[0.1f];
+        // ensure that if a new die is created from a source like flail, wound effects are applied as expected
+        if (scripts.player.woundList.Contains("chest") && dice.diceNum >= 4) {
+            StartCoroutine(dice.RerollAnimation());
+        }
+        if (scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
+        if (dice.diceType == "red" && scripts.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
+        else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
+        else if (dice.diceType == "white" && Save.game.curCharNum == 2) { dice.SetToOne(); }
+    }
+    
     /// <summary>
     /// Create a single die with specified variables.
     /// </summary>
     public Dice GenerateSingleDie(int diceNum, string diceType=null, string attachToPlayerOrEnemy="none", string statToAttachTo=null, int i=0, bool initialSix=false,bool isFromMight=false) {
-        Vector2 instantiationPos;
-        switch (attachToPlayerOrEnemy) {
+        Vector2 instantiationPos = attachToPlayerOrEnemy switch {
             // reference variable for the die's attribute
-            case "none":
-                instantiationPos = new Vector2(xCoords[i], yCoord);
-                break;
+            "none" => new Vector2(xCoords[i], yCoord),
             // add to the bottom row with correct offset if not attaching
-            case "player":
-                instantiationPos = new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f);
-                break;
-            case "enemy":
-                instantiationPos = new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - scripts.statSummoner.diceOffset, scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f);
-                break;
-            // set the instantiation pos to be by the correct stat with the correct position
-            default:
-                instantiationPos = new Vector2(0,0);
-                break;
-        }
+            "player" => new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f),
+            "enemy" => new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - scripts.statSummoner.diceOffset, scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f),
+            _ => new Vector2(0, 0)
+        };
         // reference variable for the die's color index relative to scripts.color.coloArr
         int diceColorIndex = diceType == null ? Array.IndexOf(Colors.colorArr, generatedTypes[i]) : Array.IndexOf(Colors.colorNameArr, diceType);
         // else create one of the specified type

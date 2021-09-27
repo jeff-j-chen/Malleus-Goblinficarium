@@ -184,9 +184,9 @@ public class LevelManager : MonoBehaviour {
                 scripts.music.FadeVolume("LaBossa");
                 // if spawning lich or devil, fade to boss music
             }
-            else if (sub == 3) { 
+            else if (sub == 3 && scripts.enemy.enemyName.text != "Tombstone") { 
                 scripts.music.FadeVolume("Smoke");
-                // if spawning merchant, fade to smoke
+                // if spawning merchant, fade to smoke, as long as we are not fading from tombstone
             }
             else { 
                 if (scripts.enemy.enemyName.text == "Lich" || sub == 4) { 

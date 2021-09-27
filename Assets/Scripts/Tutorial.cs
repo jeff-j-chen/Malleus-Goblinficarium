@@ -31,7 +31,7 @@ public class Tutorial : MonoBehaviour {
         // ^ 7
         "If your damage (red) is higher than\nthe enemy's parry (white), you will wound\nthe body part you are targeting.\n\n[click] to continue", 
         // ^ 8
-        "Respectively, if your parry (white) isn\nhigher than the enemy's damage (red), his\nattack will deal no harm.\n\n[click] to continue", 
+        "Respectively, if your parry (white) is\nhigher than the enemy's damage (red), his\nattack will deal no harm.\n\n[click] to continue", 
         // ^ 9
         "Speed (blue) defines who will strike first.\nIt matters because all debuffs are\napplied instantly.\n\n[click] to continue", 
         // ^ 10
@@ -83,7 +83,7 @@ public class Tutorial : MonoBehaviour {
         // ^ 7
         "If your damage (red) is higher than\nthe enemy's parry (white), you will wound\nthe body part you are targeting.\n\n[tap] to continue", 
         // ^ 8
-        "Respectively, if your parry (white) isn\nhigher than the enemy's damage (red), his\nattack will deal no harm.\n\n[tap] to continue", 
+        "Respectively, if your parry (white) is\nhigher than the enemy's damage (red), his\nattack will deal no harm.\n\n[tap] to continue", 
         // ^ 9
         "Speed (blue) defines who will strike first.\nIt matters because all debuffs are\napplied instantly.\n\n[tap] to continue", 
         // ^ 10

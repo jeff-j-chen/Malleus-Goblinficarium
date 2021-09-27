@@ -183,7 +183,7 @@ public class HighlightCalculator : MonoBehaviour {
                     if (scripts.player.woundList.Contains("head") && diceTakenByPlayer >= 3) {
                         // if injured in head the player has taken 3 dice 
                         scripts.enemy.DiscardBestPlayerDie();
-                        // note that this calls a coroutine which has a slightly delay, avoiding a weird bug with discarding too early
+                        // note that this calls a coroutine which has a slight delay, avoiding a weird bug with discarding too early
                     }
                     if (scripts.statSummoner.SumOfStat("green", "player") >= 0 && scripts.statSummoner.SumOfStat("green", "player") - dice.diceNum < 0) {
                         scripts.turnManager.RecalculateMaxFor("player");

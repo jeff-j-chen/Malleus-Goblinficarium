@@ -200,7 +200,7 @@ public class TurnManager : MonoBehaviour {
                     else {
                         // not supposed to be aiming at none, bump it up
                         scripts.player.targetIndex = 0;
-                        scripts.player.target.text = targetArr[0];
+                        scripts.player.target.text = !scripts.enemy.woundList.Contains("chest") ? targetArr[0] : "*" + targetArr[0];
                         scripts.player.targetInfo.text = targetInfoArr[0];
                     }
                 }
@@ -254,8 +254,7 @@ public class TurnManager : MonoBehaviour {
             }
             else {
                 // normal enemy, so set enemy's target indicator based on the target index
-                if (scripts.player.woundList.Contains("*")) { scripts.enemy.target.text = "*" + targetArr[scripts.enemy.targetIndex]; }
-                else { scripts.enemy.target.text = targetArr[scripts.enemy.targetIndex]; }
+                scripts.enemy.target.text = targetArr[scripts.enemy.targetIndex];
             }
         }
         else { Debug.LogError("Invalid string passed in to SetTarget() in TurnManager.cs"); }
@@ -385,23 +384,23 @@ public class TurnManager : MonoBehaviour {
                 if (PlayerPrefs.GetString(scripts.HINTS_KEY) == "on") {
                     if (Save.game.discardableDieCounter > 0) { SetStatusText("note: you can discard enemy's die"); }
                     else if (scripts.enemy.woundList.Contains("chest")) { SetStatusText("note: you can reroll enemy's dice"); }
-                }
-                // notify the player
-                actionsAvailable = true;
-                // allow actions
-                for (float i = 2.5f; i > 0; i -= 0.1f) {
-                    // 2.5 second time slot
-                    if (alterationDuringMove) {
-                        // actions handled elsewhere, but if there is an action taken (e.g. discard)
-                        i += 1.5f;
-                        // increase time slot
-                        alterationDuringMove = false;
-                        // allow timer to be changed again
+                    // notify the player
+                    actionsAvailable = true;
+                    // allow actions
+                    for (float i = 2.5f; i > 0; i -= 0.1f) {
+                        // 2.5 second time slot
+                        if (alterationDuringMove) {
+                            // actions handled elsewhere, but if there is an action taken (e.g. discard)
+                            i += 1.5f;
+                            // increase time slot
+                            alterationDuringMove = false;
+                            // allow timer to be changed again
+                        }
+                        yield return scripts.delays[0.1f];
+                        // wait
                     }
-                    yield return scripts.delays[0.1f];
-                    // wait
+                    actionsAvailable = false;
                 }
-                actionsAvailable = false;
             }
             // get necessary stats
             if (EnemyAttacks()) {
@@ -809,26 +808,14 @@ public class TurnManager : MonoBehaviour {
                 }
                 else {
                     if (scripts.enemy.target.text != "face") {
-                        // if enemy is not targeting face
-                        if (scripts.enemy.target.text.Contains("*")) {
-                            // if previously wounded
-                            if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
-                                SetStatusText($"devil twists claws in your {scripts.enemy.target.text.Substring(1)}!");
-                            }
-                            SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text.Substring(1)}!");
+                        if (scripts.enemy.spawnNum is 0 or 1) {
+                            SetStatusText($"devil twists claws in your {scripts.enemy.target.text}!");
+                        }
+                        if (scripts.player.woundList.Count != 2) {
+                            // if player won't die
+                            SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text}!");
                             // notify player
                             Save.persistent.woundsReceived++;
-                        }
-                        else {
-                            if (scripts.enemy.spawnNum == 0 || scripts.enemy.spawnNum == 1) {
-                                SetStatusText($"devil twists claws in your {scripts.enemy.target.text}!");
-                            }
-                            if (scripts.player.woundList.Count != 2) {
-                                // if player won't die
-                                SetStatusText($"{scripts.enemy.enemyName.text.ToLower()} hits you, damaging {scripts.enemy.target.text}!");
-                                // notify player
-                                Save.persistent.woundsReceived++;
-                            }
                         }
                         if (scripts.itemManager.PlayerHas("phylactery")) {
                             // if player has phylactery
@@ -841,7 +828,7 @@ public class TurnManager : MonoBehaviour {
             }
             StartCoroutine(DoStuffForAttack("hit", "player", true, armor));
             // play animation + sound for the attack
-            if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text.Substring(1)) || armor || Save.game.isDodgy)) {
+            if (!(scripts.player.woundList.Contains(scripts.enemy.target.text) || scripts.player.woundList.Contains(scripts.enemy.target.text) || armor || Save.game.isDodgy)) {
                 // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
                 if (Save.game.curCharNum == 3 && scripts.player.woundList.Count < 2 && scripts.enemy.target.text != "face" && scripts.player.stamina >= 7) {
                     // if on the 4th char, they are able to heal back (wont die instantly), and has sufficient stamina to heal the next move
@@ -855,19 +842,21 @@ public class TurnManager : MonoBehaviour {
                         ChangeStaminaOf("player", 3);
                         // so merely increment their stamina
                     }
-                    scripts.player.woundList.Add(scripts.enemy.target.text);
-                    // add the hit
-                    Save.game.playerWounds = scripts.player.woundList;
-                    // make it change
-                    RecalculateMaxFor("player");
-                    // reset stuff
-                    if (scripts.tutorial == null) { Save.SaveGame(); }
                     StartCoroutine(InjuredTextChange(scripts.player.woundGUIElement));
-                    if (scripts.player.woundList.Count > 0) {
-                        // wounds were not healed, so apply them normally
-                        return ApplyInjuriesDuringMove(scripts.enemy.target.text, "player");
+                    if (!scripts.player.woundList.Contains(scripts.enemy.target.text)) {
+                        scripts.player.woundList.Add(scripts.enemy.target.text);
+                        // add the hit, but only if the player did not yet have that wound
+                        Save.game.playerWounds = scripts.player.woundList;
+                        // make it change
+                        RecalculateMaxFor("player");
+                        // reset stuff
+                        if (scripts.tutorial == null) { Save.SaveGame(); }
+                        if (scripts.player.woundList.Count > 0) {
+                            // wounds were not healed, so apply them normally
+                            return ApplyInjuriesDuringMove(scripts.enemy.target.text, "player");
+                        }
+                        // wounds were healed, so don't apply them and don't kill the player
                     }
-                    // wounds were healed, so don't apply them and don't kill the player
                 }
                 return false;
                 // return that the player did not ie
@@ -900,6 +889,7 @@ public class TurnManager : MonoBehaviour {
     private IEnumerator RemoveArmorAfterDelay() {
         yield return scripts.delays[0.45f];
         scripts.itemManager.GetPlayerItem("armor").GetComponent<Item>().Remove(armorFade:true);
+        
     }
 
     /// <summary>
@@ -980,24 +970,25 @@ public class TurnManager : MonoBehaviour {
                         scripts.player.SetPlayerStatusEffect("leech", false);
                         // turn off bloodthirsty
                     }
-                    if (!scripts.player.target.text.Contains("*")) {
+                    if (!scripts.enemy.woundList.Contains(scripts.player.target.text) && !scripts.player.target.text.Contains("*")) {
                         // if wound was not injured and player has enough accuracy to hit
                         if (scripts.enemy.spawnNum != 0) {
                             scripts.enemy.woundList.Add(scripts.player.target.text);
                             // add the wound
                             Save.game.enemyWounds = scripts.enemy.woundList;
-                            if (scripts.tutorial == null) { Save.SaveGame(); }
-                            if (Save.game.curCharNum == 2) {
-                                scripts.turnManager.ChangeStaminaOf("player", 1);
-                                // increment stamina if on 3rd character
-                            }
-                            StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));
-                            // make the text change
-                            RecalculateMaxFor("enemy");
-                            // recalculate max
-                            return ApplyInjuriesDuringMove(scripts.player.target.text, "enemy");
-                            // return if the enemy dies and at the same time apply wounds instantly
                         }
+                        if (scripts.tutorial == null) { Save.SaveGame(); }
+                        if (Save.game.curCharNum == 2) {
+                            scripts.turnManager.ChangeStaminaOf("player", 1);
+                            // increment stamina if on 3rd character
+                        }
+                        StartCoroutine(InjuredTextChange(scripts.enemy.woundGUIElement));
+                        // make the text change
+                        RecalculateMaxFor("enemy");
+                        // recalculate max
+                        return ApplyInjuriesDuringMove(scripts.player.target.text, "enemy");
+                        // return if the enemy dies and at the same time apply wounds instantly
+                        
                     }
                 }
                 if (scripts.itemManager.PlayerHasWeapon("maul") && scripts.enemy.spawnNum != 0) { return true; }
