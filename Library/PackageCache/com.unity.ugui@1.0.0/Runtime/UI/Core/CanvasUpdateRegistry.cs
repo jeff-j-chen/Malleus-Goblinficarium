@@ -106,11 +106,11 @@ namespace UnityEngine.UI
 
         private bool ObjectValidForUpdate(ICanvasElement element)
         {
-            var valid = element is not null;
+            var valid = element != null;
 
             var isUnityObject = element is Object;
             if (isUnityObject)
-                valid = (element as Object) is not null; //Here we make use of the overloaded UnityEngine.Object == null, that checks if the native object is alive.
+                valid = (element as Object) != null; //Here we make use of the overloaded UnityEngine.Object == null, that checks if the native object is alive.
 
             return valid;
         }
@@ -239,7 +239,7 @@ namespace UnityEngine.UI
 
             var parent = child.parent;
             int count = 0;
-            while (parent is not null)
+            while (parent != null)
             {
                 count++;
                 parent = parent.parent;

@@ -24,7 +24,7 @@ namespace UnityEditor.U2D.Sprites
 
         public void RegisterCompleteObjectUndo(ScriptableObject so, string undoText)
         {
-            if (so is not null)
+            if (so != null)
             {
                 Undo.RegisterCompleteObjectUndo(so, undoText);
             }
@@ -32,7 +32,7 @@ namespace UnityEditor.U2D.Sprites
 
         public void ClearUndo(ScriptableObject so)
         {
-            if (so is not null)
+            if (so != null)
             {
                 Undo.ClearUndo(so);
             }

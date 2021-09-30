@@ -15,6 +15,7 @@ public class Dice : MonoBehaviour {
     private SpriteRenderer childSpriteRenderer;
     private Scripts scripts;
     private bool wasClickedRecently = false;
+    public bool lockedByEnemy = false;
 
     private readonly WaitForSeconds[] rollTimes = { new(0.01f), new(0.03f), new(0.06f), new(0.09f), new(0.12f), new(0.15f), new(0.18f), new(0.21f), new(0.24f), new(0.3f) };
     // different times for rolling 

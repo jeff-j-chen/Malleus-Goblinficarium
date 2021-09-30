@@ -47,7 +47,7 @@ namespace UnityEditor.U2D.Sprites
 
         private void DrawPotentialSpriteRectGizmos()
         {
-            if (m_PotentialRects is not null && m_PotentialRects.Count > 0)
+            if (m_PotentialRects != null && m_PotentialRects.Count > 0)
                 DrawRectGizmos(m_PotentialRects, Color.red);
         }
 

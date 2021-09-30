@@ -316,6 +316,7 @@ public class DiceSummoner : MonoBehaviour
         }
         generatedTypes.RemoveAt(4);
         // remove a green
+        // at this point there are 2g, 3b, 3r, 3w, 3y
         for (int d = 0; d < 8; d++) {
             // remove dice needed to get just 6
             generatedTypes.RemoveAt(Random.Range(0, generatedTypes.Count));
@@ -347,5 +348,44 @@ public class DiceSummoner : MonoBehaviour
     /// </summary>
     public int CountUnattachedDice() {
         return existingDice.Count(curObject => curObject.GetComponent<Dice>().isAttached == false);
+    }
+
+    public int CountDiceOnStat(string playerOrEnemy, string stat, bool noYellows) { 
+        int count = 0;
+        foreach (GameObject g in existingDice) {
+            Dice d = g.GetComponent<Dice>();
+            if (d.isOnPlayerOrEnemy == playerOrEnemy && d.statAddedTo == "stat") {
+                if (!(noYellows && d.diceType == "yellow")) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public int SumDiceOnStat(string playerOrEnemy, string stat, bool noYellows) { 
+        int sum = 0;
+        foreach (GameObject g in existingDice) {
+            Dice d = g.GetComponent<Dice>();
+            if (d.isOnPlayerOrEnemy == playerOrEnemy && d.statAddedTo == "stat") {
+                if (!(noYellows && d.diceType == "yellow")) {
+                    sum += d.diceNum;
+                }
+            }
+        }
+        return sum;
+    }
+
+    public int GetHighestDiceValueOnStat(string playerOrEnemy, string stat) {
+        List<int> values = new List<int>();
+        foreach (GameObject g in existingDice) {
+            Dice d = g.GetComponent<Dice>();
+            if (d.isOnPlayerOrEnemy == playerOrEnemy) {
+                if (d.statAddedTo == "stat" && d.diceType == "yellow") {
+                    values.Add(d.diceNum);
+                }
+            }
+        }
+        return values.Max();
     }
 }

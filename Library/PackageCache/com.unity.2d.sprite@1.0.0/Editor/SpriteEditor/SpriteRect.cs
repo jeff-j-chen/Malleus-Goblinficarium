@@ -126,7 +126,7 @@ namespace UnityEditor
 
         public int Count
         {
-            get { return m_Rects is not null ? m_Rects.Count : 0; }
+            get { return m_Rects != null ? m_Rects.Count : 0; }
         }
 
         public SpriteRect RectAt(int i)
@@ -136,25 +136,25 @@ namespace UnityEditor
 
         public void AddRect(SpriteRect r)
         {
-            if (m_Rects is not null)
+            if (m_Rects != null)
                 m_Rects.Add(r);
         }
 
         public void RemoveRect(SpriteRect r)
         {
-            if (m_Rects is not null)
+            if (m_Rects != null)
                 m_Rects.RemoveAll(x => x.spriteID == r.spriteID);
         }
 
         public void ClearAll()
         {
-            if (m_Rects is not null)
+            if (m_Rects != null)
                 m_Rects.Clear();
         }
 
         public int GetIndex(SpriteRect spriteRect)
         {
-            if (m_Rects is not null && spriteRect is not null)
+            if (m_Rects != null && spriteRect != null)
                 return m_Rects.FindIndex(p => p.spriteID == spriteRect.spriteID);
 
             return -1;
@@ -162,8 +162,8 @@ namespace UnityEditor
 
         public bool Contains(SpriteRect spriteRect)
         {
-            if (m_Rects is not null && spriteRect is not null)
-                return m_Rects.Find(x => x.spriteID == spriteRect.spriteID) is not null;
+            if (m_Rects != null && spriteRect != null)
+                return m_Rects.Find(x => x.spriteID == spriteRect.spriteID) != null;
 
             return false;
         }
