@@ -570,10 +570,7 @@ public class Item : MonoBehaviour {
                 if (scripts.levelManager.sub == 4) { Save.game.numItemsDroppedForTrade++; }
                 if (scripts.tutorial == null) { Save.SaveGame(); }
                 // if trader level increment the number of items dropped for trading
-                if (itemType == "weapon") {
-                    scripts.turnManager.SetStatusText($"you drop {scripts.itemManager.descriptionDict[itemName.Split(' ')[1]]}");
-                }
-                else if (itemName == "necklet") {
+                if (itemName == "necklet") {
                     scripts.turnManager.SetStatusText(modifier == "arcane" 
                                                           ? "you drop arcane necklet" 
                                                           : $"you drop {itemName} of {modifier}");

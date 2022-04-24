@@ -82,14 +82,22 @@ public class LevelManager : MonoBehaviour {
     /// </summary>
     public float[] GenStats(string lichOrDevilOrNormal = "normal") {
         if (lichOrDevilOrNormal != "normal") {
-            return lichOrDevilOrNormal switch {
-                "lich" => new[] { 1f, 1f, 1f, 1f },
-                // lich has 1/1/1/1
-                "devil" => new[] { 2f, 2f, 2f, 2f },
-                // devil has 2/2/2/2
-                _ => balanced
-                // all regular enemies
-            };
+            if (lichOrDevilOrNormal == "lich") {
+                if (Save.persistent.gameDifficulty == "hard") { 
+                    return new[] { 3f, 3f, 3f, 3f };
+                }
+                else { 
+                    return new[] { 1f, 1f, 1f, 1f };
+                }
+            }
+            else if (lichOrDevilOrNormal == "devil") {
+                if (Save.persistent.gameDifficulty == "hard") { 
+                    return new[] { 4f, 4f, 4f, 4f };
+                }
+                else { 
+                    return new[] { 2f, 2f, 2f, 2f };
+                }
+            }
         }
         if (sub == 4) { return new[] { 0f, 0f, 0f, 0f }; }
         // given key is not present in the dictionary for sub-4s, instantly return blank
@@ -107,6 +115,13 @@ public class LevelManager : MonoBehaviour {
         for (int i = 0; i < 4; i++) {
             // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
             totalStats[i] = Mathf.Round((stats[i] + baseStats[i] + UnityEngine.Random.Range(0f, stats[4]))/10f);
+            if (Save.persistent.gameDifficulty == "hard") {
+                totalStats[i] += UnityEngine.Random.Range(0, scripts.levelManager.level+1);
+            }
+        }
+        if (Save.persistent.gameDifficulty == "hard" && scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) { 
+            totalStats[1] = 0;
+            // game is slightly playable by settings speed of 1st enemy to 0 always
         }
         return totalStats;
         // return the total stats
@@ -128,7 +143,7 @@ public class LevelManager : MonoBehaviour {
         // get a random number from 1-10
         float[] chances = { stats[5], stats[5] + stats[6], stats[5] + stats[6] + stats[7], stats[5] + stats[6] + stats[7] + stats[8], 10f };
         // create a float array of the different chances
-        if (rand >= 0f && rand < chances[0])               { return balanced; }
+        if (rand >= 0f && rand < chances[0])          { return balanced; }
         if (rand >= chances[0] && rand < chances[1])  { return fast; }
         if (rand >= chances[1] && rand < chances[2])  { return damage; }
         if (rand >= chances[2] && rand < chances[3])  { return defense; }

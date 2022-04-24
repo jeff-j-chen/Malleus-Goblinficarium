@@ -310,46 +310,73 @@ public class ItemManager : MonoBehaviour {
             switch (Save.game.curCharNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                    if (Save.persistent.gameDifficulty == "hard") {
+                        CreateWeaponWithStats("sword", "rusty", 1, 0, 0, 1);
+                    }
+                    else { 
+                        CreateWeaponWithStats("sword", "harsh", 2, 2, 1, 2);
+                    }
                     // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
-                    CreateItem("steak");
-                    MoveToInventory(0, true, false, false);
-                    if (Save.persistent.easyMode) { 
+                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                        CreateItem("steak");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    if (Save.persistent.gameDifficulty == "easy") { 
                         CreateItem("torch");
                         MoveToInventory(0, true, false, false);
                     }
                     break;
                 }
                 case 1: {
-                    CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
-                    // CreateWeaponWithStats("scimitar", "common", -1, 5, 5, 5);
+                    if (Save.persistent.gameDifficulty == "hard") {
+                        CreateWeaponWithStats("maul", "rusty", -1, -1, 1, -1);
+                    }
+                    else { 
+                        CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
+                    }
                     MoveToInventory(0, true, false, false);
-                    CreateItem("armor");
-                    MoveToInventory(0, true, false, false);
-                    if (Save.persistent.easyMode) {
+                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                        CreateItem("armor");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    if (Save.persistent.gameDifficulty == "easy") {
                         CreateItem("helm_of_might");
                         MoveToInventory(0, true, false, false);
                     }
                     break;
                 }
                 case 2: {
-                    CreateWeaponWithStats("dagger", "quick", 2, 5, 0, 0);
+                    if (Save.persistent.gameDifficulty == "hard") {
+                        CreateWeaponWithStats("dagger", "rusty", 1, 2, 0, 0);
+                    }
+                    else { 
+                        CreateWeaponWithStats("dagger", "common", 2, 5, 0, 0);
+                    }
                     MoveToInventory(0, true, false, false);
-                    CreateItem("boots_of_dodge");
-                    MoveToInventory(0, true, false, false);
-                    if (Save.persistent.easyMode) { 
+                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                        CreateItem("boots_of_dodge");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    if (Save.persistent.gameDifficulty == "easy") { 
                         CreateItem("ankh");
                         MoveToInventory(0, true, false, false);
                     }
                     break;
                 }
                 case 3: {
-                    CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
+                    if (Save.persistent.gameDifficulty == "hard") {
+                        CreateWeaponWithStats("mace", "rusty", 1, 0, -1, -1);
+                    }
+                    else { 
+                        CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
+                    }
                     MoveToInventory(0, true, false, false);
-                    CreateItem("cheese");
-                    MoveToInventory(0, true, false, false);
-                    if (Save.persistent.easyMode) { 
+                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                        CreateItem("cheese");
+                        MoveToInventory(0, true, false, false);
+                    }
+                    if (Save.persistent.gameDifficulty == "easy") { 
                         CreateItem("kapala");
                         MoveToInventory(0, true, false, false);
                     }
@@ -615,41 +642,47 @@ public class ItemManager : MonoBehaviour {
                 if (!starter && playAudio) { scripts.soundManager.PlayClip("click0"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
-                    if (!starter) { Save.persistent.weaponsSwapped++; }
-                    // if the item being moved is a weapon 
-                    floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
-                    // move the item to the weapon slot
-                    scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
-                    // set the player's stats to be equal to that of the weapon
-                    Save.game.resumeAcc = scripts.player.stats["green"];
-                    Save.game.resumeSpd = scripts.player.stats["blue"];
-                    Save.game.resumeDmg = scripts.player.stats["red"];
-                    Save.game.resumeDef = scripts.player.stats["white"];
-                    if (!starter) {
-                        // if the weapon is not a starter (so player already has a weapon)
-                        scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
-                        // notify the player
-                        Destroy(scripts.player.inventory[0]);
-                        // destroy the previous weapon
-                        scripts.player.inventory[0] = floorItems[index]; 
-                        // add the new weapon to the player's inventory
-                        scripts.statSummoner.SummonStats();
-                        scripts.statSummoner.SetDebugInformationFor("player");
-                        // update debug, because player just took a new weapon
-                        scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
+                    if (Save.persistent.gameDifficulty == "hard" && !starter) { 
+                        scripts.turnManager.SetStatusText($"you may only wield {scripts.player.inventory[0].GetComponent<Item>().itemName}");
+                        // prevent player from swapping weapons if they are in hard mode
                     }
                     else {
-                        scripts.player.inventory.Add(floorItems[index]);
-                        // item is a starter, so just add it to the player's inventory
+                        if (!starter) { Save.persistent.weaponsSwapped++; }
+                        // if the item being moved is a weapon 
+                        floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
+                        // move the item to the weapon slot
+                        scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
+                        // set the player's stats to be equal to that of the weapon
+                        Save.game.resumeAcc = scripts.player.stats["green"];
+                        Save.game.resumeSpd = scripts.player.stats["blue"];
+                        Save.game.resumeDmg = scripts.player.stats["red"];
+                        Save.game.resumeDef = scripts.player.stats["white"];
+                        if (!starter) {
+                            // if the weapon is not a starter (so player already has a weapon)
+                            scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
+                            // notify the player
+                            Destroy(scripts.player.inventory[0]);
+                            // destroy the previous weapon
+                            scripts.player.inventory[0] = floorItems[index]; 
+                            // add the new weapon to the player's inventory
+                            scripts.statSummoner.SummonStats();
+                            scripts.statSummoner.SetDebugInformationFor("player");
+                            // update debug, because player just took a new weapon
+                            scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
+                        }
+                        else {
+                            scripts.player.inventory.Add(floorItems[index]);
+                            // item is a starter, so just add it to the player's inventory
+                        }
+                        floorItems.RemoveAt(0);
+                        // remove the item at index 0 (which is the weapon, because the weapon is always created first)
+                        foreach(GameObject curItem in floorItems) {
+                            curItem.transform.position = new Vector2(curItem.transform.position.x - 1f, itemY);
+                            // for every item, shift it over now that an item has been removed
+                        }
+                        Select(curList, 0);
+                        // select the item at index 0
                     }
-                    floorItems.RemoveAt(0);
-                    // remove the item at index 0 (which is the weapon, because the weapon is always created first)
-                    foreach(GameObject curItem in floorItems) {
-                        curItem.transform.position = new Vector2(curItem.transform.position.x - 1f, itemY);
-                        // for every item, shift it over now that an item has been removed
-                    }
-                    Select(curList, 0);
-                    // select the item at index 0
                 }
                 else {
                     // not a weapon
@@ -770,13 +803,17 @@ public class ItemManager : MonoBehaviour {
                     + Random.Range(-(6-scripts.levelManager.level), 1); 
                     // randomize it a bit, tending more towards negative at lower levels
                 if (scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) {
-                    // spawnCount = Mathf.Clamp(spawnCount, 0, 1);
-                    spawnCount = 5;
+                    spawnCount = Mathf.Clamp(spawnCount, 0, 1);
+                    // spawnCount = 5;
                     // fix the spawncount between 0 and 1 if on 1-1
                 }
                 else {
                     spawnCount = Mathf.Clamp(spawnCount, 1, 5);
                     // any other level, so guarantee at least 1 item, max of 5 
+                }
+                if (Save.persistent.gameDifficulty == "hard") { 
+                    spawnCount -= UnityEngine.Random.Range(0, scripts.levelManager.level-1);
+                    spawnCount = Mathf.Clamp(spawnCount, 0, 3);
                 }
                 CreateRandomWeapon();
                 // create a random weapon at index 0

@@ -201,7 +201,7 @@ public class Enemy : MonoBehaviour {
             // array to hold stats
             if (enemyNum == 2) { temp = scripts.levelManager.GenStats("lich"); }
             else if (enemyNum == 0) { temp = scripts.levelManager.GenStats("devil"); }
-            else { temp = scripts.levelManager.GenStats(); }
+            else { temp = scripts.levelManager.GenStats("normal"); }
             stats = new Dictionary<string, int> {
                 { "green", (int)temp[0] },
                 { "blue", (int)temp[1] },

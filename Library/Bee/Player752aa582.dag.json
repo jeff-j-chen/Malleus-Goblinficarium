@@ -157,17 +157,6 @@
       "DebugActionIndex": 0
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/ScriptingAssemblies.json",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/ScriptingAssemblies.json"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/ScriptingAssemblies.json"
-      ],
-      "DebugActionIndex": 1
-    },
-    {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level1",
       "ActionType": "CopyFiles",
       "Inputs": [
@@ -176,84 +165,7 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/level1"
       ],
-      "DebugActionIndex": 2
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/sharedassets3.assets"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets"
-      ],
-      "DebugActionIndex": 3
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets5.assets",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/sharedassets5.assets"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets5.assets"
-      ],
-      "DebugActionIndex": 4
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets.resS",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/sharedassets3.assets.resS"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets.resS"
-      ],
-      "DebugActionIndex": 5
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/globalgamemanagers.assets",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/globalgamemanagers.assets"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/globalgamemanagers.assets"
-      ],
-      "DebugActionIndex": 6
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/sharedassets0.assets"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets"
-      ],
-      "DebugActionIndex": 7
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level3",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/level3"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/level3"
-      ],
-      "DebugActionIndex": 8
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets.resS",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/resources.assets.resS"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets.resS"
-      ],
-      "DebugActionIndex": 9
+      "DebugActionIndex": 1
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets4.assets",
@@ -264,73 +176,40 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets4.assets"
       ],
-      "DebugActionIndex": 10
+      "DebugActionIndex": 2
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level4",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level3",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/level4"
+        "Library/PlayerDataCache/Win64/Data/level3"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/level4"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/level3"
       ],
-      "DebugActionIndex": 11
+      "DebugActionIndex": 3
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/boot.config",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/boot.config"
+        "Library/PlayerDataCache/Win64/Data/sharedassets0.assets"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/boot.config"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets"
       ],
-      "DebugActionIndex": 12
+      "DebugActionIndex": 4
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/ScriptingAssemblies.json",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/resources.assets"
+        "Library/PlayerDataCache/Win64/Data/ScriptingAssemblies.json"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/ScriptingAssemblies.json"
       ],
-      "DebugActionIndex": 13
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets1.assets.resS",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/sharedassets1.assets.resS"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets1.assets.resS"
-      ],
-      "DebugActionIndex": 14
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.resource",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/sharedassets0.resource"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.resource"
-      ],
-      "DebugActionIndex": 15
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level0",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/level0"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/level0"
-      ],
-      "DebugActionIndex": 16
+      "DebugActionIndex": 5
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets1.assets",
@@ -341,40 +220,18 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets1.assets"
       ],
-      "DebugActionIndex": 17
+      "DebugActionIndex": 6
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets.resS",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.resource",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/sharedassets0.assets.resS"
+        "Library/PlayerDataCache/Win64/Data/sharedassets0.resource"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets.resS"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.resource"
       ],
-      "DebugActionIndex": 18
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/RuntimeInitializeOnLoads.json",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/RuntimeInitializeOnLoads.json"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/RuntimeInitializeOnLoads.json"
-      ],
-      "DebugActionIndex": 19
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level2",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Library/PlayerDataCache/Win64/Data/level2"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/level2"
-      ],
-      "DebugActionIndex": 20
+      "DebugActionIndex": 7
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/globalgamemanagers",
@@ -385,7 +242,40 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/globalgamemanagers"
       ],
-      "DebugActionIndex": 21
+      "DebugActionIndex": 8
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/boot.config",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/boot.config"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/boot.config"
+      ],
+      "DebugActionIndex": 9
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets.resS",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/resources.assets.resS"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets.resS"
+      ],
+      "DebugActionIndex": 10
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets5.assets",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/sharedassets5.assets"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets5.assets"
+      ],
+      "DebugActionIndex": 11
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets2.assets",
@@ -396,7 +286,106 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets2.assets"
       ],
-      "DebugActionIndex": 22
+      "DebugActionIndex": 12
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level2",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/level2"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/level2"
+      ],
+      "DebugActionIndex": 13
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/RuntimeInitializeOnLoads.json",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/RuntimeInitializeOnLoads.json"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/RuntimeInitializeOnLoads.json"
+      ],
+      "DebugActionIndex": 14
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/resources.assets"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/resources.assets"
+      ],
+      "DebugActionIndex": 15
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/globalgamemanagers.assets",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/globalgamemanagers.assets"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/globalgamemanagers.assets"
+      ],
+      "DebugActionIndex": 16
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/sharedassets3.assets"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets"
+      ],
+      "DebugActionIndex": 17
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets.resS",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/sharedassets3.assets.resS"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets3.assets.resS"
+      ],
+      "DebugActionIndex": 18
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets.resS",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/sharedassets0.assets.resS"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets0.assets.resS"
+      ],
+      "DebugActionIndex": 19
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level4",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/level4"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/level4"
+      ],
+      "DebugActionIndex": 20
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level0",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/level0"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/level0"
+      ],
+      "DebugActionIndex": 21
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/level5",
@@ -406,6 +395,17 @@
       ],
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/level5"
+      ],
+      "DebugActionIndex": 22
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets1.assets.resS",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Library/PlayerDataCache/Win64/Data/sharedassets1.assets.resS"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/sharedassets1.assets.resS"
       ],
       "DebugActionIndex": 23
     },
@@ -421,6 +421,83 @@
       "DebugActionIndex": 24
     },
     {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Transactions.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Transactions.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Transactions.dll"
+      ],
+      "DebugActionIndex": 25
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UNETModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UNETModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UNETModule.dll"
+      ],
+      "DebugActionIndex": 26
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SharedInternalsModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.SharedInternalsModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SharedInternalsModule.dll"
+      ],
+      "DebugActionIndex": 27
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ScreenCaptureModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.ScreenCaptureModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ScreenCaptureModule.dll"
+      ],
+      "DebugActionIndex": 28
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputLegacyModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.InputLegacyModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputLegacyModule.dll"
+      ],
+      "DebugActionIndex": 29
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.TextCoreFontEngineModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll"
+      ],
+      "DebugActionIndex": 30
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Runtime.Serialization.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Runtime.Serialization.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Runtime.Serialization.dll"
+      ],
+      "DebugActionIndex": 31
+    },
+    {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
@@ -429,117 +506,51 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll"
       ],
-      "DebugActionIndex": 25
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UIModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIModule.dll"
-      ],
-      "DebugActionIndex": 26
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ComponentModel.Composition.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.ComponentModel.Composition.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ComponentModel.Composition.dll"
-      ],
-      "DebugActionIndex": 27
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.2D.PixelPerfect.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/Unity.2D.PixelPerfect.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.2D.PixelPerfect.dll"
-      ],
-      "DebugActionIndex": 28
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.EnterpriseServices.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.EnterpriseServices.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.EnterpriseServices.dll"
-      ],
-      "DebugActionIndex": 29
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubstanceModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.SubstanceModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubstanceModule.dll"
-      ],
-      "DebugActionIndex": 30
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll"
-      ],
-      "DebugActionIndex": 31
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterRendererModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.ClusterRendererModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterRendererModule.dll"
-      ],
       "DebugActionIndex": 32
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.DataSetExtensions.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VFXModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Data.DataSetExtensions.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.VFXModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.DataSetExtensions.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VFXModule.dll"
       ],
       "DebugActionIndex": 33
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.JSONSerializeModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.JSONSerializeModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.JSONSerializeModule.dll"
       ],
       "DebugActionIndex": 34
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.FileSystem.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.InputModule.dll"
+        "Temp/StagingArea/Data/Managed/System.IO.Compression.FileSystem.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.FileSystem.dll"
       ],
       "DebugActionIndex": 35
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.Linq.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Xml.Linq.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.Linq.dll"
+      ],
+      "DebugActionIndex": 36
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityAnalyticsModule.dll",
@@ -550,104 +561,93 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityAnalyticsModule.dll"
       ],
-      "DebugActionIndex": 36
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.XRModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.XRModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.XRModule.dll"
-      ],
       "DebugActionIndex": 37
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GameCenterModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.StreamingModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.GameCenterModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.StreamingModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GameCenterModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.StreamingModule.dll"
       ],
       "DebugActionIndex": 38
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.HotReloadModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Net.Http.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.HotReloadModule.dll"
+        "Temp/StagingArea/Data/Managed/System.Net.Http.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.HotReloadModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Net.Http.dll"
       ],
       "DebugActionIndex": 39
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PerformanceReportingModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.LocalizationModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.PerformanceReportingModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.LocalizationModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PerformanceReportingModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.LocalizationModule.dll"
       ],
       "DebugActionIndex": 40
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AndroidJNIModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Numerics.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.AndroidJNIModule.dll"
+        "Temp/StagingArea/Data/Managed/System.Numerics.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AndroidJNIModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Numerics.dll"
       ],
       "DebugActionIndex": 41
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VehiclesModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.TextCoreTextEngineModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.VehiclesModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VehiclesModule.dll"
       ],
       "DebugActionIndex": 42
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Transactions.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.CrashReportingModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Transactions.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.CrashReportingModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Transactions.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.CrashReportingModule.dll"
       ],
       "DebugActionIndex": 43
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubsystemsModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TilemapModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.SubsystemsModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.TilemapModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubsystemsModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TilemapModule.dll"
       ],
       "DebugActionIndex": 44
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.FileSystem.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.IO.Compression.FileSystem.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.FileSystem.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll"
       ],
       "DebugActionIndex": 45
     },
@@ -663,314 +663,6 @@
       "DebugActionIndex": 46
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.dll"
-      ],
-      "DebugActionIndex": 47
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.IMGUIModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.IMGUIModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.IMGUIModule.dll"
-      ],
-      "DebugActionIndex": 48
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.TerrainModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainModule.dll"
-      ],
-      "DebugActionIndex": 49
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestModule.dll"
-      ],
-      "DebugActionIndex": 50
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Mono.Security.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/Mono.Security.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Mono.Security.dll"
-      ],
-      "DebugActionIndex": 51
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UmbraModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UmbraModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UmbraModule.dll"
-      ],
-      "DebugActionIndex": 52
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ScreenCaptureModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.ScreenCaptureModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ScreenCaptureModule.dll"
-      ],
-      "DebugActionIndex": 53
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TilemapModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.TilemapModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TilemapModule.dll"
-      ],
-      "DebugActionIndex": 54
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/mscorlib.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/mscorlib.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/mscorlib.dll"
-      ],
-      "DebugActionIndex": 55
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VirtualTexturingModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.VirtualTexturingModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VirtualTexturingModule.dll"
-      ],
-      "DebugActionIndex": 56
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIElementsNativeModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UIElementsNativeModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIElementsNativeModule.dll"
-      ],
-      "DebugActionIndex": 57
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ParticleSystemModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.ParticleSystemModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ParticleSystemModule.dll"
-      ],
-      "DebugActionIndex": 58
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ProfilerModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.ProfilerModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ProfilerModule.dll"
-      ],
-      "DebugActionIndex": 59
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.IO.Compression.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.dll"
-      ],
-      "DebugActionIndex": 60
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Numerics.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Numerics.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Numerics.dll"
-      ],
-      "DebugActionIndex": 61
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.JSONSerializeModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.JSONSerializeModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.JSONSerializeModule.dll"
-      ],
-      "DebugActionIndex": 62
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Net.Http.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Net.Http.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Net.Http.dll"
-      ],
-      "DebugActionIndex": 63
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ServiceModel.Internals.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.ServiceModel.Internals.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ServiceModel.Internals.dll"
-      ],
-      "DebugActionIndex": 64
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DSPGraphModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.DSPGraphModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DSPGraphModule.dll"
-      ],
-      "DebugActionIndex": 65
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Drawing.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Drawing.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Drawing.dll"
-      ],
-      "DebugActionIndex": 66
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteMaskModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.SpriteMaskModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteMaskModule.dll"
-      ],
-      "DebugActionIndex": 67
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AnimationModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.AnimationModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AnimationModule.dll"
-      ],
-      "DebugActionIndex": 68
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Security.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Security.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Security.dll"
-      ],
-      "DebugActionIndex": 69
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TLSModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.TLSModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TLSModule.dll"
-      ],
-      "DebugActionIndex": 70
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PhysicsModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.PhysicsModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PhysicsModule.dll"
-      ],
-      "DebugActionIndex": 71
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/netstandard.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/netstandard.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/netstandard.dll"
-      ],
-      "DebugActionIndex": 72
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityCurlModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UnityCurlModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityCurlModule.dll"
-      ],
-      "DebugActionIndex": 73
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VRModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.VRModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VRModule.dll"
-      ],
-      "DebugActionIndex": 74
-    },
-    {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIElementsModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
@@ -979,205 +671,18 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIElementsModule.dll"
       ],
-      "DebugActionIndex": 75
+      "DebugActionIndex": 47
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.TextCoreFontEngineModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.UIModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIModule.dll"
       ],
-      "DebugActionIndex": 76
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputLegacyModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.InputLegacyModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputLegacyModule.dll"
-      ],
-      "DebugActionIndex": 77
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.LocalizationModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.LocalizationModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.LocalizationModule.dll"
-      ],
-      "DebugActionIndex": 78
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VideoModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.VideoModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VideoModule.dll"
-      ],
-      "DebugActionIndex": 79
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.StreamingModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.StreamingModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.StreamingModule.dll"
-      ],
-      "DebugActionIndex": 80
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VFXModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.VFXModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VFXModule.dll"
-      ],
-      "DebugActionIndex": 81
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainPhysicsModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.TerrainPhysicsModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainPhysicsModule.dll"
-      ],
-      "DebugActionIndex": 82
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DirectorModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.DirectorModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DirectorModule.dll"
-      ],
-      "DebugActionIndex": 83
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ImageConversionModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.ImageConversionModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ImageConversionModule.dll"
-      ],
-      "DebugActionIndex": 84
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Xml.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.dll"
-      ],
-      "DebugActionIndex": 85
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ARModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.ARModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ARModule.dll"
-      ],
-      "DebugActionIndex": 86
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UI.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UI.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UI.dll"
-      ],
-      "DebugActionIndex": 87
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UaaLAnalyticsModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UaaLAnalyticsModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UaaLAnalyticsModule.dll"
-      ],
-      "DebugActionIndex": 88
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UNETModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UNETModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UNETModule.dll"
-      ],
-      "DebugActionIndex": 89
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteShapeModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.SpriteShapeModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteShapeModule.dll"
-      ],
-      "DebugActionIndex": 90
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityConnectModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UnityConnectModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityConnectModule.dll"
-      ],
-      "DebugActionIndex": 91
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Core.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Core.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Core.dll"
-      ],
-      "DebugActionIndex": 92
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Assembly-CSharp.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/Assembly-CSharp.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Assembly-CSharp.dll"
-      ],
-      "DebugActionIndex": 93
+      "DebugActionIndex": 48
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.NVIDIAModule.dll",
@@ -1188,216 +693,40 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.NVIDIAModule.dll"
       ],
-      "DebugActionIndex": 94
+      "DebugActionIndex": 49
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.Physics2DModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ImageConversionModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.Physics2DModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.ImageConversionModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.Physics2DModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ImageConversionModule.dll"
       ],
-      "DebugActionIndex": 95
+      "DebugActionIndex": 50
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GIModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ARModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.GIModule.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.ARModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GIModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ARModule.dll"
       ],
-      "DebugActionIndex": 96
+      "DebugActionIndex": 51
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UaaLAnalyticsModule.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Data.dll"
+        "Temp/StagingArea/Data/Managed/UnityEngine.UaaLAnalyticsModule.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UaaLAnalyticsModule.dll"
       ],
-      "DebugActionIndex": 97
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VehiclesModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.VehiclesModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VehiclesModule.dll"
-      ],
-      "DebugActionIndex": 98
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AssetBundleModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.AssetBundleModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AssetBundleModule.dll"
-      ],
-      "DebugActionIndex": 99
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll"
-      ],
-      "DebugActionIndex": 100
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.CrashReportingModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.CrashReportingModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.CrashReportingModule.dll"
-      ],
-      "DebugActionIndex": 101
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterInputModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.ClusterInputModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterInputModule.dll"
-      ],
-      "DebugActionIndex": 102
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SharedInternalsModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.SharedInternalsModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SharedInternalsModule.dll"
-      ],
-      "DebugActionIndex": 103
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll"
-      ],
-      "DebugActionIndex": 104
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AudioModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.AudioModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AudioModule.dll"
-      ],
-      "DebugActionIndex": 105
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Runtime.Serialization.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Runtime.Serialization.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Runtime.Serialization.dll"
-      ],
-      "DebugActionIndex": 106
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AIModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.AIModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AIModule.dll"
-      ],
-      "DebugActionIndex": 107
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GridModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.GridModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GridModule.dll"
-      ],
-      "DebugActionIndex": 108
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextRenderingModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.TextRenderingModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextRenderingModule.dll"
-      ],
-      "DebugActionIndex": 109
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AccessibilityModule.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.AccessibilityModule.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AccessibilityModule.dll"
-      ],
-      "DebugActionIndex": 110
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Configuration.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Configuration.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Configuration.dll"
-      ],
-      "DebugActionIndex": 111
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.TextMeshPro.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/Unity.TextMeshPro.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.TextMeshPro.dll"
-      ],
-      "DebugActionIndex": 112
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.Linq.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.Xml.Linq.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.Linq.dll"
-      ],
-      "DebugActionIndex": 113
+      "DebugActionIndex": 52
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.CoreModule.dll",
@@ -1408,18 +737,535 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.CoreModule.dll"
       ],
-      "DebugActionIndex": 114
+      "DebugActionIndex": 53
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/mscorlib.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/System.dll"
+        "Temp/StagingArea/Data/Managed/mscorlib.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/mscorlib.dll"
       ],
-      "DebugActionIndex": 115
+      "DebugActionIndex": 54
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AudioModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.AudioModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AudioModule.dll"
+      ],
+      "DebugActionIndex": 55
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ParticleSystemModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.ParticleSystemModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ParticleSystemModule.dll"
+      ],
+      "DebugActionIndex": 56
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DSPGraphModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.DSPGraphModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DSPGraphModule.dll"
+      ],
+      "DebugActionIndex": 57
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.XRModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.XRModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.XRModule.dll"
+      ],
+      "DebugActionIndex": 58
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AnimationModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.AnimationModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AnimationModule.dll"
+      ],
+      "DebugActionIndex": 59
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.IMGUIModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.IMGUIModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.IMGUIModule.dll"
+      ],
+      "DebugActionIndex": 60
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll"
+      ],
+      "DebugActionIndex": 61
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityConnectModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UnityConnectModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityConnectModule.dll"
+      ],
+      "DebugActionIndex": 62
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UmbraModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UmbraModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UmbraModule.dll"
+      ],
+      "DebugActionIndex": 63
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubsystemsModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.SubsystemsModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubsystemsModule.dll"
+      ],
+      "DebugActionIndex": 64
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DirectorModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.DirectorModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.DirectorModule.dll"
+      ],
+      "DebugActionIndex": 65
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll"
+      ],
+      "DebugActionIndex": 66
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.TerrainModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainModule.dll"
+      ],
+      "DebugActionIndex": 67
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.IO.Compression.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.IO.Compression.dll"
+      ],
+      "DebugActionIndex": 68
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TLSModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.TLSModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TLSModule.dll"
+      ],
+      "DebugActionIndex": 69
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.Physics2DModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.Physics2DModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.Physics2DModule.dll"
+      ],
+      "DebugActionIndex": 70
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AccessibilityModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.AccessibilityModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AccessibilityModule.dll"
+      ],
+      "DebugActionIndex": 71
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.WindModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.WindModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.WindModule.dll"
+      ],
+      "DebugActionIndex": 72
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VRModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.VRModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VRModule.dll"
+      ],
+      "DebugActionIndex": 73
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ProfilerModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.ProfilerModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ProfilerModule.dll"
+      ],
+      "DebugActionIndex": 74
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Security.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Security.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Security.dll"
+      ],
+      "DebugActionIndex": 75
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UnityWebRequestModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityWebRequestModule.dll"
+      ],
+      "DebugActionIndex": 76
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GridModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.GridModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GridModule.dll"
+      ],
+      "DebugActionIndex": 77
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.TextCoreTextEngineModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll"
+      ],
+      "DebugActionIndex": 78
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Mono.Security.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/Mono.Security.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Mono.Security.dll"
+      ],
+      "DebugActionIndex": 79
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.dll"
+      ],
+      "DebugActionIndex": 80
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.EnterpriseServices.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.EnterpriseServices.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.EnterpriseServices.dll"
+      ],
+      "DebugActionIndex": 81
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.HotReloadModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.HotReloadModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.HotReloadModule.dll"
+      ],
+      "DebugActionIndex": 82
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.2D.PixelPerfect.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/Unity.2D.PixelPerfect.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.2D.PixelPerfect.dll"
+      ],
+      "DebugActionIndex": 83
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIElementsNativeModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UIElementsNativeModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UIElementsNativeModule.dll"
+      ],
+      "DebugActionIndex": 84
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ComponentModel.Composition.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.ComponentModel.Composition.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ComponentModel.Composition.dll"
+      ],
+      "DebugActionIndex": 85
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Data.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.dll"
+      ],
+      "DebugActionIndex": 86
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AssetBundleModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.AssetBundleModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AssetBundleModule.dll"
+      ],
+      "DebugActionIndex": 87
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AndroidJNIModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.AndroidJNIModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AndroidJNIModule.dll"
+      ],
+      "DebugActionIndex": 88
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainPhysicsModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.TerrainPhysicsModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TerrainPhysicsModule.dll"
+      ],
+      "DebugActionIndex": 89
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterRendererModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.ClusterRendererModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterRendererModule.dll"
+      ],
+      "DebugActionIndex": 90
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VideoModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.VideoModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VideoModule.dll"
+      ],
+      "DebugActionIndex": 91
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteMaskModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.SpriteMaskModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteMaskModule.dll"
+      ],
+      "DebugActionIndex": 92
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll"
+      ],
+      "DebugActionIndex": 93
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Configuration.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Configuration.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Configuration.dll"
+      ],
+      "DebugActionIndex": 94
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/netstandard.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/netstandard.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/netstandard.dll"
+      ],
+      "DebugActionIndex": 95
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextRenderingModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.TextRenderingModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.TextRenderingModule.dll"
+      ],
+      "DebugActionIndex": 96
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteShapeModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.SpriteShapeModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SpriteShapeModule.dll"
+      ],
+      "DebugActionIndex": 97
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.TextMeshPro.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/Unity.TextMeshPro.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Unity.TextMeshPro.dll"
+      ],
+      "DebugActionIndex": 98
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Assembly-CSharp.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/Assembly-CSharp.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/Assembly-CSharp.dll"
+      ],
+      "DebugActionIndex": 99
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterInputModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.ClusterInputModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClusterInputModule.dll"
+      ],
+      "DebugActionIndex": 100
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GIModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.GIModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GIModule.dll"
+      ],
+      "DebugActionIndex": 101
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClothModule.dll",
@@ -1430,16 +1276,170 @@
       "Outputs": [
         "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.ClothModule.dll"
       ],
+      "DebugActionIndex": 102
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AIModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.AIModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.AIModule.dll"
+      ],
+      "DebugActionIndex": 103
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ServiceModel.Internals.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.ServiceModel.Internals.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.ServiceModel.Internals.dll"
+      ],
+      "DebugActionIndex": 104
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Drawing.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Drawing.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Drawing.dll"
+      ],
+      "DebugActionIndex": 105
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.dll"
+      ],
+      "DebugActionIndex": 106
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubstanceModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.SubstanceModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.SubstanceModule.dll"
+      ],
+      "DebugActionIndex": 107
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PhysicsModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.PhysicsModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PhysicsModule.dll"
+      ],
+      "DebugActionIndex": 108
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Xml.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Xml.dll"
+      ],
+      "DebugActionIndex": 109
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.InputModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.InputModule.dll"
+      ],
+      "DebugActionIndex": 110
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UI.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UI.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UI.dll"
+      ],
+      "DebugActionIndex": 111
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PerformanceReportingModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.PerformanceReportingModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.PerformanceReportingModule.dll"
+      ],
+      "DebugActionIndex": 112
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VirtualTexturingModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.VirtualTexturingModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.VirtualTexturingModule.dll"
+      ],
+      "DebugActionIndex": 113
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityCurlModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.UnityCurlModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.UnityCurlModule.dll"
+      ],
+      "DebugActionIndex": 114
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Core.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/System.Core.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Core.dll"
+      ],
+      "DebugActionIndex": 115
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GameCenterModule.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "Temp/StagingArea/Data/Managed/UnityEngine.GameCenterModule.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.GameCenterModule.dll"
+      ],
       "DebugActionIndex": 116
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.WindModule.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.DataSetExtensions.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "Temp/StagingArea/Data/Managed/UnityEngine.WindModule.dll"
+        "Temp/StagingArea/Data/Managed/System.Data.DataSetExtensions.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/UnityEngine.WindModule.dll"
+        "Builds/malleus_windows/Malleus Goblinficarium_Data/Managed/System.Data.DataSetExtensions.dll"
       ],
       "DebugActionIndex": 117
     },
@@ -1491,17 +1491,6 @@
       "DebugActionIndex": 121
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/UnityPlayer.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/UnityPlayer.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/UnityPlayer.dll"
-      ],
-      "DebugActionIndex": 122
-    },
-    {
       "Annotation": "CopyFiles Builds/malleus_windows/UnityCrashHandler64.exe",
       "ActionType": "CopyFiles",
       "Inputs": [
@@ -1510,18 +1499,7 @@
       "Outputs": [
         "Builds/malleus_windows/UnityCrashHandler64.exe"
       ],
-      "DebugActionIndex": 123
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/nvngx_dlss.dll",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/nvngx_dlss.dll"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/nvngx_dlss.dll"
-      ],
-      "DebugActionIndex": 124
+      "DebugActionIndex": 122
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/NVUnityPlugin.dll",
@@ -1532,18 +1510,29 @@
       "Outputs": [
         "Builds/malleus_windows/NVUnityPlugin.dll"
       ],
-      "DebugActionIndex": 125
+      "DebugActionIndex": 123
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll",
+      "Annotation": "CopyFiles Builds/malleus_windows/UnityPlayer.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll"
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/UnityPlayer.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll"
+        "Builds/malleus_windows/UnityPlayer.dll"
       ],
-      "DebugActionIndex": 126
+      "DebugActionIndex": 124
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/nvngx_dlss.dll",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/nvngx_dlss.dll"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/nvngx_dlss.dll"
+      ],
+      "DebugActionIndex": 125
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll",
@@ -1554,18 +1543,18 @@
       "Outputs": [
         "Builds/malleus_windows/MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll"
       ],
-      "DebugActionIndex": 127
+      "DebugActionIndex": 126
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/config",
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/config"
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll"
       ],
       "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/config"
+        "Builds/malleus_windows/MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll"
       ],
-      "DebugActionIndex": 128
+      "DebugActionIndex": 127
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/browscap.ini",
@@ -1576,128 +1565,18 @@
       "Outputs": [
         "Builds/malleus_windows/MonoBleedingEdge/etc/mono/browscap.ini"
       ],
+      "DebugActionIndex": 128
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/config",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/config"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/config"
+      ],
       "DebugActionIndex": 129
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/mconfig/config.xml",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/mconfig/config.xml"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/mconfig/config.xml"
-      ],
-      "DebugActionIndex": 130
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx"
-      ],
-      "DebugActionIndex": 131
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/settings.map",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/settings.map"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/settings.map"
-      ],
-      "DebugActionIndex": 132
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/machine.config",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/machine.config"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/machine.config"
-      ],
-      "DebugActionIndex": 133
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/web.config",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/web.config"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/web.config"
-      ],
-      "DebugActionIndex": 134
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx"
-      ],
-      "DebugActionIndex": 135
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/settings.map",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/settings.map"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/settings.map"
-      ],
-      "DebugActionIndex": 136
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/machine.config",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/machine.config"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/machine.config"
-      ],
-      "DebugActionIndex": 137
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/web.config",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/web.config"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/web.config"
-      ],
-      "DebugActionIndex": 138
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx"
-      ],
-      "DebugActionIndex": 139
-    },
-    {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/settings.map",
-      "ActionType": "CopyFiles",
-      "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.5/settings.map"
-      ],
-      "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/settings.map"
-      ],
-      "DebugActionIndex": 140
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/machine.config",
@@ -1708,7 +1587,7 @@
       "Outputs": [
         "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/machine.config"
       ],
-      "DebugActionIndex": 141
+      "DebugActionIndex": 130
     },
     {
       "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/web.config",
@@ -1719,16 +1598,137 @@
       "Outputs": [
         "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/web.config"
       ],
+      "DebugActionIndex": 131
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/settings.map",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.5/settings.map"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/settings.map"
+      ],
+      "DebugActionIndex": 132
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx"
+      ],
+      "DebugActionIndex": 133
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/mconfig/config.xml",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/mconfig/config.xml"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/mconfig/config.xml"
+      ],
+      "DebugActionIndex": 134
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/machine.config",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/machine.config"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/machine.config"
+      ],
+      "DebugActionIndex": 135
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/web.config",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/web.config"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/web.config"
+      ],
+      "DebugActionIndex": 136
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/settings.map",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/settings.map"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/settings.map"
+      ],
+      "DebugActionIndex": 137
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx"
+      ],
+      "DebugActionIndex": 138
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/machine.config",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/machine.config"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/machine.config"
+      ],
+      "DebugActionIndex": 139
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/web.config",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/web.config"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/web.config"
+      ],
+      "DebugActionIndex": 140
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/settings.map",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/settings.map"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/settings.map"
+      ],
+      "DebugActionIndex": 141
+    },
+    {
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx",
+      "ActionType": "CopyFiles",
+      "Inputs": [
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx"
+      ],
+      "Outputs": [
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx"
+      ],
       "DebugActionIndex": 142
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser",
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser"
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser"
       ],
       "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser"
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser"
       ],
       "DebugActionIndex": 143
     },
@@ -1744,13 +1744,13 @@
       "DebugActionIndex": 144
     },
     {
-      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser",
+      "Annotation": "CopyFiles Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser",
       "ActionType": "CopyFiles",
       "Inputs": [
-        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser"
+        "/home/jeff/Unity/Hub/Editor/2021.2.0b1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Variations/win64_player_nondevelopment_mono/MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser"
       ],
       "Outputs": [
-        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser"
+        "Builds/malleus_windows/MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser"
       ],
       "DebugActionIndex": 145
     },

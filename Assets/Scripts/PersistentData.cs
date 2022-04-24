@@ -12,7 +12,7 @@ public class PersistentData {
     public string[] tsItemTypes;
     public string[] tsItemMods;
     public int newCharNum;
-    public bool easyMode;
+    public string gameDifficulty;
     public bool[] unlockedChars;
     public int gamesPlayed;
     public int highestLevel;
@@ -46,7 +46,7 @@ public class PersistentData {
         tsItemTypes = new string[9];
         tsItemMods = new string[9];
         newCharNum = 0;
-        easyMode = false;
+        gameDifficulty = "normal";
         unlockedChars = new bool[4] { true, false, false, false };
         gamesPlayed = 0;
         highestLevel = 1;

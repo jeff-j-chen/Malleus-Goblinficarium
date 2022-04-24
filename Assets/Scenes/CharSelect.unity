@@ -835,6 +835,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 0}
+  border: {fileID: 0}
   dice: {fileID: 0}
   arrow: {fileID: 0}
   enemy: {fileID: 0}
@@ -852,8 +853,10 @@ MonoBehaviour:
   levelManager: {fileID: 0}
   statSummoner: {fileID: 0}
   tombstoneData: {fileID: 0}
+  mobileResizer: {fileID: 0}
   characterSelector: {fileID: 0}
   highlightCalculator: {fileID: 0}
+  mobileMode: 0
 --- !u!4 &560893086
 Transform:
   m_ObjectHideFlags: 0
@@ -1606,7 +1609,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'toggle
+  m_text: 'change
 
     difficulty'
   m_isRightToLeft: 0
@@ -1900,7 +1903,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: press [enter] to choose, press [space] to toggle 'easy' mode
+  m_text: press [enter] to choose, press [space] to change difficulty
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 153c2cc2c59f4064695fb26abfea98e2, type: 2}
   m_sharedMaterial: {fileID: -7047417035543559013, guid: 153c2cc2c59f4064695fb26abfea98e2,

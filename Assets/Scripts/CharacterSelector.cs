@@ -34,16 +34,23 @@ public class CharacterSelector : MonoBehaviour {
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         // get necessary objects
         // pull in data from the Savefile
-        if (Save.persistent.easyMode) { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
-        else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
-        // hide the item if normal mode, if easy mode then show it
-        selectionNum = 0;
-        SetSelection(selectionNum);
+        HideItemsByDifficulty();
+        
         // select 0 and go to it
         bottomText.SetActive(PlayerPrefs.GetString(scripts.BUTTONS_KEY) != "on");
         StartCoroutine(AllowFX());
     }
     
+    public void HideItemsByDifficulty() { 
+        if (Save.persistent.gameDifficulty == "easy") { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
+        else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
+        // easy has 2nd item
+        if (Save.persistent.gameDifficulty == "hard") { scripts.itemManager.floorItems[1].GetComponent<Item>().Hide(); }
+        else { scripts.itemManager.floorItems[1].GetComponent<Item>().UnHide(); }
+        selectionNum = 0;
+        SetSelection(selectionNum);
+    }
+
     /// <summary>
     /// Only allow sound effects to be played after a short delay, preventing extra clicking.
     /// </summary>
@@ -68,7 +75,7 @@ public class CharacterSelector : MonoBehaviour {
             ChangeToReleased("Right");
         }
         // depending on the input, shift the selection in that direction and shows a small animation
-        else if (Input.GetKeyDown(KeyCode.Space)) { ToggleEasy(); }
+        else if (Input.GetKeyDown(KeyCode.Space)) { CycleDifficulty(); }
         // space toggles easy mode
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) { 
             // enter selects the character
@@ -110,7 +117,7 @@ public class CharacterSelector : MonoBehaviour {
                 itemHider.SetActive(false);
                 // show that character's items
                 quoteText.text = quotes[selectionNum];
-                perkText.text = perks[selectionNum];
+                UpdatePerkText();
                 // show that character's quote and perk
             }
             else {
@@ -183,6 +190,13 @@ public class CharacterSelector : MonoBehaviour {
                     scripts.itemManager.GetItemSprite("kapala");
                 break;
         }
+        if (Save.persistent.gameDifficulty == "hard") {
+            // rename weapon to be rusty if in hard mode
+            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "rusty";
+            string itemName = scripts.itemManager.floorItems[0].GetComponent<Item>().itemName;
+            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "rusty " + itemName.Split(' ')[1];
+            // print(scripts.itemManager.floorItems[0].GetComponent<Item>().itemName);
+        }
         // give the character items based on their class, even if its not unlocked because it will be hidden regardless
         scripts.itemManager.floorItems[0].GetComponent<Item>().Select(false);
         // select the first item so its not buggy
@@ -209,17 +223,39 @@ public class CharacterSelector : MonoBehaviour {
     /// <summary>
     /// Toggles easy mode and handles the hiding.
     /// </summary>
-    public void ToggleEasy() {
+    public void CycleDifficulty() {
         if (!simpleFadeIn.lockChanges) {
             // don't allow toggle of easy if we are fading rn
             scripts.soundManager.PlayClip("click1");
             // play clip
-            Save.persistent.easyMode = !Save.persistent.easyMode;
             // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
             // fade to black and then back
+            if (Save.persistent.gameDifficulty == "easy") {
+                Save.persistent.gameDifficulty = "normal";
+            }
+            else if (Save.persistent.gameDifficulty == "normal") {
+                Save.persistent.gameDifficulty = "hard";
+            }
+            else if (Save.persistent.gameDifficulty == "hard") {
+                Save.persistent.gameDifficulty = "easy";
+            }
+
             Save.SavePersistent();
             // apply it to the Save file so the next game will have the correct character
+        }
+    }
+
+    public void UpdatePerkText() { 
+        perkText.text = perks[selectionNum];
+        if (Save.persistent.gameDifficulty == "easy") { 
+            perkText.text += "\n> Selected Difficulty: EASY";
+        }
+        else if (Save.persistent.gameDifficulty == "normal") { 
+            perkText.text += "\n> Selected Difficulty: NORMAL";
+        }
+        else if (Save.persistent.gameDifficulty == "hard") { 
+            perkText.text += "\n> Selected Difficulty: HARD";
         }
     }
 }

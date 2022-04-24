@@ -29,7 +29,7 @@ public class MobileButton : MonoBehaviour {
             case "menu": scripts.backToMenu.GoBack(); break;
             case "items": scripts.itemManager.ChangeItemList(); break;
             case "select": scripts.characterSelector.Select(); break;
-            case "easy mode": scripts.characterSelector.ToggleEasy(); break;
+            case "easy mode": scripts.characterSelector.CycleDifficulty(); break;
             case "reset stats": scripts.statistics.ResetStats(); break;
         }
     }
