@@ -104,7 +104,7 @@ namespace UnityEditor.U2D.Sprites
         /// <returns>The ISpriteEditorDataProvider associated with the object.</returns>
         public ISpriteEditorDataProvider GetSpriteEditorDataProviderFromObject(UnityEngine.Object obj)
         {
-            if (obj is not null)
+            if (obj != null)
             {
                 var objType = obj.GetType();
                 foreach (var factory in m_Factories)
@@ -114,7 +114,7 @@ namespace UnityEditor.U2D.Sprites
                         if (factory.methodType == objType)
                         {
                             var dataProvider = factory.method.Invoke(factory.instance, new[] { obj }) as ISpriteEditorDataProvider;
-                            if (dataProvider is not null && !dataProvider.Equals(null))
+                            if (dataProvider != null && !dataProvider.Equals(null))
                                 return dataProvider;
                         }
                     }
@@ -173,7 +173,7 @@ namespace UnityEditor.U2D.Sprites
                 try
                 {
                     var sprite = spriteObjectProvider.Invoke(null, new object[] { obj }) as Sprite;
-                    if (sprite is not null && !sprite.Equals(null))
+                    if (sprite != null && !sprite.Equals(null))
                         return sprite;
                 }
                 catch (Exception ex)
@@ -323,7 +323,7 @@ namespace UnityEditor.U2D.Sprites
             m_SpriteDataProvider.InitSpriteEditorDataProvider();
 
             var textureProvider = m_SpriteDataProvider.GetDataProvider<ITextureDataProvider>();
-            if (textureProvider is not null)
+            if (textureProvider != null)
             {
                 int width = 0, height = 0;
                 textureProvider.GetTextureActualWidthAndHeight(out width, out height);
@@ -364,7 +364,7 @@ namespace UnityEditor.U2D.Sprites
 
         bool activeDataProviderSelected
         {
-            get { return m_SpriteDataProvider is not null; }
+            get { return m_SpriteDataProvider != null; }
         }
 
         public bool textureIsDirty
@@ -385,7 +385,7 @@ namespace UnityEditor.U2D.Sprites
             {
                 var assetPath = GetSelectionAssetPath();
                 var dataProvider = spriteDataProviderFactories.GetSpriteEditorDataProviderFromObject(m_SelectedObject);
-                return dataProvider is not null && m_SelectedAssetPath != assetPath;
+                return dataProvider != null && m_SelectedAssetPath != assetPath;
             }
         }
 
@@ -416,7 +416,7 @@ namespace UnityEditor.U2D.Sprites
                 updateModules = true;
             }
 
-            if (m_RectsCache is not null)
+            if (m_RectsCache != null)
             {
                 UpdateSelectedSpriteRectFromSelection();
             }
@@ -498,7 +498,7 @@ namespace UnityEditor.U2D.Sprites
         private bool SetupVisualElements()
         {
             var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(SpriteEditorWindowStyles.styleSheetPath);
-            if (styleSheet is not null)
+            if (styleSheet != null)
             {
                 m_ToolbarIMGUIElement = new IMGUIContainer(DoToolbarGUI)
                 {
@@ -542,10 +542,10 @@ namespace UnityEditor.U2D.Sprites
         private void InitSelectedSpriteRect()
         {
             SpriteRect newSpriteRect = null;
-            if (m_RectsCache is not null && m_RectsCache.Count > 0)
+            if (m_RectsCache != null && m_RectsCache.Count > 0)
             {
-                if (selectedSpriteRect is not null)
-                    newSpriteRect = m_RectsCache.FirstOrDefault(x => x.spriteID == selectedSpriteRect.spriteID) is not null ? selectedSpriteRect : m_RectsCache[0];
+                if (selectedSpriteRect != null)
+                    newSpriteRect = m_RectsCache.FirstOrDefault(x => x.spriteID == selectedSpriteRect.spriteID) != null ? selectedSpriteRect : m_RectsCache[0];
                 else
                     newSpriteRect = m_RectsCache[0];
             }
@@ -580,7 +580,7 @@ namespace UnityEditor.U2D.Sprites
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.quitting -= OnEditorApplicationQuit;
 
-            if (m_OutlineTexture is not null)
+            if (m_OutlineTexture != null)
             {
                 DestroyImmediate(m_OutlineTexture);
                 m_OutlineTexture = null;
@@ -592,7 +592,7 @@ namespace UnityEditor.U2D.Sprites
                 m_ReadableTexture = null;
             }
 
-            if (m_CurrentModule is not null)
+            if (m_CurrentModule != null)
                 m_CurrentModule.OnModuleDeactivate();
             UnityEditor.SpriteUtilityWindow.SetApplySpriteEditorWindow(null);
         }
@@ -632,7 +632,7 @@ namespace UnityEditor.U2D.Sprites
 
         bool IsSpriteDataProviderValid()
         {
-            return m_SpriteDataProvider is not null && !m_SpriteDataProvider.Equals(null);
+            return m_SpriteDataProvider != null && !m_SpriteDataProvider.Equals(null);
         }
 
         void RefreshRects()
@@ -672,7 +672,7 @@ namespace UnityEditor.U2D.Sprites
                 // We can't depend on the existing data provider to set data because a reimport might cause
                 // the data provider to be invalid. We store up the current asset path so that in DoApply()
                 // the modified data can be set correctly to correct asset.
-                if (m_CurrentResetContext is not null)
+                if (m_CurrentResetContext != null)
                     Debug.LogError("Existing reset not completed for " + m_CurrentResetContext.assetPath);
                 m_CurrentResetContext = new CurrentResetContext()
                 {
@@ -747,7 +747,7 @@ namespace UnityEditor.U2D.Sprites
             if (m_EventSystem.current.type == EventType.Repaint)
             {
                 SpriteEditorUtility.BeginLines(new Color(1f, 1f, 1f, 0.5f));
-                var selectedRect = selectedSpriteRect is not null ? selectedSpriteRect.spriteID : new GUID();
+                var selectedRect = selectedSpriteRect != null ? selectedSpriteRect.spriteID : new GUID();
                 for (int i = 0; i < m_RectsCache.Count; i++)
                 {
                     if (m_RectsCache[i].spriteID != selectedRect)
@@ -866,7 +866,7 @@ namespace UnityEditor.U2D.Sprites
             textureIsDirty = false;
             bool reimport = true;
             var dataProvider = m_SpriteDataProvider;
-            if (m_CurrentResetContext is not null)
+            if (m_CurrentResetContext != null)
             {
                 m_SpriteDataProvider =
                     m_SpriteDataProviderFactories.GetSpriteEditorDataProviderFromObject(
@@ -875,9 +875,9 @@ namespace UnityEditor.U2D.Sprites
                 m_CurrentResetContext = null;
             }
 
-            if (m_SpriteDataProvider is not null)
+            if (m_SpriteDataProvider != null)
             {
-                if (m_CurrentModule is not null)
+                if (m_CurrentModule != null)
                     reimport = m_CurrentModule.ApplyRevert(true);
                 m_SpriteDataProvider.Apply();
             }
@@ -900,7 +900,7 @@ namespace UnityEditor.U2D.Sprites
             textureIsDirty = false;
             RefreshRects();
             GUI.FocusControl("");
-            if (m_CurrentModule is not null)
+            if (m_CurrentModule != null)
                 m_CurrentModule.ApplyRevert(false);
         }
 
@@ -921,12 +921,12 @@ namespace UnityEditor.U2D.Sprites
                     changed = true;
                 }
 
-                if (selectedSpriteRect is not null)
+                if (selectedSpriteRect != null)
                     s_OneClickDragStarted = true;
                 else
                     RequestRepaint();
 
-                if (changed && selectedSpriteRect is not null)
+                if (changed && selectedSpriteRect != null)
                 {
                     m_EventSystem.current.Use();
                 }
@@ -1019,7 +1019,7 @@ namespace UnityEditor.U2D.Sprites
 
         public void DoTextureReimport(string path)
         {
-            if (m_SpriteDataProvider is not null)
+            if (m_SpriteDataProvider != null)
             {
                 try
                 {
@@ -1047,7 +1047,7 @@ namespace UnityEditor.U2D.Sprites
             if (m_RegisteredModules.Count > newModuleIndex)
             {
                 m_CurrentModuleIndex = newModuleIndex;
-                if (m_CurrentModule is not null)
+                if (m_CurrentModule != null)
                     m_CurrentModule.OnModuleDeactivate();
 
                 m_CurrentModule = null;
@@ -1056,9 +1056,9 @@ namespace UnityEditor.U2D.Sprites
 
                 m_CurrentModule.OnModuleActivate();
             }
-            if (m_MainViewElement is not null)
+            if (m_MainViewElement != null)
                 m_MainViewElement.MarkDirtyRepaint();
-            if (m_ModuleViewElement is not null)
+            if (m_ModuleViewElement != null)
                 m_ModuleViewElement.MarkDirtyRepaint();
         }
 
@@ -1152,12 +1152,12 @@ namespace UnityEditor.U2D.Sprites
                         var constructorInfoObj = moduleClassType.GetConstructor(
                             BindingFlags.Instance | BindingFlags.Public, null,
                             CallingConventions.HasThis, constructorType, null);
-                        if (constructorInfoObj is not null)
+                        if (constructorInfoObj != null)
                         {
                             try
                             {
                                 var newInstance = constructorInfoObj.Invoke(new object[0]) as SpriteEditorModuleBase;
-                                if (newInstance is not null)
+                                if (newInstance != null)
                                 {
                                     newInstance.spriteEditor = this;
                                     RegisterModule(newInstance);
@@ -1212,12 +1212,12 @@ namespace UnityEditor.U2D.Sprites
                     return;
 
                 var oldSelected = m_SelectedSpriteRectGUID;
-                m_SelectedSpriteRectGUID = value is not null ? value.spriteID.ToString() : new GUID().ToString();
+                m_SelectedSpriteRectGUID = value != null ? value.spriteID.ToString() : new GUID().ToString();
                 if (oldSelected != m_SelectedSpriteRectGUID)
                 {
-                    if (m_MainViewIMGUIElement is not null)
+                    if (m_MainViewIMGUIElement != null)
                         m_MainViewIMGUIElement.MarkDirtyRepaint();
-                    if (m_MainViewElement is not null)
+                    if (m_MainViewElement != null)
                     {
                         m_MainViewElement.MarkDirtyRepaint();
                         using (var e = SpriteSelectionChangeEvent.GetPooled())
@@ -1306,7 +1306,7 @@ namespace UnityEditor.U2D.Sprites
 
         public T GetDataProvider<T>() where T : class
         {
-            return m_SpriteDataProvider is not null ? m_SpriteDataProvider.GetDataProvider<T>() : null;
+            return m_SpriteDataProvider != null ? m_SpriteDataProvider.GetDataProvider<T>() : null;
         }
 
         public VisualElement GetMainVisualContainer()
@@ -1340,7 +1340,7 @@ namespace UnityEditor.U2D.Sprites
         {
             UnityEngine.Object[] wins = Resources.FindObjectsOfTypeAll(typeof(SpriteEditorWindow));
             SpriteEditorWindow win = wins.Length > 0 ? (EditorWindow)(wins[0]) as SpriteEditorWindow : null;
-            if (win is not null)
+            if (win != null)
             {
                 foreach (var deletedAsset in deletedAssets)
                     SpriteEditorWindow.OnTextureReimport(win, deletedAsset);

@@ -73,15 +73,15 @@ public class ItemManager : MonoBehaviour {
             // +1g +1b +1r +1w
     };  
     private readonly Dictionary<string, int> itemDropDict = new() {
-        { "armor",          3 },
-        { "cheese",         7 },
+        { "armor",          2 },
+        { "cheese",         10 },
         { "torch",          4 },
-        { "steak",          5 },
-        { "scroll",         6 },
-        { "potion",         10 },
-        { "shuriken",       6 },
-        { "necklet",        6 },
-        { "skeleton_key",   4 },
+        { "steak",          8 },
+        { "scroll",         16 },
+        { "potion",         24 },
+        { "shuriken",       12 },
+        { "necklet",        12 },
+        { "skeleton_key",   8 },
         { "boots_of_dodge", 1 },
         { "helm_of_might",  1 },
         { "kapala",         1 },
@@ -136,7 +136,7 @@ public class ItemManager : MonoBehaviour {
 
     private readonly Dictionary<string, int> modifierDropDict = new() {
         { "common0",   15 },
-        { "legendary0", 5 },
+        { "legendary0", 3 },
         { "accurate0", 5 },
         { "accurate1", 5 },
         { "brisk0",    5 },
@@ -762,8 +762,22 @@ public class ItemManager : MonoBehaviour {
                 int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
                 if (PlayerHasWeapon("sword") && PlayerHasLegendary()) { torchCount++; }
                 // count the number of torches, legendary sword helps find loot
-                int spawnCount = Mathf.Clamp(Random.Range(1, torchCount+1) + scripts.levelManager.level + 1 + Random.Range(-2, 1), 0, 6);
-                // create a spawn count, only 5 items can be spawned
+                int spawnCount = 
+                    Random.Range(torchCount == 0 ? 0 : torchCount-1, torchCount+1) 
+                    // random int based on number of torches
+                    + scripts.levelManager.level 
+                    // +1 item per level
+                    + Random.Range(-(6-scripts.levelManager.level), 1); 
+                    // randomize it a bit, tending more towards negative at lower levels
+                if (scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) {
+                    // spawnCount = Mathf.Clamp(spawnCount, 0, 1);
+                    spawnCount = 5;
+                    // fix the spawncount between 0 and 1 if on 1-1
+                }
+                else {
+                    spawnCount = Mathf.Clamp(spawnCount, 1, 5);
+                    // any other level, so guarantee at least 1 item, max of 5 
+                }
                 CreateRandomWeapon();
                 // create a random weapon at index 0
                 for (int i = 0; i < spawnCount; i++) {

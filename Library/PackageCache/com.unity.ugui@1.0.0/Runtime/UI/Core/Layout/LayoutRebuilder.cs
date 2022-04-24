@@ -184,7 +184,7 @@ namespace UnityEngine.UI
                 for (int i = 0; i < comps.Count; ++i)
                 {
                     var cur = comps[i];
-                    if (cur is not null && cur is Behaviour && ((Behaviour)cur).isActiveAndEnabled)
+                    if (cur != null && cur is Behaviour && ((Behaviour)cur).isActiveAndEnabled)
                     {
                         validLayoutGroup = true;
                         layoutRoot = parent;
@@ -216,7 +216,7 @@ namespace UnityEngine.UI
             for (int i = 0; i < comps.Count; ++i)
             {
                 var cur = comps[i];
-                if (cur is not null && cur is Behaviour && ((Behaviour)cur).isActiveAndEnabled)
+                if (cur != null && cur is Behaviour && ((Behaviour)cur).isActiveAndEnabled)
                 {
                     return true;
                 }

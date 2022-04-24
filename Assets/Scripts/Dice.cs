@@ -405,7 +405,9 @@ public class Dice : MonoBehaviour {
         // destroy the die
         scripts.diceSummoner.SaveDiceValues();
         // Save the dice values to the Save file
-        scripts.turnManager.RecalculateMaxFor(isOnPlayerOrEnemy);
+        if (isOnPlayerOrEnemy != "none") {
+            scripts.turnManager.RecalculateMaxFor(isOnPlayerOrEnemy);
+        }
         scripts.statSummoner.SetDebugInformationFor("enemy");
         scripts.statSummoner.SetDebugInformationFor("player");
     }

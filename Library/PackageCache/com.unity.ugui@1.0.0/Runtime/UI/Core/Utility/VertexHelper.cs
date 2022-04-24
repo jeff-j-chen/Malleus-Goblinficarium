@@ -152,7 +152,7 @@ namespace UnityEngine.UI
         /// </summary>
         public int currentVertCount
         {
-            get { return m_Positions is not null ? m_Positions.Count : 0; }
+            get { return m_Positions != null ? m_Positions.Count : 0; }
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace UnityEngine.UI
         /// </summary>
         public int currentIndexCount
         {
-            get { return m_Indices is not null ? m_Indices.Count : 0; }
+            get { return m_Indices != null ? m_Indices.Count : 0; }
         }
 
         /// <summary>
@@ -323,12 +323,12 @@ namespace UnityEngine.UI
         {
             InitializeListIfRequired();
 
-            if (verts is not null)
+            if (verts != null)
             {
                 CanvasRenderer.AddUIVertexStream(verts, m_Positions, m_Colors, m_Uv0S, m_Uv1S, m_Uv2S, m_Uv3S, m_Normals, m_Tangents);
             }
 
-            if (indices is not null)
+            if (indices != null)
             {
                 m_Indices.AddRange(indices);
             }

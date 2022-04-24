@@ -269,15 +269,28 @@ public class Player : MonoBehaviour {
     }
     
     /// <summary>
-    ///  Sets the status effect of a player.
+    ///  Sets the status effect of a player. Returns true if successfully set, false if they already had it.
     /// </summary>
-    public void SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
-        switch (statusEffect) {
-            case "fury": Save.game.isFurious = onOrOff; break;
-            case "dodge": Save.game.isDodgy = onOrOff; break;
-            case "haste": Save.game.isHasty = onOrOff; break;
-            case "leech": Save.game.isBloodthirsty = onOrOff; break;
-            case "courage": Save.game.isCourageous = onOrOff; break;
+    public bool SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
+        if (statusEffect == "fury") {
+            if (onOrOff && Save.game.isFurious) { return false; } 
+            else { Save.game.isFurious = onOrOff; }
+        }
+        else if (statusEffect == "dodge") {
+            if (onOrOff && Save.game.isDodgy) { return false; } 
+            else { Save.game.isDodgy = onOrOff; }
+        }
+        else if (statusEffect == "haste") {
+            if (onOrOff && Save.game.isHasty) { return false; } 
+            else { Save.game.isHasty = onOrOff; }
+        }
+        else if (statusEffect == "leech") {
+            if (onOrOff && Save.game.isBloodthirsty) { return false; } 
+            else { Save.game.isBloodthirsty = onOrOff; }
+        }
+        else if (statusEffect == "courage") {
+            if (onOrOff && Save.game.isCourageous) { return false; } 
+            else { Save.game.isCourageous = onOrOff; }
         }
         if (onOrOff) {
             // if turning on
@@ -288,7 +301,7 @@ public class Player : MonoBehaviour {
             statusEffectList.Add(icon);
             // get the icon and add it to the status effect list.
         }
-        if (onOrOff == false) {
+        else {
             // turning off
             try {
                 GameObject matchingIcon = (from icon in statusEffectList where icon.GetComponent<SpriteRenderer>().sprite.name == statusEffect select icon).ToList()[0];
@@ -305,5 +318,6 @@ public class Player : MonoBehaviour {
             if (statusEffectList.Count <= 0) { identifier.text = "You"; }
             // if no status effects, reset identifier text
         }
+        return true;
     }
 }

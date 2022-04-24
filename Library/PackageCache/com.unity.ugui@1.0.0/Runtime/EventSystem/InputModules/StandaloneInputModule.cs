@@ -164,7 +164,7 @@ namespace UnityEngine.EventSystems
         {
             if (!eventSystem.isFocused && ShouldIgnoreEventsOnNoFocus())
             {
-                if (m_InputPointerEvent is not null && m_InputPointerEvent.pointerDrag is not null && m_InputPointerEvent.dragging)
+                if (m_InputPointerEvent != null && m_InputPointerEvent.pointerDrag != null && m_InputPointerEvent.dragging)
                 {
                     ReleaseMouse(m_InputPointerEvent, m_InputPointerEvent.pointerCurrentRaycast.gameObject);
                 }
@@ -189,7 +189,7 @@ namespace UnityEngine.EventSystems
             {
                 ExecuteEvents.Execute(pointerEvent.pointerClick, pointerEvent, ExecuteEvents.pointerClickHandler);
             }
-            if (pointerEvent.pointerDrag is not null && pointerEvent.dragging)
+            if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
             {
                 ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
             }
@@ -199,7 +199,7 @@ namespace UnityEngine.EventSystems
             pointerEvent.rawPointerPress = null;
             pointerEvent.pointerClick = null;
 
-            if (pointerEvent.pointerDrag is not null && pointerEvent.dragging)
+            if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
                 ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
 
             pointerEvent.dragging = false;
@@ -386,7 +386,7 @@ namespace UnityEngine.EventSystems
                 // Save the drag handler as well
                 pointerEvent.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(currentOverGo);
 
-                if (pointerEvent.pointerDrag is not null)
+                if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
             }
 
@@ -407,7 +407,7 @@ namespace UnityEngine.EventSystems
                     ExecuteEvents.Execute(pointerEvent.pointerClick, pointerEvent, ExecuteEvents.pointerClickHandler);
                 }
 
-                if (pointerEvent.pointerDrag is not null && pointerEvent.dragging)
+                if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
                 {
                     ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.dropHandler);
                 }
@@ -417,7 +417,7 @@ namespace UnityEngine.EventSystems
                 pointerEvent.rawPointerPress = null;
                 pointerEvent.pointerClick = null;
 
-                if (pointerEvent.pointerDrag is not null && pointerEvent.dragging)
+                if (pointerEvent.pointerDrag != null && pointerEvent.dragging)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
 
                 pointerEvent.dragging = false;
@@ -628,7 +628,7 @@ namespace UnityEngine.EventSystems
                 // Save the drag handler as well
                 pointerEvent.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(currentOverGo);
 
-                if (pointerEvent.pointerDrag is not null)
+                if (pointerEvent.pointerDrag != null)
                     ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
 
                 m_InputPointerEvent = pointerEvent;

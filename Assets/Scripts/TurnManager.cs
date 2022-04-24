@@ -694,7 +694,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Coroutine for fading in the status text.
     /// </summary>
-    private IEnumerator StatusTextCoroutine(string text) {
+    private IEnumerator StatusTextCoroutine(string text, bool extraDuration) {
         Color temp = statusText.color;
         // make the text invisible
         statusText.text = "";
@@ -703,7 +703,8 @@ public class TurnManager : MonoBehaviour {
         // set the status text to the desired text
         for (int i = 0; i < 10; i++) {
             statusText.text = text;
-            yield return scripts.delays[0.033f];
+            if (extraDuration) { yield return scripts.delays[0.1f]; }
+            else { yield return scripts.delays[0.033f]; }
             temp.a += 0.1f;
             statusText.color = temp;
         }
@@ -711,7 +712,8 @@ public class TurnManager : MonoBehaviour {
         yield return scripts.delays[1.5f];
         // wait 1 sec (so player has time to read)
         for (int i = 0; i < 10; i++) {
-            yield return scripts.delays[0.033f];
+            if (extraDuration) { yield return scripts.delays[0.1f]; }
+            else { yield return scripts.delays[0.033f]; }
             temp.a -= 0.1f;
             statusText.color = temp;
         }
@@ -724,7 +726,7 @@ public class TurnManager : MonoBehaviour {
     /// Update the status text.
     /// </summary>
     /// <param name="text">What to set the new status text to</param>
-    public void SetStatusText(string text) {
+    public void SetStatusText(string text, bool extraDuration = false) {
 
         // BRIEFLY GLITCHES!
 
@@ -734,7 +736,7 @@ public class TurnManager : MonoBehaviour {
             // clear the status text
             try { StopCoroutine(coroutine); } catch {}
             // stop any existing status text coroutines
-            coroutine = StartCoroutine(StatusTextCoroutine(text));
+            coroutine = StartCoroutine(StatusTextCoroutine(text, extraDuration));
             // set the status text, and allow for it to be stopped
         }
     }
@@ -933,6 +935,8 @@ public class TurnManager : MonoBehaviour {
                     // enemy is going to die
                     StartCoroutine(DoStuffForAttack("hit", "enemy", false));
                     // play sound but no animation
+                    Save.persistent.woundsInflicted++;
+                    Save.persistent.woundsInflictedArr[scripts.player.targetIndex]++;
                 }
                 else {
                     // enemy will not die
@@ -944,7 +948,7 @@ public class TurnManager : MonoBehaviour {
                     if (scripts.player.target.text.Contains("*")) {
                         SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text.Substring(1)}!");
                         Save.persistent.woundsInflicted++;
-                        Save.persistent.woundsInflictedArr[Array.IndexOf(targetArr, scripts.player.target.text.Substring(1))]++;
+                        Save.persistent.woundsInflictedArr[scripts.player.targetIndex]++;
                     }
                     else {
                         // not injured
@@ -956,7 +960,8 @@ public class TurnManager : MonoBehaviour {
                             SetStatusText($"you hit {scripts.enemy.enemyName.text.ToLower()}, damaging {scripts.player.target.text}!");
                         }
                         Save.persistent.woundsInflicted++;
-                        Save.persistent.woundsInflictedArr[Array.IndexOf(targetArr, scripts.player.target.text)]++;
+                        Save.persistent.woundsInflictedArr[scripts.player.targetIndex]++;
+                        
                         // same as above
                     }
                 }

@@ -56,10 +56,10 @@ namespace UnityEngine.UI
         {
             get
             {
-                if (font is not null && font.material is not null && font.material.mainTexture is not null)
+                if (font != null && font.material != null && font.material.mainTexture != null)
                     return font.material.mainTexture;
 
-                if (m_Material is not null)
+                if (m_Material != null)
                     return m_Material.mainTexture;
 
                 return base.mainTexture;
@@ -575,7 +575,7 @@ namespace UnityEngine.UI
 
         protected override void UpdateGeometry()
         {
-            if (font is not null)
+            if (font != null)
             {
                 base.UpdateGeometry();
             }
@@ -609,7 +609,7 @@ namespace UnityEngine.UI
             var settings = new TextGenerationSettings();
 
             settings.generationExtents = extents;
-            if (font is not null && font.dynamic)
+            if (font != null && font.dynamic)
             {
                 settings.fontSize = m_FontData.fontSize;
                 settings.resizeTextMinSize = m_FontData.minSize;

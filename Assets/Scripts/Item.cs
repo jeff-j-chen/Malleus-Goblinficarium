@@ -67,6 +67,7 @@ public class Item : MonoBehaviour {
                 if (scripts.levelManager.sub == 4 || Save.game.enemyIsDead || scripts.enemy.enemyName.text == "Tombstone" || scripts.itemManager.PlayerHas("kapala") || (scripts.tutorial != null && modifier == "nothing" && scripts.tutorial.curIndex == 2 && !scripts.tutorial.isAnimating)) {
                     // only allow dropping of items if player is trading, enemy is dead, on a tombstone, are offering to kapala, or are dropping scroll in tutorial
                     Remove(true);
+                    // scripts.soundManager.PlayClip("")
                 }
             }
         }
@@ -552,15 +553,17 @@ public class Item : MonoBehaviour {
             // if dropping the item when allowed
             if (scripts.itemManager.PlayerHas("kapala") && scripts.levelManager.sub != 4) {
                 // play add checks so that this doesn't happen multiple times a round / when dropping items after enemy has dead
-                if (itemType != "weapon") {
-                    // if the item is not the player's weapon
-                    scripts.player.SetPlayerStatusEffect("fury", true);
-                    // turn on fury
-                    scripts.turnManager.SetStatusText("deity accepts your offering... you feel furious");
-                    // notify player
-                    scripts.soundManager.PlayClip("fwoosh");
-                    // play sound clip
-                    scripts.diceSummoner.MakeAllAttachedYellow();
+                if (itemType != "weapon" && scripts.enemy.enemyName.text != "Tombstone" && !Save.game.enemyIsDead) {
+                    // if the item is not the player's weapon and the enemy is not the tombstone
+                    bool wasntAlreadyFurious = scripts.player.SetPlayerStatusEffect("fury", true);
+                    if (wasntAlreadyFurious) {
+                        // turn on fury
+                        scripts.turnManager.SetStatusText("deity accepts your offering... you feel furious");
+                        // notify player
+                        scripts.soundManager.PlayClip("fwoosh");
+                        // play sound clip
+                        scripts.diceSummoner.MakeAllAttachedYellow();
+                    }
                 }
             }
             else {
@@ -637,7 +640,7 @@ public class Item : MonoBehaviour {
             scripts.player.inventory[i].transform.position = new Vector2(scripts.player.inventory[i].transform.position.x - 1f, 3.16f);
             // shift over each item
         }
-        if (selectNew) { scripts.itemManager.Select(scripts.itemManager.curList, index, playAudio: false); }
+        if (selectNew) { scripts.itemManager.Select(scripts.itemManager.curList, index, playAudio: true); }
         // select the next item over if needed
     }
 

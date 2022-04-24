@@ -75,7 +75,7 @@ public class DiceSummoner : MonoBehaviour
             // clear the list so we have a fresh array
             GenerateDiceTypes();
             for (int i = 0; i < 6; i++) {
-                yield return scripts.delays[0.05f];
+                yield return scripts.delays[0.025f];
                 GenerateSingleDie(Random.Range(1, 7), null, "none", null, i, initialSix:true);
                 // generate the 6 base die for every round
             }

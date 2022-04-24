@@ -177,13 +177,13 @@ namespace UnityEditor.UI
                 if (EditorGUI.EndChangeCheck())
                 {
                     font = m_Font.objectReferenceValue as Font;
-                    if (font is not null && !font.dynamic)
+                    if (font != null && !font.dynamic)
                         m_FontSize.intValue = font.fontSize;
                 }
 
                 rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
                 rect.height = m_FontStyleHeight;
-                using (new EditorGUI.DisabledScope(!m_Font.hasMultipleDifferentValues && font is not null && !font.dynamic))
+                using (new EditorGUI.DisabledScope(!m_Font.hasMultipleDifferentValues && font != null && !font.dynamic))
                 {
                     EditorGUI.PropertyField(rect, m_FontStyle);
                 }

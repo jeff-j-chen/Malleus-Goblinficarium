@@ -17,14 +17,14 @@ namespace UnityEditor.UI
             {
                 Component comp = (targets[i] as Component);
                 ILayoutIgnorer ignorer = comp.GetComponent(typeof(ILayoutIgnorer)) as ILayoutIgnorer;
-                if (ignorer is not null && ignorer.ignoreLayout)
+                if (ignorer != null && ignorer.ignoreLayout)
                     continue;
 
                 RectTransform parent = comp.transform.parent as RectTransform;
-                if (parent is not null)
+                if (parent != null)
                 {
                     Behaviour layoutGroup = parent.GetComponent(typeof(ILayoutGroup)) as Behaviour;
-                    if (layoutGroup is not null && layoutGroup.enabled)
+                    if (layoutGroup != null && layoutGroup.enabled)
                     {
                         anyHaveLayoutParent = true;
                         break;

@@ -164,12 +164,12 @@ public class LevelManager : MonoBehaviour {
                     // unlock the next character and let them know if it has not yet been unlocked
                     StartCoroutine(IndicateUnlock());
                     Save.persistent.unlockedChars[Save.game.curCharNum + 1] = true;
-                    Save.persistent.successfulRuns++;
                     Save.SavePersistent();
                 }
                 else {
                     Initiate.Fade("Credits", Color.black, 2.5f);
                 }
+                Save.persistent.successfulRuns++; 
                 Save.game = new GameData();
                 if (scripts.tutorial == null) { Save.SaveGame(); }
                 // for some reason file.delete doesn't want to work here
@@ -327,9 +327,9 @@ public class LevelManager : MonoBehaviour {
                 tempColor.a -= 1f/15f;
                 boxSR.color = tempColor;
             }
-            if (toSpawn == "tombstone") { scripts.turnManager.SetStatusText("you come across a humble tombstone"); }
-            else if (toSpawn == "lich") { scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects"); }
-            else if (toSpawn == "devil") { scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck"); }
+            if (toSpawn == "tombstone") { scripts.turnManager.SetStatusText("you come across a humble tombstone", true); }
+            else if (toSpawn == "lich") { scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects", true); }
+            else if (toSpawn == "devil") { scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck", true); }
             // fade the level box back out
             scripts.itemManager.AttemptFadeTorches();
             // try to remove torches
