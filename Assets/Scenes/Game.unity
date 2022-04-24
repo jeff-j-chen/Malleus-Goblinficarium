@@ -4839,17 +4839,12 @@ PrefabInstance:
     - target: {fileID: 5461874815468008221, guid: 73464a17e02af0b4e87c1d5b8892655a,
         type: 3}
       propertyPath: m_textAlignment
-      value: 65535
+      value: 516
       objectReference: {fileID: 0}
     - target: {fileID: 5461874815468008221, guid: 73464a17e02af0b4e87c1d5b8892655a,
         type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4282400832
-      objectReference: {fileID: 0}
-    - target: {fileID: 5461874815468008221, guid: 73464a17e02af0b4e87c1d5b8892655a,
-        type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 5461874815468008221, guid: 73464a17e02af0b4e87c1d5b8892655a,
         type: 3}
@@ -4955,6 +4950,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5461874815468008222, guid: 73464a17e02af0b4e87c1d5b8892655a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 5461874815468008222, guid: 73464a17e02af0b4e87c1d5b8892655a,
         type: 3}

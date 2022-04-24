@@ -119,7 +119,7 @@ namespace UnityEditor.UI
                 // If in Prefab Mode, Canvas has to be part of Prefab contents,
                 // otherwise use Prefab root instead.
                 PrefabStage prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
-                if (prefabStage != null && !prefabStage.IsPartOfPrefabContents(parent))
+                if (prefabStage is not null && !prefabStage.IsPartOfPrefabContents(parent))
                     parent = prefabStage.prefabContentsRoot;
             }
             if (parent.GetComponentsInParent<Canvas>(true).Length == 0)
@@ -325,7 +325,7 @@ namespace UnityEditor.UI
             StageUtility.PlaceGameObjectInCurrentStage(root);
             bool customScene = false;
             PrefabStage prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
-            if (prefabStage != null)
+            if (prefabStage is not null)
             {
                 Undo.SetTransformParent(root.transform, prefabStage.prefabContentsRoot.transform, "");
                 customScene = true;
@@ -371,7 +371,7 @@ namespace UnityEditor.UI
                 Undo.RegisterCreatedObjectUndo(eventSystem, "Create " + eventSystem.name);
             }
 
-            if (select && esys != null)
+            if (select && esys is not null)
             {
                 Selection.activeGameObject = esys.gameObject;
             }
@@ -383,7 +383,7 @@ namespace UnityEditor.UI
             GameObject selectedGo = Selection.activeGameObject;
 
             // Try to find a gameobject that is the selected GO or one if its parents.
-            Canvas canvas = (selectedGo != null) ? selectedGo.GetComponentInParent<Canvas>() : null;
+            Canvas canvas = (selectedGo is not null) ? selectedGo.GetComponentInParent<Canvas>() : null;
             if (IsValidCanvas(canvas))
                 return canvas.gameObject;
 

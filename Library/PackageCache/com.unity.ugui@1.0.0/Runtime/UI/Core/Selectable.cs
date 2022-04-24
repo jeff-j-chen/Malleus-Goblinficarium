@@ -364,7 +364,7 @@ namespace UnityEngine.UI
             {
                 if (SetPropertyUtility.SetStruct(ref m_Interactable, value))
                 {
-                    if (!m_Interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
+                    if (!m_Interactable && EventSystem.current is not null && EventSystem.current.currentSelectedGameObject == gameObject)
                         EventSystem.current.SetSelectedGameObject(null);
                     OnSetProperty();
                 }
@@ -432,7 +432,7 @@ namespace UnityEngine.UI
             // to not do that :)
             var groupAllowInteraction = true;
             Transform t = transform;
-            while (t != null)
+            while (t is not null)
             {
                 t.GetComponents(m_CanvasGroupCache);
                 bool shouldBreak = false;
@@ -584,7 +584,7 @@ namespace UnityEngine.UI
             // OnSetProperty potentially access Animator or Graphics. (case 618186)
             if (isActiveAndEnabled)
             {
-                if (!interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
+                if (!interactable && EventSystem.current is not null && EventSystem.current.currentSelectedGameObject == gameObject)
                     EventSystem.current.SetSelectedGameObject(null);
                 // Need to clear out the override image on the target...
                 DoSpriteSwap(null);
@@ -801,12 +801,12 @@ namespace UnityEngine.UI
                 // Apart from runtime use, FindSelectable is used by custom editors to
                 // draw arrows between different selectables. For scene view cameras,
                 // only selectables in the same stage should be considered.
-                if (Camera.current != null && !UnityEditor.SceneManagement.StageUtility.IsGameObjectRenderedByCamera(sel.gameObject, Camera.current))
+                if (Camera.current is not null && !UnityEditor.SceneManagement.StageUtility.IsGameObjectRenderedByCamera(sel.gameObject, Camera.current))
                     continue;
 #endif
 
                 var selRect = sel.transform as RectTransform;
-                Vector3 selCenter = selRect != null ? (Vector3)selRect.rect.center : Vector3.zero;
+                Vector3 selCenter = selRect is not null ? (Vector3)selRect.rect.center : Vector3.zero;
                 Vector3 myVector = sel.transform.TransformPoint(selCenter) - pos;
 
                 // Value that is the distance out along the direction.
@@ -872,7 +872,7 @@ namespace UnityEngine.UI
         // Convenience function -- change the selection to the specified object if it's not null and happens to be active.
         void Navigate(AxisEventData eventData, Selectable sel)
         {
-            if (sel != null && sel.IsActive())
+            if (sel is not null && sel.IsActive())
                 eventData.selectedObject = sel.gameObject;
         }
 
@@ -1202,7 +1202,7 @@ namespace UnityEngine.UI
                 return;
 
             // Selection tracking
-            if (IsInteractable() && navigation.mode != Navigation.Mode.None && EventSystem.current != null)
+            if (IsInteractable() && navigation.mode != Navigation.Mode.None && EventSystem.current is not null)
                 EventSystem.current.SetSelectedGameObject(gameObject, eventData);
 
             isPointerDown = true;

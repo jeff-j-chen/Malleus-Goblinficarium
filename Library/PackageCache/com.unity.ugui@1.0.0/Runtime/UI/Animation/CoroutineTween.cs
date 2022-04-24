@@ -107,7 +107,7 @@ namespace UnityEngine.UI.CoroutineTween
 
         public bool ValidTarget()
         {
-            return m_Target != null;
+            return m_Target is not null;
         }
     }
 
@@ -178,7 +178,7 @@ namespace UnityEngine.UI.CoroutineTween
 
         public bool ValidTarget()
         {
-            return m_Target != null;
+            return m_Target is not null;
         }
     }
 
@@ -234,7 +234,7 @@ namespace UnityEngine.UI.CoroutineTween
 
         public void StopTween()
         {
-            if (m_Tween != null)
+            if (m_Tween is not null)
             {
                 m_CoroutineContainer.StopCoroutine(m_Tween);
                 m_Tween = null;

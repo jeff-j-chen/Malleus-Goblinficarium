@@ -835,7 +835,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 0}
-  border: {fileID: 0}
   dice: {fileID: 0}
   arrow: {fileID: 0}
   enemy: {fileID: 0}
@@ -853,10 +852,8 @@ MonoBehaviour:
   levelManager: {fileID: 0}
   statSummoner: {fileID: 0}
   tombstoneData: {fileID: 0}
-  mobileResizer: {fileID: 0}
   characterSelector: {fileID: 0}
   highlightCalculator: {fileID: 0}
-  mobileMode: 0
 --- !u!4 &560893086
 Transform:
   m_ObjectHideFlags: 0
@@ -1609,7 +1606,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'change
+  m_text: 'toggle
 
     difficulty'
   m_isRightToLeft: 0

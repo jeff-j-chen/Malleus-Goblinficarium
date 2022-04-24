@@ -9,8 +9,8 @@ public class StatSummoner : MonoBehaviour {
     [SerializeField] private GameObject square;
     [SerializeField] private GameObject negSquare;
     [SerializeField] private GameObject circle;
-    [SerializeField] public TextMeshProUGUI playerDebug;
-    [SerializeField] public TextMeshProUGUI enemyDebug;
+    [SerializeField] private TextMeshProUGUI playerDebug;
+    [SerializeField] private TextMeshProUGUI enemyDebug;
     private readonly float xCoord = -10.5f;
     private readonly float desktopDiceOffset = 1f;
     private readonly float mobileDiceOffset = 1f*1.5f;
@@ -393,9 +393,6 @@ public class StatSummoner : MonoBehaviour {
             // for example
             else { Debug.Log("error"); }
             scripts.enemy.TargetBest();
-            if (PlayerPrefs.GetString(scripts.DEBUG_KEY) == "on") { 
-                enemyDebug.color = Colors.disabled;
-            }
         }
     }
 

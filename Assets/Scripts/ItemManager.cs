@@ -81,7 +81,7 @@ public class ItemManager : MonoBehaviour {
         { "potion",         10 },
         { "shuriken",       6 },
         { "necklet",        6 },
-        { "skeleton_key",   3 },
+        { "skeleton_key",   4 },
         { "boots_of_dodge", 1 },
         { "helm_of_might",  1 },
         { "kapala",         1 },
@@ -762,24 +762,12 @@ public class ItemManager : MonoBehaviour {
                 int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
                 if (PlayerHasWeapon("sword") && PlayerHasLegendary()) { torchCount++; }
                 // count the number of torches, legendary sword helps find loot
-                int spawnCount = 
-                    Random.Range(torchCount == 0 ? 0 : torchCount-1, torchCount+1) 
-                    // random int based on number of torches
-                    + scripts.levelManager.level 
-                    // +1 item per level
-                    + Random.Range(-(5-scripts.levelManager.level), 1); 
-                    // randomize it a bit, tending more towards negative at lower levels
-                if (scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) {
-                    spawnCount = Mathf.Clamp(spawnCount, 0, 1);
-                    // fix the spawncount between 0 and 1 if on 1-1
-                }
-                else {
-                    spawnCount = Mathf.Clamp(spawnCount, 1, 5);
-                    // any other level, so guarantee at least 1 item, max of 5 
-                }
+                int spawnCount = Mathf.Clamp(Random.Range(1, torchCount+1) + scripts.levelManager.level + 1 + Random.Range(-2, 1), 0, 6);
+                // create a spawn count, only 5 items can be spawned
                 CreateRandomWeapon();
                 // create a random weapon at index 0
                 for (int i = 0; i < spawnCount; i++) {
+                // for (int i = 0; i < 6; i++) {
                     CreateRandomItem();
                     // create a random number of items based on the spawn count
                 }

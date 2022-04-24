@@ -28,22 +28,6 @@ public class TurnManager : MonoBehaviour {
     public GameObject dieSavedFromLastRound = null;
     public bool discardDieBecauseCourage = false;
     public bool dontRemoveLeechYet = false;
-    private List<List<int>> lenOneLookups = new List<List<int>>() { 
-        new List<int>() { 0 },
-    };
-    private List<List<int>> lenTwoLookups = new List<List<int>>() { 
-        new List<int>() { 0 },
-        new List<int>() { 1 },
-        new List<int>() { 0, 1 },
-    };
-    private List<List<int>> lenThreeLookups = new List<List<int>>() { 
-        new List<int>() { 0 },
-        new List<int>() { 1 },
-        new List<int>() { 2 },
-        new List<int>() { 0, 1 },
-        new List<int>() { 1, 2 },
-        new List<int>() { 0, 2 },
-    };
 
     private void Start() {
         scripts = FindObjectOfType<Scripts>();
@@ -123,6 +107,7 @@ public class TurnManager : MonoBehaviour {
             SetTargetOf("enemy");
             // same as above
         }
+        else { Debug.LogError("Invalid string passed in to RecalculateMax() in TurnManager.cs"); }
     }
 
     /// <summary>
@@ -295,8 +280,8 @@ public class TurnManager : MonoBehaviour {
             if (scripts.tutorial == null) { Save.SaveGame(); }
         }
         else if (playerOrEnemy == "enemy") {
-            Save.game.enemyStamina += amount;
-            scripts.enemy.staminaCounter.text = Save.game.enemyStamina.ToString();
+            scripts.enemy.stamina += amount;
+            scripts.enemy.staminaCounter.text = scripts.enemy.stamina.ToString();
             RecalculateMaxFor(playerOrEnemy);
             // same as above
         }
@@ -509,15 +494,14 @@ public class TurnManager : MonoBehaviour {
         Save.game.usedHelm = false;
         Save.game.expendedStamina = 0;
         if (scripts.tutorial == null) { Save.SaveGame(); }
-        if (scripts.enemy.enemyName.text == "Lich" && Save.game.enemyStamina < scripts.enemy.lichStamina && !Save.game.enemyIsDead) {
-            Save.game.enemyStamina = scripts.enemy.lichStamina;
+        if (scripts.enemy.enemyName.text == "Lich" && scripts.enemy.stamina < scripts.enemy.lichStamina && !Save.game.enemyIsDead) {
+            scripts.enemy.stamina = scripts.enemy.lichStamina;
             // refresh lich's stamina
             scripts.soundManager.PlayClip("blip1");
             // play sound clip
-            scripts.enemy.staminaCounter.text = Save.game.enemyStamina.ToString();
+            scripts.enemy.staminaCounter.text = scripts.enemy.stamina.ToString();
         }
         dontRemoveLeechYet = false;
-        Save.SaveGame();
         // set it to be false regardless afterwards, because we only want it to persist for 1 round
         StartCoroutine(AttemptRegenStaminaAfterDelay());
     }
@@ -1199,293 +1183,57 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     private void RunEnemyCalculations() {
         if (!scripts.enemy.woundList.Contains("hip") || scripts.enemy.enemyName.text == "Lich") {
-            // enemy cant use stamina if injured in hip, unless they are lich
             InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
-
-            // new system:
-            // show what the enemy is going to do after each move?? (maybe only on easy mode)
-            // 'buffing' means adding stamina AND moving around yellow dice as necessary
-            // have a system for locking down yellow dice if they are needed for something
-
-            // if player speed is greater
-                // if player is going to hit the enemy
-                    // if enemy can buff speed to go first
-                        // if enemy can also buff attack to successfully hit
-                            // do it
-                            // if player doesn't have armor
-                                // if enemy can target face with remaining stamina
-                                    // do it
-                            // if enemy will get hit by player
-                                // if enemy can buff defense to live
-                                    // do it
-                    // else enemy cannot buff speed to go first
-                        // if enemy is going to get hit
-                            // if enemy is at 2 wounds or player is targeting face/hip
-                                // if enemy can buff defense to prevent hit
-                                    // do it
-                            // else enemy will not be insta-killed or get hip injury
-                                // if player is targeting guts
-                                    // if enemy can hit player even with guts wound
-                                        // buff damage to do so
-                                    // else enemy cannot do so
-                                        // if enemy can buff defense to prevent hit
-                                            // do it
-                                // if player is targeting head
-                                    // if enemy can hit player even if their best red is discarded
-                                        // buff damage to do so
-                                    // else enemy cannot do so
-                                        // if enemy can buff defense to prevent hit
-                                            // do it
-                                // if player is targeting hand 
-                                    // if enemy can hit player even if their best red is discarded
-                                        // buff damage to do so
-                                    // else enemy cannot do so
-                                        // if enemy can buff defense to prevent hit
-                                            // do it
-                                // if player is targeting armpits
-                                    // if enemy can hit player even with all their red die removed
-                                        // buff damage to do so
-                                    // else enemy cannot do so
-                                        // if enemy can buff defense to prevent hit
-                                            // do it
-                                // if player doesn't have armor
-                                    // if enemy can target face with remaining stamina
-                                        // do it
-            int tempStamina = Save.game.enemyStamina;
-            // temporarily save the enemy's stamina so we can accurately calculate stamina costs
-            int addToGreen;
-            int addToBlue;
-            int addToRed;
-            int addToWhite;
-            // ints to track how much stamina needs to be moved over
-            List<Dice> moveToGreen;
-            List<Dice> moveToBlue;
-            List<Dice> moveToRed;
-            List<Dice> moveToWhite;
-            // lists to track where a list's dice will need to be moved to 
-            if (playerSpd > enemySpd) {
-                // if player speed is greater
-                if (playerAtt > enemyDef) {
-                    // if player is going to hit the enemy
-                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemySpd > playerSpd) {
-                        // if enemy can buff speed to go first
-                        moveToBlue = CalculateHowToMoveDice(playerSpd, enemySpd, true, tempStamina, out addToBlue);
-                        tempStamina -= addToBlue;
-                        if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyAtt > playerDef) {
-                            // if enemy can buff attack to hit player
-                            moveToRed = CalculateHowToMoveDice(playerDef, enemyAtt, true, tempStamina, out addToRed);
-                            tempStamina -= addToRed;  
-                            if (!scripts.itemManager.PlayerHas("armor")) {
-                                // if the player doesn't have armor, don't need to worry about dodgy here
-                                int availableAccuracy = SumOfEnemyMoveableYellowDice() + tempStamina + enemyAim;
-                                if (availableAccuracy >= 7) {
-                                    // if player can target face
-                                    moveToGreen = CalculateHowToMoveDice(7, enemyAim, false, tempStamina, out addToGreen);
-                                    tempStamina -= addToGreen;
-                                }
-                            } 
-                        }
-                        if (enemyDef < playerAtt) {
-                            // enemy will get hit 
-                            if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyDef >= playerAtt) { 
-                                // enemy can defend
-                                moveToWhite = CalculateHowToMoveDice(playerAtt, enemyDef, false, tempStamina, out addToWhite);
-                                tempStamina -= addToWhite;
-                            }
-                            // in the future, some sort of system where the enemy calculates whether it can hit something like armpits and whether the cost of doing so will be lower than straight up defending
-                        }                     
-                    }
-                    else {
-                        if (enemyDef < playerAtt) { 
-                            // enemy will get hit
-                            if (scripts.enemy.woundList.Count == 2 || scripts.player.target.text == "face" || scripts.player.target.text == "hip") { 
-                               // enemy will get killed by the player 
-                                if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyDef >= playerAtt) { 
-                                    // enemy can defend
-                                    moveToWhite = CalculateHowToMoveDice(playerAtt, enemyDef, false, tempStamina, out addToWhite);
-                                    tempStamina -= addToWhite;
-                                }
-                            }
-                            else { 
-                                // enemy will not be killed
-                                string playerTarget = scripts.player.target.text;
-                                bool willHit = false;
-                                if (playerTarget == "guts") {
-                                    int redCount = scripts.diceSummoner.CountDiceOnStat("enemy", "red", true);
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyAtt - redCount > playerDef) {
-                                        // if enemy can buff attack to hit player, even with gut wound
-                                        moveToRed = CalculateHowToMoveDice(playerDef, enemyAtt - redCount, true, tempStamina, out addToRed);
-                                        tempStamina -= addToRed;  
-                                        willHit = true;
-                                    }
-                                    int whiteCount = scripts.diceSummoner.CountDiceOnStat("enemy", "white", true);
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyDef - whiteCount >= playerAtt) { 
-                                        // enemy can defend, even with gut wound
-                                        moveToWhite = CalculateHowToMoveDice(playerAtt, enemyDef - whiteCount, false, tempStamina, out addToWhite);
-                                        tempStamina -= addToWhite;
-                                    }
-                                }
-                                else if (playerTarget == "head") {
-                                    int bestRed = scripts.diceSummoner.GetHighestDiceValueOnStat("enemy", "red");
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyAtt - bestRed > playerDef) {
-                                        // if enemy can buff attack to hit player, even with best red discarded
-                                        moveToRed = CalculateHowToMoveDice(playerDef, enemyAtt - bestRed, true, tempStamina, out addToRed);
-                                        tempStamina -= addToRed;  
-                                        willHit = true;
-                                    }
-                                    int bestWhite = scripts.diceSummoner.GetHighestDiceValueOnStat("enemy", "red");
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyDef - bestWhite >= playerAtt) { 
-                                        // enemy can defend, even with best white discarded
-                                        moveToWhite = CalculateHowToMoveDice(playerAtt, enemyDef - bestWhite, false, tempStamina, out addToWhite);
-                                        tempStamina -= addToWhite;
-                                    }
-                                }
-                                else if (playerTarget == "hand") {
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyAtt > playerDef) {
-                                        // if enemy can buff attack to hit player (hand wound does not effect attack)
-                                        moveToRed = CalculateHowToMoveDice(playerDef, enemyAtt, true, tempStamina, out addToRed);
-                                        tempStamina -= addToRed;  
-                                        willHit = true;
-                                    }
-                                    int whiteSum = scripts.diceSummoner.CountDiceOnStat("enemy", "white", false);
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyDef - whiteSum >= playerAtt) { 
-                                        // enemy can defend, even with head wound
-                                        moveToWhite = CalculateHowToMoveDice(playerAtt, enemyDef - whiteSum, false, tempStamina, out addToWhite);
-                                        tempStamina -= addToWhite;
-                                    }
-                                }
-                                else if (playerTarget == "armpits") {
-                                    int redSum = scripts.diceSummoner.CountDiceOnStat("enemy", "red", false);
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyAtt - redSum > playerDef) {
-                                        // if enemy can buff attack to hit player, even with armpit wound
-                                        moveToRed = CalculateHowToMoveDice(playerDef, enemyAtt - redSum, true, tempStamina, out addToRed);
-                                        tempStamina -= addToRed;  
-                                        willHit = true;
-                                    }
-                                    if (SumOfEnemyMoveableYellowDice() + tempStamina + enemyDef >= playerAtt) { 
-                                        // enemy can defend (armpit wound does not effect defense)
-                                        moveToWhite = CalculateHowToMoveDice(playerAtt, enemyDef, false, tempStamina, out addToWhite);
-                                        tempStamina -= addToWhite;
-                                    }
-                                }
-                                if (!scripts.itemManager.PlayerHas("armor") && willHit) {
-                                    // if the player doesn't have armor, don't need to worry about dodgy here
-                                    int availableAccuracy = SumOfEnemyMoveableYellowDice() + tempStamina + enemyAim;
-                                    if (availableAccuracy >= 7) {
-                                        // if player can target face
-                                        moveToGreen = CalculateHowToMoveDice(7, enemyAim, false, tempStamina, out addToGreen);
-                                        tempStamina -= addToGreen;
-                                    }
-                                } 
-                            }
-                        }
-                    }
-                }
+            if (enemyAtt > playerDef) {
+                // if enemy can just straight up hit the player
+                AddSpeedAndAccuracy(enemyAim, playerSpd, enemySpd, playerAtt, enemyDef);
+                // add blue and green if needed
             }
+            else if (enemyAtt <= playerDef && enemyAtt + scripts.enemy.stamina > playerDef) {
+                // if enemy can hit player with the use of stamina
+                UseEnemyStaminaOn("red", (playerDef - enemyAtt) + 1);
+                // add stamina to hit player
+                AddSpeedAndAccuracy(enemyAim, playerSpd, enemySpd, playerAtt, enemyDef);
+                // and blue and green if needed
+            }
+            if (enemyDef < playerAtt && enemyDef + scripts.enemy.stamina >= playerAtt && scripts.statSummoner.SumOfStat("green", "player") >= 0) {
+                // if enemy will be hit and can defend
+                // add stamina to defend
+                UseEnemyStaminaOn("white", playerAtt - enemyDef);
+                // TO DO: check for gut/hip/chest strike and take actions correspondingly
+            }
+            scripts.statSummoner.SetDebugInformationFor("enemy");
+            // update the debug
         }
+        Save.game.enemyStamina = scripts.enemy.stamina;
         if (scripts.tutorial == null) { Save.SaveGame(); }
     }
 
-    private int SumOfEnemyMoveableYellowDice() { 
-        // returns the sum of dice that the enemy can move around to protect itself
-        // change this to a linq statement maybe?
-        int sum = 0;
-        foreach (Dice d in GetEnemyMoveableYellowDice()) {
-            sum += d.diceNum;
+    /// <summary>
+    /// Make the enemy add stamina to green and blue to gain an advantage.
+    /// </summary>
+    private void AddSpeedAndAccuracy(int enemyAim, int playerSpd, int enemySpd, int playerAtt, int enemyDef) {
+        if (playerSpd >= enemySpd && playerAtt > enemyDef) {
+            // if player will attack first
+            if (enemySpd + scripts.enemy.stamina > playerSpd) {
+                // if enemy can attack first
+                // add speed to go first
+                UseEnemyStaminaOn("blue", (playerSpd - enemySpd) + 1);
+            }
         }
-        return sum;
+        if (enemyAim < 7 && enemyAim + scripts.enemy.stamina > 6 && !scripts.itemManager.PlayerHas("armor")) {
+            // if enemy can target face, and the player doesnt have a set of armor
+            UseEnemyStaminaOn("green", 7 - enemyAim);
+            scripts.enemy.TargetBest();
+            // add accuracy to target face
+        }
     }
-
-    private List<Dice> GetEnemyMoveableYellowDice() {
-        List<Dice> ret = new List<Dice>();
-        foreach (GameObject g in scripts.diceSummoner.existingDice) {
-            // for every existing gameobject
-            Dice dice = g.GetComponent<Dice>();
-            if (dice.diceType == "yellow" && dice.isOnPlayerOrEnemy == "enemy" && !dice.lockedByEnemy) {
-                // if the dice is on the enemy, yellow, and has not yet been locked
-                ret.Add(dice);
-            }
-        }
-        return ret;
-    }
-
-    private List<Dice> CalculateHowToMoveDice(int playerStat, int enemyStat, bool needsToExceed, int tempStamina, out int staminaExpended) { 
-        // returns a list of dice to be moved to the enemy stat
-        staminaExpended = 0;
-        List<Dice> toBeMoved = new List<Dice>();
-        List<Dice> moveable = new List<Dice>();
-        if (SumOfEnemyMoveableYellowDice() == 0) { return toBeMoved; }
-        // if there are no yellow dice to be moved, we obviously cant move anything over
-        if (needsToExceed) { playerStat++; }
-        // if the enemy's stat must exceed that of the player (i.e. when attacking or speeding), just run calculations with the player's stat as one higher
-        if (enemyStat + tempStamina >= playerStat) {
-            // stamina alone is enough to override the player's stat
-            staminaExpended = (playerStat - enemyStat);
-            // take out the temporary stamina for further calculations
-        }
-        else { 
-            if (moveable.Count == 1) {
-                // 1 moveable dice, so only option is to add it
-                if (moveable[0].diceNum + enemyStat < playerStat) {
-                    // cant do it without stamina
-                    staminaExpended = (playerStat - enemyStat - moveable[0].diceNum);
-                }
-                toBeMoved.Add(moveable[0]);
-                moveable[0].lockedByEnemy = true;
-            }
-            else if (moveable.Count == 2) {
-                int sum0 = moveable[0].diceNum + enemyStat;
-                int sum1 = moveable[1].diceNum + enemyStat;
-                if (sum0 >= playerStat && sum1 >= playerStat) { 
-                    // both of them are greater, without the need of stamina
-                    if (sum0 > sum1) { 
-                        toBeMoved.Add(moveable[1]);
-                        moveable[1].lockedByEnemy = true;
-                    }
-                    else { 
-                        toBeMoved.Add(moveable[0]);
-                        moveable[0].lockedByEnemy = true;
-                    }
-                    // move the one over that will have the smallest value
-                }
-                else {
-                    // stamina needs to be added
-                    sum0 = moveable[0].diceNum + enemyStat + tempStamina;
-                    sum1 = moveable[1].diceNum + enemyStat + tempStamina;
-                    if (sum0 >= playerStat) {
-                        staminaExpended = (playerStat - (enemyStat + moveable[0].diceNum));
-                        toBeMoved.Add(moveable[0]);
-                        moveable[0].lockedByEnemy = true;
-                    }
-                    else if (sum1 >= playerStat) {
-                        staminaExpended = (playerStat - (enemyStat + moveable[1].diceNum));
-                        toBeMoved.Add(moveable[1]);
-                        moveable[1].lockedByEnemy = true;
-                    }
-                    // either one the dice + stamina is enough to override
-                    else {
-                        staminaExpended = (playerStat - (enemyStat + moveable[0].diceNum + moveable[1].diceNum));
-                        toBeMoved.AddRange(moveable);
-                        moveable[1].lockedByEnemy = true;
-                        moveable[0].lockedByEnemy = true;
-                    }
-                    // all three dice need to be added
-                }
-            }
-            else { // 3 or more (basically will never happen)
-
-            }
-        }
-        return toBeMoved;
-    }
-
-
 
     /// <summary>
     /// Make the enemy use stamina on a given stat.
     /// </summary>
     private void UseEnemyStaminaOn(string stat, int amount) {
-        if (Save.game.enemyStamina >= amount) {
+        if (scripts.enemy.stamina >= amount) {
             scripts.statSummoner.addedEnemyStamina[stat] += amount;
             // incrase stat
             scripts.turnManager.ChangeStaminaOf("enemy", -amount);

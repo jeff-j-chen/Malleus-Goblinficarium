@@ -20,6 +20,7 @@ public class Enemy : MonoBehaviour {
     public Dictionary<string, int> stats;
     private readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone" };
     private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
+    public int stamina = 1;
     public int targetIndex = 0;
     private readonly Vector2 basePosition = new(1.9f, -1.866667f);
     private readonly Vector2 iconPosition = new(6.16667f, 3.333333f);
@@ -116,22 +117,16 @@ public class Enemy : MonoBehaviour {
     public void TargetBest() {
         // could change this later so that it prioritizes certain wounds rather than just aiming for the highest wound
         targetIndex = 7;
-        // start at the end of the array of targetables
+        // start at the end of the array of targetbales
         // for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 6); i >= 0; i--) {
         for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7); i >= 0; i--) {
+            // print($"enemy target starting at its accuracy stat, {Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7)}");
            // iterating through the array backwards
             if (!scripts.player.woundList.Contains(scripts.turnManager.targetArr[i])) {
                 // if the player does not have the wound
-                if (i == 3 && Save.game.curCharNum == 1 && scripts.player.woundList.Count < 2) {
-                    // if targeting hip, attacking char 2 (cant use stamina), and this isn't the 3rd wound
-                    continue;
-                    // dont do anything, so that we target a wound other than hip (which in this case would be useless)
-                }
-                else {
-                    targetIndex = i;
-                    break;
-                    // set target index and break
-                }
+                targetIndex = i;
+                break;
+                // set target index and break
             }
         }
         if (targetIndex == 7 && scripts.statSummoner.SumOfStat("green", "enemy") < 7) { targetIndex = 0; }
@@ -245,19 +240,20 @@ public class Enemy : MonoBehaviour {
             enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
             // set the name, when spawning the cloaked just set it to be "Devil"
             if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") {
-                Save.game.enemyStamina = 0;
+                stamina = 0;
                 // tombstone and merchant don't have stamina
             }
             else if (enemyArr[enemyNum] == "Lich") {
                 // if lich, has 3 stamina by default
-                Save.game.enemyStamina = lichStamina;
+                stamina = lichStamina;
             }
             else {
                 // normal enemy 
-                Save.game.enemyStamina = givenStamina[$"{scripts.levelManager.level}{scripts.levelManager.sub}"];
+                stamina = givenStamina[$"{scripts.levelManager.level}{scripts.levelManager.sub}"];
                 // assign stamina based on level and sub
             }
             woundList.Clear();
+            Save.game.enemyStamina = stamina;
             Save.SaveGame();
         }
         else { 
@@ -293,12 +289,13 @@ public class Enemy : MonoBehaviour {
             // devil and tombstone have special positions
             enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
             // devil should only be called 'cloaked', not devil
-            if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { Save.game.enemyStamina = 0; }
-            else if (enemyArr[enemyNum] == "Lich") { Save.game.enemyStamina = 3; }
+            if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { stamina = 0; }
+            else if (enemyArr[enemyNum] == "Lich") { stamina = 3; }
+            else { stamina = Save.game.enemyStamina; }
             woundList = Save.game.enemyWounds;
             // set stamina, show wounds and name
         }
-        staminaCounter.text = Save.game.enemyStamina.ToString();
+        staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
         try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
         try { scripts.turnManager.DisplayWounds(); } catch {}
