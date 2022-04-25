@@ -1043,4 +1043,4 @@ ScriptsOnlyBuild:
   - Assets/Scenes/CharSelect.unity
   - Assets/Scenes/Statistics.unity
   - Assets/Scenes/Tutorial.unity
-  playerPath: /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Builds/malleus_linux/malleus_linux.x86_64
+  playerPath: /home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Builds/malleus_linux.x86_64

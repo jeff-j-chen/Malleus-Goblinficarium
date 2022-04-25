@@ -5,8 +5,8 @@ dependencies {
     }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 30
+    buildToolsVersion '30.0.2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 29
+        targetSdkVersion 30
         applicationId 'com.JeffChen.MalleusGoblinficarium'
         ndk {
             abiFilters 'armeabi-v7a'

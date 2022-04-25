@@ -8,12 +8,12 @@
         "source": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png"
     },
     {
-        "merged": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/build/intermediates/res/merged/release/mipmap-xxhdpi_app_icon_round.png.flat",
-        "source": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/src/main/res/mipmap-xxhdpi/app_icon_round.png"
-    },
-    {
         "merged": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/build/intermediates/res/merged/release/mipmap-ldpi_ic_launcher_foreground.png.flat",
         "source": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/src/main/res/mipmap-ldpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/build/intermediates/res/merged/release/mipmap-xxhdpi_app_icon_round.png.flat",
+        "source": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/src/main/res/mipmap-xxhdpi/app_icon_round.png"
     },
     {
         "merged": "/home/jeff/Documents/Unity Projects/Malleus-Goblinficarium/Library/Android/Prj/Mono2x/Gradle/launcher/build/intermediates/res/merged/release/mipmap-hdpi_app_icon_round.png.flat",

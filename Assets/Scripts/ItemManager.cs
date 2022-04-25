@@ -330,7 +330,7 @@ public class ItemManager : MonoBehaviour {
                 }
                 case 1: {
                     if (Save.persistent.gameDifficulty == "hard") {
-                        CreateWeaponWithStats("maul", "rusty", -1, -1, 1, -1);
+                        CreateWeaponWithStats("maul", "rusty", -1, -1, 0, -1);
                     }
                     else { 
                         CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
