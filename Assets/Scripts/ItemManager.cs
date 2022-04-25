@@ -815,6 +815,10 @@ public class ItemManager : MonoBehaviour {
                     spawnCount -= UnityEngine.Random.Range(0, scripts.levelManager.level-1);
                     spawnCount = Mathf.Clamp(spawnCount, 0, 3);
                 }
+                if (scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) { 
+                    spawnCount = 1;
+                    // make sure that first kill always drops an item
+                }
                 CreateRandomWeapon();
                 // create a random weapon at index 0
                 for (int i = 0; i < spawnCount; i++) {
