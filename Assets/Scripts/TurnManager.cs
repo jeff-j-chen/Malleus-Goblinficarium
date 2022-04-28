@@ -703,17 +703,20 @@ public class TurnManager : MonoBehaviour {
         // set the status text to the desired text
         for (int i = 0; i < 10; i++) {
             statusText.text = text;
-            if (extraDuration) { yield return scripts.delays[0.1f]; }
-            else { yield return scripts.delays[0.033f]; }
+            yield return scripts.delays[0.033f];
             temp.a += 0.1f;
             statusText.color = temp;
         }
         // fade in
-        yield return scripts.delays[1.5f];
+        if (extraDuration) { 
+            yield return scripts.delays[3f];
+        }
+        else { 
+            yield return scripts.delays[1.5f];
+        }
         // wait 1 sec (so player has time to read)
         for (int i = 0; i < 10; i++) {
-            if (extraDuration) { yield return scripts.delays[0.1f]; }
-            else { yield return scripts.delays[0.033f]; }
+            yield return scripts.delays[0.033f];
             temp.a -= 0.1f;
             statusText.color = temp;
         }
