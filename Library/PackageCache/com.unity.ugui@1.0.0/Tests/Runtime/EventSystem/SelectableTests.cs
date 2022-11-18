@@ -356,7 +356,7 @@ namespace UnityEngine.UI.Tests
         }
 
         [Test]
-        public void PointerEnterOnSelectedObjectShouldHighlight()
+        public void PointerEnterOnSelectedObjectShouldStaySelected()
         {
             selectable.InvokeOnSelect(null);
             Assert.True(selectable.isStateSelected);
@@ -364,7 +364,7 @@ namespace UnityEngine.UI.Tests
             {
                 pointerEnter = selectable.gameObject
             });
-            Assert.True(selectable.isStateHighlighted);
+            Assert.True(selectable.isStateSelected);
         }
 
         [Test]
