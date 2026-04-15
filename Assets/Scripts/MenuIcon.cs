@@ -20,33 +20,33 @@ public class MenuIcon : MonoBehaviour {
     private SpriteRenderer hintsSR;
     private SpriteRenderer musicSR;
     private SpriteRenderer buttonsSR;
-    private Scripts scripts;
+    private Scripts s;
     public GameObject[] menuIconOrdering;
     public GameObject[] menuIconTextOrdering;
     
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         debugSR = debug.GetComponent<SpriteRenderer>();
         hintsSR = hints.GetComponent<SpriteRenderer>();
         soundsSR = sound.GetComponent<SpriteRenderer>();
         musicSR = music.GetComponent<SpriteRenderer>();
         buttonsSR = buttons.GetComponent<SpriteRenderer>();
         // get the necessary components and colors
-        if(!PlayerPrefs.HasKey(scripts.DEBUG_KEY)) PlayerPrefs.SetString(scripts.DEBUG_KEY, "on");
-        if(!PlayerPrefs.HasKey(scripts.HINTS_KEY)) PlayerPrefs.SetString(scripts.HINTS_KEY, "on");
-        if(!PlayerPrefs.HasKey(scripts.SOUNDS_KEY)) PlayerPrefs.SetString(scripts.SOUNDS_KEY, "on");
-        if(!PlayerPrefs.HasKey(scripts.MUSIC_KEY)) PlayerPrefs.SetString(scripts.MUSIC_KEY, "on");
-        if(!PlayerPrefs.HasKey(scripts.BUTTONS_KEY)) PlayerPrefs.SetString(scripts.BUTTONS_KEY, "off");
+        if(!PlayerPrefs.HasKey(s.DEBUG_KEY)) PlayerPrefs.SetString(s.DEBUG_KEY, "on");
+        if(!PlayerPrefs.HasKey(s.HINTS_KEY)) PlayerPrefs.SetString(s.HINTS_KEY, "on");
+        if(!PlayerPrefs.HasKey(s.SOUNDS_KEY)) PlayerPrefs.SetString(s.SOUNDS_KEY, "on");
+        if(!PlayerPrefs.HasKey(s.MUSIC_KEY)) PlayerPrefs.SetString(s.MUSIC_KEY, "on");
+        if(!PlayerPrefs.HasKey(s.BUTTONS_KEY)) PlayerPrefs.SetString(s.BUTTONS_KEY, "off");
         // set defaults for settings if they dont already exist
-        PlayerPrefSetter(scripts.DEBUG_KEY, debugSR, false);
-        PlayerPrefSetter(scripts.HINTS_KEY, hintsSR, false);
-        PlayerPrefSetter(scripts.SOUNDS_KEY, soundsSR, false);
-        PlayerPrefSetter(scripts.MUSIC_KEY, musicSR, false);
-        PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR, false);
+        PlayerPrefSetter(s.DEBUG_KEY, debugSR, false);
+        PlayerPrefSetter(s.HINTS_KEY, hintsSR, false);
+        PlayerPrefSetter(s.SOUNDS_KEY, soundsSR, false);
+        PlayerPrefSetter(s.MUSIC_KEY, musicSR, false);
+        PlayerPrefSetter(s.BUTTONS_KEY, buttonsSR, false);
         // then set the icons
         if (SystemInfo.deviceType == DeviceType.Handheld || Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer) {
-            PlayerPrefs.SetString(scripts.BUTTONS_KEY, "on");
-            PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR, false);
+            PlayerPrefs.SetString(s.BUTTONS_KEY, "on");
+            PlayerPrefSetter(s.BUTTONS_KEY, buttonsSR, false);
             // mobile devices always have buttons
         }
         // set the default preferences
@@ -54,16 +54,16 @@ public class MenuIcon : MonoBehaviour {
     }
 
     private IEnumerator FindMusicLate() { 
-        yield return scripts.delays[0.25f];
+        yield return s.delays[0.25f];
         musicPlayer = FindObjectOfType<Music>().GetComponent<AudioSource>();
     }
 
     private void Update() {
-        if (Input.GetKeyDown("d")) { PlayerPrefSetter(scripts.DEBUG_KEY, debugSR); }
-        else if (Input.GetKeyDown("h")) { PlayerPrefSetter(scripts.HINTS_KEY, hintsSR); }
-        else if (Input.GetKeyDown("s")) { PlayerPrefSetter(scripts.SOUNDS_KEY, soundsSR); }
-        else if (Input.GetKeyDown("m")) { PlayerPrefSetter(scripts.MUSIC_KEY, musicSR); }
-        else if (Input.GetKeyDown("b")) { PlayerPrefSetter(scripts.BUTTONS_KEY, buttonsSR); }
+        if (Input.GetKeyDown("d")) { PlayerPrefSetter(s.DEBUG_KEY, debugSR); }
+        else if (Input.GetKeyDown("h")) { PlayerPrefSetter(s.HINTS_KEY, hintsSR); }
+        else if (Input.GetKeyDown("s")) { PlayerPrefSetter(s.SOUNDS_KEY, soundsSR); }
+        else if (Input.GetKeyDown("m")) { PlayerPrefSetter(s.MUSIC_KEY, musicSR); }
+        else if (Input.GetKeyDown("b")) { PlayerPrefSetter(s.BUTTONS_KEY, buttonsSR); }
     }
     // toggle player preferences based on the keys pressed
 
@@ -99,11 +99,11 @@ public class MenuIcon : MonoBehaviour {
     private void TurnOn(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = Color.white;
         // make the icon white
-        if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 1f; }
-        else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0.5f; }
-        else if (key == scripts.BUTTONS_KEY) { 
-            scripts.mobileResizer.FlipMenuIconMode();
-            scripts.arrow = FindObjectOfType<Arrow>();
+        if (key == s.SOUNDS_KEY) { sfxPlayer.volume = 1f; }
+        else if (key == s.MUSIC_KEY) { musicPlayer.volume = 0.5f; }
+        else if (key == s.BUTTONS_KEY) { 
+            s.mobileResizer.FlipMenuIconMode();
+            s.arrow = FindObjectOfType<Arrow>();
         }
     }
 
@@ -113,11 +113,11 @@ public class MenuIcon : MonoBehaviour {
     private void TurnOff(string key, SpriteRenderer spriteRenderer) {
         spriteRenderer.color = Colors.disabled;
         // make the icon gray
-        if (key == scripts.SOUNDS_KEY) { sfxPlayer.volume = 0f; }
-        else if (key == scripts.MUSIC_KEY) { musicPlayer.volume = 0f; }
-        else if (key == scripts.BUTTONS_KEY) { 
-            scripts.mobileResizer.FlipMenuIconMode();
-            scripts.arrow = FindObjectOfType<Arrow>();
+        if (key == s.SOUNDS_KEY) { sfxPlayer.volume = 0f; }
+        else if (key == s.MUSIC_KEY) { musicPlayer.volume = 0f; }
+        else if (key == s.BUTTONS_KEY) { 
+            s.mobileResizer.FlipMenuIconMode();
+            s.arrow = FindObjectOfType<Arrow>();
         }
     }
 }

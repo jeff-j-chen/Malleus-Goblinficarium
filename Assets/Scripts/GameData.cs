@@ -7,6 +7,10 @@ public class GameData {
     public string[] floorItemNames;
     public string[] floorItemTypes;
     public string[] floorItemMods;
+    public int[] floorItemAccs;
+    public int[] floorItemSpds;
+    public int[] floorItemDmgs;
+    public int[] floorItemDefs;
     public string[] resumeItemNames;
     public string[] resumeItemTypes;
     public string[] resumeItemMods;
@@ -45,6 +49,7 @@ public class GameData {
     public bool isCourageous;
     public int expendedStamina;
     public int numItemsDroppedForTrade;
+    public bool blacksmithHasForged;
     public int discardableDieCounter;
     public bool enemyIsDead;
     public int enemyAcc;
@@ -58,6 +63,10 @@ public class GameData {
         floorItemNames = new string[9];
         floorItemTypes = new string[9];
         floorItemMods = new string[9];
+        floorItemAccs = new int[9];
+        floorItemSpds = new int[9];
+        floorItemDmgs = new int[9];
+        floorItemDefs = new int[9];
         resumeItemNames = new string[9];
         resumeItemTypes = new string[9];
         resumeItemMods = new string[9];
@@ -96,11 +105,33 @@ public class GameData {
         isCourageous = false;
         expendedStamina = 0;
         numItemsDroppedForTrade = 0;
+        blacksmithHasForged = false;
         discardableDieCounter = 0;
         enemyIsDead = false;
         enemyAcc = 0;
         enemySpd = 0;
         enemyDmg = 0;
         enemyDef = 0;
+    }
+
+    public void Normalize() {
+        floorItemNames ??= new string[9];
+        floorItemTypes ??= new string[9];
+        floorItemMods ??= new string[9];
+        resumeItemNames ??= new string[9];
+        resumeItemTypes ??= new string[9];
+        resumeItemMods ??= new string[9];
+
+        if (floorItemAccs == null || floorItemAccs.Length != 9) { floorItemAccs = new int[9]; }
+        if (floorItemSpds == null || floorItemSpds.Length != 9) { floorItemSpds = new int[9]; }
+        if (floorItemDmgs == null || floorItemDmgs.Length != 9) { floorItemDmgs = new int[9]; }
+        if (floorItemDefs == null || floorItemDefs.Length != 9) { floorItemDefs = new int[9]; }
+
+        if (floorItemTypes.Length > 0 && floorItemTypes[0] == "weapon" && floorItemAccs[0] == 0 && floorItemSpds[0] == 0 && floorItemDmgs[0] == 0 && floorItemDefs[0] == 0) {
+            floorItemAccs[0] = floorAcc;
+            floorItemSpds[0] = floorSpd;
+            floorItemDmgs[0] = floorDmg;
+            floorItemDefs[0] = floorDef;
+        }
     }
 }

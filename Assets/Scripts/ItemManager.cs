@@ -173,6 +173,7 @@ public class ItemManager : MonoBehaviour {
         {"defiled kapala",     ""}, 
         {"flail",              "start with red die"}, 
         {"legendary flail",    "start with two red die"}, 
+        {"forge",              ""},
         {"hatchet",            "enemy can't choose yellow die"},  
         {"legendary hatchet",  "start with yellow die"},  
         {"helm of might",      "pay 3 stamina to gain a yellow die"}, 
@@ -200,6 +201,10 @@ public class ItemManager : MonoBehaviour {
         {"legendary spear",    "your speed is always higher than enemy's"}, 
         {"steak",              "5"}, 
         {"sword",              ""}, 
+        {"upgrade accuracy",   "forge +1 accuracy"},
+        {"upgrade speed",      "forge +1 speed"},
+        {"upgrade damage",     "forge +1 damage"},
+        {"upgrade parry",      "forge +1 parry"},
         {"legendary sword",    "find more loot"}, 
         {"torch",              "find more loot"} 
     };
@@ -212,15 +217,59 @@ public class ItemManager : MonoBehaviour {
     private Sprite[] allSprites;
     public float itemSpacing = 1f;
     public float itemY = -5.3f;
-    private Scripts scripts;
+    private Scripts s;
     public int col = 0;
     public List<GameObject> curList;
     public bool isCharSelect = false;
 
+    public bool IsMerchantEncounter() {
+        return s != null && s.enemy != null && s.enemy.enemyName.text == "Merchant";
+    }
+
+    public bool IsBlacksmithEncounter() {
+        return s != null && s.enemy != null && s.enemy.enemyName.text == "Blacksmith";
+    }
+
+    public bool IsVendorEncounter() {
+        return IsMerchantEncounter() || IsBlacksmithEncounter();
+    }
+
+    public bool IsUpgradeArrow(Item curItem) {
+        return curItem != null && curItem.itemType == "upgrade";
+    }
+
+    public string GetForgeDescription(string stat) {
+        return $"+1 {stat}";
+    }
+
+    public void UpdateVendorUIForSelection(GameObject selectedItem = null) {
+        if (s?.enemy == null || !IsVendorEncounter()) { return; }
+
+        if (IsBlacksmithEncounter() && selectedItem != null && floorItems.Contains(selectedItem)) {
+            Item curItem = selectedItem.GetComponent<Item>();
+            if (curItem != null) {
+                if (curItem.itemType == "weapon") {
+                    s.enemy.target.text = "exchange";
+                    s.enemy.woundGUIElement.text = "[no wounds]";
+                    return;
+                }
+
+                if (IsUpgradeArrow(curItem)) {
+                    s.enemy.target.text = "forge";
+                    s.enemy.woundGUIElement.text = "[no wounds]";
+                    return;
+                }
+            }
+        }
+
+        s.enemy.target.text = "bargain";
+        s.enemy.woundGUIElement.text = "[no wounds]";
+    }
+
     private void Start() {
         allSprites = itemSprites.ToArray().Concat(weaponSprites.ToArray()).Concat(otherSprites.ToArray()).ToArray();
         // create a list containing all of the sprites
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         itemDropTable = new List<string>();
         foreach (KeyValuePair<string, int> entry in itemDropDict) {
             for (int i = 0; i < entry.Value; i++) { itemDropTable.Add(entry.Key); }
@@ -244,7 +293,7 @@ public class ItemManager : MonoBehaviour {
         else {
             // in game
             lootText.text = "";
-            curList = scripts.player.inventory;
+            curList = s.player.inventory;
             // assign the curlist variable for item selection navigation
             // need to implement a check if continuing or new game
         }
@@ -280,8 +329,8 @@ public class ItemManager : MonoBehaviour {
         // if pressing one of the ctrl keys
         if (!isCharSelect) {
             // if not in char select scene
-            if (curList == scripts.player.inventory) { Select(floorItems, 0); }
-            else if (curList == floorItems) { Select(scripts.player.inventory, 0); }
+            if (curList == s.player.inventory) { Select(floorItems, 0); }
+            else if (curList == floorItems) { Select(s.player.inventory, 0); }
             // swap the curList (used for selection) to the other
             // else { print("invalid list to select from"); }
             // something is wrong here
@@ -292,7 +341,7 @@ public class ItemManager : MonoBehaviour {
     public void SelectLeft() { Select(curList, col - 1, false); }
     public void SelectRight() { Select(curList, col + 1, false); }
     public void UseCurrentItem() { 
-        if (scripts.turnManager != null && !scripts.turnManager.isMoving && !isCharSelect) {
+        if (s.turnManager != null && !s.turnManager.isMoving && !isCharSelect) {
             // if not moving and in game
             highlightedItem.GetComponent<Item>().Use();
             // use the item
@@ -306,11 +355,13 @@ public class ItemManager : MonoBehaviour {
     /// Give the player their starting items, based on chosen class.
     /// </summary>
     public void GiveStarterItems() {
-        if (Save.game.newGame) { 
+        if (Save.game.newGame) {
+            bool getsStandardExtras = !DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty);
+            bool isEasy = DifficultyHelper.IsEasy(Save.persistent.gameDifficulty);
             switch (Save.game.curCharNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    if (Save.persistent.gameDifficulty == "hard") {
+                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                         CreateWeaponWithStats("sword", "rusty", 1, 0, 0, 1);
                     }
                     else { 
@@ -318,65 +369,65 @@ public class ItemManager : MonoBehaviour {
                     }
                     // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
-                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                    if (getsStandardExtras) {
                         CreateItem("steak");
                         MoveToInventory(0, true, false, false);
                     }
-                    if (Save.persistent.gameDifficulty == "easy") { 
+                    if (isEasy) {
                         CreateItem("torch");
                         MoveToInventory(0, true, false, false);
                     }
                     break;
                 }
                 case 1: {
-                    if (Save.persistent.gameDifficulty == "hard") {
+                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                         CreateWeaponWithStats("maul", "rusty", -1, -1, 0, -1);
                     }
                     else { 
                         CreateWeaponWithStats("maul", "common", -1, -1, 3, 1);
                     }
                     MoveToInventory(0, true, false, false);
-                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                    if (getsStandardExtras) {
                         CreateItem("armor");
                         MoveToInventory(0, true, false, false);
                     }
-                    if (Save.persistent.gameDifficulty == "easy") {
+                    if (isEasy) {
                         CreateItem("helm_of_might");
                         MoveToInventory(0, true, false, false);
                     }
                     break;
                 }
                 case 2: {
-                    if (Save.persistent.gameDifficulty == "hard") {
+                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                         CreateWeaponWithStats("dagger", "rusty", 1, 2, 0, 0);
                     }
                     else { 
                         CreateWeaponWithStats("dagger", "common", 2, 5, 0, 0);
                     }
                     MoveToInventory(0, true, false, false);
-                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                    if (getsStandardExtras) {
                         CreateItem("boots_of_dodge");
                         MoveToInventory(0, true, false, false);
                     }
-                    if (Save.persistent.gameDifficulty == "easy") { 
+                    if (isEasy) {
                         CreateItem("ankh");
                         MoveToInventory(0, true, false, false);
                     }
                     break;
                 }
                 case 3: {
-                    if (Save.persistent.gameDifficulty == "hard") {
+                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                         CreateWeaponWithStats("mace", "rusty", 1, 0, -1, -1);
                     }
                     else { 
                         CreateWeaponWithStats("mace", "ruthless", 2, 2, 1, 0);
                     }
                     MoveToInventory(0, true, false, false);
-                    if (Save.persistent.gameDifficulty == "normal" || Save.persistent.gameDifficulty == "easy") {
+                    if (getsStandardExtras) {
                         CreateItem("cheese");
                         MoveToInventory(0, true, false, false);
                     }
-                    if (Save.persistent.gameDifficulty == "easy") { 
+                    if (isEasy) {
                         CreateItem("kapala");
                         MoveToInventory(0, true, false, false);
                     }
@@ -436,9 +487,9 @@ public class ItemManager : MonoBehaviour {
                 }
                 else {
                     // player only has weapon
-                    if (scripts.player != null) { 
-                        scripts.player.inventory[0].GetComponent<Item>().Select(); 
-                        curList = scripts.player.inventory;
+                    if (s.player != null) { 
+                        s.player.inventory[0].GetComponent<Item>().Select(); 
+                        curList = s.player.inventory;
                     }
                     else { 
                         floorItems[0].GetComponent<Item>().Select(); 
@@ -545,11 +596,11 @@ public class ItemManager : MonoBehaviour {
     /// <summary>
     /// Create a weapon with randomized modifier and stats. Use to generate a weapon when the player slays the enemy.
     /// </summary>
-    private void CreateRandomWeapon() {
+    private GameObject CreateRandomWeapon(int negativeOffset = 0, string forcedWeaponName = null) {
         Dictionary<string, int> baseWeapon = new() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
-        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + floorItems.Count * itemSpacing, itemY), Quaternion.identity);
+        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
         // instantiate the item
-        int rand = Random.Range(0, weaponNames.Length);
+        int rand = forcedWeaponName == null ? Random.Range(0, weaponNames.Length) : System.Array.IndexOf(weaponNames, forcedWeaponName);
         // get a random variable of which we will pull weapon information from
         instantiatedItem.GetComponent<SpriteRenderer>().sprite = weaponSprites[rand];
         // get the sprite from the random number
@@ -581,11 +632,8 @@ public class ItemManager : MonoBehaviour {
         // assign the weapon stats to the weapon
         floorItems.Add(instantiatedItem);
         // add the item to the array
-        Save.game.floorAcc = baseWeapon["green"];
-        Save.game.floorSpd = baseWeapon["blue"];
-        Save.game.floorDmg = baseWeapon["red"];
-        Save.game.floorDef = baseWeapon["white"];
-        if (scripts.tutorial == null) { Save.SaveGame(); }
+        if (s.tutorial == null) { Save.SaveGame(); }
+        return instantiatedItem;
     }
 
     /// <summary>
@@ -616,6 +664,69 @@ public class ItemManager : MonoBehaviour {
         return instantiatedItem;
     }
 
+    public GameObject CreateSmithUpgradeArrow(string stat, int negativeOffset = 0) {
+        GameObject instantiatedItem = Instantiate(item, new Vector2(-2.75f + (floorItems.Count - negativeOffset) * itemSpacing, itemY), Quaternion.identity);
+        instantiatedItem.GetComponent<SpriteRenderer>().sprite = GetItemSprite("forge");
+        instantiatedItem.transform.parent = gameObject.transform;
+        Item itemScript = instantiatedItem.GetComponent<Item>();
+        itemScript.itemName = "forge";
+        itemScript.itemType = "upgrade";
+        itemScript.modifier = stat;
+        floorItems.Add(instantiatedItem);
+        return instantiatedItem;
+    }
+
+    public GameObject CreateSavedFloorItem(string itemName, string itemType, string modifier, int aim, int spd, int atk, int def) {
+        if (itemName == null || itemName == "") { return null; }
+
+        if (itemType == "weapon") {
+            return CreateWeaponWithStats(itemName, modifier, aim, spd, atk, def);
+        }
+
+        if (itemType == "upgrade") {
+            return CreateSmithUpgradeArrow(modifier == "" ? itemName.Replace("upgrade ", "") : modifier);
+        }
+
+        return CreateItem(itemName.Replace(' ', '_'), modifier);
+    }
+
+    public void RemoveFloorItemAt(int index, bool saveData = true) {
+        Destroy(floorItems[index]);
+        floorItems.RemoveAt(index);
+        for (int i = index; i < floorItems.Count; i++) {
+            floorItems[i].transform.position = new Vector2(-2.75f + i * itemSpacing, itemY);
+        }
+        if (floorItems.Count > 0) { Select(floorItems, Mathf.Clamp(index, 0, floorItems.Count - 1), playAudio:false); }
+        else { Select(s.player.inventory, 0, playAudio:false); }
+        if (saveData) { SaveFloorItems(); }
+    }
+
+    public void ForgePlayerWeapon(string statName) {
+        Item weapon = s.player.inventory[0].GetComponent<Item>();
+        string statColor = statName switch {
+            "accuracy" => "green",
+            "speed" => "blue",
+            "damage" => "red",
+            _ => "white"
+        };
+
+        weapon.weaponStats[statColor]++;
+        if (weapon.modifier != "legendary") {
+            weapon.modifier = "forged";
+            weapon.itemName = $"forged {weapon.itemName.Split(' ')[1]}";
+        }
+
+        s.player.stats = weapon.weaponStats;
+        Save.game.resumeAcc = s.player.stats["green"];
+        Save.game.resumeSpd = s.player.stats["blue"];
+        Save.game.resumeDmg = s.player.stats["red"];
+        Save.game.resumeDef = s.player.stats["white"];
+        Save.game.blacksmithHasForged = true;
+        s.statSummoner.SummonStats();
+        s.statSummoner.SetDebugInformationFor("player");
+        SaveInventoryItems();
+    }
+
     /// <summary>
     /// Move the item at index 0 from the floor to the display in the character selection screen.
     /// </summary>
@@ -637,50 +748,57 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     public void MoveToInventory(int index, bool starter=false, bool playAudio=true, bool saveData=true) {
         if (floorItems[index] != null) {
-            if (scripts.player.inventory.Count < 7 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
-                // if the player doesn't have 7 or more items or is trying to pick up weapon 
-                if (!starter && playAudio) { scripts.soundManager.PlayClip("click0"); }
+            if (s.player.inventory.Count < 8 || floorItems[index].GetComponent<Item>().itemType == "weapon") {
+                // if the player doesn't have 8 or more items or is trying to pick up weapon 
+                if (!starter && playAudio) { s.soundManager.PlayClip("click0"); }
                 // if the item is not the starter (so it doesn't instantly play a click), play the click sound
                 if (floorItems[index].GetComponent<Item>().itemType == "weapon") { 
-                    if (Save.persistent.gameDifficulty == "hard" && !starter) { 
-                        scripts.turnManager.SetStatusText($"you may only wield {scripts.player.inventory[0].GetComponent<Item>().itemName}");
+                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) && !starter) {
+                        s.turnManager.SetStatusText($"you may only wield {s.player.inventory[0].GetComponent<Item>().itemName}");
                         // prevent player from swapping weapons if they are in hard mode
                     }
                     else {
                         if (!starter) { Save.persistent.weaponsSwapped++; }
                         // if the item being moved is a weapon 
-                        floorItems[index].transform.position = new Vector2(-2.75f, 3.16f);
+                        GameObject pickedWeapon = floorItems[index];
+                        pickedWeapon.transform.position = new Vector2(-2.75f, 3.16f);
                         // move the item to the weapon slot
-                        scripts.player.stats = floorItems[index].GetComponent<Item>().weaponStats;
+                        s.player.stats = pickedWeapon.GetComponent<Item>().weaponStats;
                         // set the player's stats to be equal to that of the weapon
-                        Save.game.resumeAcc = scripts.player.stats["green"];
-                        Save.game.resumeSpd = scripts.player.stats["blue"];
-                        Save.game.resumeDmg = scripts.player.stats["red"];
-                        Save.game.resumeDef = scripts.player.stats["white"];
+                        Save.game.resumeAcc = s.player.stats["green"];
+                        Save.game.resumeSpd = s.player.stats["blue"];
+                        Save.game.resumeDmg = s.player.stats["red"];
+                        Save.game.resumeDef = s.player.stats["white"];
                         if (!starter) {
                             // if the weapon is not a starter (so player already has a weapon)
-                            scripts.turnManager.SetStatusText("you take " + floorItems[index].GetComponent<Item>().itemName.Split(' ')[1]);
+                            if (IsBlacksmithEncounter()) {
+                                s.turnManager.SetStatusText("you exchange weapons");
+                            }
+                            else {
+                                s.turnManager.SetStatusText("you take " + pickedWeapon.GetComponent<Item>().itemName.Split(' ')[1]);
+                            }
                             // notify the player
-                            Destroy(scripts.player.inventory[0]);
-                            // destroy the previous weapon
-                            scripts.player.inventory[0] = floorItems[index]; 
+                            GameObject oldWeapon = s.player.inventory[0];
+                            oldWeapon.transform.position = new Vector2(-2.75f + index * itemSpacing, itemY);
+                            oldWeapon.transform.rotation = Quaternion.identity;
+                            s.player.inventory[0] = pickedWeapon;
+                            floorItems[index] = oldWeapon;
                             // add the new weapon to the player's inventory
-                            scripts.statSummoner.SummonStats();
-                            scripts.statSummoner.SetDebugInformationFor("player");
+                            s.statSummoner.SummonStats();
+                            s.statSummoner.SetDebugInformationFor("player");
                             // update debug, because player just took a new weapon
-                            scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
+                            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
                         }
                         else {
-                            scripts.player.inventory.Add(floorItems[index]);
+                            s.player.inventory.Add(pickedWeapon);
                             // item is a starter, so just add it to the player's inventory
+                            floorItems.RemoveAt(index);
+                            foreach(GameObject curItem in floorItems) {
+                                curItem.transform.position = new Vector2(curItem.transform.position.x - 1f, itemY);
+                                // for every item, shift it over now that an item has been removed
+                            }
                         }
-                        floorItems.RemoveAt(0);
-                        // remove the item at index 0 (which is the weapon, because the weapon is always created first)
-                        foreach(GameObject curItem in floorItems) {
-                            curItem.transform.position = new Vector2(curItem.transform.position.x - 1f, itemY);
-                            // for every item, shift it over now that an item has been removed
-                        }
-                        Select(curList, 0);
+                        Select(s.player.inventory, 0);
                         // select the item at index 0
                     }
                 }
@@ -719,22 +837,22 @@ public class ItemManager : MonoBehaviour {
                     if (!starter) { 
                         // not a starter item
                         if (tempItem.itemType == "weapon") { 
-                            scripts.turnManager.SetStatusText($"you take {scripts.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
+                            s.turnManager.SetStatusText($"you take {s.itemManager.descriptionDict[tempItem.itemName.Split(' ')[1]]}"); 
                         }
                         if (tempItem.itemName == "necklet") {
-                            scripts.turnManager.SetStatusText(tempItem.modifier == "arcane" 
+                            s.turnManager.SetStatusText(tempItem.modifier == "arcane" 
                                                                   ? "you take arcane necklet" 
                                                                   : $"you take {tempItem.itemName} of {tempItem.modifier}");
                         }
-                        else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { scripts.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
-                        else { scripts.turnManager.SetStatusText($"you take {tempItem.itemName}"); }
+                        else if (tempItem.itemName == "potion" || tempItem.itemName == "scroll") { s.turnManager.SetStatusText($"you take {tempItem.itemName} of {tempItem.modifier}"); }
+                        else { s.turnManager.SetStatusText($"you take {tempItem.itemName}"); }
                         // notify the player of which item that they took
-                        if (scripts.tutorial != null) { scripts.tutorial.Increment(); }
+                        if (s.tutorial != null) { s.tutorial.Increment(); }
                     }
                     // if the item is not a starter item, notify the player that they have picked up the item
-                    floorItems[index].transform.position = new Vector2(-2.75f + itemSpacing * scripts.player.inventory.Count, 3.16f);
+                    floorItems[index].transform.position = new Vector2(-2.75f + itemSpacing * s.player.inventory.Count, 3.16f);
                     // add the item to the proper location
-                    scripts.player.inventory.Add(floorItems[index]);
+                    s.player.inventory.Add(floorItems[index]);
                     // add the item to the player's inventory
                     floorItems.RemoveAt(index);
                     // and remove it from the floor
@@ -749,7 +867,7 @@ public class ItemManager : MonoBehaviour {
                 }
             }
             else {
-                scripts.turnManager.SetStatusText("you can't carry any more");
+                s.turnManager.SetStatusText("you can't carry any more");
             }
         }
         else {
@@ -759,7 +877,7 @@ public class ItemManager : MonoBehaviour {
         }
         if (saveData) { 
             SaveInventoryItems();
-            if (scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) { SaveFloorItems(); }
+            if (s.levelManager.level == Save.persistent.tsLevel && s.levelManager.sub == Save.persistent.tsSub) { SaveFloorItems(); }
             else { SaveFloorItems(); }
             // only Save items if necessary
         }
@@ -770,9 +888,9 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     /// <returns></returns>
     private IEnumerator UpdateUIAfterDelay() {
-        yield return scripts.delays[0.1f];
-        scripts.statSummoner.SetDebugInformationFor("player");
-        scripts.statSummoner.SummonStats();
+        yield return s.delays[0.1f];
+        s.statSummoner.SetDebugInformationFor("player");
+        s.statSummoner.SummonStats();
     }
 
     /// <summary>
@@ -781,28 +899,28 @@ public class ItemManager : MonoBehaviour {
     public void SpawnItems() {
         lootText.text = "loot:";
         // set the text 
-        if (scripts.tutorial == null) { 
-            if (scripts.enemy.enemyName.text == "Lich") {
+        if (s.tutorial == null) { 
+            if (s.enemy.enemyName.text == "Lich") {
                 CreateItem("phylactery");
                 // defeated lich, so give phylactery
             }
-            else if (scripts.enemy.enemyName.text == "Devil") {
+            else if (s.enemy.enemyName.text == "Devil") {
                 CreateItem("necklet", "victory");
                 // defeated devil, so give necklet of victory
             }
             else {
                 // normal enemy
-                int torchCount = (from item in scripts.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
+                int torchCount = (from item in s.player.inventory where item.GetComponent<Item>().itemName == "torch" select item).Count();
                 if (PlayerHasWeapon("sword") && PlayerHasLegendary()) { torchCount++; }
                 // count the number of torches, legendary sword helps find loot
                 int spawnCount = 
                     Random.Range(torchCount == 0 ? 0 : torchCount-1, torchCount+1) 
                     // random int based on number of torches
-                    + scripts.levelManager.level 
+                    + s.levelManager.level 
                     // +1 item per level
-                    + Random.Range(-(6-scripts.levelManager.level), 1); 
+                    + Random.Range(-(6-s.levelManager.level), 1); 
                     // randomize it a bit, tending more towards negative at lower levels
-                if (scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) {
+                if (s.levelManager.level == 1 && s.levelManager.sub == 1) {
                     spawnCount = Mathf.Clamp(spawnCount, 0, 1);
                     // spawnCount = 5;
                     // fix the spawncount between 0 and 1 if on 1-1
@@ -811,11 +929,11 @@ public class ItemManager : MonoBehaviour {
                     spawnCount = Mathf.Clamp(spawnCount, 1, 5);
                     // any other level, so guarantee at least 1 item, max of 5 
                 }
-                if (Save.persistent.gameDifficulty == "hard") { 
-                    spawnCount -= UnityEngine.Random.Range(0, scripts.levelManager.level-1);
+                if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+                    spawnCount -= UnityEngine.Random.Range(0, s.levelManager.level-1);
                     spawnCount = Mathf.Clamp(spawnCount, 0, 3);
                 }
-                if (scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) { 
+                if (s.levelManager.level == 1 && s.levelManager.sub == 1) { 
                     spawnCount = 1;
                     // make sure that first kill always drops an item
                 }
@@ -851,43 +969,83 @@ public class ItemManager : MonoBehaviour {
         // create the next level arrow
         SaveFloorItems();
     }
+
+    public void SpawnBlacksmithItems(bool delayForPlayerSetup = false) {
+        if (delayForPlayerSetup) {
+            StartCoroutine(SpawnBlacksmithItemsAfterPlayerSetup());
+            return;
+        }
+
+        SpawnBlacksmithItemsImmediate();
+    }
+
+    private IEnumerator SpawnBlacksmithItemsAfterPlayerSetup() {
+        yield return null;
+
+        while (s == null || s.player == null || s.player.inventory.Count == 0) {
+            yield return null;
+        }
+
+        yield return s.delays[0.05f];
+        SpawnBlacksmithItemsImmediate();
+    }
+
+    private void SpawnBlacksmithItemsImmediate() {
+        lootText.text = "goods:";
+        List<string> availableWeapons = weaponNames.ToList();
+        for (int i = 0; i < 2; i++) {
+            int rand = Random.Range(0, availableWeapons.Count);
+            CreateRandomWeapon(forcedWeaponName: availableWeapons[rand]);
+            availableWeapons.RemoveAt(rand);
+        }
+        CreateSmithUpgradeArrow("accuracy");
+        CreateSmithUpgradeArrow("speed");
+        CreateSmithUpgradeArrow("damage");
+        CreateSmithUpgradeArrow("parry");
+        CreateItem("arrow");
+        SaveFloorItems();
+        UpdateVendorUIForSelection();
+    }
     
     /// <summary>
     /// Destroy floor items when going on to the next level or restarting.
     /// </summary>
     public void DestroyItems() {
         lootText.text = "";
-        Select(scripts.player.inventory, 0, playAudio:false);
+        Select(s.player.inventory, 0, playAudio:false);
         foreach (GameObject toBeRemoved in floorItems) {
             Destroy(toBeRemoved);
             // destroy every floor item
         }
         floorItems.Clear(); 
+        Save.game.blacksmithHasForged = false;
         // clear the array
     }
 
     /// <summary>
     /// Returns true if the player has an item of the given name.
     /// </summary>
-    public bool PlayerHas(string itemName) { return (from a in scripts.player.inventory select a.GetComponent<Item>().itemName).Contains(itemName); }
+    public bool PlayerHas(string itemName) { return (from a in s.player.inventory select a.GetComponent<Item>().itemName).Contains(itemName); }
 
     /// <summary>
     /// Returns true if the player has a weapon of given type.
     /// </summary>
     public bool PlayerHasWeapon(string weaponName) {
-        return (scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1] == weaponName);
-        // return (from a in scripts.player.inventory where a.GetComponent<Item>().itemName.Split(' ').Length > 1 select a.GetComponent<Item>().itemName.Split(' ')[1]).Contains(weaponName);
+        // if player died, slot 0 is 'retry' instead of 'xx weaponName', so check for that first
+        if (s.player.inventory[0].GetComponent<Item>().itemName == "retry") { return false; }
+        return s.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1] == weaponName;
+        // return (from a in s.player.inventory where a.GetComponent<Item>().itemName.Split(' ').Length > 1 select a.GetComponent<Item>().itemName.Split(' ')[1]).Contains(weaponName);
     }
     
     public bool PlayerHasLegendary() {
-        return (scripts.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[0] == "legendary");
+        return (s.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[0] == "legendary");
     }
 
     /// <summary>
     /// Gets the first item in the player's inventory with given name.
     /// </summary>
     public GameObject GetPlayerItem(string itemName) {
-        try { return scripts.player.inventory[(from a in scripts.player.inventory select a.GetComponent<Item>().itemName).ToList().IndexOf(itemName)]; }
+        try { return s.player.inventory[(from a in s.player.inventory select a.GetComponent<Item>().itemName).ToList().IndexOf(itemName)]; }
         catch { return null; }
     }
 
@@ -895,14 +1053,14 @@ public class ItemManager : MonoBehaviour {
     /// Fade all torches that have ended their lifespan.
     /// </summary>
     public void AttemptFadeTorches() {
-        foreach (GameObject curItem in scripts.player.inventory) {
+        foreach (GameObject curItem in s.player.inventory) {
             if (curItem.GetComponent<Item>().itemName == "torch") {
                 // if the item is a torch
-                if ($"{scripts.levelManager.level}-{scripts.levelManager.sub}" == curItem.GetComponent<Item>().modifier) {
+                if ($"{s.levelManager.level}-{s.levelManager.sub}" == curItem.GetComponent<Item>().modifier) {
                     // if the fade level matches the current level
-                    scripts.turnManager.SetStatusText("your torch runs out");
+                    s.turnManager.SetStatusText("your torch runs out");
                     // notify player
-                    scripts.player.inventory[scripts.player.inventory.IndexOf(curItem)].GetComponent<Item>().Remove(torchFade:true);
+                    s.player.inventory[s.player.inventory.IndexOf(curItem)].GetComponent<Item>().Remove(torchFade:true);
                 }
             }
         }
@@ -912,24 +1070,24 @@ public class ItemManager : MonoBehaviour {
     /// Save all inventory items onto the player's local Savefile.
     /// </summary>
     public void SaveInventoryItems() {
-        if (scripts.levelManager != null && !scripts.player.isDead) { 
+        if (s.levelManager != null && !s.player.isDead) { 
             Save.game.resumeItemNames = new string[9];
             Save.game.resumeItemTypes = new string[9];
             Save.game.resumeItemMods = new string[9];
             // clear the data before placing in new
-            Item curItem = scripts.player.inventory[0].GetComponent<Item>();
+            Item curItem = s.player.inventory[0].GetComponent<Item>();
             Save.game.resumeItemNames[0] = curItem.itemName.Split(' ')[1];
             Save.game.resumeItemTypes[0] = curItem.itemType;
             Save.game.resumeItemMods[0] = curItem.modifier;
             // add the player's weapon first
-            for (int i = 1; i < scripts.player.inventory.Count; i++) {
-                curItem = scripts.player.inventory[i].GetComponent<Item>();
+            for (int i = 1; i < s.player.inventory.Count; i++) {
+                curItem = s.player.inventory[i].GetComponent<Item>();
                 Save.game.resumeItemNames[i] = curItem.itemName;
                 Save.game.resumeItemTypes[i] = curItem.itemType;
                 Save.game.resumeItemMods[i] = curItem.modifier;
                 // add all the remaining items
             }
-            if (scripts.tutorial == null) { Save.SaveGame(); }
+            if (s.tutorial == null) { Save.SaveGame(); }
             // Save to file
 
         }
@@ -942,26 +1100,26 @@ public class ItemManager : MonoBehaviour {
         Save.game.floorItemNames = new string[9];
         Save.game.floorItemTypes = new string[9];
         Save.game.floorItemMods = new string[9];
+        Save.game.floorItemAccs = new int[9];
+        Save.game.floorItemSpds = new int[9];
+        Save.game.floorItemDmgs = new int[9];
+        Save.game.floorItemDefs = new int[9];
         // clear the data before placing in new 
-        bool arrowFound = false;
         for (int i = 0; i < floorItems.Count; i++) {
-            if (!arrowFound) { 
-                Item curItem = floorItems[i].GetComponent<Item>();
-                if (curItem.itemType == "weapon") { Save.game.floorItemNames[i] = curItem.itemName.Split(' ')[1]; }
-                else { Save.game.floorItemNames[i] = curItem.itemName; }
-                
-                Save.game.floorItemTypes[i] = curItem.itemType;
-                Save.game.floorItemMods[i] = curItem.modifier;
-                if (Save.game.floorItemNames[i] == "arrow") { arrowFound = true; }
+            Item curItem = floorItems[i].GetComponent<Item>();
+            if (curItem.itemType == "weapon") {
+                Save.game.floorItemNames[i] = curItem.itemName.Split(' ')[1];
+                Save.game.floorItemAccs[i] = curItem.weaponStats["green"];
+                Save.game.floorItemSpds[i] = curItem.weaponStats["blue"];
+                Save.game.floorItemDmgs[i] = curItem.weaponStats["red"];
+                Save.game.floorItemDefs[i] = curItem.weaponStats["white"];
             }
-            else {
-                Save.game.floorItemNames[i] = "";
-                Save.game.floorItemTypes[i] = "";
-                Save.game.floorItemMods[i] = "";
-            }
+            else { Save.game.floorItemNames[i] = curItem.itemName; }
+
+            Save.game.floorItemTypes[i] = curItem.itemType;
+            Save.game.floorItemMods[i] = curItem.modifier;
         }
-        // funky workaround to make it so that the player doesn't get duplicate arrows
-        if (scripts.tutorial == null) { Save.SaveGame(); }
+        if (s.tutorial == null) { Save.SaveGame(); }
     }
 
     // two separate methods so that we dont have to do any fancy checks, just pull whichever we need as long as we Save it properly

@@ -38,7 +38,7 @@ public class Player : MonoBehaviour {
     };
     public int stamina = 3;
     public int targetIndex = 0;
-    private Scripts scripts;
+    private Scripts s;
     private readonly Vector2 basePosition = new(-2.166667f, -1.866667f);
     [SerializeField] private Vector2 iconPosition = new(-12.16667f, 3.333333f);
     private readonly Dictionary<int, Vector2> deathPositions = new() {
@@ -49,10 +49,10 @@ public class Player : MonoBehaviour {
     };
 
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         // something here to check if we are continuing or starting a new game
         Save.game.curCharNum = Save.game.newGame ? Save.persistent.newCharNum : Save.game.curCharNum;
-        scripts.itemManager.GiveStarterItems();
+        s.itemManager.GiveStarterItems();
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
         woundList = Save.game.playerWounds;
@@ -75,17 +75,17 @@ public class Player : MonoBehaviour {
         stamina = Save.game.playerStamina + Save.game.expendedStamina;
         Save.game.expendedStamina = 0;
         staminaCounter.text = stamina.ToString();
-        if (scripts.tutorial == null) { Save.SaveGame(); }
+        if (s.tutorial == null) { Save.SaveGame(); }
         // give status effects, potion effects, stamina, everything from previous Save
     }
 
     private void Update() {
         
-        if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f && !scripts.turnManager.isMoving)) {
+        if (((Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !s.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") < 0f && !s.turnManager.isMoving)) {
             MoveTargetDown();
         }
-        else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !scripts.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !scripts.turnManager.isMoving)) {
-            if (!(scripts.tutorial != null && targetIndex == 7)) { 
+        else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !s.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !s.turnManager.isMoving)) {
+            if (!(s.tutorial != null && targetIndex == 7)) { 
                 // lock tutorial to attacking face once its targeted
                 MoveTargetUp();
             }
@@ -96,42 +96,42 @@ public class Player : MonoBehaviour {
     }
 
     private void AttemptSuicide() {
-        if (!isDead && !scripts.turnManager.isMoving && scripts.tutorial == null) {
+        if (!isDead && !s.turnManager.isMoving && s.tutorial == null) {
             if (Save.game.enemyIsDead) {
                 // don't let player suicide when enemy is dead, because it is glitchy
-                scripts.turnManager.SetStatusText("you've killed him");
+                s.turnManager.SetStatusText("you've killed him");
             }
-            else if (scripts.enemy.enemyName.text == "Tombstone" || scripts.enemy.enemyName.text == "Merchant") {
+            else if (s.enemy.enemyName.text == "Tombstone" || s.enemy.enemyName.text == "Merchant" || s.enemy.enemyName.text == "Blacksmith") {
                 // or on tombstone
-                scripts.turnManager.SetStatusText("mind your manners");
+                s.turnManager.SetStatusText("mind your manners");
             }
             else {
-                if (!scripts.levelManager.lockActions) {
+                if (!s.levelManager.lockActions) {
                     // don't let player restart while actions are locked
                     // player wants to restart
                     // player death on r is instant, so don't do animation stuff
                     isDead = true;
                     // mark player as dead
-                    scripts.soundManager.PlayClip("death");
+                    s.soundManager.PlayClip("death");
                     // play sound clip
-                    scripts.player.GetComponent<Animator>().enabled = false;
+                    s.player.GetComponent<Animator>().enabled = false;
                     GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
                     SetPlayerPositionAfterDeath();
-                    foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+                    foreach (GameObject dice in s.diceSummoner.existingDice) {
                         StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
                         // fade out all existing die
                     }
-                    scripts.statSummoner.ResetDiceAndStamina();
+                    s.statSummoner.ResetDiceAndStamina();
                     // clear them
-                    scripts.turnManager.ClearPotionStats();
+                    s.turnManager.ClearPotionStats();
                     // clear potion stats
-                    scripts.statSummoner.SummonStats();
+                    s.statSummoner.SummonStats();
                     // summon stats
-                    scripts.statSummoner.SetDebugInformationFor("player");
+                    s.statSummoner.SetDebugInformationFor("player");
                     // set debug (only player needed here)
-                    scripts.turnManager.RecalculateMaxFor("player");
+                    s.turnManager.RecalculateMaxFor("player");
                     // reset target
-                    scripts.tombstoneData.SetTombstoneData();
+                    s.tombstoneData.SetTombstoneData();
                     // allow player to retry
                     Save.persistent.deaths++;
                     Save.SavePersistent();
@@ -143,24 +143,24 @@ public class Player : MonoBehaviour {
     public void MoveTargetDown() { 
         // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
         // set the available targets to make sure the player can do that
-        if (targetIndex < Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "player"), 0, 7)) {
+        if (targetIndex < Mathf.Clamp(s.statSummoner.SumOfStat("green", "player"), 0, 7)) {
             // if player can target there
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
             // if there is still time left on the hint timer (for targeting face or targeting wounded body part)
             targetIndex++;
             // increment target index
-            scripts.turnManager.SetTargetOf("player");
+            s.turnManager.SetTargetOf("player");
             // and set target based off the new target index
-            if (scripts.tutorial != null && targetIndex == 7 && scripts.tutorial.curIndex == 20) { scripts.tutorial.Increment(); }
+            if (s.tutorial != null && targetIndex == 7 && s.tutorial.curIndex == 20) { s.tutorial.Increment(); }
         }
     }
 
     public void MoveTargetUp() {
         if (targetIndex > 0) {  
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
-            if (!(scripts.tutorial != null && targetIndex == 7)) {
+            if (!(s.tutorial != null && targetIndex == 7)) {
                 targetIndex--;
-                scripts.turnManager.SetTargetOf("player");
+                s.turnManager.SetTargetOf("player");
             }
         }
     }
@@ -171,7 +171,7 @@ public class Player : MonoBehaviour {
     public void UseWeapon() {
         List<Dice> availableDice = new();
         // create an empty list to hold die in
-        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+        foreach (GameObject dice in s.diceSummoner.existingDice) {
             // for every die
             if (dice.GetComponent<Dice>().isAttached == false) {
                 availableDice.Add(dice.GetComponent<Dice>());
@@ -184,44 +184,44 @@ public class Player : MonoBehaviour {
                 StopCoroutine(coroutine);
                 coroutine = null;
                 // stop the existing coroutine
-                scripts.turnManager.statusText.text = "";
+                s.turnManager.statusText.text = "";
                 // clear the status text
                 hintTimer = 0f;
                 // reset the hint timer
-                scripts.turnManager.RoundOne();
+                s.turnManager.RoundOne();
                 // begin the round
             }
-            else if (scripts.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString(scripts.HINTS_KEY) == "on" && scripts.enemy.enemyName.text != "Devil" && scripts.enemy.enemyName.text != "Lich" && !scripts.itemManager.PlayerHasWeapon("maul")) {
+            else if (s.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul")) {
                 // if player wants hints, can aim for the face, but is not doing so, and doesn't have a maul
                 coroutine = StartCoroutine(HintFace());
                 // hint the player
             }
-            else if (scripts.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString(scripts.HINTS_KEY) == "on") {
+            else if (s.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
                 // if body part is already wounded
                 coroutine = StartCoroutine(HintTargetingWounded());
                 // hint the player
             }
-            else { scripts.turnManager.RoundOne(); }
+            else { s.turnManager.RoundOne(); }
         }
         else { 
             // dice are available
-            if (scripts.itemManager.PlayerHasWeapon("mace") && !Save.game.usedMace) {
+            if (s.itemManager.PlayerHasWeapon("mace") && !Save.game.usedMace) {
                 // if player has mace
                 Save.game.usedMace = true;
-                if (scripts.tutorial == null) { Save.SaveGame(); }
+                if (s.tutorial == null) { Save.SaveGame(); }
                 // prevent player from using mace again
-                scripts.soundManager.PlayClip("click0");
-                foreach (Dice dice in from a in scripts.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
+                s.soundManager.PlayClip("click0");
+                foreach (Dice dice in from a in s.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
                     // for every die that is not attached
                     StartCoroutine(dice.RerollAnimation(false));
                     // reroll the die
                 }
             }
-            else if (scripts.itemManager.PlayerHasWeapon("mace") && Save.game.usedMace) {
-                scripts.turnManager.SetStatusText("already rerolled");
+            else if (s.itemManager.PlayerHasWeapon("mace") && Save.game.usedMace) {
+                s.turnManager.SetStatusText("already rerolled");
             }
             else {
-                scripts.turnManager.SetStatusText("choose a die"); 
+                s.turnManager.SetStatusText("choose a die"); 
                 // player doesn't have mace, so notify them to choose a die
             }
         }
@@ -231,13 +231,13 @@ public class Player : MonoBehaviour {
     /// Coroutine for hinting to the player that they can aim to the enemy's face.
     /// </summary>
     private IEnumerator HintFace() {
-        scripts.turnManager.SetStatusText("note: you can aim to the face");
+        s.turnManager.SetStatusText("note: you can aim to the face");
         // notify the player
         for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.025f) {
-            yield return scripts.delays[0.025f];
+            yield return s.delays[0.025f];
             // start the timer (they can do actions here)
         }
-        scripts.turnManager.RoundOne();
+        s.turnManager.RoundOne();
         // after the timer is up, start the round.
     }
     
@@ -246,11 +246,11 @@ public class Player : MonoBehaviour {
     /// </summary>
     private IEnumerator HintTargetingWounded() {
         // pretty much the exact same thing has hintface
-        scripts.turnManager.SetStatusText("note: you are targeting a wounded body part");
+        s.turnManager.SetStatusText("note: you are targeting a wounded body part");
         for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.025f) {
-            yield return scripts.delays[0.025f];
+            yield return s.delays[0.025f];
         }
-        scripts.turnManager.RoundOne();
+        s.turnManager.RoundOne();
     }
 
     /// <summary>

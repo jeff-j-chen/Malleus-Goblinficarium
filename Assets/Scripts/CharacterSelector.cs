@@ -27,27 +27,28 @@ public class CharacterSelector : MonoBehaviour {
         "* White dice buff damage\n* Gains 3 stamina once wounded\n* As stamina reaches 10, wounds are cured and stamina is decreased by 10",
     }; 
     private bool preventPlayingFX = true;
-    private Scripts scripts;
+    private Scripts s;
     
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
         // get necessary objects
         // pull in data from the Savefile
-        HideItemsByDifficulty();
+        HideItemsByDifficulty(false);
         
         // select 0 and go to it
-        bottomText.SetActive(PlayerPrefs.GetString(scripts.BUTTONS_KEY) != "on");
+        bottomText.SetActive(PlayerPrefs.GetString(s.BUTTONS_KEY) != "on");
         StartCoroutine(AllowFX());
     }
     
-    public void HideItemsByDifficulty() { 
-        if (Save.persistent.gameDifficulty == "easy") { scripts.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
-        else { scripts.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
+    public void HideItemsByDifficulty(bool preserveSelection = true) { 
+        int selectionToKeep = preserveSelection ? selectionNum : 0;
+        if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)) { s.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
+        else { s.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
         // easy has 2nd item
-        if (Save.persistent.gameDifficulty == "hard") { scripts.itemManager.floorItems[1].GetComponent<Item>().Hide(); }
-        else { scripts.itemManager.floorItems[1].GetComponent<Item>().UnHide(); }
-        selectionNum = 0;
+        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) { s.itemManager.floorItems[1].GetComponent<Item>().Hide(); }
+        else { s.itemManager.floorItems[1].GetComponent<Item>().UnHide(); }
+        selectionNum = Mathf.Clamp(selectionToKeep, 0, icons.Length - 1);
         SetSelection(selectionNum);
     }
 
@@ -55,7 +56,7 @@ public class CharacterSelector : MonoBehaviour {
     /// Only allow sound effects to be played after a short delay, preventing extra clicking.
     /// </summary>
     private IEnumerator AllowFX() { 
-        yield return scripts.delays[0.45f];
+        yield return s.delays[0.45f];
         preventPlayingFX = false;
     }
 
@@ -92,13 +93,13 @@ public class CharacterSelector : MonoBehaviour {
     /// Coroutine used to load the menu scene after the player locks in their character selection.
     /// </summary>
     private IEnumerator LoadMenuScene() { 
-        scripts.soundManager.PlayClip("blip0");
+        s.soundManager.PlayClip("blip0");
         // play sfx (this is when selected)
         Save.persistent.newCharNum = selectionNum;
         // set the selection num
         Save.SavePersistent();
         // Save the selection num
-        yield return scripts.delays[0.1f];
+        yield return s.delays[0.1f];
         // delay here, because i don't want a singleton and this allows blip to complete playing
         SceneManager.LoadScene("Menu");
         // load the menu scene after the delay
@@ -130,7 +131,7 @@ public class CharacterSelector : MonoBehaviour {
             }
             GetComponent<SpriteRenderer>().sprite = icons[selectionNum];
             // set the character icon
-            if (!preventPlayingFX) { scripts.soundManager.PlayClip("click0"); }
+            if (!preventPlayingFX) { s.soundManager.PlayClip("click0"); }
             // only play sfx if we want it 
             if (selectionNum == 0) { leftButton.transform.position = new Vector2(-8.53f, 20f); }
             // hide left button if we are the leftmost (first) character
@@ -142,63 +143,63 @@ public class CharacterSelector : MonoBehaviour {
         }
         switch (num) {
             case 0:
-                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "harsh sword";
-                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "harsh";
-                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("sword");
-                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "steak";
-                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("steak");
-                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "torch";
-                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("torch");
+                s.itemManager.floorItems[0].GetComponent<Item>().itemName = "harsh sword";
+                s.itemManager.floorItems[0].GetComponent<Item>().modifier = "harsh";
+                s.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("sword");
+                s.itemManager.floorItems[1].GetComponent<Item>().itemName = "steak";
+                s.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("steak");
+                s.itemManager.floorItems[2].GetComponent<Item>().itemName = "torch";
+                s.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("torch");
                 break;
             case 1:
-                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "common maul";
-                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "common";
-                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("maul");
-                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "armor";
-                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("armor");
-                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "helm of might";
-                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("helm_of_might");
+                s.itemManager.floorItems[0].GetComponent<Item>().itemName = "common maul";
+                s.itemManager.floorItems[0].GetComponent<Item>().modifier = "common";
+                s.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("maul");
+                s.itemManager.floorItems[1].GetComponent<Item>().itemName = "armor";
+                s.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("armor");
+                s.itemManager.floorItems[2].GetComponent<Item>().itemName = "helm of might";
+                s.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("helm_of_might");
                 break;
             case 2:
-                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "quick dagger";
-                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "quick";
-                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("dagger");
-                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "boots of dodge";
-                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("boots_of_dodge");
-                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "ankh";
-                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("ankh");
+                s.itemManager.floorItems[0].GetComponent<Item>().itemName = "quick dagger";
+                s.itemManager.floorItems[0].GetComponent<Item>().modifier = "quick";
+                s.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("dagger");
+                s.itemManager.floorItems[1].GetComponent<Item>().itemName = "boots of dodge";
+                s.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("boots_of_dodge");
+                s.itemManager.floorItems[2].GetComponent<Item>().itemName = "ankh";
+                s.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("ankh");
                 break;
             case 3:
-                scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "ruthless mace";
-                scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "ruthless";
-                scripts.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("mace");
-                scripts.itemManager.floorItems[1].GetComponent<Item>().itemName = "cheese";
-                scripts.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("cheese");
-                scripts.itemManager.floorItems[2].GetComponent<Item>().itemName = "kapala";
-                scripts.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
-                    scripts.itemManager.GetItemSprite("kapala");
+                s.itemManager.floorItems[0].GetComponent<Item>().itemName = "ruthless mace";
+                s.itemManager.floorItems[0].GetComponent<Item>().modifier = "ruthless";
+                s.itemManager.floorItems[0].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("mace");
+                s.itemManager.floorItems[1].GetComponent<Item>().itemName = "cheese";
+                s.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("cheese");
+                s.itemManager.floorItems[2].GetComponent<Item>().itemName = "kapala";
+                s.itemManager.floorItems[2].GetComponent<SpriteRenderer>().sprite = 
+                    s.itemManager.GetItemSprite("kapala");
                 break;
         }
-        if (Save.persistent.gameDifficulty == "hard") {
-            // rename weapon to be rusty if in hard mode
-            scripts.itemManager.floorItems[0].GetComponent<Item>().modifier = "rusty";
-            string itemName = scripts.itemManager.floorItems[0].GetComponent<Item>().itemName;
-            scripts.itemManager.floorItems[0].GetComponent<Item>().itemName = "rusty " + itemName.Split(' ')[1];
-            // print(scripts.itemManager.floorItems[0].GetComponent<Item>().itemName);
+        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+            // rename weapon to be rusty if in nightmare mode
+            s.itemManager.floorItems[0].GetComponent<Item>().modifier = "rusty";
+            string itemName = s.itemManager.floorItems[0].GetComponent<Item>().itemName;
+            s.itemManager.floorItems[0].GetComponent<Item>().itemName = "rusty " + itemName.Split(' ')[1];
+            // print(s.itemManager.floorItems[0].GetComponent<Item>().itemName);
         }
         // give the character items based on their class, even if its not unlocked because it will be hidden regardless
-        scripts.itemManager.floorItems[0].GetComponent<Item>().Select(false);
+        s.itemManager.floorItems[0].GetComponent<Item>().Select(false);
         // select the first item so its not buggy
     }
 
@@ -226,20 +227,13 @@ public class CharacterSelector : MonoBehaviour {
     public void CycleDifficulty() {
         if (!simpleFadeIn.lockChanges) {
             // don't allow toggle of easy if we are fading rn
-            scripts.soundManager.PlayClip("click1");
+            s.soundManager.PlayClip("click1");
             // play clip
             // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
             // fade to black and then back
-            if (Save.persistent.gameDifficulty == "easy") {
-                Save.persistent.gameDifficulty = "normal";
-            }
-            else if (Save.persistent.gameDifficulty == "normal") {
-                Save.persistent.gameDifficulty = "hard";
-            }
-            else if (Save.persistent.gameDifficulty == "hard") {
-                Save.persistent.gameDifficulty = "easy";
-            }
+            Save.persistent.gameDifficulty = DifficultyHelper.Next(Save.persistent.gameDifficulty);
+            Save.persistent.difficultyVersion = DifficultyHelper.CurrentDifficultyVersion;
 
             Save.SavePersistent();
             // apply it to the Save file so the next game will have the correct character
@@ -248,14 +242,17 @@ public class CharacterSelector : MonoBehaviour {
 
     public void UpdatePerkText() { 
         perkText.text = perks[selectionNum];
-        if (Save.persistent.gameDifficulty == "easy") { 
+        if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)) { 
             perkText.text += "\n> Selected Difficulty: EASY";
         }
-        else if (Save.persistent.gameDifficulty == "normal") { 
+        else if (DifficultyHelper.IsNormal(Save.persistent.gameDifficulty)) { 
             perkText.text += "\n> Selected Difficulty: NORMAL";
         }
-        else if (Save.persistent.gameDifficulty == "hard") { 
+        else if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) { 
             perkText.text += "\n> Selected Difficulty: HARD";
+        }
+        else if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+            perkText.text += "\n> Selected Difficulty: NIGHTMARE";
         }
     }
 }

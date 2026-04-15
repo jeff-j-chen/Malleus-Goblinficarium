@@ -6,6 +6,9 @@ using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 public class Enemy : MonoBehaviour {
+    public const int MerchantEnemyNum = 7;
+    public const int TombstoneEnemyNum = 8;
+    public const int BlacksmithEnemyNum = 9;
     [SerializeField] public RuntimeAnimatorController[] controllers;
     [SerializeField] public RuntimeAnimatorController lichDeathController;
     [SerializeField] private Sprite[] icons;
@@ -18,7 +21,7 @@ public class Enemy : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI target;
     public List<string> woundList = new();
     public Dictionary<string, int> stats;
-    private readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone" };
+    private readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone", "Blacksmith" };
     private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
     public int stamina = 1;
     public int targetIndex = 0;
@@ -48,36 +51,52 @@ public class Enemy : MonoBehaviour {
         {"33", 4},
         {"41", 5},
     };
-    private Scripts scripts;
+    private Scripts s;
     public int spawnNum;
     private readonly List<Dice> availableDice = new();
     private readonly List<int> diceValuations = new();
     public readonly int lichStamina = 3;
 
+    private int GetDisplayIndex(int enemyNum) {
+        return enemyNum == BlacksmithEnemyNum ? MerchantEnemyNum : enemyNum;
+    }
+
+    private bool IsVendor(int enemyNum) {
+        return enemyNum == MerchantEnemyNum || enemyNum == BlacksmithEnemyNum;
+    }
+
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
-        scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.offScreen;
+        s = FindObjectOfType<Scripts>();
+        s.turnManager.blackBox.transform.localPosition = s.turnManager.offScreen;
         // make sure to show the enemy's stats at the start
-        if (scripts.levelManager.level == Save.persistent.tsLevel && scripts.levelManager.sub == Save.persistent.tsSub) {
+        if (s.levelManager.level == Save.persistent.tsLevel && s.levelManager.sub == Save.persistent.tsSub) {
             // on the tombstone level
-            SpawnNewEnemy(8, Save.game.newGame);
+            SpawnNewEnemy(TombstoneEnemyNum, Save.game.newGame);
             // spawn th tombstone
-            scripts.itemManager.lootText.text = "loot:";
+            s.itemManager.lootText.text = "loot:";
             // indicate that the player can loot
-            scripts.tombstoneData.SpawnSavedTSItems(true);
+            s.tombstoneData.SpawnSavedTSItems(true);
             // spawn the Saved tombstone items
-            scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
+            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
             // hide the stats (don't fight tombstones)
         }
-        else if (scripts.levelManager.sub == 4) {
+        else if (s.levelManager.ShouldForceBlacksmithSpawn()) {
+            bool spawnNewBlacksmith = Save.game.newGame || Save.game.enemyNum != BlacksmithEnemyNum;
+            SpawnNewEnemy(BlacksmithEnemyNum, spawnNewBlacksmith);
+            s.itemManager.lootText.text = "goods:";
+            if (spawnNewBlacksmith) { s.itemManager.SpawnBlacksmithItems(true); }
+            else { s.tombstoneData.SpawnSavedMerchantItems(true); }
+            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+        }
+        else if (s.levelManager.sub == 4) {
             // on a merchant level
-            SpawnNewEnemy(7, Save.game.newGame);
+            SpawnNewEnemy(MerchantEnemyNum, Save.game.newGame);
             // spawn the merchant
-            scripts.itemManager.lootText.text = "goods:";
+            s.itemManager.lootText.text = "goods:";
             // indicate that the player should trade
-            scripts.tombstoneData.SpawnSavedMerchantItems(true);
+            s.tombstoneData.SpawnSavedMerchantItems(true);
             // spawn the Saved merchant items
-            scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
+            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
             // hide the stats (don't fight merchants)
         }
         else { 
@@ -90,11 +109,11 @@ public class Enemy : MonoBehaviour {
                 // spawn the same enemy back in
                 if (Save.game.enemyIsDead) { 
                     // if resuming after the enemy has been killed
-                    scripts.itemManager.lootText.text = "loot:";
-                    if (scripts.levelManager.level == 4 || Save.game.enemyNum == 2) { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
+                    s.itemManager.lootText.text = "loot:";
+                    if (s.levelManager.level == 4 || Save.game.enemyNum == 2) { s.tombstoneData.SpawnSavedMerchantItems(true); }
                     else { 
-                        if (Save.game.floorItemTypes[0] == "weapon") { scripts.tombstoneData.SpawnSavedFloorItems(true);  }
-                        else { scripts.tombstoneData.SpawnSavedMerchantItems(true); }
+                        if (Save.game.floorItemTypes[0] == "weapon") { s.tombstoneData.SpawnSavedFloorItems(true);  }
+                        else { s.tombstoneData.SpawnSavedMerchantItems(true); }
                     }
                     // spawn in the enemy's loot again for the player
                     // devil and lich dont have weapons, so make sure it doesnt bug
@@ -102,7 +121,7 @@ public class Enemy : MonoBehaviour {
                     SetEnemyPositionAfterDeath();
                     // show the enemy as dead
                 }
-                else { scripts.itemManager.lootText.text = ""; }
+                else { s.itemManager.lootText.text = ""; }
                 // enemy is not dead, so nothing special 
             }
         }
@@ -115,78 +134,15 @@ public class Enemy : MonoBehaviour {
     /// Make the enemy target the best wound that it can.
     /// </summary>
     public void TargetBest() {
-        // could change this later so that it prioritizes certain wounds rather than just aiming for the highest wound
-        targetIndex = 7;
-        // start at the end of the array of targetbales
-        // for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 6); i >= 0; i--) {
-        for (int i = Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7); i >= 0; i--) {
-            // print($"enemy target starting at its accuracy stat, {Mathf.Clamp(scripts.statSummoner.SumOfStat("green", "enemy"), 0, 7)}");
-           // iterating through the array backwards
-            if (!scripts.player.woundList.Contains(scripts.turnManager.targetArr[i])) {
-                // if the player does not have the wound
-                targetIndex = i;
-                break;
-                // set target index and break
-            }
-        }
-        if (targetIndex == 7 && scripts.statSummoner.SumOfStat("green", "enemy") < 7) { targetIndex = 0; }
-        // this happens if enemy already wounded everything, so it targets face by default (which is wrong)
-        scripts.turnManager.SetTargetOf("enemy");
-        // set the target of the enemy with the new targetindex
+        targetIndex = EnemyAI.GetBestTargetIndex(s);
+        s.turnManager.SetTargetOf("enemy");
     }
 
     /// <summary>
     /// Make the enemy pick the dice it deems to be most valuable. 
     /// </summary>
     public void ChooseBestDie() {
-        // create a more advanced system to value dice based on context
-        availableDice.Clear();
-        diceValuations.Clear();
-        // clear the data holding lists
-        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
-            if (dice.GetComponent<Dice>().isAttached == false) {
-                availableDice.Add(dice.GetComponent<Dice>());
-                diceValuations.Add(Array.IndexOf(valueArr, dice.GetComponent<Dice>().diceType + dice.GetComponent<Dice>().diceNum));
-                // add values to the lists if the dice is not attached
-            }
-        }
-        if (availableDice.Count > 0) {
-            // if there is more than 1 available to choose
-            Dice chosenDie = availableDice[diceValuations.IndexOf(diceValuations.Min())];
-            // select the die
-            if (woundList.Contains("guts") && enemyName.text != "Lich") { StartCoroutine(chosenDie.DecreaseDiceValue(false)); }
-            // decrease if necessary
-            chosenDie.isAttached = true;
-            chosenDie.moveable = false;
-            chosenDie.isOnPlayerOrEnemy = "enemy";
-            // assign associated attributes
-            if (chosenDie.diceType != "yellow") {
-                // if the dice is not a yellow die
-                chosenDie.statAddedTo = chosenDie.diceType;
-                scripts.statSummoner.AddDiceToEnemy(chosenDie.diceType, chosenDie);
-                // add it to the corresponding dice type
-                chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX(chosenDie.diceType), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, chosenDie.diceType)] - 0.01f);
-                // set the correct transform position
-                if ((chosenDie.diceType == "red" && woundList.Contains("armpits")) || (chosenDie.diceType == "white" && woundList.Contains("hand"))) {
-                    if (enemyName.text != "Lich") { StartCoroutine(chosenDie.FadeOut(false)); }
-                }
-                // only fade if its not already going to fade, and player is not facing the lich
-            }
-            else {
-                // if the dice is yellow
-                chosenDie.statAddedTo = "red";
-                scripts.statSummoner.AddDiceToEnemy("red", chosenDie); 
-                // attach to red
-                chosenDie.transform.position = new Vector2(scripts.statSummoner.OutermostEnemyX("red"), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, "red")] - 0.01f);
-                // set the correct transform position
-                if (scripts.itemManager.PlayerHasWeapon("hatchet")) { StartCoroutine(chosenDie.FadeOut(false)); }
-                // fade out the dice if the enemy picked a yellow
-            }
-            TargetBest();
-            // make the enemy update its aim (incase it picked up green)
-            scripts.statSummoner.SetDebugInformationFor("enemy");
-            // set the debug info
-        }
+        EnemyAI.ChooseBestDie(s);
     }
 
     /// <summary>
@@ -199,9 +155,9 @@ public class Enemy : MonoBehaviour {
             // make sure enemy is not dead
             float[] temp;
             // array to hold stats
-            if (enemyNum == 2) { temp = scripts.levelManager.GenStats("lich"); }
-            else if (enemyNum == 0) { temp = scripts.levelManager.GenStats("devil"); }
-            else { temp = scripts.levelManager.GenStats("normal"); }
+            if (enemyNum == 2) { temp = s.levelManager.GenStats("lich"); }
+            else if (enemyNum == 0) { temp = s.levelManager.GenStats("devil"); }
+            else { temp = s.levelManager.GenStats("normal"); }
             stats = new Dictionary<string, int> {
                 { "green", (int)temp[0] },
                 { "blue", (int)temp[1] },
@@ -214,14 +170,15 @@ public class Enemy : MonoBehaviour {
             Save.game.enemyDef = stats["white"];
             // set stats of the enemy
             spawnNum = enemyNum;
-            iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+            int displayIndex = GetDisplayIndex(enemyNum);
+            iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[displayIndex];
             // set the sprite for the icon
             GetComponent<Animator>().enabled = true;
             // enable the animator (which is disabled from enemies dying)
-            try {GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
+            try {GetComponent<Animator>().runtimeAnimatorController = controllers[displayIndex]; } 
             catch { 
                 GetComponent<Animator>().runtimeAnimatorController = null; 
-                GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+                GetComponent<SpriteRenderer>().sprite = icons[displayIndex];
             }
             // try set the controller (none for tombstone), must use runtimeanimationcontroller here
             if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
@@ -239,7 +196,7 @@ public class Enemy : MonoBehaviour {
             }
             enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
             // set the name, when spawning the cloaked just set it to be "Devil"
-            if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") {
+            if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) {
                 stamina = 0;
                 // tombstone and merchant don't have stamina
             }
@@ -249,7 +206,7 @@ public class Enemy : MonoBehaviour {
             }
             else {
                 // normal enemy 
-                stamina = givenStamina[$"{scripts.levelManager.level}{scripts.levelManager.sub}"];
+                stamina = givenStamina[$"{s.levelManager.level}{s.levelManager.sub}"];
                 // assign stamina based on level and sub
             }
             woundList.Clear();
@@ -266,16 +223,17 @@ public class Enemy : MonoBehaviour {
             };
             spawnNum = enemyNum;
             // enemy inherits its stats from the Save
-            try { scripts.turnManager.DisplayWounds(); } catch {}
+            try { s.turnManager.DisplayWounds(); } catch {}
             // try displaying wounds
-            iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+            int displayIndex = GetDisplayIndex(enemyNum);
+            iconGameobject.GetComponent<SpriteRenderer>().sprite = icons[displayIndex];
             // set its sprite
             GetComponent<Animator>().enabled = !Save.game.enemyIsDead;
             // enable/disable the animator, depending on if the enemy is dead or not
-            try { GetComponent<Animator>().runtimeAnimatorController = controllers[enemyNum]; } 
+            try { GetComponent<Animator>().runtimeAnimatorController = controllers[displayIndex]; } 
             catch { 
                 GetComponent<Animator>().runtimeAnimatorController = null; 
-                GetComponent<SpriteRenderer>().sprite = icons[enemyNum];
+                GetComponent<SpriteRenderer>().sprite = icons[displayIndex];
             }
             // try setting the controller, if it doesnt work (tombstone) then set it to null
             if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
@@ -289,7 +247,7 @@ public class Enemy : MonoBehaviour {
             // devil and tombstone have special positions
             enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
             // devil should only be called 'cloaked', not devil
-            if (enemyArr[enemyNum] == "Tombstone" || enemyArr[enemyNum] == "Merchant") { stamina = 0; }
+            if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) { stamina = 0; }
             else if (enemyArr[enemyNum] == "Lich") { stamina = 3; }
             else { stamina = Save.game.enemyStamina; }
             woundList = Save.game.enemyWounds;
@@ -297,10 +255,10 @@ public class Enemy : MonoBehaviour {
         }
         staminaCounter.text = stamina.ToString();
         // show the amount of stamina the enemy has
-        try { scripts.turnManager.SetTargetOf("enemy"); } catch {} 
-        try { scripts.turnManager.DisplayWounds(); } catch {}
+        try { s.turnManager.SetTargetOf("enemy"); } catch {} 
+        try { s.turnManager.DisplayWounds(); } catch {}
         Save.game.enemyNum = enemyNum;
-        if (scripts.tutorial == null) { Save.SaveGame(); }
+        if (s.tutorial == null) { Save.SaveGame(); }
     }
 
     /// <summary>
@@ -314,26 +272,16 @@ public class Enemy : MonoBehaviour {
     /// Do not call this coroutine, use DiscardBestPlayerDie() instead.
     /// </summary>
     private IEnumerator DiscardBestPlayerDieCoro() {
-        print("hello");
-        // maybe change this in the future to discard situationally (e.g. discard blue so it can get a first hit if its going to get hit regardless)
-        yield return scripts.delays[0.25f];
-        // dont discard immediately, otherwise its buggy
+        yield return s.delays[0.25f];
         List<Dice> curAvailableDice = new();
-        List<int> curDiceValuations = new();
-        // create lists to store the information in
-        foreach (GameObject curDice in scripts.diceSummoner.existingDice) {
-            // for every existing dice
+        foreach (GameObject curDice in s.diceSummoner.existingDice) {
             Dice diceScript = curDice.GetComponent<Dice>();
-            if (curDice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") { 
+            if (curDice.GetComponent<Dice>().isOnPlayerOrEnemy == "player") {
                 curAvailableDice.Add(diceScript);
-                curDiceValuations.Add(Array.IndexOf(valueArr, diceScript.diceType + diceScript.diceNum));
-                // add all the information (script and each die's valuation), only if on player
             }
         }
-        Dice chosenDie = curAvailableDice[curDiceValuations.IndexOf(curDiceValuations.Min())];
-        // choose the best die (lowest valuation = best)
-        chosenDie.DiscardFromPlayer();
-        // discard it
+        Dice chosenDie = EnemyAI.GetBestPlayerDieToDiscard(s, curAvailableDice);
+        if (chosenDie != null) { chosenDie.DiscardFromPlayer(); }
     }
 
     /// <summary>

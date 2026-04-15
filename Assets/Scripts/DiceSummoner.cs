@@ -9,7 +9,7 @@ public class DiceSummoner : MonoBehaviour
     [SerializeField] private GameObject diceBase;
     [SerializeField] public GameObject[] numArr;
     public bool breakOutOfScimitarParryLoop = false;
-    private Scripts scripts;
+    private Scripts s;
     public List<GameObject> existingDice = new();
     public float yCoord = -5.51f;
     private readonly float[] desktopXCoords = { -2.75f, -1.65f, -0.55f, 0.55f, 1.65f, 2.75f };
@@ -26,8 +26,8 @@ public class DiceSummoner : MonoBehaviour
     
     
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
-        if (scripts.mobileMode) {
+        s = FindObjectOfType<Scripts>();
+        if (s.mobileMode) {
             xCoords = mobileXCoords;
             diceScale = mobileDiceScale;
         }
@@ -40,9 +40,9 @@ public class DiceSummoner : MonoBehaviour
     // private void Update() {
     //     if (Input.GetKeyDown(KeyCode.Space)) {
     //         // testing purposes only, use to refresh this given set of dice
-    //         scripts.statSummoner.ResetDiceAndStamina();
+    //         s.statSummoner.ResetDiceAndStamina();
     //         SummonDice(false, true);
-    //         scripts.statSummoner.SummonStats();
+    //         s.statSummoner.SummonStats();
     //     }
     // }
 
@@ -58,8 +58,8 @@ public class DiceSummoner : MonoBehaviour
     /// </summary>
     private IEnumerator SummonAfterFade(bool initialSummon, bool newSet) {
         if (newSet) {
-            if (scripts.turnManager.dieSavedFromLastRound != null) { 
-                Dice fromLastRound = scripts.turnManager.dieSavedFromLastRound.GetComponent<Dice>();
+            if (s.turnManager.dieSavedFromLastRound != null) { 
+                Dice fromLastRound = s.turnManager.dieSavedFromLastRound.GetComponent<Dice>();
                 lastNum = fromLastRound.diceNum;
                 lastType = fromLastRound.diceType;
                 lastStat = fromLastRound.statAddedTo;
@@ -69,26 +69,26 @@ public class DiceSummoner : MonoBehaviour
             // need to Save the die before the delay and summon it afterwards for some reason
             if (!initialSummon) {
                 // delay if necessary
-                yield return scripts.delays[0.25f];
+                yield return s.delays[0.25f];
             }
             existingDice.Clear();
             // clear the list so we have a fresh array
             GenerateDiceTypes();
             for (int i = 0; i < 6; i++) {
-                yield return scripts.delays[0.025f];
+                yield return s.delays[0.025f];
                 GenerateSingleDie(Random.Range(1, 7), null, "none", null, i, initialSix:true);
                 // generate the 6 base die for every round
             }
-            if (scripts.itemManager.PlayerHasWeapon("flail")) {
+            if (s.itemManager.PlayerHasWeapon("flail")) {
                 StartCoroutine(SpawnFlailDice());
             }
             if (Save.game.curCharNum == 1) {
                 StartCoroutine(SpawnCharOneDice());
             }
-            if (scripts.itemManager.PlayerHasWeapon("hatchet") && scripts.itemManager.PlayerHasLegendary()) {
+            if (s.itemManager.PlayerHasWeapon("hatchet") && s.itemManager.PlayerHasLegendary()) {
                 StartCoroutine(SpawnHatchetDice());
             }
-            if (scripts.levelManager.level == 4 && scripts.levelManager.sub == 1) {
+            if (s.levelManager.level == 4 && s.levelManager.sub == 1) {
                 StartCoroutine(SpawnDevilDice());
             }
             if (lastNum != -1) {
@@ -99,7 +99,7 @@ public class DiceSummoner : MonoBehaviour
             existingDice.Clear();
             int initialSpawnCount = 0;
             for (int i = 0; i < Save.game.diceTypes.Count; i++) {
-                yield return scripts.delays[0.05f];
+                yield return s.delays[0.05f];
                 // for every die
                 if (Save.game.dicePlayerOrEnemy[i] == "none") {
                     // if its not attached, its part of the 6 pickup-able
@@ -133,11 +133,11 @@ public class DiceSummoner : MonoBehaviour
     }
 
     private IEnumerator SpawnFlailDice() {
-        yield return scripts.delays[0.2f];
-        if (scripts.itemManager.PlayerHasLegendary()) {
+        yield return s.delays[0.2f];
+        if (s.itemManager.PlayerHasLegendary()) {
             // give the player two red die if wielding a legendary flail, else one
             StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
-            yield return scripts.delays[0.1f];
+            yield return s.delays[0.1f];
             StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
         }
         else {
@@ -146,26 +146,26 @@ public class DiceSummoner : MonoBehaviour
     }
 
     private IEnumerator SpawnCharOneDice() {
-        yield return scripts.delays[0.2f];
+        yield return s.delays[0.2f];
         // if player character #2 (maul armor helm), give player yellow die
         StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true)));
     }
 
     private IEnumerator SpawnHatchetDice() {
-        yield return scripts.delays[0.2f];
+        yield return s.delays[0.2f];
         // legendary hatchet lets player start out with yellow die
-        scripts.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+        s.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
     }
 
     private IEnumerator SpawnDevilDice() {
         // if devil
-        yield return scripts.delays[0.2f];
-        foreach (string typeToGen in scripts.itemManager.statArr) {
+        yield return s.delays[0.2f];
+        foreach (string typeToGen in s.itemManager.statArr) {
             // generate a die for every stat
-            yield return scripts.delays[0.05f];
+            yield return s.delays[0.05f];
             Dice created = GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
             // attach it to the devil
-            if (typeToGen == "red" && scripts.enemy.woundList.Contains("armpits") || typeToGen == "white" && scripts.enemy.woundList.Contains("hand")) {
+            if (typeToGen == "red" && s.enemy.woundList.Contains("armpits") || typeToGen == "white" && s.enemy.woundList.Contains("hand")) {
                 StartCoroutine(created.FadeOut(true));
             }
             // devil doesn't get to take its starting red and white if its wounded there
@@ -173,21 +173,21 @@ public class DiceSummoner : MonoBehaviour
     }
 
     private IEnumerator SpawnCourageDice() {
-        yield return scripts.delays[0.2f];
+        yield return s.delays[0.2f];
         // if there is a die Saved from last round (from scroll of courage)
         StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(lastNum, lastType, "player", lastStat, initialSix:true)));
         // create the die and add it to the player
     }
 
     private IEnumerator ApplyWoundsToDice(Dice dice) {
-        yield return scripts.delays[0.1f];
+        yield return s.delays[0.1f];
         // ensure that if a new die is created from a source like flail, wound effects are applied as expected
-        if (scripts.player.woundList.Contains("chest") && dice.diceNum >= 4) {
+        if (s.player.woundList.Contains("chest") && dice.diceNum >= 4) {
             StartCoroutine(dice.RerollAnimation());
         }
-        if (scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
-        if (dice.diceType == "red" && scripts.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
-        else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
+        if (s.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
+        if (dice.diceType == "red" && s.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
+        else if (dice.diceType == "white" && s.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
         else if (dice.diceType == "white" && Save.game.curCharNum == 2) { dice.SetToOne(); }
     }
     
@@ -199,11 +199,11 @@ public class DiceSummoner : MonoBehaviour
             // reference variable for the die's attribute
             "none" => new Vector2(xCoords[i], yCoord),
             // add to the bottom row with correct offset if not attaching
-            "player" => new Vector2(scripts.statSummoner.OutermostPlayerX(statToAttachTo), scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f),
-            "enemy" => new Vector2(scripts.statSummoner.OutermostEnemyX(statToAttachTo) - scripts.statSummoner.diceOffset, scripts.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f),
+            "player" => new Vector2(s.statSummoner.OutermostPlayerX(statToAttachTo), s.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f),
+            "enemy" => new Vector2(s.statSummoner.OutermostEnemyX(statToAttachTo) - s.statSummoner.diceOffset, s.statSummoner.yCoords[Array.IndexOf(Colors.colorNameArr, statToAttachTo)] - 0.01f),
             _ => new Vector2(0, 0)
         };
-        // reference variable for the die's color index relative to scripts.color.coloArr
+        // reference variable for the die's color index relative to s.color.coloArr
         int diceColorIndex = diceType == null ? Array.IndexOf(Colors.colorArr, generatedTypes[i]) : Array.IndexOf(Colors.colorNameArr, diceType);
         // else create one of the specified type
         GameObject number = Instantiate(numArr[diceNum - 1], instantiationPos, Quaternion.identity);
@@ -220,7 +220,7 @@ public class DiceSummoner : MonoBehaviour
         // set the necessary attributes
         if (attachToPlayerOrEnemy == "player")  {
             // if attaching to player
-            scripts.statSummoner.AddDiceToPlayer(statToAttachTo, number.GetComponent<Dice>());
+            s.statSummoner.AddDiceToPlayer(statToAttachTo, number.GetComponent<Dice>());
             // add it to the array
             number.GetComponent<Dice>().statAddedTo = statToAttachTo;
             if (diceType != "yellow") { number.GetComponent<Dice>().moveable = false; }
@@ -230,7 +230,7 @@ public class DiceSummoner : MonoBehaviour
         }
         else if (attachToPlayerOrEnemy == "enemy")  {
             // if attaching to enemy
-            scripts.statSummoner.AddDiceToEnemy(statToAttachTo, number.GetComponent<Dice>());
+            s.statSummoner.AddDiceToEnemy(statToAttachTo, number.GetComponent<Dice>());
             // add it to the array
             number.GetComponent<Dice>().moveable = false;
             number.GetComponent<Dice>().statAddedTo = statToAttachTo;
@@ -249,16 +249,16 @@ public class DiceSummoner : MonoBehaviour
         // fade in the die
         existingDice.Add(number);
         if (attachToPlayerOrEnemy == "player" && isFromMight)  { 
-            if (scripts.player.woundList.Contains("guts")) { 
+            if (s.player.woundList.Contains("guts")) { 
                 StartCoroutine(number.GetComponent<Dice>().DecreaseDiceValue());
             }
-            if (scripts.player.woundList.Contains("chest") && number.GetComponent<Dice>().diceNum >= 4) { 
+            if (s.player.woundList.Contains("chest") && number.GetComponent<Dice>().diceNum >= 4) { 
                 StartCoroutine(number.GetComponent<Dice>().RerollAnimation());
             }
         }
         // add it to the array of existing dice so that functions can be performed on all die at once
-        if (attachToPlayerOrEnemy == "player") { scripts.statSummoner.SetDebugInformationFor("player"); }
-        else if (attachToPlayerOrEnemy == "enemy") { scripts.statSummoner.SetDebugInformationFor("enemy"); }
+        if (attachToPlayerOrEnemy == "player") { s.statSummoner.SetDebugInformationFor("player"); }
+        else if (attachToPlayerOrEnemy == "enemy") { s.statSummoner.SetDebugInformationFor("enemy"); }
         // set the necessary debug information
         if (!initialSix) { SaveDiceValues(); }
         return number.GetComponent<Dice>();
@@ -275,7 +275,7 @@ public class DiceSummoner : MonoBehaviour
     /// Do not call this coroutine, use SaveDiceValues() instead
     /// </summary>
     private IEnumerator SaveDiceValuesCoro(float waitTime) { 
-        yield return scripts.delays[waitTime];
+        yield return s.delays[waitTime];
         // KEEP THIS DELAY HERE, WITHOUT IT THE DICE WILL NOT SAVE PROPERLY!!!
         Save.game.diceNumbers.Clear();
         Save.game.diceTypes.Clear();
@@ -293,7 +293,7 @@ public class DiceSummoner : MonoBehaviour
             Save.game.diceRerolled.Add(dice.isRerolled);
             // add its info to the info 
         }
-        if (scripts.tutorial == null) { Save.SaveGame(); }
+        if (s.tutorial == null) { Save.SaveGame(); }
         // make sure to Save it
     }
 

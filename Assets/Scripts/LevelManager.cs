@@ -39,11 +39,15 @@ public class LevelManager : MonoBehaviour {
     private Coroutine debugGlitchCoro;
     private SpriteRenderer boxSR;
     private Color temp;
-    private Scripts scripts;
+    private Scripts s;
+
+    public bool ShouldForceBlacksmithSpawn() {
+        return level == 1 && sub == 2;
+    }
 
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
-        levelText.gameObject.SetActive(PlayerPrefs.GetString(scripts.DEBUG_KEY) == "on");
+        s = FindObjectOfType<Scripts>();
+        levelText.gameObject.SetActive(PlayerPrefs.GetString(s.DEBUG_KEY) == "on");
         // show the level text only if debug is on
         level = Save.game.resumeLevel;
         sub = Save.game.resumeSub;
@@ -59,12 +63,12 @@ public class LevelManager : MonoBehaviour {
         // make the black box and the loading circle go off the screen
         lockActions = false;
         // make sure actions aren't locked
-        if (scripts.tutorial == null) {
+        if (s.tutorial == null) {
             if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
             else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
             { levelText.text = $"(level {level}-{sub}*)"; }
             else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
-            else if (scripts.enemy.enemyName.text == "Lich") { levelText.text = "(level ???)"; }
+            else if (s.enemy.enemyName.text == "Lich") { levelText.text = "(level ???)"; }
             else { levelText.text = $"(level {level}-{sub})"; }
         }
         else { levelText.text = ""; }
@@ -83,7 +87,7 @@ public class LevelManager : MonoBehaviour {
     public float[] GenStats(string lichOrDevilOrNormal = "normal") {
         if (lichOrDevilOrNormal != "normal") {
             if (lichOrDevilOrNormal == "lich") {
-                if (Save.persistent.gameDifficulty == "hard") { 
+                if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                     return new[] { 3f, 3f, 3f, 3f };
                 }
                 else { 
@@ -91,7 +95,7 @@ public class LevelManager : MonoBehaviour {
                 }
             }
             else if (lichOrDevilOrNormal == "devil") {
-                if (Save.persistent.gameDifficulty == "hard") { 
+                if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                     return new[] { 4f, 4f, 4f, 4f };
                 }
                 else { 
@@ -115,11 +119,11 @@ public class LevelManager : MonoBehaviour {
         for (int i = 0; i < 4; i++) {
             // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
             totalStats[i] = Mathf.Round((stats[i] + baseStats[i] + UnityEngine.Random.Range(0f, stats[4]))/10f);
-            if (Save.persistent.gameDifficulty == "hard") {
-                totalStats[i] += UnityEngine.Random.Range(0, scripts.levelManager.level+1);
+            if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+                totalStats[i] += UnityEngine.Random.Range(0, s.levelManager.level+1);
             }
         }
-        if (Save.persistent.gameDifficulty == "hard" && scripts.levelManager.level == 1 && scripts.levelManager.sub == 1) { 
+        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) && s.levelManager.level == 1 && s.levelManager.sub == 1) {
             totalStats[1] = 0;
             // game is slightly playable by settings speed of 1st enemy to 0 always
         }
@@ -168,9 +172,9 @@ public class LevelManager : MonoBehaviour {
             tempColor.a = 0f;
             boxSR.color = tempColor;
             // hide the level loading box
-            scripts = FindObjectOfType<Scripts>();
-            // re-get scripts
-            scripts.soundManager.PlayClip("next");
+            s = FindObjectOfType<Scripts>();
+            // re-get s
+            s.soundManager.PlayClip("next");
             // play sound clip
             if (level == 4 && sub == 1) {
                 if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
@@ -186,35 +190,35 @@ public class LevelManager : MonoBehaviour {
                 }
                 Save.persistent.successfulRuns++; 
                 Save.game = new GameData();
-                if (scripts.tutorial == null) { Save.SaveGame(); }
+                if (s.tutorial == null) { Save.SaveGame(); }
                 // for some reason file.delete doesn't want to work here
                 yield break;
             }
-            scripts.turnManager.ClearVariablesAfterRound();
+            s.turnManager.ClearVariablesAfterRound();
             // remove variables before going to next level
-            foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+            foreach (GameObject dice in s.diceSummoner.existingDice) {
                 StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
             }
             // fade out all die (die are only faded out upon kill normally)
-            // yield return scripts.delays[1.5f]; // uncomment for tombstone tests
+            // yield return s.delays[1.5f]; // uncomment for tombstone tests
             if (isLich || level == 3 && sub == 4) { 
-                scripts.music.FadeVolume("LaBossa");
+                s.music.FadeVolume("LaBossa");
                 // if spawning lich or devil, fade to boss music
             }
-            else if (sub == 3 && scripts.enemy.enemyName.text != "Tombstone") { 
-                scripts.music.FadeVolume("Smoke");
+            else if (sub == 3 && s.enemy.enemyName.text != "Tombstone") { 
+                s.music.FadeVolume("Smoke");
                 // if spawning merchant, fade to smoke, as long as we are not fading from tombstone
             }
             else { 
-                if (scripts.enemy.enemyName.text == "Lich" || sub == 4) { 
+                if (s.enemy.enemyName.text == "Lich" || sub == 4) { 
                     // leaving lich or merchant, so change back to main
-                    scripts.music.FadeVolume("Through");
+                    s.music.FadeVolume("Through");
                 }
-                else { scripts.music.FadeVolume(); }
+                else { s.music.FadeVolume(); }
             }
             string toSpawn;
             for (int i = 0; i < 15; i++) {
-                yield return scripts.delays[0.033f];
+                yield return s.delays[0.033f];
                 tempColor.a += 1f/15f;
                 boxSR.color = tempColor;
             }
@@ -224,10 +228,15 @@ public class LevelManager : MonoBehaviour {
             Save.game.floorItemNames = new string[9];
             Save.game.floorItemTypes = new string[9];
             Save.game.floorItemMods = new string[9];
+            Save.game.floorItemAccs = new int[9];
+            Save.game.floorItemSpds = new int[9];
+            Save.game.floorItemDmgs = new int[9];
+            Save.game.floorItemDefs = new int[9];
             Save.game.floorAcc = 0;
             Save.game.floorSpd = 0;
             Save.game.floorDmg = 0;
             Save.game.floorDef = 0;
+            Save.game.blacksmithHasForged = false;
             // clear merchant and floor items when going to the next level
             if (!isLich) {
                 // if spawning a normal enemy
@@ -239,7 +248,7 @@ public class LevelManager : MonoBehaviour {
                     Save.persistent.highestLevel = level;
                     Save.persistent.highestSub = sub;
                 }
-                if (scripts.enemy.enemyName.text == "Tombstone") {
+                if (s.enemy.enemyName.text == "Tombstone") {
                     Save.persistent.tsLevel = -1;
                     Save.persistent.tsSub = -1;
                     Save.persistent.tsWeaponAcc = -1;
@@ -260,29 +269,36 @@ public class LevelManager : MonoBehaviour {
                     levelTransText.text = $"level {level}-{sub}*";
                     levelText.text = $"(level {level}-{sub}*)";
                     // decrement sub (because we went up 1 level but aren't going to fight anything)
-                    scripts.enemy.SpawnNewEnemy(8, true);
+                    s.enemy.SpawnNewEnemy(8, true);
                     // spawn the tombstone
                 }
                 else if (sub == 4) { 
                     toSpawn = "merchant";
-                    scripts.enemy.SpawnNewEnemy(7, true);
+                    s.enemy.SpawnNewEnemy(Enemy.MerchantEnemyNum, true);
                     // create the trader enemy
-                    scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.onScreen;
+                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
                     // summon trader if necessary
                     levelTransText.text = $"level {level}-3+";
                     levelText.text = $"(level {level}-3+)";
                     // set the correct level loading text
                 }
+                else if (ShouldForceBlacksmithSpawn()) {
+                    toSpawn = "blacksmith";
+                    s.enemy.SpawnNewEnemy(Enemy.BlacksmithEnemyNum, true);
+                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+                    levelTransText.text = $"level {level}-{sub}";
+                    levelText.text = $"(level {level}-{sub})";
+                }
                 else if (level == 4 && sub == 1) { 
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
                     transGlitchCoro = StartCoroutine(GlitchyLevelText());
-                    scripts.enemy.SpawnNewEnemy(0, true); 
+                    s.enemy.SpawnNewEnemy(0, true); 
                     debugGlitchCoro = StartCoroutine(GlitchyDebugText());
                 }
                 else { 
                     toSpawn = "normal";
-                    scripts.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); 
+                    s.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); 
                     levelTransText.text = $"level {level}-{sub}";
                     levelText.text = $"(level {level}-{sub})";
                 }
@@ -293,23 +309,23 @@ public class LevelManager : MonoBehaviour {
                 levelTransText.text = "level ???";
                 levelText.text = "(level ???)";
                 // going to the lich level, so notify player
-                scripts.enemy.SpawnNewEnemy(2, true);
+                s.enemy.SpawnNewEnemy(2, true);
             }
             // always spawn new enemy if going to next level
-            scripts.itemManager.DestroyItems();
+            s.itemManager.DestroyItems();
             // remove all items from the floor
-            // scripts.player.GetComponent<Animation>().Rewind();
-            scripts.enemy.GetComponent<Animator>().Rebind();
-            scripts.enemy.GetComponent<Animator>().Update(0f);
-            scripts.player.GetComponent<Animator>().Rebind();
-            scripts.player.GetComponent<Animator>().Update(0f);
-            scripts.terrain.Rebind();
-            scripts.terrain.Update(0f);
-            yield return scripts.delays[1.5f];
+            // s.player.GetComponent<Animation>().Rewind();
+            s.enemy.GetComponent<Animator>().Rebind();
+            s.enemy.GetComponent<Animator>().Update(0f);
+            s.player.GetComponent<Animator>().Rebind();
+            s.player.GetComponent<Animator>().Update(0f);
+            s.terrain.Rebind();
+            s.terrain.Update(0f);
+            yield return s.delays[1.5f];
             if (transGlitchCoro != null) { StopCoroutine(transGlitchCoro); }
             // wait 1.5s
-            scripts.statSummoner.SummonStats();
-            scripts.statSummoner.SetDebugInformationFor("enemy");
+            s.statSummoner.SummonStats();
+            s.statSummoner.SetDebugInformationFor("enemy");
             // summon the stats and update the debug information
             levelTransText.text = "";
             loadingCircle.transform.position = offScreen;
@@ -317,46 +333,50 @@ public class LevelManager : MonoBehaviour {
             // clear the loading text and move the box offscreen
             Save.game.numItemsDroppedForTrade = 0;
             // clear the number of items player has dropped
-            if (scripts.tutorial == null) { Save.SaveGame(); }
+            if (s.tutorial == null) { Save.SaveGame(); }
             if (toSpawn == "tombstone") { 
                 // going to tombstone, spawn spawn items
-                scripts.itemManager.lootText.text = "loot:";
-                scripts.tombstoneData.SpawnSavedTSItems();
+                s.itemManager.lootText.text = "loot:";
+                s.tombstoneData.SpawnSavedTSItems();
             }
             else if (toSpawn == "merchant") {
                 // going to trader, so spawn trader items
-                scripts.itemManager.SpawnMerchantItems();
+                s.itemManager.SpawnMerchantItems();
+            }
+            else if (toSpawn == "blacksmith") {
+                s.itemManager.SpawnBlacksmithItems();
             }
             else {
                 // not going to the trader or tombstone
-                scripts.diceSummoner.SummonDice(false, true);
-                scripts.turnManager.blackBox.transform.localPosition = scripts.turnManager.offScreen;
+                s.diceSummoner.SummonDice(false, true);
+                s.turnManager.blackBox.transform.localPosition = s.turnManager.offScreen;
                 // summon die and make sure the enemy's stats can be seen
             }
             // can spawn the items here because we have a deletion queue rather than just deleting all
-            scripts.player.targetIndex = 0;
-            scripts.turnManager.SetTargetOf("player");
+            s.player.targetIndex = 0;
+            s.turnManager.SetTargetOf("player");
             // make it so that the player auto targets chest, rather than their previous attack
             for (int i = 0; i < 15; i++) {
-                yield return scripts.delays[0.033f];
+                yield return s.delays[0.033f];
                 tempColor.a -= 1f/15f;
                 boxSR.color = tempColor;
             }
-            if (toSpawn == "tombstone") { scripts.turnManager.SetStatusText("you come across a humble tombstone", true); }
-            else if (toSpawn == "lich") { scripts.turnManager.SetStatusText("impervious, he seems to be immune to wound effects", true); }
-            else if (toSpawn == "devil") { scripts.turnManager.SetStatusText("dice of slain heroes rattle around his neck", true); }
+            if (toSpawn == "tombstone") { s.turnManager.SetStatusText("you come across a humble tombstone", true); }
+            else if (toSpawn == "lich") { s.turnManager.SetStatusText("impervious, he seems to be immune to wound effects", true); }
+            else if (toSpawn == "devil") { s.turnManager.SetStatusText("dice of slain heroes rattle around his neck", true); }
+            else if (toSpawn == "blacksmith") { s.turnManager.SetStatusText("forge one stat", true); }
             // fade the level box back out
-            scripts.itemManager.AttemptFadeTorches();
+            s.itemManager.AttemptFadeTorches();
             // try to remove torches
             // spawn the items so the player can interact with them, after the items are destroyed
-            scripts.turnManager.DetermineMove(false);
+            s.turnManager.DetermineMove(false);
             // determine who moves
             lockActions = false;
-            Save.game.resumeSub = scripts.levelManager.sub;
-            Save.game.resumeLevel = scripts.levelManager.level;
+            Save.game.resumeSub = s.levelManager.sub;
+            Save.game.resumeLevel = s.levelManager.level;
         }
         Save.SavePersistent();
-        if (scripts.tutorial == null) { Save.SaveGame(); }
+        if (s.tutorial == null) { Save.SaveGame(); }
     }
 
     private char R() { 
@@ -374,13 +394,13 @@ public class LevelManager : MonoBehaviour {
         tempColor.a = 0f;
         boxSR.color = tempColor;
         for (int i = 0; i < 15; i++) {
-            yield return scripts.delays[0.033f];
+            yield return s.delays[0.033f];
             tempColor.a += 1f/15f;
             boxSR.color = tempColor;
         }
         loadingCircle.transform.position = onScreen;
         levelTransText.text = "New character unlocked!";
-        yield return scripts.delays[2f];
+        yield return s.delays[2f];
         levelTransText.text = "";
         loadingCircle.transform.position = offScreen;
         Initiate.Fade("Credits", Color.black, 4f);
@@ -392,17 +412,17 @@ public class LevelManager : MonoBehaviour {
     private IEnumerator GlitchyLevelText() {
         for (int i = 0; i < 12; i++) {
             levelTransText.text = $"level {R()}-{R()}";
-            yield return scripts.delays[0.033f];
+            yield return s.delays[0.033f];
             // 12 times, 'level z-w'
         }
         for (int i = 0; i < 12; i++) {
             levelTransText.text = $"lev{R()} {R()}{R()}{R()}";
-            yield return scripts.delays[0.033f];
+            yield return s.delays[0.033f];
             // 12 times, 'levnU p0y'
         }
         for (int i = 0; i < 12; i++) {
             levelTransText.text = $"{R()}{R()}{R()}{R()} {R()}{R()}{R()}";
-            yield return scripts.delays[0.05f];
+            yield return s.delays[0.05f];
             // 12 times, 'OQI"k Hl9'
         }
     }
@@ -413,7 +433,7 @@ public class LevelManager : MonoBehaviour {
     private IEnumerator GlitchyDebugText() {
         while (true){ 
             levelText.text = $"level {T()}-{T()}";
-            yield return scripts.delays[0.05f];
+            yield return s.delays[0.05f];
             // forever until interrupted, 'level i-!'
         }
     }

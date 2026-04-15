@@ -52,5 +52,10 @@
         "ProjectSettings/":true,
         "temp/":true,
         "Temp/":true
-    }
+    },
+    // vstuc (unity extension) connects to unity's built-in roslyn lsp when editor is open
+    // dotnet.defaultSolution:disable stops csdevkit from trying to load the legacy .csproj
+    // (unity 2021 generates net471/toolsversion4 format which csdevkit refuses)
+    // "dotnet.defaultSolution": "disable",
+    "csharp.suppressHiddenDiagnostics": true
 }

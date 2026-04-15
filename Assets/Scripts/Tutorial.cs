@@ -7,7 +7,7 @@ public class Tutorial : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private TextMeshProUGUI statText;
     [SerializeField] public int curIndex = 0;
-    private Scripts scripts;
+    private Scripts s;
     public bool preventAttack = true;
     public bool isAnimating;
     private Coroutine mainScroll;
@@ -120,15 +120,15 @@ public class Tutorial : MonoBehaviour {
     private List<string> tutorialTextList;
 
     private void Awake() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         GetComponent<SpriteRenderer>().sprite = blackBox;
-        tutorialTextList = PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on" ? mobileTextList : desktopTutorialText;
-        // cant use scripts.mobilemode for some reason, so oh well 
+        tutorialTextList = PlayerPrefs.GetString(s.BUTTONS_KEY) == "on" ? mobileTextList : desktopTutorialText;
+        // cant use s.mobilemode for some reason, so oh well 
         mainScroll = StartCoroutine(TextAnimation(0));
     }
 
     private void OnMouseDown() {
-        scripts.soundManager.PlayClip("click0");
+        s.soundManager.PlayClip("click0");
         if (curIndex + 1 < tutorialTextList.Count) {
             // if within the bounds of the tutorial
             if (isAnimating) { 
@@ -151,7 +151,7 @@ public class Tutorial : MonoBehaviour {
                 if (curIndex is not (2 or 12 or 13 or 19 or 20 or 21 or 22)) { Increment(); }
                 // some tutorial steps cannot be skipped through clicking, a specific player action needs tobe taken
             }
-            if (curIndex == 12 && scripts.diceSummoner.existingDice.Count == 0) { scripts.diceSummoner.SummonDice(true, false);  }
+            if (curIndex == 12 && s.diceSummoner.existingDice.Count == 0) { s.diceSummoner.SummonDice(true, false);  }
             else if (curIndex == 21) { preventAttack = false; }
             else if (curIndex != 3 && curIndex != 4) { statText.text = ""; }
             // specific tutorials have specific necessary extra things to introduce or clear from the previous step
@@ -179,8 +179,8 @@ public class Tutorial : MonoBehaviour {
         isAnimating = true;
         for (int i = 0; i < tutorialTextList[index].Length; i++) { 
             tutorialText.text += tutorialTextList[index][i];
-            // yield return scripts.delays[0.02f];
-            // for some reason scripts.delays dont fucking work here
+            // yield return s.delays[0.02f];
+            // for some reason s.delays dont fucking work here
             yield return new WaitForSeconds(0.015f);
         }
         isAnimating = false;
@@ -193,8 +193,8 @@ public class Tutorial : MonoBehaviour {
         isAnimating = true;
         foreach (char c in str) {
             statText.text += c;
-            // yield return scripts.delays[0.02f];
-            // for some reason scripts.delays dont fucking work here
+            // yield return s.delays[0.02f];
+            // for some reason s.delays dont fucking work here
             yield return new WaitForSeconds(0.015f);
         }
         isAnimating = false;

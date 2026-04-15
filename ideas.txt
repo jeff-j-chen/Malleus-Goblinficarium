@@ -1,0 +1,9 @@
+turning on / off hints
+fix bug where changing difficulty swaps back to first character
+have trader always have life potion?
+paths with campfires to heal at?
+have trader have weapon?
+make sure torch doesnt fade on trader level
+buff potions significantly (either +5 or grant dice), or potion belt
+blacksmith to upgrade stats / offer weapons?
+increase inventory size by 1

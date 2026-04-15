@@ -4,14 +4,14 @@ public class HighlightCalculator : MonoBehaviour {
     [SerializeField] private GameObject highlighter;
     public GameObject[] highlights = new GameObject[4];
     public BoxCollider2D[] highlightColliders = new BoxCollider2D[4];
-    private Scripts scripts;
+    private Scripts s;
     private readonly Vector2 offScreen = new(0, 20);
     public int diceTakenByPlayer = 0;
     private readonly Vector2 small = new(10f, 1f);
     private readonly Vector2 large = new(10f, 10f);
 
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         HandleHighlightInitiation();
     }
     
@@ -25,9 +25,9 @@ public class HighlightCalculator : MonoBehaviour {
             highlights[i] = highlight;
             highlights[i].transform.parent = transform;
             highlightColliders[i] = highlight.GetComponent<BoxCollider2D>();
-            highlightColliders[i].transform.localScale = scripts.mobileMode 
-                ? scripts.diceSummoner.mobileDiceScale 
-                : scripts.diceSummoner.desktopDiceScale;
+            highlightColliders[i].transform.localScale = s.mobileMode 
+                ? s.diceSummoner.mobileDiceScale 
+                : s.diceSummoner.desktopDiceScale;
             // put the data of each highlight in, and scale it based on the size
         }
     }
@@ -42,12 +42,12 @@ public class HighlightCalculator : MonoBehaviour {
             // shift all die after into place
             ShowYellowHighlights();
             // show all 4 highlights for the player
-            scripts.turnManager.RecalculateMaxFor("player");
+            s.turnManager.RecalculateMaxFor("player");
             // recalculate the max (if the yellow was moved off accuracy)
         }
         else {
             // not yellow
-            if (dice.diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger")) { ShowSingleHighlight("red"); }
+            if (dice.diceType == "green" && s.itemManager.PlayerHasWeapon("dagger")) { ShowSingleHighlight("red"); }
             // if player is using dagger, show highlights for red when picking green dice
             else if (dice.diceType == "white" && Save.game.curCharNum == 3) { ShowSingleHighlight("red"); }
             // if player is 4th char, show highlights for red when picking white dice
@@ -62,7 +62,7 @@ public class HighlightCalculator : MonoBehaviour {
     private void ShowSingleHighlight(string diceType) {
         int diceIndex = Array.IndexOf(Colors.colorNameArr, diceType);
         // get the index of the color relative to the colorName array
-        highlights[diceIndex].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(Colors.colorNameArr[diceIndex], diceType), scripts.statSummoner.yCoords[diceIndex] - 0.01f);
+        highlights[diceIndex].transform.position = new Vector2(s.statSummoner.OutermostPlayerX(Colors.colorNameArr[diceIndex], diceType), s.statSummoner.yCoords[diceIndex] - 0.01f);
         highlights[diceIndex].GetComponent<BoxCollider2D>().size = large;
         // move it to the correct position
     }
@@ -73,7 +73,7 @@ public class HighlightCalculator : MonoBehaviour {
     private void ShowYellowHighlights() {
         for (int i = 0; i < 4; i++) {
             // 4 highlights
-            highlights[i].transform.position = new Vector2(scripts.statSummoner.OutermostPlayerX(Colors.colorNameArr[i]), scripts.statSummoner.yCoords[i] - 0.01f);
+            highlights[i].transform.position = new Vector2(s.statSummoner.OutermostPlayerX(Colors.colorNameArr[i]), s.statSummoner.yCoords[i] - 0.01f);
             highlights[i].GetComponent<BoxCollider2D>().size = small;
             // move the highlight into position with the corresponding stat
         }
@@ -105,21 +105,21 @@ public class HighlightCalculator : MonoBehaviour {
     private void MoveOtherDiceAfterYellow(Dice dice) {
         if (dice.isAttached) {
             // if the die is attached to a stat
-            int index = scripts.statSummoner.addedPlayerDice[dice.statAddedTo].IndexOf(dice);
+            int index = s.statSummoner.addedPlayerDice[dice.statAddedTo].IndexOf(dice);
             // get the index of the stat of which the die is attached to
             if (index != -1) {
                 // if the die exists (to prevent errors)
-                scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Remove(dice);
+                s.statSummoner.addedPlayerDice[dice.statAddedTo].Remove(dice);
                 // remove the die from the array
-                for (int i = index; i < scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Count; i++) {
+                for (int i = index; i < s.statSummoner.addedPlayerDice[dice.statAddedTo].Count; i++) {
                     // for each die after the yellow's place
-                    scripts.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position = new Vector2(scripts.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position.x - scripts.statSummoner.diceOffset, scripts.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position.y);
+                    s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position = new Vector2(s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position.x - s.statSummoner.diceOffset, s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position.y);
                     // shift over to the correct position
-                    scripts.statSummoner.addedPlayerDice[dice.statAddedTo][i].GetComponent<Dice>().instantiationPos = scripts.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position;
+                    s.statSummoner.addedPlayerDice[dice.statAddedTo][i].GetComponent<Dice>().instantiationPos = s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position;
                     // adjust the instantiation position of each accordingly
                 }
-                if (scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Count > 0) {
-                    dice.instantiationPos = new Vector2(scripts.statSummoner.addedPlayerDice[dice.statAddedTo][scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.x + scripts.statSummoner.diceOffset, scripts.statSummoner.addedPlayerDice[dice.statAddedTo][scripts.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.y);
+                if (s.statSummoner.addedPlayerDice[dice.statAddedTo].Count > 0) {
+                    dice.instantiationPos = new Vector2(s.statSummoner.addedPlayerDice[dice.statAddedTo][s.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.x + s.statSummoner.diceOffset, s.statSummoner.addedPlayerDice[dice.statAddedTo][s.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.y);
                     // create an instantiation position at the end of the die stack
                 }
             }
@@ -150,7 +150,7 @@ public class HighlightCalculator : MonoBehaviour {
                 }
                 else {
                     // not yellow
-                    if (dice.diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger")) {
+                    if (dice.diceType == "green" && s.itemManager.PlayerHasWeapon("dagger")) {
                         // if die is green and the player has dagger
                         HandleNormalDrop("red", dice);
                         // make the die drop for red
@@ -175,18 +175,18 @@ public class HighlightCalculator : MonoBehaviour {
                     dice.isAttached = true;
                     dice.isOnPlayerOrEnemy = "player";
                     // set attributes
-                    if (scripts.player.woundList.Contains("chest") && dice.diceNum >= 4) {
+                    if (s.player.woundList.Contains("chest") && dice.diceNum >= 4) {
                         // if injured in chest and die num is 4 or more
                         StartCoroutine(dice.RerollAnimation());
                         // reroll the die, use the coroutine rather than reroll() because reroll is for player altering others only
                     }
-                    if (scripts.player.woundList.Contains("head") && diceTakenByPlayer >= 3) {
+                    if (s.player.woundList.Contains("head") && diceTakenByPlayer >= 3) {
                         // if injured in head the player has taken 3 dice 
-                        scripts.enemy.DiscardBestPlayerDie();
+                        s.enemy.DiscardBestPlayerDie();
                         // note that this calls a coroutine which has a slight delay, avoiding a weird bug with discarding too early
                     }
-                    if (scripts.statSummoner.SumOfStat("green", "player") >= 0 && scripts.statSummoner.SumOfStat("green", "player") - dice.diceNum < 0) {
-                        scripts.turnManager.RecalculateMaxFor("player");
+                    if (s.statSummoner.SumOfStat("green", "player") >= 0 && s.statSummoner.SumOfStat("green", "player") - dice.diceNum < 0) {
+                        s.turnManager.RecalculateMaxFor("player");
                         // recalculate max for the player if necessary
                     }
                     if (Save.game.isHasty) {
@@ -194,24 +194,24 @@ public class HighlightCalculator : MonoBehaviour {
                         if (diceTakenByPlayer >= 3) {
                             // allow the player to take 3 dice
                             diceTakenByPlayer = 0;
-                            scripts.player.SetPlayerStatusEffect("haste", false);
+                            s.player.SetPlayerStatusEffect("haste", false);
                             // reset and turn status effect off
-                            StartCoroutine(scripts.turnManager.EnemyMove(false, true));
+                            StartCoroutine(s.turnManager.EnemyMove(false, true));
                             // make the enemy move and select all remaining die
                         }
                     }
                     else {
                         // not hasty
-                        StartCoroutine(scripts.turnManager.EnemyMove(false));
+                        StartCoroutine(s.turnManager.EnemyMove(false));
                         // enemy moves normally
                     }
-                    if (scripts.tutorial != null) {
-                        if (scripts.diceSummoner.CountUnattachedDice() == 4 || scripts.diceSummoner.CountUnattachedDice() == 0) {
-                            scripts.tutorial.Increment();
+                    if (s.tutorial != null) {
+                        if (s.diceSummoner.CountUnattachedDice() == 4 || s.diceSummoner.CountUnattachedDice() == 0) {
+                            s.tutorial.Increment();
                         }
                     }
                 }
-                scripts.statSummoner.SetDebugInformationFor("player");
+                s.statSummoner.SetDebugInformationFor("player");
                 // set the debug information
                 return;
                 // found a collider so no need to check others, just end function
@@ -223,32 +223,32 @@ public class HighlightCalculator : MonoBehaviour {
     /// Handle a normal dice being dropped onto a highlight.
     /// </summary>
     private void HandleNormalDrop(string addTo, Dice dice) {
-        scripts.statSummoner.AddDiceToPlayer(addTo, dice);
+        s.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to the player
         dice.statAddedTo = addTo;
         // set attributes
-        if (scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
-        if (dice.diceType == "red" && scripts.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
-        else if (dice.diceType == "white" && scripts.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
+        if (s.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
+        if (dice.diceType == "red" && s.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
+        else if (dice.diceType == "white" && s.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
         else if (dice.diceType == "white" && Save.game.curCharNum == 2) { dice.SetToOne(); }
         // take actions depending on injuries and die types, and character numbers
         // chest wounds are handled elsewhere, so dont worry about it here
-        scripts.diceSummoner.SaveDiceValues();
+        s.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
     /// Handle a yellow dice being dropped on to a highlight.
     /// </summary>
     private void HandleYellowDrop(string addTo, Dice dice) {
-        scripts.statSummoner.AddDiceToPlayer(addTo, dice);
+        s.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to player's die list
         dice.statAddedTo = addTo;
         // set attributes
-        if (!dice.isAttached && scripts.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
+        if (!dice.isAttached && s.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
         // decrease if gut wound
-        scripts.turnManager.SetTargetOf("player");
+        s.turnManager.SetTargetOf("player");
         // update the player's targets
-        scripts.diceSummoner.SaveDiceValues();
+        s.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>

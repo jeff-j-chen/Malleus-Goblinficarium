@@ -12,7 +12,7 @@ public class Music : MonoBehaviour {
     [SerializeField] private AudioClip[] musicPieces;
     [SerializeField] private string[] musicPieceNames;
     public AudioSource audioSource;
-    private Scripts scripts;
+    private Scripts s;
     private bool shouldPlayMusic;
     
     private void Awake() {
@@ -21,8 +21,8 @@ public class Music : MonoBehaviour {
         for (int i = 0; i < musicPieces.Length; i++) {
             musicPieceNames[i] = musicPieces[i].name;
         }
-        scripts = FindObjectOfType<Scripts>();
-        shouldPlayMusic = PlayerPrefs.GetString(scripts.MUSIC_KEY) == "on";
+        s = FindObjectOfType<Scripts>();
+        shouldPlayMusic = PlayerPrefs.GetString(s.MUSIC_KEY) == "on";
         audioSource.volume = shouldPlayMusic ? 0.4f : 0f;
     }
     
@@ -44,7 +44,7 @@ public class Music : MonoBehaviour {
     /// Fade the volume out, then back in.
     /// </summary>
     public void FadeVolume() { 
-        shouldPlayMusic = PlayerPrefs.GetString(scripts.MUSIC_KEY) == "on";
+        shouldPlayMusic = PlayerPrefs.GetString(s.MUSIC_KEY) == "on";
         if (shouldPlayMusic) { 
             audioSource.volume = 0.5f;
             StartCoroutine(FadeVolumeCoro()); 
@@ -55,7 +55,7 @@ public class Music : MonoBehaviour {
     /// Fade the volume out, change the track, and fade back in.
     /// </summary>
     public void FadeVolume(String pieceName) { 
-        shouldPlayMusic = PlayerPrefs.GetString(scripts.MUSIC_KEY) == "on";
+        shouldPlayMusic = PlayerPrefs.GetString(s.MUSIC_KEY) == "on";
         if (shouldPlayMusic) { 
             audioSource.volume = 0.5f;
             StartCoroutine(FadeVolumeCoro(pieceName)); 
@@ -67,16 +67,16 @@ public class Music : MonoBehaviour {
     /// </summary>
     private IEnumerator FadeVolumeCoro() { 
         for (int i = 0; i < 5; i++) {
-            yield return scripts.delays[0.05f];
+            yield return s.delays[0.05f];
             audioSource.volume -= 0.1f;
         }
         // fade the volume to 0
         audioSource.volume = 0;
         // prevent rounding errors resulting in the base level changing over time
-        yield return scripts.delays[1f];
+        yield return s.delays[1f];
         // short time where there is no music
         for (int i = 0; i < 5; i++) {
-            yield return scripts.delays[0.05f];
+            yield return s.delays[0.05f];
             audioSource.volume += 0.1f;
         }
         audioSource.volume = 0.5f;
@@ -88,15 +88,15 @@ public class Music : MonoBehaviour {
     /// </summary>
     private IEnumerator FadeVolumeCoro(string pieceName) { 
         for (int i = 0; i < 5; i++) {
-            yield return scripts.delays[0.05f];
+            yield return s.delays[0.05f];
             audioSource.volume -= 0.1f;
         }
         audioSource.Stop();
         audioSource.volume = 0;
-        yield return scripts.delays[1f];
+        yield return s.delays[1f];
         PlayMusic(pieceName);
         for (int i = 0; i < 5; i++) {
-            yield return scripts.delays[0.05f];
+            yield return s.delays[0.05f];
             audioSource.volume += 0.1f;
         }
         audioSource.volume = 0.5f;

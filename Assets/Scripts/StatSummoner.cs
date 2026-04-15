@@ -60,10 +60,10 @@ public class StatSummoner : MonoBehaviour {
         { "red", 0 },
         { "white", 0 },
     };
-    private Scripts scripts;
+    private Scripts s;
 
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         if (PlayerPrefs.GetString("debug") == "on") {
             playerDebug.color = Colors.disabled;
             enemyDebug.color = Colors.disabled;
@@ -73,7 +73,7 @@ public class StatSummoner : MonoBehaviour {
             enemyDebug.color = Color.black;
         }
         // set the debug color if needed
-        if (scripts.mobileMode) {
+        if (s.mobileMode) {
             diceOffset = mobileDiceOffset;
             xOffset = mobileXOffset;
             highlightOffset = mobileHighlightOffset;
@@ -126,10 +126,10 @@ public class StatSummoner : MonoBehaviour {
         if (playerOrEnemy == "player") {
             // get for player
             if (stat == "blue") {
-                if (scripts.enemy.woundList.Contains("knee") && scripts.enemy.enemyName.text != "Lich" || !scripts.player.isDead && scripts.itemManager.PlayerHasWeapon("spear") && scripts.itemManager.PlayerHasLegendary()) { return 99; }
+                if (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || !s.player.isDead && s.itemManager.PlayerHasWeapon("spear") && s.itemManager.PlayerHasLegendary()) { return 99; }
                 // return 99 speed if enemy has knee wound (lich not affected by wounds), or the player has legendary spear
             }
-            int sum = scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];
+            int sum = s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat];
             // get the sum of base stats + potion + stamina + necklet
             foreach (Dice dice in addedPlayerDice[stat]) {
                 // add to the sum all the added die
@@ -140,8 +140,8 @@ public class StatSummoner : MonoBehaviour {
         }
         if (playerOrEnemy == "enemy") {
             // get for enemy, similar process to getting from player
-            if (scripts.player.woundList.Contains("knee") && stat == "blue") { return 99; }
-            int sum = scripts.enemy.stats[stat] + addedEnemyStamina[stat];
+            if (s.player.woundList.Contains("knee") && stat == "blue") { return 99; }
+            int sum = s.enemy.stats[stat] + addedEnemyStamina[stat];
             foreach (Dice dice in addedEnemyDice[stat]) {
                 if (dice != null) { sum += dice.GetComponent<Dice>().diceNum; }
             }
@@ -161,10 +161,10 @@ public class StatSummoner : MonoBehaviour {
             return 0;
         }
         if (playerOrEnemy == "player") {
-            return scripts.player.stats[stat] + scripts.player.potionStats[stat] + addedPlayerStamina[stat] + scripts.itemManager.neckletStats[stat];
+            return s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat];
         }
         if (playerOrEnemy == "enemy") {
-            return scripts.enemy.stats[stat] + addedEnemyStamina[stat];
+            return s.enemy.stats[stat] + addedEnemyStamina[stat];
         }
         Debug.LogError("Can only get the stats of a player or an enemy");
         return 0;
@@ -195,39 +195,39 @@ public class StatSummoner : MonoBehaviour {
         // could use Colors.colorNameArr[i] instead of colorName but that takes up way more space and its much more confusing
         Color statColor = Colors.colorArr[Array.IndexOf(Colors.colorNameArr, colorName)];
         // get the color of the given colorname
-        if (scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName] > 0) {
+        if (s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName] > 0) {
             // if player's stats are greater than 0
             int k0;
-            for (k0 = 0; k0 < scripts.player.stats[colorName] + scripts.player.potionStats[colorName]; k0++) {
+            for (k0 = 0; k0 < s.player.stats[colorName] + s.player.potionStats[colorName]; k0++) {
                 SpawnGeneratedShape(i, statColor, k0, xCoord, xOffset, true, true);
             }
             // summon the positive stat squares at the proper place
-            if (scripts.player.stats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName] < 0) {
+            if (s.player.stats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName] < 0) {
                 // if total without necklet is negative, but total with necklet is positive
-                for (int k1 = 0; k1 < 0 - Mathf.Abs(scripts.player.stats[colorName]) + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; k1++) {
+                for (int k1 = 0; k1 < 0 - Mathf.Abs(s.player.stats[colorName]) + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]; k1++) {
                     // create circles based on the number over the negative
                     SpawnGeneratedShape(i, statColor, k0 + k1, xCoord, xOffset, true, false);
                 }
             }
             else {
                 // spawn circles normally
-                for (int k2 = 0; k2 < scripts.itemManager.neckletStats[colorName]; k2++) {
+                for (int k2 = 0; k2 < s.itemManager.neckletStats[colorName]; k2++) {
                     SpawnGeneratedShape(i, statColor, k0 + k2, xCoord, xOffset, true, false);
                 }
             }
         }
         else {
             // stats are less than 0
-            for (int k = 0; k < -(scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]); k++) {
+            for (int k = 0; k < -(s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]); k++) {
                 SpawnGeneratedShape(i, statColor, k, xCoord, xOffset, false);
             }
             // create negative stat squares
         }
-        if (addedPlayerStamina[colorName] > 0 && scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName] > 0) {
+        if (addedPlayerStamina[colorName] > 0 && s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName] > 0) {
             // if player stamina is greater than 0 and total stats) are greater than 0
-            if (scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] > 0) {
+            if (s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] > 0) {
                 // if player's total stats (without stamina) are greater than 0
-                for (int j = scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName]; j < scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
+                for (int j = s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName]; j < s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
                     GameObject addedStaminaSquare = SpawnGeneratedShape(i, Colors.yellow, j, xCoord, xOffset, true);
                     Vector3 position = addedStaminaSquare.transform.position;
                     position = new Vector2(position.x - 0.01f, position.y);
@@ -241,30 +241,30 @@ public class StatSummoner : MonoBehaviour {
             }
             else {
                 // player's total stats w/o stamina are less than 0
-                for (int j = 0; j < scripts.player.stats[colorName] + scripts.itemManager.neckletStats[colorName] + scripts.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
+                for (int j = 0; j < s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
                     SpawnGeneratedShape(i, Colors.yellow, j, xCoord, xOffset, true);
                 }
                 // make yellow squares in the correct place
             }
         }
-        if (scripts.enemy.stats[colorName] + addedEnemyStamina[colorName] > 0) {
-            for (int l = 0; l < scripts.enemy.stats[colorName]; l++) {
+        if (s.enemy.stats[colorName] + addedEnemyStamina[colorName] > 0) {
+            for (int l = 0; l < s.enemy.stats[colorName]; l++) {
                 SpawnGeneratedShape(i, statColor, l, -xCoord + 1, -xOffset, true);
             }
         }
         else {
-            for (int l = 0; l < -(scripts.enemy.stats[colorName] + addedEnemyStamina[colorName]); l++) {
+            for (int l = 0; l < -(s.enemy.stats[colorName] + addedEnemyStamina[colorName]); l++) {
                 SpawnGeneratedShape(i, statColor, l, -xCoord + 1, -xOffset, false);
             }
         }
-        if (addedEnemyStamina[colorName] > 0 && scripts.enemy.stats[colorName] + addedEnemyStamina[colorName] > 0) {
-            if (scripts.enemy.stats[colorName] > 0) {
-                for (int n = scripts.enemy.stats[colorName]; n < scripts.enemy.stats[colorName] + addedEnemyStamina[colorName]; n++) {
+        if (addedEnemyStamina[colorName] > 0 && s.enemy.stats[colorName] + addedEnemyStamina[colorName] > 0) {
+            if (s.enemy.stats[colorName] > 0) {
+                for (int n = s.enemy.stats[colorName]; n < s.enemy.stats[colorName] + addedEnemyStamina[colorName]; n++) {
                     SpawnGeneratedShape(i, Colors.yellow, n, -xCoord + 1, -xOffset, true);
                 }
             }
             else {
-                for (int n = 0; n < scripts.enemy.stats[colorName] + addedEnemyStamina[colorName]; n++) {
+                for (int n = 0; n < s.enemy.stats[colorName] + addedEnemyStamina[colorName]; n++) {
                     SpawnGeneratedShape(i, Colors.yellow, n, -xCoord + 1, -xOffset, true);
                 }
             }
@@ -322,7 +322,7 @@ public class StatSummoner : MonoBehaviour {
     /// Remove all attached die and stamina.
     /// </summary>
     public void ResetDiceAndStamina() {
-        foreach (GameObject dice in scripts.diceSummoner.existingDice) {
+        foreach (GameObject dice in s.diceSummoner.existingDice) {
             // fade out every die
             StartCoroutine(dice.GetComponent<Dice>().FadeOut());
         }
@@ -333,7 +333,7 @@ public class StatSummoner : MonoBehaviour {
             addedPlayerStamina[key] = 0;
             addedEnemyStamina[key] = 0;
         }
-        scripts.highlightCalculator.diceTakenByPlayer = 0;
+        s.highlightCalculator.diceTakenByPlayer = 0;
         SetDebugInformationFor("player");
         SetDebugInformationFor("enemy");
         // set the debug information
@@ -343,14 +343,72 @@ public class StatSummoner : MonoBehaviour {
     /// Add a die to player's stat.
     /// </summary>
     public void AddDiceToPlayer(string addTo, Dice dice) {
-        addedPlayerDice[addTo].Add(dice);
+        if (dice != null && !addedPlayerDice[addTo].Contains(dice)) {
+            addedPlayerDice[addTo].Add(dice);
+        }
     }
 
     /// <summary>
     /// Add a die to enemy's stat.
     /// </summary>
     public void AddDiceToEnemy(string addTo, Dice dice) {
-        addedEnemyDice[addTo].Add(dice);
+        if (dice != null && !addedEnemyDice[addTo].Contains(dice)) {
+            addedEnemyDice[addTo].Add(dice);
+        }
+    }
+
+    /// <summary>
+    /// Reposition all attached dice for the specified side.
+    /// </summary>
+    public void RepositionAllDice(string playerOrEnemy) {
+        Dictionary<string, List<Dice>> diceDictionary = playerOrEnemy == "player"
+            ? addedPlayerDice
+            : addedEnemyDice;
+
+        foreach (string stat in diceDictionary.Keys) {
+            RepositionDice(playerOrEnemy, stat);
+        }
+    }
+
+    /// <summary>
+    /// Reposition all attached dice for a given stat on the specified side.
+    /// </summary>
+    public void RepositionDice(string playerOrEnemy, string stat) {
+        Dictionary<string, List<Dice>> diceDictionary = playerOrEnemy == "player"
+            ? addedPlayerDice
+            : addedEnemyDice;
+
+        if (!diceDictionary.TryGetValue(stat, out List<Dice> diceList)) { return; }
+
+        CompactDiceList(diceList);
+
+        int count = diceList.Count;
+        float y = yCoords[Array.IndexOf(Colors.colorNameArr, stat)] - 0.01f;
+
+        for (int i = 0; i < count; i++) {
+            float x = playerOrEnemy == "player"
+                ? OutermostPlayerX(stat) - (count * diceOffset) + (i * diceOffset)
+                : OutermostEnemyX(stat) + ((count - 1 - i) * diceOffset);
+
+            Vector2 position = new(x, y);
+            diceList[i].transform.position = position;
+            diceList[i].instantiationPos = position;
+        }
+    }
+
+    /// <summary>
+    /// Remove null and duplicate dice references while preserving order.
+    /// </summary>
+    private static void CompactDiceList(List<Dice> diceList) {
+        List<Dice> compacted = diceList
+            .Where(dice => dice != null)
+            .Distinct()
+            .ToList();
+
+        if (compacted.Count == diceList.Count) { return; }
+
+        diceList.Clear();
+        diceList.AddRange(compacted);
     }
 
     /// <summary>
@@ -359,7 +417,7 @@ public class StatSummoner : MonoBehaviour {
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         optionalDiceOffsetStatToMultiplyBy ??= statType;
         // not setting the optional variable will just default it to the base stat type
-        return xCoord + ((Mathf.Abs(scripts.player.stats[statType] + scripts.player.potionStats[statType] + scripts.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
+        return xCoord + ((Mathf.Abs(s.player.stats[statType] + s.player.potionStats[statType] + s.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
     }
 
@@ -367,7 +425,8 @@ public class StatSummoner : MonoBehaviour {
     /// Get the outermost enemy's x coordinate to add dice onto.
     /// </summary>
     public float OutermostEnemyX(string statType) {
-        return -xCoord + 1 + ((Mathf.Abs(scripts.enemy.stats[statType]) + addedEnemyStamina[statType] - 1) * -xOffset)  - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
+        int totalEnemyStat = s.enemy.stats[statType] + addedEnemyStamina[statType];
+        return -xCoord + 1 + ((Mathf.Abs(totalEnemyStat) - 1) * -xOffset) - highlightOffset - diceOffset * (addedEnemyDice[statType].Count - 1);
         // similar to outermostplayerx
     }
 
@@ -375,7 +434,7 @@ public class StatSummoner : MonoBehaviour {
     /// Set the debug information for player or enemy.
     /// </summary>
     public void SetDebugInformationFor(string playerOrEnemy) {
-        if (scripts.tutorial == null) {
+        if (s.tutorial == null) {
             if (playerOrEnemy == "player") {
                 float furthest = (new[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
                 playerDebug.transform.position = furthest >= -3.8 ? new Vector2(furthest + 1.333f, baseDebugPos.y) : new Vector2(baseDebugPos.x, baseDebugPos.y);
@@ -392,7 +451,7 @@ public class StatSummoner : MonoBehaviour {
             // (2)
             // for example
             else { Debug.Log("error"); }
-            scripts.enemy.TargetBest();
+            s.enemy.TargetBest();
         }
     }
 

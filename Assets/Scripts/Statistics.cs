@@ -15,11 +15,11 @@ public class Statistics : MonoBehaviour {
     private readonly WaitForSeconds tenthSecond = new(0.1f);
     private readonly WaitForSeconds oneSecond = new(1f);
     private readonly string baseText = "hold [space] to delete all data - this action is irrecoverable";
-    private Scripts scripts;
+    private Scripts s;
     
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
-        bottomText.gameObject.SetActive(PlayerPrefs.GetString(scripts.BUTTONS_KEY) != "on");
+        s = FindObjectOfType<Scripts>();
+        bottomText.gameObject.SetActive(PlayerPrefs.GetString(s.BUTTONS_KEY) != "on");
         ShowStatistics();
     }
 
@@ -47,7 +47,7 @@ public class Statistics : MonoBehaviour {
             // 50 times, decrease by 0.1s
             if (i % 10 == 0) {
                 bottomText.text = $"[{Mathf.Round(time)}]";
-                scripts.soundManager.PlayClip("click0");
+                s.soundManager.PlayClip("click0");
                 // whole number, so display it
             }
             if (!Input.GetKey(KeyCode.Space)) { break; }
@@ -70,7 +70,7 @@ public class Statistics : MonoBehaviour {
         Save.persistent = new PersistentData();
         Save.SavePersistent();
         bottomText.text = "[done]";
-        scripts.soundManager.PlayClip("click1");
+        s.soundManager.PlayClip("click1");
         ShowStatistics();
     }
 }

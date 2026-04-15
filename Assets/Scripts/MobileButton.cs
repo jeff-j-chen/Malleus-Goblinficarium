@@ -2,35 +2,35 @@ using UnityEngine;
 using TMPro;
 
 public class MobileButton : MonoBehaviour {
-    private Scripts scripts;
+    private Scripts s;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private TextMeshProUGUI text;
     private bool usingSR;
     private bool showButtons;
     
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer == null) { text = GetComponent<TextMeshProUGUI>(); }
         // if not a sprite (text button), use textmeshpro instead
         usingSR = spriteRenderer != null;
         // toggle bool for handling sprites or text objects
-        gameObject.SetActive(PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on");
+        gameObject.SetActive(PlayerPrefs.GetString(s.BUTTONS_KEY) == "on");
     }
 
     private void OnMouseUpAsButton() {
         switch (gameObject.name) {
-            case "UButton": scripts.player.MoveTargetUp(); break;
-            case "DButton": scripts.player.MoveTargetDown(); break;
-            case "LButton": scripts.itemManager.SelectLeft(); break;
-            case "use": scripts.itemManager.UseCurrentItem(); break;
-            case "drop": scripts.itemManager.DropCurrentItem(); break;
-            case "RButton": scripts.itemManager.SelectRight(); break;
-            case "menu": scripts.backToMenu.GoBack(); break;
-            case "items": scripts.itemManager.ChangeItemList(); break;
-            case "select": scripts.characterSelector.Select(); break;
-            case "easy mode": scripts.characterSelector.CycleDifficulty(); break;
-            case "reset stats": scripts.statistics.ResetStats(); break;
+            case "UButton": s.player.MoveTargetUp(); break;
+            case "DButton": s.player.MoveTargetDown(); break;
+            case "LButton": s.itemManager.SelectLeft(); break;
+            case "use": s.itemManager.UseCurrentItem(); break;
+            case "drop": s.itemManager.DropCurrentItem(); break;
+            case "RButton": s.itemManager.SelectRight(); break;
+            case "menu": s.backToMenu.GoBack(); break;
+            case "items": s.itemManager.ChangeItemList(); break;
+            case "select": s.characterSelector.Select(); break;
+            case "easy mode": s.characterSelector.CycleDifficulty(); break;
+            case "reset stats": s.statistics.ResetStats(); break;
         }
     }
     
@@ -44,7 +44,7 @@ public class MobileButton : MonoBehaviour {
     private void OnMouseDown() {
         if (gameObject.name != "LButton" && gameObject.name != "RButton") {
             // l and r buttons already play click when selecting an item
-            scripts.soundManager.PlayClip("click0");
+            s.soundManager.PlayClip("click0");
         }
         if (usingSR) {  spriteRenderer.color = Colors.clicked; }
         else { text.color = Colors.clicked; }

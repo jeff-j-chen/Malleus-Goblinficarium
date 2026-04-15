@@ -1,3 +1,4 @@
+using System.Linq;
 using System.IO;
 using UnityEngine;
 public static class Save {
@@ -12,9 +13,14 @@ public static class Save {
 
     public static void LoadTutorial() { 
         game = JsonUtility.FromJson<GameData>(tutorialJson);
+        game.Normalize();
     }
 
     public static void SaveGame() { 
+        Scripts s = Object.FindObjectOfType<Scripts>();
+        if (game != null && s != null && s.enemy != null && s.statSummoner != null) {
+            game.enemyStamina = s.enemy.stamina + s.statSummoner.addedEnemyStamina.Values.Sum();
+        }
         File.WriteAllText(GamePath, JsonUtility.ToJson(game));
     }
 
@@ -27,6 +33,7 @@ public static class Save {
                 game = new GameData();
                 SaveGame();
             }
+            game.Normalize();
             // Debug.Log($"just saved the game! newgame is {game.newGame}");
         }
         else { 
@@ -46,6 +53,13 @@ public static class Save {
             if (persistent == null) { 
                 persistent = new PersistentData();
                 SavePersistent();
+            }
+            else {
+                string migratedDifficulty = DifficultyHelper.Migrate(persistent.gameDifficulty, persistent.difficultyVersion);
+                bool changed = migratedDifficulty != persistent.gameDifficulty || persistent.difficultyVersion != DifficultyHelper.CurrentDifficultyVersion;
+                persistent.gameDifficulty = migratedDifficulty;
+                persistent.difficultyVersion = DifficultyHelper.CurrentDifficultyVersion;
+                if (changed) { SavePersistent(); }
             }
         }
         else { 

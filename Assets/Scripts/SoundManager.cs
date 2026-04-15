@@ -4,16 +4,16 @@ public class SoundManager : MonoBehaviour {
     [SerializeField] private AudioClip[] audioClips;
     [SerializeField] private string[] audioClipNames;
     private AudioSource audioSource;
-    private Scripts scripts;
+    private Scripts s;
 
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         audioSource = GetComponent<AudioSource>();
         audioClipNames = new string[audioClips.Length];
         for (int i = 0; i < audioClips.Length; i++) {
             audioClipNames[i] = audioClips[i].name;
         }
-        audioSource.volume = PlayerPrefs.GetString(scripts.SOUNDS_KEY) == "on" ? 1f : 0f;
+        audioSource.volume = PlayerPrefs.GetString(s.SOUNDS_KEY) == "on" ? 1f : 0f;
     }
 
     /// <summary>

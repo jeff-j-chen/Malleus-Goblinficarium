@@ -13,15 +13,15 @@ public class Dice : MonoBehaviour {
     public Vector3 instantiationPos;
     private SpriteRenderer spriteRenderer;
     private SpriteRenderer childSpriteRenderer;
-    private Scripts scripts;
+    private Scripts s;
     private bool wasClickedRecently = false;
 
     private readonly WaitForSeconds[] rollTimes = { new(0.01f), new(0.03f), new(0.06f), new(0.09f), new(0.12f), new(0.15f), new(0.18f), new(0.21f), new(0.24f), new(0.3f) };
     // different times for rolling 
 
     private void Awake()  {
-        // must be in awake, otherwise scripts not set fast enough
-        scripts = FindObjectOfType<Scripts>();
+        // must be in awake, otherwise s not set fast enough
+        s = FindObjectOfType<Scripts>();
         // assign the necessary sprite renderers
     }
 
@@ -31,16 +31,16 @@ public class Dice : MonoBehaviour {
 
     private void OnMouseDown() {
         // as soon as the mouse button is pressed down
-        if (scripts.tutorial != null) { 
+        if (s.tutorial != null) { 
             // if within the tutorial, make sure player can only do certain actions (so that they win)
-            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex is 12 or 13)  {
-                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDown(); }
+            if (s.tutorial.isAnimating || s.tutorial.curIndex is 12 or 13)  {
+                if (s.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDown(); }
                 // only allow the red 6 to be picked
-                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDown(); }
+                else if (s.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDown(); }
                 // then take the green
-                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceDown(); }
+                else if (s.diceSummoner.CountUnattachedDice() == 2) { DiceDown(); }
                 // after that it doesnt matter
-                else { scripts.turnManager.SetStatusText("bad choice"); }
+                else { s.turnManager.SetStatusText("bad choice"); }
             }
         }
         else { DiceDown(); }
@@ -52,24 +52,24 @@ public class Dice : MonoBehaviour {
     /// Handle what happens when the player presses down on a dice.
     /// </summary>
     private void DiceDown() { 
-        if (moveable && !scripts.turnManager.isMoving) {
+        if (moveable && !s.turnManager.isMoving) {
             // if the dice is still moveable
-            scripts.soundManager.PlayClip("click0");
+            s.soundManager.PlayClip("click0");
             // play sound clip
             childSpriteRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
             // assign the child sprite renderer to be edited 
-            scripts.highlightCalculator.ShowValidHighlights(gameObject.GetComponent<Dice>());
+            s.highlightCalculator.ShowValidHighlights(gameObject.GetComponent<Dice>());
             // call the from class HighlightCalculator to show all valid highlights 
         }
         // TODO: LOOKS BETTER BUT CAUSES GLITCHES, FIX IN THE FUTURE
         
         // if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy") {
         //     // if an action can be performed on the dice (discard, reroll)
-        //     if (!scripts.turnManager.isMoving || (scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable)) {
+        //     if (!s.turnManager.isMoving || (s.turnManager.isMoving && s.turnManager.actionsAvailable)) {
         //         // if the situation permits action to occur on the die
-        //         if (scripts.itemManager.discardableDieCounter > 0) {
+        //         if (s.itemManager.discardableDieCounter > 0) {
         //             // if the enemy is wounded in the head and a die has not been discarded yet
-        //             scripts.soundManager.PlayClip("click0");
+        //             s.soundManager.PlayClip("click0");
         //             // play sound clip
         //             Color numTemp = spriteRenderer.color;
         //             Color baseTemp = childSpriteRenderer.color;
@@ -81,9 +81,9 @@ public class Dice : MonoBehaviour {
         //         }
         //     }
         // }
-        // if (isAttached && isOnPlayerOrEnemy == "player" && scripts.player.isCourageous && !scripts.turnManager.isMoving) {
+        // if (isAttached && isOnPlayerOrEnemy == "player" && s.player.isCourageous && !s.turnManager.isMoving) {
         //     // if the player wants to Save a die via scroll of courage by discarding the others
-        //     scripts.soundManager.PlayClip("click0");
+        //     s.soundManager.PlayClip("click0");
         //     // play sound clip
         //     Color numTemp = spriteRenderer.color;
         //     Color baseTemp = childSpriteRenderer.color;
@@ -97,24 +97,24 @@ public class Dice : MonoBehaviour {
     
     private void OnMouseUp() {
         // self explanatory, tutorial restricts which dice can be picked, else is just normal
-        if (scripts.tutorial != null) { 
-            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13) {
-                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceUp(); }
-                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceUp(); }
-                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceUp(); }
-                else { scripts.turnManager.SetStatusText("bad choice"); }
+        if (s.tutorial != null) { 
+            if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13) {
+                if (s.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceUp(); }
+                else if (s.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceUp(); }
+                else if (s.diceSummoner.CountUnattachedDice() == 2) { DiceUp(); }
+                else { s.turnManager.SetStatusText("bad choice"); }
             }
         }
         else { DiceUp(); }
     }
 
     private void OnMouseDrag() {
-        if (scripts.tutorial != null) { 
-            if (scripts.tutorial.isAnimating || scripts.tutorial.curIndex == 12 || scripts.tutorial.curIndex == 13) {
-                if (scripts.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDrag(); }
-                else if (scripts.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDrag(); }
-                else if (scripts.diceSummoner.CountUnattachedDice() == 2) { DiceDrag(); }
-                else { scripts.turnManager.SetStatusText("bad choice"); }
+        if (s.tutorial != null) { 
+            if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13) {
+                if (s.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDrag(); }
+                else if (s.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDrag(); }
+                else if (s.diceSummoner.CountUnattachedDice() == 2) { DiceDrag(); }
+                else { s.turnManager.SetStatusText("bad choice"); }
             }
         }
         else { DiceDrag(); }
@@ -125,7 +125,7 @@ public class Dice : MonoBehaviour {
     /// </summary>
     private void DiceDrag() { 
         // when the mouse is dragged
-        if (moveable && !scripts.turnManager.isMoving) {
+        if (moveable && !s.turnManager.isMoving) {
             // if the dice can be moved
             spriteRenderer.sortingOrder = 3;
             childSpriteRenderer.sortingOrder = 2;
@@ -143,18 +143,18 @@ public class Dice : MonoBehaviour {
     /// </summary>
     private void DiceUp() {
         // when the mouse is released
-        if (moveable && !scripts.turnManager.isMoving) {
+        if (moveable && !s.turnManager.isMoving) {
             // if the dice can be moved
-            scripts.soundManager.PlayClip("click1");
+            s.soundManager.PlayClip("click1");
             // play sound clip
             if (wasClickedRecently) {
                 // was clicked recently, so select the dice
                 float xOverride;
                 float yOverride;
-                GameObject[] highlights = scripts.highlightCalculator.highlights;
+                GameObject[] highlights = s.highlightCalculator.highlights;
                 // 0: accuracy, 1: speed, 2: damage, 3: parry
                 if (diceType == "yellow" || 
-                    diceType == "green" && scripts.itemManager.PlayerHasWeapon("dagger") || diceType == "white" && Save.game.curCharNum == 3) { 
+                    diceType == "green" && s.itemManager.PlayerHasWeapon("dagger") || diceType == "white" && Save.game.curCharNum == 3) { 
                     // yellow dice drop onto red by default
                     // green die + dagger drop onto red
                     // white die + char 3 do as well
@@ -167,38 +167,38 @@ public class Dice : MonoBehaviour {
                     xOverride = highlights[diceIndex].transform.position.x;
                     yOverride = highlights[diceIndex].transform.position.y;
                 }
-                scripts.highlightCalculator.SnapToPosition(gameObject.GetComponent<Dice>(), instantiationPos, out moveable, out instantiationPos, xOverride, yOverride);
+                s.highlightCalculator.SnapToPosition(gameObject.GetComponent<Dice>(), instantiationPos, out moveable, out instantiationPos, xOverride, yOverride);
             }
             else { 
                 // dice was not clicked recently, so start the timer
                 StartCoroutine(ClickedTimer());
-                scripts.highlightCalculator.SnapToPosition(gameObject.GetComponent<Dice>(), instantiationPos, out moveable, out instantiationPos);
+                s.highlightCalculator.SnapToPosition(gameObject.GetComponent<Dice>(), instantiationPos, out moveable, out instantiationPos);
             }
             // attempt to snap the position with a function defined in HighlightCalculator
             transform.position = instantiationPos;
             // set the transform position to be where the instantiation position is (snap back to the selection menu if it didn't get snapped in SnapToPosition)
-            scripts.highlightCalculator.HideHighlights();
+            s.highlightCalculator.HideHighlights();
             // hide all the highlights
             spriteRenderer.sortingOrder = 1;
             childSpriteRenderer.sortingOrder = 0;
             // send the die to the background
         }
-        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && scripts.enemy.enemyName.text != "Lich") {
-            //  && !scripts.turnManager.isMoving
+        if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && s.enemy.enemyName.text != "Lich") {
+            //  && !s.turnManager.isMoving
             // if an action can be performed on the dice (discard, reroll)
-            if (!scripts.turnManager.isMoving || scripts.turnManager.isMoving && scripts.turnManager.actionsAvailable) {
+            if (!s.turnManager.isMoving || s.turnManager.isMoving && s.turnManager.actionsAvailable) {
                 // if the situation allows for an action to be performed
-                if (Save.game.discardableDieCounter > 0 || scripts.turnManager.scimitarParryCount > 0) {
+                if (Save.game.discardableDieCounter > 0 || s.turnManager.scimitarParryCount > 0) {
                     // if can discard from another source
-                    if (scripts.turnManager.scimitarParryCount > 1) {
-                        scripts.turnManager.scimitarParryCount = 1;
+                    if (s.turnManager.scimitarParryCount > 1) {
+                        s.turnManager.scimitarParryCount = 1;
                         // decrease the scimitarparry count
-                        if (scripts.tutorial == null) { Save.SaveGame(); }
+                        if (s.tutorial == null) { Save.SaveGame(); }
                     }
                     else {
                         // <= 1 scimitar die parry
-                        scripts.turnManager.scimitarParryCount = 0;
-                        scripts.diceSummoner.breakOutOfScimitarParryLoop = true;
+                        s.turnManager.scimitarParryCount = 0;
+                        s.diceSummoner.breakOutOfScimitarParryLoop = true;
                         // set the # of parries to 0 and break out of the loop
                     }
                     DiscardFromEnemy();
@@ -207,14 +207,14 @@ public class Dice : MonoBehaviour {
                     // decrease the counter for the number of die able to be discarded
                     // if source is from scimitarParry, break out of the waiting loop
                 }
-                else if (scripts.enemy.woundList.Contains("chest") || scripts.itemManager.PlayerHasWeapon("mace") && scripts.itemManager.PlayerHasLegendary()) {
+                else if (s.enemy.woundList.Contains("chest") || s.itemManager.PlayerHasWeapon("mace") && s.itemManager.PlayerHasLegendary()) {
                     // if enemy is wounded in the chest or player has legendary mace
                     Reroll();
                     // reroll the die
                 }
             }
         }
-        if (isAttached && isOnPlayerOrEnemy == "player" && Save.game.isCourageous && scripts.turnManager.discardDieBecauseCourage) {
+        if (isAttached && isOnPlayerOrEnemy == "player" && Save.game.isCourageous && s.turnManager.discardDieBecauseCourage) {
             // if discarding can and should discard die from courage
             DiscardFromPlayer();
             // do so 
@@ -224,7 +224,7 @@ public class Dice : MonoBehaviour {
     private IEnumerator ClickedTimer() { 
         if (!wasClickedRecently) { 
             wasClickedRecently = true;
-            yield return scripts.delays[0.3f];
+            yield return s.delays[0.3f];
             wasClickedRecently = false;
         }
     }
@@ -233,27 +233,17 @@ public class Dice : MonoBehaviour {
     /// Discard this dice from the enemy.
     /// </summary>
     private void DiscardFromEnemy() {
-        scripts.soundManager.PlayClip("click1");
+        s.soundManager.PlayClip("click1");
         // play sound clip
-        int index = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this);
-        // set variable index to be the index of where the die is
-        scripts.turnManager.alterationDuringMove = true;
+        s.turnManager.alterationDuringMove = true;
         // set necessary variables for the turnmanager
-        scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this);
-        scripts.diceSummoner.existingDice.Remove(gameObject);
+        s.statSummoner.addedEnemyDice[statAddedTo].Remove(this);
+        s.diceSummoner.existingDice.Remove(gameObject);
         // remove the die from the lists
         Destroy(gameObject);
         // destroy the gameObject
-        List<Dice> diceList = scripts.statSummoner.addedEnemyDice[statAddedTo];
-        // assign reference variable for the enemy dice of the same category that just had a dice removed
-        for (int i = index; i < diceList.Count; i++) {
-            // for every dice at and after the index of where the removed die was
-            diceList[i].transform.position = new Vector2(diceList[i].transform.position.x + scripts.statSummoner.diceOffset, diceList[i].transform.position.y);
-            // shift the die so it fits properly after one was removed
-            diceList[i].GetComponent<Dice>().instantiationPos = diceList[i].transform.position;
-            // set the instantiation position for the dice
-        }
-        scripts.statSummoner.SetDebugInformationFor("enemy");
+        s.statSummoner.RepositionDice("enemy", statAddedTo);
+        s.statSummoner.SetDebugInformationFor("enemy");
         // set the debug information
         Save.persistent.diceDiscarded++;
         Save.SavePersistent();
@@ -265,17 +255,13 @@ public class Dice : MonoBehaviour {
     /// </summary>
     public void DiscardFromPlayer() {
         // very similar to discardfromenemy, just doesn't set certain variables in TurnManager and such
-        int index = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this);
-        scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this);
-        scripts.diceSummoner.existingDice.Remove(gameObject);
+        s.statSummoner.addedPlayerDice[statAddedTo].Remove(this);
+        s.diceSummoner.existingDice.Remove(gameObject);
         Destroy(gameObject);
-        List<Dice> diceList = scripts.statSummoner.addedPlayerDice[statAddedTo];
-        for (int i = index; i < diceList.Count; i++) {
-            diceList[i].transform.position = new Vector2(diceList[i].transform.position.x - scripts.statSummoner.diceOffset, diceList[i].transform.position.y);
-            diceList[i].GetComponent<Dice>().instantiationPos = diceList[i].transform.position;
-        }
-        scripts.statSummoner.SetDebugInformationFor("player");
-        scripts.diceSummoner.SaveDiceValues();
+        s.statSummoner.RepositionDice("player", statAddedTo);
+        s.statSummoner.SetDebugInformationFor("player");
+        s.turnManager.RecalculateMaxFor("player");
+        s.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
@@ -284,10 +270,10 @@ public class Dice : MonoBehaviour {
     private void Reroll() {
         // pretty self explanatory self explanatory
         Save.persistent.diceRerolled++;
-        scripts.turnManager.alterationDuringMove = true;
+        s.turnManager.alterationDuringMove = true;
         StartCoroutine(RerollAnimation());
         isRerolled = true;
-        scripts.diceSummoner.SaveDiceValues();
+        s.diceSummoner.SaveDiceValues();
         Save.SavePersistent();
     }
 
@@ -300,40 +286,40 @@ public class Dice : MonoBehaviour {
             // 10 times
             yield return rollTimes[i];
             // wait for a set amount of time
-            if (playSound) { scripts.soundManager.PlayClip("click0"); }
+            if (playSound) { s.soundManager.PlayClip("click0"); }
             // play sound clip if necessary
             int randNum = UnityEngine.Random.Range(1, 7);
             // get a random number for the dice 
-            spriteRenderer.sprite = scripts.diceSummoner.numArr[randNum - 1].GetComponent<SpriteRenderer>().sprite;
+            spriteRenderer.sprite = s.diceSummoner.numArr[randNum - 1].GetComponent<SpriteRenderer>().sprite;
             // assign the sprite to be the necessary sprite with the new number
             diceNum = randNum;
             // reassign the die's number
         }
-        scripts.statSummoner.SetDebugInformationFor("player");
-        scripts.statSummoner.SetDebugInformationFor("enemy");
-        scripts.turnManager.RecalculateMaxFor("player");
-        scripts.turnManager.RecalculateMaxFor("enemy");
+        s.statSummoner.SetDebugInformationFor("player");
+        s.statSummoner.SetDebugInformationFor("enemy");
+        s.turnManager.RecalculateMaxFor("player");
+        s.turnManager.RecalculateMaxFor("enemy");
         // set debug information and make sure that the player/enemy isn't aiming at something that they shouldn't be able to hit
-        scripts.diceSummoner.SaveDiceValues();
+        s.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
     /// Coroutine for decreasing the value of this die.
     /// </summary>
     public IEnumerator DecreaseDiceValue(bool wait = true) {
-        if (wait) { yield return scripts.delays[1f]; }
+        if (wait) { yield return s.delays[1f]; }
         // wait if necessary
         if (diceNum == 1) { StartCoroutine(FadeOut()); }
         // fade it out if decreasing dice value to 0
         else {
             diceNum--;
-            GetComponent<SpriteRenderer>().sprite = scripts.diceSummoner.numArr[diceNum - 1].GetComponent<SpriteRenderer>().sprite;
+            GetComponent<SpriteRenderer>().sprite = s.diceSummoner.numArr[diceNum - 1].GetComponent<SpriteRenderer>().sprite;
             // otherwise decrement value and set the proper sprite
         }
-        scripts.statSummoner.SetDebugInformationFor("player");
-        scripts.statSummoner.SetDebugInformationFor("enemy");
+        s.statSummoner.SetDebugInformationFor("player");
+        s.statSummoner.SetDebugInformationFor("enemy");
         // set the debug information
-        scripts.diceSummoner.SaveDiceValues();
+        s.diceSummoner.SaveDiceValues();
     }
 
     /// <summary>
@@ -342,17 +328,17 @@ public class Dice : MonoBehaviour {
     public void SetToOne() {
         // pretty self explanatory
         diceNum = 1;
-        spriteRenderer.sprite = scripts.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
-        scripts.statSummoner.SetDebugInformationFor("player");
+        spriteRenderer.sprite = s.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
+        s.statSummoner.SetDebugInformationFor("player");
         // this can only happen to player, so don't worry about enemies stuff
-        scripts.diceSummoner.SaveDiceValues();
+        s.diceSummoner.SaveDiceValues();
     }
     
     /// <summary>
     /// Coroutine for fading out this die.
     /// </summary>
     public IEnumerator FadeOut(bool wait=false, bool shiftOver = true) {
-        if (wait) { yield return scripts.delays[0.55f]; }
+        if (wait) { yield return s.delays[0.55f]; }
         // wait if necessary
         Color numTemp = spriteRenderer.color;
         Color baseTemp = childSpriteRenderer.color;
@@ -362,7 +348,7 @@ public class Dice : MonoBehaviour {
         // assign the necessary variables to manipulate the color
         for (int i = 0; i < 12; i++) {
             // 40 times
-            yield return scripts.delays[0.005f];
+            yield return s.delays[0.005f];
             // wait a small duration
             numTemp.a -= 1/12f;
             spriteRenderer.color = numTemp;
@@ -370,46 +356,25 @@ public class Dice : MonoBehaviour {
             childSpriteRenderer.color = baseTemp;
             // decrease the colors of the die and base
         }
-        if (statAddedTo != "" && shiftOver) { 
-            // if the die has already been attached (only needed to check for my cheat)
-            if (isOnPlayerOrEnemy == "player") {
-                // if the die is attached to the player
-                for (int i = scripts.statSummoner.addedPlayerDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedPlayerDice[statAddedTo].Count; i++) { 
-                    // for every die following this current die
-                    GameObject curDie = scripts.statSummoner.addedPlayerDice[statAddedTo][i].gameObject;
-                    Vector3 position = curDie.transform.position;
-                    position = new Vector3(position.x - scripts.statSummoner.diceOffset, position.y, position.z);
-                    curDie.transform.position = position;
-                    // shift each die back one, because this die will decrease to 0 and fade out
-                }
-            }
-            else if (isOnPlayerOrEnemy == "enemy") {
-                // else the die is attached to the enemy
-                for (int i = scripts.statSummoner.addedEnemyDice[statAddedTo].IndexOf(this)+1; i < scripts.statSummoner.addedEnemyDice[statAddedTo].Count; i++) { 
-                    GameObject curDie = scripts.statSummoner.addedEnemyDice[statAddedTo][i].gameObject;
-                    Vector3 position = curDie.transform.position;
-                    position = new Vector3(position.x + scripts.statSummoner.diceOffset, position.y, position.z);
-                    curDie.transform.position = position;
-                }
-                // same situation as above, shift the die (except forwards this time)
-            }
-            
-            // else { print("something is wrong with this die"); }
-        }
-        try { scripts.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
-        try { scripts.statSummoner.addedEnemyDice[statAddedTo].Remove(this); } catch { }
+        string removedStat = statAddedTo;
+        string removedSide = isOnPlayerOrEnemy;
+        try { s.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
+        try { s.statSummoner.addedEnemyDice[statAddedTo].Remove(this); } catch { }
         // attempt to remove from the player/enemy, checking with if statements causes a plethora of bugs for no reason
-        scripts.diceSummoner.existingDice.Remove(gameObject);
+        if (removedStat != "" && shiftOver && (removedSide == "player" || removedSide == "enemy")) {
+            s.statSummoner.RepositionDice(removedSide, removedStat);
+        }
+        s.diceSummoner.existingDice.Remove(gameObject);
         // remove from existing die list so no errors later on
         Destroy(gameObject);
         // destroy the die
-        scripts.diceSummoner.SaveDiceValues();
+        s.diceSummoner.SaveDiceValues();
         // Save the dice values to the Save file
         if (isOnPlayerOrEnemy != "none") {
-            scripts.turnManager.RecalculateMaxFor(isOnPlayerOrEnemy);
+            s.turnManager.RecalculateMaxFor(isOnPlayerOrEnemy);
         }
-        scripts.statSummoner.SetDebugInformationFor("enemy");
-        scripts.statSummoner.SetDebugInformationFor("player");
+        s.statSummoner.SetDebugInformationFor("enemy");
+        s.statSummoner.SetDebugInformationFor("player");
     }
     
     /// <summary>
@@ -425,13 +390,13 @@ public class Dice : MonoBehaviour {
         baseTemp.a = 0;
         spriteRenderer.color = numTemp;
         childSpriteRenderer.color = baseTemp;
-        yield return scripts.delays[0.005f];
+        yield return s.delays[0.005f];
         for (int i = 0; i < 40; i++) {
             numTemp.a += 0.025f;
             spriteRenderer.color = numTemp;
             baseTemp.a += 0.025f;
             childSpriteRenderer.color = baseTemp;
-            yield return scripts.delays[0.005f];
+            yield return s.delays[0.005f];
         }
     }
 }

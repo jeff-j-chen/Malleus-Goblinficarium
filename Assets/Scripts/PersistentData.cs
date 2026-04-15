@@ -2,6 +2,7 @@ using System;
 
 [Serializable]
 public class PersistentData {
+    public int difficultyVersion;
     public int tsLevel;
     public int tsSub;
     public int tsWeaponAcc;
@@ -36,6 +37,7 @@ public class PersistentData {
     public int diceRerolled;
     public int diceDiscarded;
     public PersistentData() {
+        difficultyVersion = DifficultyHelper.CurrentDifficultyVersion;
         tsLevel = -1;
         tsSub = -1;
         tsWeaponAcc = 0;
@@ -46,7 +48,7 @@ public class PersistentData {
         tsItemTypes = new string[9];
         tsItemMods = new string[9];
         newCharNum = 0;
-        gameDifficulty = "normal";
+        gameDifficulty = DifficultyHelper.Normal;
         unlockedChars = new bool[4] { true, false, false, false };
         gamesPlayed = 0;
         highestLevel = 1;

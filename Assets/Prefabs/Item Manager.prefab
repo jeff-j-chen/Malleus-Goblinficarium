@@ -65,6 +65,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fbeb873f995e3d547bd6d963167a4f6e, type: 3}
   - {fileID: 21300000, guid: 6030d694c23c4604784ed64320ae40df, type: 3}
   - {fileID: 21300000, guid: e3be4f2a0ba737247a8d9193d24c7230, type: 3}
+  - {fileID: 21300000, guid: c54a3ff4386f97b8988fd1a3b9028d00, type: 3}
   weaponSprites:
   - {fileID: 21300000, guid: da24a2410e9825747b80ada71e96d102, type: 3}
   - {fileID: 21300000, guid: b798d06b968782340be9160baad4e4a4, type: 3}
@@ -92,6 +93,7 @@ MonoBehaviour:
   - speed
   - damage
   - parry
+  itemDropTable: []
   weaponNames:
   - dagger
   - flail

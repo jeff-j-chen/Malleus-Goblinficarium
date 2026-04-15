@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 
 public class MobileResizer : MonoBehaviour {
-    private Scripts scripts;
+    private Scripts s;
     private bool mobileMode;
     private readonly int desktopFontSize = 32;
     private readonly int mobileFontSize = 48;
@@ -70,14 +70,14 @@ public class MobileResizer : MonoBehaviour {
     
     
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
-        if (scripts.menuIcon != null) {
+        s = FindObjectOfType<Scripts>();
+        if (s.menuIcon != null) {
             FlipMenuIconMode();
         }
     }
 
     public void FlipMenuIconMode() {
-        mobileMode = PlayerPrefs.GetString(scripts.BUTTONS_KEY) == "on";
+        mobileMode = PlayerPrefs.GetString(s.BUTTONS_KEY) == "on";
         if (!mobileMode) {
             // desktop mode
             SetMenuIcons(menuIconDesktopScale, menuIconDesktopPos, desktopFontSize, menuIconTextDesktopPos);
@@ -95,10 +95,10 @@ public class MobileResizer : MonoBehaviour {
     
     private void SetMenuIcons(Vector3 iconScale, IReadOnlyList<Vector2> iconPositionArr, float fontSize, IReadOnlyList<Vector2> textPositionArr) {
         for (int i = 0; i < 5; i++) {
-            scripts.menuIcon.menuIconOrdering[i].transform.localScale = iconScale;
-            scripts.menuIcon.menuIconOrdering[i].transform.localPosition = iconPositionArr[i];
-            scripts.menuIcon.menuIconTextOrdering[i].GetComponent<TextMeshProUGUI>().fontSize = fontSize;
-            scripts.menuIcon.menuIconTextOrdering[i].transform.localPosition = textPositionArr[i];
+            s.menuIcon.menuIconOrdering[i].transform.localScale = iconScale;
+            s.menuIcon.menuIconOrdering[i].transform.localPosition = iconPositionArr[i];
+            s.menuIcon.menuIconTextOrdering[i].GetComponent<TextMeshProUGUI>().fontSize = fontSize;
+            s.menuIcon.menuIconTextOrdering[i].transform.localPosition = textPositionArr[i];
         }
     }
 
@@ -126,20 +126,20 @@ public class MobileResizer : MonoBehaviour {
     private void SetArrowPos() {
         if (!mobileMode) {
             if (Save.game.newGame) {
-                scripts.arrow.transform.localPosition = new Vector2(
-                    menuButtons[1].transform.position.x + scripts.arrow.xOffset,
-                    menuButtons[1].transform.position.y + scripts.arrow.yOffset
+                s.arrow.transform.localPosition = new Vector2(
+                    menuButtons[1].transform.position.x + s.arrow.xOffset,
+                    menuButtons[1].transform.position.y + s.arrow.yOffset
                 );
             }
             else {
-                scripts.arrow.transform.localPosition = new Vector2(
-                    menuButtons[0].transform.position.x + scripts.arrow.xOffset,
-                    menuButtons[0].transform.position.y + scripts.arrow.yOffset
+                s.arrow.transform.localPosition = new Vector2(
+                    menuButtons[0].transform.position.x + s.arrow.xOffset,
+                    menuButtons[0].transform.position.y + s.arrow.yOffset
                 );
             }
         }
         else {
-            scripts.arrow.transform.localPosition = new Vector2(1000f, 0);
+            s.arrow.transform.localPosition = new Vector2(1000f, 0);
         }
     }
 

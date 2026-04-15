@@ -7,11 +7,11 @@ public class SimpleFadeIn : MonoBehaviour
     [SerializeField] public bool lockChanges = false;
     private readonly WaitForSeconds zeroPointTwoFive = new(0.25f);
     private readonly WaitForSeconds pointZeroThreeThree = new(0.033f);
-    // can't use scripts.delays because its weird
-    private Scripts scripts;
+    // can't use s.delays because its weird
+    private Scripts s;
     
     private void Start() {
-        scripts = FindObjectOfType<Scripts>();
+        s = FindObjectOfType<Scripts>();
         boxSR = GetComponent<SpriteRenderer>();
         if (SceneManager.GetActiveScene().name == "CharSelect") { 
             Color temp = boxSR.color;
@@ -52,8 +52,8 @@ public class SimpleFadeIn : MonoBehaviour
             temp.a += 1f/7f;
             boxSR.color = temp;
         }
-        scripts.characterSelector.UpdatePerkText();
-        scripts.characterSelector.HideItemsByDifficulty();
+        s.characterSelector.UpdatePerkText();
+        s.characterSelector.HideItemsByDifficulty();
         for (int i = 0; i < 7; i++) {
             yield return pointZeroThreeThree;
             temp.a -= 1f/7f;
