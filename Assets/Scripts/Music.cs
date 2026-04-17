@@ -21,7 +21,7 @@ public class Music : MonoBehaviour {
         for (int i = 0; i < musicPieces.Length; i++) {
             musicPieceNames[i] = musicPieces[i].name;
         }
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         shouldPlayMusic = PlayerPrefs.GetString(s.MUSIC_KEY) == "on";
         audioSource.volume = shouldPlayMusic ? 0.4f : 0f;
     }
@@ -46,7 +46,7 @@ public class Music : MonoBehaviour {
     public void FadeVolume() { 
         shouldPlayMusic = PlayerPrefs.GetString(s.MUSIC_KEY) == "on";
         if (shouldPlayMusic) { 
-            audioSource.volume = 0.5f;
+            audioSource.volume = 0.4f;
             StartCoroutine(FadeVolumeCoro()); 
         }
     }
@@ -57,7 +57,7 @@ public class Music : MonoBehaviour {
     public void FadeVolume(String pieceName) { 
         shouldPlayMusic = PlayerPrefs.GetString(s.MUSIC_KEY) == "on";
         if (shouldPlayMusic) { 
-            audioSource.volume = 0.5f;
+            audioSource.volume = 0.4f;
             StartCoroutine(FadeVolumeCoro(pieceName)); 
         }
     }
@@ -104,7 +104,7 @@ public class Music : MonoBehaviour {
     }
 
     private void SetUpSingleton() {
-        if (FindObjectsOfType(GetType()).Length > 1) {
+        if (FindObjectsByType(GetType(), FindObjectsSortMode.None).Length > 1) {
             Destroy(gameObject);
         }
         else {

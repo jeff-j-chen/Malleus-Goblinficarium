@@ -49,7 +49,7 @@ public class Player : MonoBehaviour {
     };
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         // something here to check if we are continuing or starting a new game
         Save.game.curCharNum = Save.game.newGame ? Save.persistent.newCharNum : Save.game.curCharNum;
         s.itemManager.GiveStarterItems();
@@ -63,6 +63,7 @@ public class Player : MonoBehaviour {
         // set the correct sprite
         GetComponent<Animator>().runtimeAnimatorController = controllers[Save.game.curCharNum];
         // set the correct animation controller (using runtime so that it works in the actual game, and not only the editor)
+        ResetStatusEffectVisuals();
         SetPlayerStatusEffect("fury", Save.game.isFurious);
         SetPlayerStatusEffect("dodge", Save.game.isDodgy);
         SetPlayerStatusEffect("haste", Save.game.isHasty);
@@ -75,8 +76,19 @@ public class Player : MonoBehaviour {
         stamina = Save.game.playerStamina + Save.game.expendedStamina;
         Save.game.expendedStamina = 0;
         staminaCounter.text = stamina.ToString();
+        s.itemManager.RestoreCharmStateFromSave();
+        s.itemManager.RefreshPassiveInventoryEffects(updateUI:false);
+        s.itemManager.RefreshPlayerCombatStatsAndDice();
+        StartCoroutine(RefreshEncounterWeaponStateAfterLoad());
         if (s.tutorial == null) { Save.SaveGame(); }
         // give status effects, potion effects, stamina, everything from previous Save
+    }
+
+    private IEnumerator RefreshEncounterWeaponStateAfterLoad() {
+        yield return null;
+        if (s != null && s.itemManager != null) {
+            s.itemManager.RefreshEncounterWeaponState();
+        }
     }
 
     private void Update() {
@@ -86,7 +98,7 @@ public class Player : MonoBehaviour {
         }
         else if (((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !s.turnManager.isMoving) || (Input.GetAxis("Mouse ScrollWheel") > 0f  && !s.turnManager.isMoving)) {
             if (!(s.tutorial != null && targetIndex == 7)) { 
-                // lock tutorial to attacking face once its targeted
+                // lock tutorial to attacking neck once its targeted
                 MoveTargetUp();
             }
         }
@@ -114,9 +126,7 @@ public class Player : MonoBehaviour {
                     // mark player as dead
                     s.soundManager.PlayClip("death");
                     // play sound clip
-                    s.player.GetComponent<Animator>().enabled = false;
-                    GetComponent<SpriteRenderer>().sprite = GetDeathSprite();
-                    SetPlayerPositionAfterDeath();
+                    RestoreDefaultVisualState();
                     foreach (GameObject dice in s.diceSummoner.existingDice) {
                         StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
                         // fade out all existing die
@@ -127,7 +137,7 @@ public class Player : MonoBehaviour {
                     // clear potion stats
                     s.statSummoner.SummonStats();
                     // summon stats
-                    s.statSummoner.SetDebugInformationFor("player");
+                    s.statSummoner.SetCombatDebugInformationFor("player");
                     // set debug (only player needed here)
                     s.turnManager.RecalculateMaxFor("player");
                     // reset target
@@ -146,7 +156,7 @@ public class Player : MonoBehaviour {
         if (targetIndex < Mathf.Clamp(s.statSummoner.SumOfStat("green", "player"), 0, 7)) {
             // if player can target there
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
-            // if there is still time left on the hint timer (for targeting face or targeting wounded body part)
+            // if there is still time left on the hint timer (for targeting neck or targeting wounded body part)
             targetIndex++;
             // increment target index
             s.turnManager.SetTargetOf("player");
@@ -191,9 +201,9 @@ public class Player : MonoBehaviour {
                 s.turnManager.RoundOne();
                 // begin the round
             }
-            else if (s.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "face" && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul")) {
-                // if player wants hints, can aim for the face, but is not doing so, and doesn't have a maul
-                coroutine = StartCoroutine(HintFace());
+            else if (s.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "neck" && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul")) {
+                // if player wants hints, can aim for the neck, but is not doing so, and doesn't have a maul
+                coroutine = StartCoroutine(HintNeck());
                 // hint the player
             }
             else if (s.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
@@ -210,10 +220,10 @@ public class Player : MonoBehaviour {
                 Save.game.usedMace = true;
                 if (s.tutorial == null) { Save.SaveGame(); }
                 // prevent player from using mace again
-                s.soundManager.PlayClip("click0");
-                foreach (Dice dice in from a in s.diceSummoner.existingDice where a.GetComponent<Dice>().isAttached == false select a.GetComponent<Dice>()) {
+                for (int i = 0; i < availableDice.Count; i++) {
+                    Dice dice = availableDice[i];
                     // for every die that is not attached
-                    StartCoroutine(dice.RerollAnimation(false));
+                    StartCoroutine(dice.RerollAnimation(i == 0));
                     // reroll the die
                 }
             }
@@ -228,10 +238,10 @@ public class Player : MonoBehaviour {
     }
 
     /// <summary>
-    /// Coroutine for hinting to the player that they can aim to the enemy's face.
+    /// Coroutine for hinting to the player that they can aim to the enemy's neck.
     /// </summary>
-    private IEnumerator HintFace() {
-        s.turnManager.SetStatusText("note: you can aim to the face");
+    private IEnumerator HintNeck() {
+        s.turnManager.SetStatusText("note: you can aim to the neck");
         // notify the player
         for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.025f) {
             yield return s.delays[0.025f];
@@ -245,7 +255,7 @@ public class Player : MonoBehaviour {
     /// Coroutine for hinting to the player that they are targeting a wounded body part.
     /// </summary>
     private IEnumerator HintTargetingWounded() {
-        // pretty much the exact same thing has hintface
+        // pretty much the exact same thing has hintneck
         s.turnManager.SetStatusText("note: you are targeting a wounded body part");
         for (hintTimer = 3f; hintTimer > 0; hintTimer -= 0.025f) {
             yield return s.delays[0.025f];
@@ -267,38 +277,96 @@ public class Player : MonoBehaviour {
     public void SetPlayerPositionAfterDeath() {
         transform.position = deathPositions[Save.game.curCharNum];
     }
+
+    public void RestoreDefaultVisualState() {
+        transform.position = basePosition;
+
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) {
+            spriteRenderer.color = Color.white;
+        }
+
+        Animator animator = GetComponent<Animator>();
+        if (animator != null) {
+            animator.enabled = true;
+            animator.runtimeAnimatorController = controllers[Save.game.curCharNum];
+            animator.Rebind();
+            animator.Update(0f);
+        }
+    }
+
+    public void ResetAfterResurrection(bool restoreVisualState = true) {
+        isDead = false;
+        woundList = new List<string>();
+        Save.game.playerWounds = woundList;
+
+        if (restoreVisualState) {
+            RestoreDefaultVisualState();
+        }
+
+        if (s != null && s.turnManager != null) {
+            s.turnManager.DisplayWounds();
+            s.turnManager.RecalculateMaxFor("player");
+        }
+    }
+
+    private void ResetStatusEffectVisuals() {
+        foreach (GameObject icon in statusEffectList.ToList()) {
+            if (icon != null) { Destroy(icon); }
+        }
+        statusEffectList.Clear();
+        identifier.text = "You";
+    }
+
+    private bool HasStatusEffectIcon(string statusEffect) {
+        return statusEffectList.Any(icon => icon != null && icon.GetComponent<SpriteRenderer>().sprite.name == statusEffect);
+    }
+
+    private void AddStatusEffectIcon(string statusEffect) {
+        if (HasStatusEffectIcon(statusEffect)) { return; }
+
+        identifier.text = ":";
+        GameObject icon = Instantiate(statusEffectIcon, new Vector2(-10.25f + 1f * statusEffectList.Count, 3.333f), Quaternion.identity);
+        icon.GetComponent<SpriteRenderer>().sprite = statusEffectSprites[Array.IndexOf(statusEffectNames, statusEffect)];
+        statusEffectList.Add(icon);
+    }
     
     /// <summary>
     ///  Sets the status effect of a player. Returns true if successfully set, false if they already had it.
     /// </summary>
     public bool SetPlayerStatusEffect(string statusEffect, bool onOrOff) {
+        bool currentlyActive = statusEffect switch {
+            "fury" => Save.game.isFurious,
+            "dodge" => Save.game.isDodgy,
+            "haste" => Save.game.isHasty,
+            "leech" => Save.game.isBloodthirsty,
+            "courage" => Save.game.isCourageous,
+            _ => false,
+        };
+
         if (statusEffect == "fury") {
-            if (onOrOff && Save.game.isFurious) { return false; } 
+            if (onOrOff && Save.game.isFurious && HasStatusEffectIcon(statusEffect)) { return false; } 
             else { Save.game.isFurious = onOrOff; }
         }
         else if (statusEffect == "dodge") {
-            if (onOrOff && Save.game.isDodgy) { return false; } 
+            if (onOrOff && Save.game.isDodgy && HasStatusEffectIcon(statusEffect)) { return false; } 
             else { Save.game.isDodgy = onOrOff; }
         }
         else if (statusEffect == "haste") {
-            if (onOrOff && Save.game.isHasty) { return false; } 
+            if (onOrOff && Save.game.isHasty && HasStatusEffectIcon(statusEffect)) { return false; } 
             else { Save.game.isHasty = onOrOff; }
         }
         else if (statusEffect == "leech") {
-            if (onOrOff && Save.game.isBloodthirsty) { return false; } 
+            if (onOrOff && Save.game.isBloodthirsty && HasStatusEffectIcon(statusEffect)) { return false; } 
             else { Save.game.isBloodthirsty = onOrOff; }
         }
         else if (statusEffect == "courage") {
-            if (onOrOff && Save.game.isCourageous) { return false; } 
+            if (onOrOff && Save.game.isCourageous && HasStatusEffectIcon(statusEffect)) { return false; } 
             else { Save.game.isCourageous = onOrOff; }
         }
         if (onOrOff) {
             // if turning on
-            identifier.text = ":";
-            // set colon (instead of you)
-            GameObject icon = Instantiate(statusEffectIcon, new Vector2(-10.25f + 1f * statusEffectList.Count, 3.333f), Quaternion.identity);
-            icon.GetComponent<SpriteRenderer>().sprite = statusEffectSprites[Array.IndexOf(statusEffectNames, statusEffect)];
-            statusEffectList.Add(icon);
+            AddStatusEffectIcon(statusEffect);
             // get the icon and add it to the status effect list.
         }
         else {
@@ -318,6 +386,6 @@ public class Player : MonoBehaviour {
             if (statusEffectList.Count <= 0) { identifier.text = "You"; }
             // if no status effects, reset identifier text
         }
-        return true;
+        return !currentlyActive || !onOrOff;
     }
 }

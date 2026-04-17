@@ -7,7 +7,7 @@ public class SoundManager : MonoBehaviour {
     private Scripts s;
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         audioSource = GetComponent<AudioSource>();
         audioClipNames = new string[audioClips.Length];
         for (int i = 0; i < audioClips.Length; i++) {
@@ -28,5 +28,14 @@ public class SoundManager : MonoBehaviour {
     /// </summary>
     public void PlayClip(int clipIndex) {
         audioSource.PlayOneShot(audioClips[clipIndex]);
+    }
+
+    /// <summary>
+    /// Get the length of a sound clip by name.
+    /// </summary>
+    public float GetClipLength(string clipName) {
+        int clipIndex = Array.IndexOf(audioClipNames, clipName);
+        if (clipIndex < 0) { return 0f; }
+        return audioClips[clipIndex].length;
     }
 }

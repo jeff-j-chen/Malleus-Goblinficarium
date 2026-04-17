@@ -24,6 +24,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8629857127145482950}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -31,7 +32,6 @@ Transform:
   m_Children:
   - {fileID: 8629857128417149034}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8629857127145482952
 MonoBehaviour:
@@ -66,6 +66,26 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6030d694c23c4604784ed64320ae40df, type: 3}
   - {fileID: 21300000, guid: e3be4f2a0ba737247a8d9193d24c7230, type: 3}
   - {fileID: 21300000, guid: c54a3ff4386f97b8988fd1a3b9028d00, type: 3}
+  - {fileID: 21300000, guid: 67471cbae8f072fc4ae68cb44efc1c55, type: 3}
+  - {fileID: 21300000, guid: 2907fb8f2bb72029793b84112b07ce5e, type: 3}
+  - {fileID: 21300000, guid: 3dcd5977b49eb536799ec9d92a56cffb, type: 3}
+  - {fileID: 21300000, guid: e99706885a53c8709a6c7f41e2158c3b, type: 3}
+  - {fileID: 21300000, guid: 0426fe835e958ae579e10c4f08060750, type: 3}
+  - {fileID: 21300000, guid: f3dfa2f08692955e88accd232ffbb891, type: 3}
+  - {fileID: 21300000, guid: c5c3e9338590010c585c0950d9d9f9e1, type: 3}
+  - {fileID: 21300000, guid: d22254f36cc98322095205b1cc819a4e, type: 3}
+  - {fileID: 21300000, guid: f09329fcc2f69f63eafad4800eb7d8db, type: 3}
+  - {fileID: 21300000, guid: fc4e1e440e8a8566ea08fd42db7ae0cd, type: 3}
+  - {fileID: 21300000, guid: 6143ed59c6fb06724a1c8c4024a1bf02, type: 3}
+  - {fileID: 21300000, guid: a496508045536a38599554903b452b6b, type: 3}
+  - {fileID: 21300000, guid: c8aaf648edad57ab6afea74c5def4967, type: 3}
+  - {fileID: 21300000, guid: 141065f8f5991eb9a9453f8870170495, type: 3}
+  - {fileID: 21300000, guid: 76f23266d996f91f0b4aad3e5893849b, type: 3}
+  - {fileID: 21300000, guid: 48a59d0482f2ee990953cd10b639cbb4, type: 3}
+  - {fileID: 21300000, guid: e75c140b2736fe40db2bc7f467dca738, type: 3}
+  - {fileID: 21300000, guid: 2528ead36628522458f3068e20e442db, type: 3}
+  - {fileID: 21300000, guid: 6e7f1d4f8ad698a9ba1f8f378c5f33ce, type: 3}
+  - {fileID: 21300000, guid: 071d13daaf2658802aebe6231b715af3, type: 3}
   weaponSprites:
   - {fileID: 21300000, guid: da24a2410e9825747b80ada71e96d102, type: 3}
   - {fileID: 21300000, guid: b798d06b968782340be9160baad4e4a4, type: 3}
@@ -77,10 +97,22 @@ MonoBehaviour:
   - {fileID: 21300000, guid: b31eaaf25c38e414595c9878f59ac5fe, type: 3}
   - {fileID: 21300000, guid: 06a4af3eaaed16e4abaeec777810af73, type: 3}
   - {fileID: 21300000, guid: 13614ebb7d7e44544b3780e0ea1090a1, type: 3}
+  - {fileID: 21300000, guid: 51f4509b9c7a5c09e87eab4f694d77fb, type: 3}
+  - {fileID: 21300000, guid: 3b4ee1e693df6d619909909604b50821, type: 3}
+  - {fileID: 21300000, guid: 8fad4187cad3376848f4f9c1b58ba806, type: 3}
+  - {fileID: 21300000, guid: 9fa70114ad90e2d6db40079bec8404df, type: 3}
+  - {fileID: 21300000, guid: 8ad679ebb89b611a28527174b150a627, type: 3}
+  - {fileID: 21300000, guid: 415d5574c46b02e4ab61af98acc54abf, type: 3}
+  - {fileID: 21300000, guid: e3a1be2f90673d416aba33e841da0f22, type: 3}
+  - {fileID: 21300000, guid: 5c05c951b6d234290a516caba0418eff, type: 3}
+  - {fileID: 21300000, guid: 2fb34da69014874dea7e15e1adafb3cb, type: 3}
+  - {fileID: 21300000, guid: bd89dda980ba36318990130b19313269, type: 3}
+  - {fileID: 21300000, guid: b512ba12a37f1e88487a7959fc5054d6, type: 3}
   otherSprites:
   - {fileID: 21300000, guid: b8d47890e8227dd4bb0900e4283fde64, type: 3}
   - {fileID: 21300000, guid: c3303b3ebe228da4c9665c739494c4b1, type: 3}
   - {fileID: 21300000, guid: 3edc425014b04fd4fb1c377abfc77cbb, type: 3}
+  - {fileID: 21300000, guid: f098ea1a373147a4cb0c810cb237e2fc, type: 3}
   floorItems: []
   deletionQueue: []
   statArr:
@@ -94,17 +126,6 @@ MonoBehaviour:
   - damage
   - parry
   itemDropTable: []
-  weaponNames:
-  - dagger
-  - flail
-  - hatchet
-  - mace
-  - maul
-  - montante
-  - rapier
-  - scimitar
-  - spear
-  - sword
   neckletTypes:
   - solidity
   - rapidity
@@ -113,11 +134,30 @@ MonoBehaviour:
   - arcane
   - nothing
   - victory
+  charmTypes:
+  - fortification
+  - relentless
+  - aether
+  - ruthless
+  - crystalline
+  - exalted
+  - dismarmament
+  - bulwark
+  - retribution
+  tarotTypes:
+  - abyss
+  - verdantt
+  - inferno
+  - glacier
+  - dawn
+  - nothing
   itemSpacing: 1
   itemY: -5.3
+  itemX: -3.75
   col: 0
   curList: []
   isCharSelect: 0
+  isAlmanac: 0
 --- !u!1 &8629857128417149035
 GameObject:
   m_ObjectHideFlags: 0
@@ -142,16 +182,17 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8629857128417149035}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8629857127145482953}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &8629857128417149037
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -167,6 +208,11 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -188,9 +234,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: ea788e3dc6a0bae46a8ce78d319b44c1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -200,5 +248,4 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0

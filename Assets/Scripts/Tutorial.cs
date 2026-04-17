@@ -10,6 +10,7 @@ public class Tutorial : MonoBehaviour {
     private Scripts s;
     public bool preventAttack = true;
     public bool isAnimating;
+    private bool queuedParryDraft;
     private Coroutine mainScroll;
     private Coroutine statScroll;
     private readonly List<string> desktopTutorialText = new() {
@@ -53,16 +54,18 @@ public class Tutorial : MonoBehaviour {
         // ^ 18
         "\nUse \"-\" and \"+\" to the left\nfrom your weapon stats to throw\n3 stamina into your accuracy (green)",
         // ^ 19
-        "\nAim to the face, since it's\nthe only wound that is instantly lethal.\nScroll to the bottom of the aim list\nusing [arrow_keys] or [mouse_wheel]",
+        "\nAim to the neck, since it makes\nyour enemy bleed out next turn.\nScroll to the bottom of the aim list\nusing [arrow_keys] or [mouse_wheel]",
         // ^ 20
-        "\n\nNow use your weapon\n(click the \"sword\" icon) to start the\nfight, and watch him die...",
+        "\n\nNow use your weapon\n(click the \"sword\" icon) to start the\nfight.",
         // ^ 21
-        "Take the loot now. Use [ctrl]\nor [left_mouse] to access his\ninventory.\n\n[take steak] to continue",
+        "\n\nWith a neck wound, he will live to fight one more round, but die regardless of teh outcome.\nThis means he can still mortally wound you, be careful\n\n[attack again] to continue",
         // ^ 22
-        "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[click] to continue",
+        "Take the loot now. Use [ctrl]\nor [left_mouse] to access his\ninventory.\n\n[take steak] to continue",
         // ^ 23
-        "Finally, use the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of\nMalleus Goblinificarium. \nYou'll learn more as you play more!"
+        "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[click] to continue",
         // ^ 24
+        "Finally, use the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of\nMalleus Goblinificarium. \nYou'll learn more as you play more!"
+        // ^ 25
     };
     private readonly List<string> mobileTextList = new() {
         "Welcome to MALLEUS GOBLINIFICARIUM,\na realistic dice-based combat simulator!\n\nYes, a realistic game can contain goblins and scrolls.\n[tap] to continue", 
@@ -105,22 +108,24 @@ public class Tutorial : MonoBehaviour {
         // ^ 18
         "\n[tap] the \"-\" and \"+\" to the left\nfrom your weapon stats to throw\n3 stamina into your accuracy (green)",
         // ^ 19
-        "\nAim to the face, since it's\nthe only wound that is instantly lethal.\nScroll to the bottom of the aim list\nusing the [up/down arrows].",
+        "\nAim to the neck, since it makes\nyour enemy bleed out next turn.\nScroll to the bottom of the aim list\nusing the [up/down arrows].",
         // ^ 20
         "\n\nNow use your weapon\n(tap the \"sword\" or press [use])\nto start the fight, and watch him die...",
         // ^ 21
-        "Take the loot now.\nPress [item] to switch to his items.\nPress [use] to take an item.\n\n[take steak] to continue",
+        "\n\nWith a neck wound, he will live to fight one more round, but die regardless of teh outcome.\nThis means he can still mortally wound you, be careful\n\n[attack again] to continue",
         // ^ 22
-        "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[tap] to continue",
+        "Take the loot now.\nPress [item] to switch to his items.\nPress [use] to take an item.\n\n[take steak] to continue",
         // ^ 23
-        "Finally, [use] the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of\nMalleus Goblinficarium. \nYou'll learn more as you play more!"
+        "To the right you can see the stats of\nthe weapon you are about to take.\nYou can't carry more than one weapon.\n\n[tap] to continue",
         // ^ 24
+        "Finally, [use] the arrow in the\nenemy's inventory to proceed.\n\nThose are the very basics of\nMalleus Goblinificarium. \nYou'll learn more as you play more!"
+        // ^ 25
     };
 
     private List<string> tutorialTextList;
 
     private void Awake() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         GetComponent<SpriteRenderer>().sprite = blackBox;
         tutorialTextList = PlayerPrefs.GetString(s.BUTTONS_KEY) == "on" ? mobileTextList : desktopTutorialText;
         // cant use s.mobilemode for some reason, so oh well 
@@ -148,14 +153,26 @@ public class Tutorial : MonoBehaviour {
             }
             else {
                 // animation has already finished playing
-                if (curIndex is not (2 or 12 or 13 or 19 or 20 or 21 or 22)) { Increment(); }
+                if (curIndex is not (2 or 12 or 13 or 19 or 20 or 21 or 22 or 23)) { Increment(); }
                 // some tutorial steps cannot be skipped through clicking, a specific player action needs tobe taken
             }
             if (curIndex == 12 && s.diceSummoner.existingDice.Count == 0) { s.diceSummoner.SummonDice(true, false);  }
-            else if (curIndex == 21) { preventAttack = false; }
+            else if (curIndex is 21 or 22) { preventAttack = false; }
             else if (curIndex != 3 && curIndex != 4) { statText.text = ""; }
             // specific tutorials have specific necessary extra things to introduce or clear from the previous step
         }
+    }
+
+    public void QueueParryDraftRound() {
+        preventAttack = true;
+        queuedParryDraft = true;
+        Increment();
+    }
+
+    public bool ConsumeQueuedParryDraft() {
+        if (!queuedParryDraft) { return false; }
+        queuedParryDraft = false;
+        return true;
     }
 
     public void Increment() { 
@@ -185,7 +202,7 @@ public class Tutorial : MonoBehaviour {
         }
         isAnimating = false;
         // self explanatory, just add the text step by step for a specific tutorial index
-        if (curIndex == 21) { preventAttack = false; }
+        if (curIndex is 21 or 22) { preventAttack = false; }
         // enable the player to attack after the text is done scrolling
     }
 

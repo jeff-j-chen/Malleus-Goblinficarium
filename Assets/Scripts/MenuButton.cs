@@ -10,11 +10,11 @@ public class MenuButton : MonoBehaviour {
     private void Start() {
         Save.LoadGame();
         Save.LoadPersistent();
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         text = GetComponent<TextMeshProUGUI>();
-        transitionMultiplier = FindObjectOfType<BackToMenu>().transitionMultiplier;
+        transitionMultiplier = FindFirstObjectByType<BackToMenu>().transitionMultiplier;
         if (s.arrow != null) {
-            s.arrow = FindObjectOfType<Arrow>();
+            s.arrow = FindFirstObjectByType<Arrow>();
             s.arrow.MoveToButtonPos(1);
         }
     }
@@ -44,7 +44,7 @@ public class MenuButton : MonoBehaviour {
                 if (Save.game.enemyNum is 0 or 1 or 2) {
                     if (s.music.audioSource.clip.name != "LaBossa") { s.music.FadeVolume("LaBossa"); }
                 }
-                else if (Save.game.resumeSub == 4) {
+                else if (Save.game.resumeSub is LevelManager.MerchantSub or LevelManager.BlacksmithSub) {
                     if (s.music.audioSource.clip.name != "Smoke") { s.music.FadeVolume("Smoke"); }
                 }
                 else {

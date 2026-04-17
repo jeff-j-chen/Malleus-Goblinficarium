@@ -6,7 +6,7 @@ public class StaminaButton : MonoBehaviour {
 
     private void Start() {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
     }
 
     private void OnMouseUpAsButton() {
@@ -15,7 +15,7 @@ public class StaminaButton : MonoBehaviour {
             // if situation allows
             if (name == "plus(Clone)") {
                 // if plus button
-                if (s.player.stamina > 0 && s.statSummoner.addedPlayerStamina[stat] < 8) {
+                if (s.player.stamina > 0) { // && s.statSummoner.addedPlayerStamina[stat] < 8
                     // if player has the stamina and hasn't put 7 into the stat already
                     ShiftDiceAccordingly(stat, 1);
                     // move the die 

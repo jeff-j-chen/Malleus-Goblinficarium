@@ -9,19 +9,23 @@ public class Dice : MonoBehaviour {
     public bool moveable = true;
     public bool isAttached = false;
     public bool isRerolled = false;
+    public bool tarotUpgradeApplied = false;
     public string isOnPlayerOrEnemy = "none";
     public Vector3 instantiationPos;
     private SpriteRenderer spriteRenderer;
     private SpriteRenderer childSpriteRenderer;
     private Scripts s;
     private bool wasClickedRecently = false;
+    private bool suspendedEnemyPlanRefreshForDrag = false;
+    private bool dragStartedAttachedToPlayer = false;
+    private string dragStartedPlayerStat = "";
 
     private readonly WaitForSeconds[] rollTimes = { new(0.01f), new(0.03f), new(0.06f), new(0.09f), new(0.12f), new(0.15f), new(0.18f), new(0.21f), new(0.24f), new(0.3f) };
     // different times for rolling 
 
     private void Awake()  {
         // must be in awake, otherwise s not set fast enough
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         // assign the necessary sprite renderers
     }
 
@@ -29,17 +33,62 @@ public class Dice : MonoBehaviour {
         StartCoroutine(FadeIn());
     }
 
+    private void EnsureRenderersAssigned() {
+        spriteRenderer ??= GetComponent<SpriteRenderer>();
+        childSpriteRenderer ??= transform.GetChild(0).GetComponent<SpriteRenderer>();
+    }
+
+    private bool TryResolvePendingMirrorCopy() {
+        if (!Save.game.pendingMirrorCopy || s.turnManager.isMoving || !s.itemManager.IsFightableEncounter()) { return false; }
+
+        Save.game.pendingMirrorCopy = false;
+        s.diceSummoner.DuplicateDieToPlayer(diceNum, diceType);
+        s.statSummoner.SummonStats();
+        s.statSummoner.SetCombatDebugInformationFor("player");
+        s.turnManager.RecalculateMaxFor("player");
+        s.diceSummoner.SaveDiceValues();
+        return true;
+    }
+
+    private bool TryResolvePendingSpellbookTransmute() {
+        if (!Save.game.pendingSpellbookTransmute || s.turnManager.isMoving) {
+            return false;
+        }
+
+        if (ShouldPrioritizeEnemyDieActionOverSpellbook()) {
+            return false;
+        }
+
+        Save.game.pendingSpellbookTransmute = false;
+        s.itemManager.TransmuteDie(this);
+        return true;
+    }
+
+    private bool ShouldPrioritizeEnemyDieActionOverSpellbook() {
+        if (!isAttached || isOnPlayerOrEnemy != "enemy" || s.enemy.enemyName.text == "Lich") { return false; }
+
+        bool isEnemyHeadWounded = s.enemy.woundList.Contains("head");
+        bool isEnemyChestWounded = s.enemy.woundList.Contains("chest");
+
+        if (isEnemyHeadWounded && Save.game.discardableDieCounter > 0) { return true; }
+        if (isEnemyChestWounded && !isRerolled) { return true; }
+
+        return false;
+    }
+
     private void OnMouseDown() {
+        if (TryResolvePendingMirrorCopy() || TryResolvePendingSpellbookTransmute()) { return; }
         // as soon as the mouse button is pressed down
         if (s.tutorial != null) { 
             // if within the tutorial, make sure player can only do certain actions (so that they win)
-            if (s.tutorial.isAnimating || s.tutorial.curIndex is 12 or 13)  {
+            if (s.tutorial.isAnimating || s.tutorial.curIndex is 12 or 13 or 22)  {
                 if (s.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDown(); }
                 // only allow the red 6 to be picked
                 else if (s.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDown(); }
                 // then take the green
                 else if (s.diceSummoner.CountUnattachedDice() == 2) { DiceDown(); }
                 // after that it doesnt matter
+                else if (s.tutorial.curIndex == 22) { DiceDown(); }
                 else { s.turnManager.SetStatusText("bad choice"); }
             }
         }
@@ -54,6 +103,12 @@ public class Dice : MonoBehaviour {
     private void DiceDown() { 
         if (moveable && !s.turnManager.isMoving) {
             // if the dice is still moveable
+            dragStartedAttachedToPlayer = isAttached && isOnPlayerOrEnemy == "player";
+            dragStartedPlayerStat = dragStartedAttachedToPlayer ? statAddedTo : "";
+            if (!suspendedEnemyPlanRefreshForDrag) {
+                s.turnManager.BeginEnemyPlanRefreshBatch();
+                suspendedEnemyPlanRefreshForDrag = true;
+            }
             s.soundManager.PlayClip("click0");
             // play sound clip
             childSpriteRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
@@ -98,10 +153,11 @@ public class Dice : MonoBehaviour {
     private void OnMouseUp() {
         // self explanatory, tutorial restricts which dice can be picked, else is just normal
         if (s.tutorial != null) { 
-            if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13) {
+            if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13 || s.tutorial.curIndex == 22) {
                 if (s.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceUp(); }
                 else if (s.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceUp(); }
                 else if (s.diceSummoner.CountUnattachedDice() == 2) { DiceUp(); }
+                else if (s.tutorial.curIndex == 22) { DiceUp(); }
                 else { s.turnManager.SetStatusText("bad choice"); }
             }
         }
@@ -110,10 +166,11 @@ public class Dice : MonoBehaviour {
 
     private void OnMouseDrag() {
         if (s.tutorial != null) { 
-            if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13) {
+            if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13 || s.tutorial.curIndex == 22) {
                 if (s.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDrag(); }
                 else if (s.diceSummoner.CountUnattachedDice() == 4 && diceType == "green") { DiceDrag(); }
                 else if (s.diceSummoner.CountUnattachedDice() == 2) { DiceDrag(); }
+                else if (s.tutorial.curIndex == 22) { DiceDrag(); }
                 else { s.turnManager.SetStatusText("bad choice"); }
             }
         }
@@ -183,6 +240,16 @@ public class Dice : MonoBehaviour {
             childSpriteRenderer.sortingOrder = 0;
             // send the die to the background
         }
+        if (suspendedEnemyPlanRefreshForDrag) {
+            bool isAttachedToPlayerAfterDrop = isAttached && isOnPlayerOrEnemy == "player";
+            bool placedNewPlayerDie = isAttachedToPlayerAfterDrop && !dragStartedAttachedToPlayer;
+            bool changedPlayerStat = isAttachedToPlayerAfterDrop
+                && dragStartedAttachedToPlayer
+                && dragStartedPlayerStat != statAddedTo;
+            bool shouldRefreshAfterDrop = placedNewPlayerDie || changedPlayerStat;
+            s.turnManager.EndEnemyPlanRefreshBatch(shouldRefreshAfterDrop);
+            suspendedEnemyPlanRefreshForDrag = false;
+        }
         if (!moveable && isAttached && !isRerolled && isOnPlayerOrEnemy == "enemy" && s.enemy.enemyName.text != "Lich") {
             //  && !s.turnManager.isMoving
             // if an action can be performed on the dice (discard, reroll)
@@ -243,7 +310,7 @@ public class Dice : MonoBehaviour {
         Destroy(gameObject);
         // destroy the gameObject
         s.statSummoner.RepositionDice("enemy", statAddedTo);
-        s.statSummoner.SetDebugInformationFor("enemy");
+        s.statSummoner.SetCombatDebugInformationFor("enemy");
         // set the debug information
         Save.persistent.diceDiscarded++;
         Save.SavePersistent();
@@ -259,7 +326,7 @@ public class Dice : MonoBehaviour {
         s.diceSummoner.existingDice.Remove(gameObject);
         Destroy(gameObject);
         s.statSummoner.RepositionDice("player", statAddedTo);
-        s.statSummoner.SetDebugInformationFor("player");
+        s.statSummoner.SetCombatDebugInformationFor("player");
         s.turnManager.RecalculateMaxFor("player");
         s.diceSummoner.SaveDiceValues();
     }
@@ -297,6 +364,7 @@ public class Dice : MonoBehaviour {
         }
         s.statSummoner.SetDebugInformationFor("player");
         s.statSummoner.SetDebugInformationFor("enemy");
+        s.turnManager.RefreshEnemyPlanIfNeeded();
         s.turnManager.RecalculateMaxFor("player");
         s.turnManager.RecalculateMaxFor("enemy");
         // set debug information and make sure that the player/enemy isn't aiming at something that they shouldn't be able to hit
@@ -318,8 +386,44 @@ public class Dice : MonoBehaviour {
         }
         s.statSummoner.SetDebugInformationFor("player");
         s.statSummoner.SetDebugInformationFor("enemy");
+        s.turnManager.RefreshEnemyPlanIfNeeded();
         // set the debug information
         s.diceSummoner.SaveDiceValues();
+    }
+
+    /// <summary>
+    /// Coroutine for increasing the value of this die.
+    /// </summary>
+    public IEnumerator IncreaseDiceValue(bool wait = true) {
+        if (wait) { yield return s.delays[1f]; }
+        if (diceNum >= 6) { yield break; }
+
+        diceNum++;
+        GetComponent<SpriteRenderer>().sprite = s.diceSummoner.numArr[diceNum - 1].GetComponent<SpriteRenderer>().sprite;
+        s.statSummoner.SetDebugInformationFor("player");
+        s.statSummoner.SetDebugInformationFor("enemy");
+        s.turnManager.RefreshEnemyPlanIfNeeded();
+        s.diceSummoner.SaveDiceValues();
+    }
+
+    public void SetDiceValue(int newValue) {
+        EnsureRenderersAssigned();
+        diceNum = Mathf.Clamp(newValue, 1, 6);
+        spriteRenderer.sprite = s.diceSummoner.numArr[diceNum - 1].GetComponent<SpriteRenderer>().sprite;
+    }
+
+    public void SetDieType(string newType) {
+        EnsureRenderersAssigned();
+        diceType = newType;
+        spriteRenderer.color = newType is "white" or "yellow" ? Color.black : Color.white;
+        childSpriteRenderer.color = newType switch {
+            "green" => Colors.green,
+            "blue" => Colors.blue,
+            "red" => Colors.red,
+            "white" => Colors.white,
+            "yellow" => Colors.yellow,
+            _ => childSpriteRenderer.color,
+        };
     }
 
     /// <summary>
@@ -329,7 +433,7 @@ public class Dice : MonoBehaviour {
         // pretty self explanatory
         diceNum = 1;
         spriteRenderer.sprite = s.diceSummoner.numArr[0].GetComponent<SpriteRenderer>().sprite;
-        s.statSummoner.SetDebugInformationFor("player");
+        s.statSummoner.SetCombatDebugInformationFor("player");
         // this can only happen to player, so don't worry about enemies stuff
         s.diceSummoner.SaveDiceValues();
     }
@@ -375,6 +479,7 @@ public class Dice : MonoBehaviour {
         }
         s.statSummoner.SetDebugInformationFor("enemy");
         s.statSummoner.SetDebugInformationFor("player");
+        s.turnManager.RefreshEnemyPlanIfNeeded();
     }
     
     /// <summary>

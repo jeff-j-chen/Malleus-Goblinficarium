@@ -30,8 +30,8 @@ public class CharacterSelector : MonoBehaviour {
     private Scripts s;
     
     private void Start() {
-        s = FindObjectOfType<Scripts>();
-        simpleFadeIn = FindObjectOfType<SimpleFadeIn>();
+        s = FindFirstObjectByType<Scripts>();
+        simpleFadeIn = FindFirstObjectByType<SimpleFadeIn>();
         // get necessary objects
         // pull in data from the Savefile
         HideItemsByDifficulty(false);
@@ -195,7 +195,7 @@ public class CharacterSelector : MonoBehaviour {
             // rename weapon to be rusty if in nightmare mode
             s.itemManager.floorItems[0].GetComponent<Item>().modifier = "rusty";
             string itemName = s.itemManager.floorItems[0].GetComponent<Item>().itemName;
-            s.itemManager.floorItems[0].GetComponent<Item>().itemName = "rusty " + itemName.Split(' ')[1];
+            s.itemManager.floorItems[0].GetComponent<Item>().itemName = "rusty " + ItemManager.GetWeaponBaseName(itemName);
             // print(s.itemManager.floorItems[0].GetComponent<Item>().itemName);
         }
         // give the character items based on their class, even if its not unlocked because it will be hidden regardless

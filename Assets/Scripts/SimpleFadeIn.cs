@@ -11,7 +11,7 @@ public class SimpleFadeIn : MonoBehaviour
     private Scripts s;
     
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         boxSR = GetComponent<SpriteRenderer>();
         if (SceneManager.GetActiveScene().name == "CharSelect") { 
             Color temp = boxSR.color;

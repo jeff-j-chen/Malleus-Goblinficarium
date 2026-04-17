@@ -11,7 +11,7 @@ public class HighlightCalculator : MonoBehaviour {
     private readonly Vector2 large = new(10f, 10f);
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         HandleHighlightInitiation();
     }
     
@@ -205,13 +205,18 @@ public class HighlightCalculator : MonoBehaviour {
                         StartCoroutine(s.turnManager.EnemyMove(false));
                         // enemy moves normally
                     }
-                    if (s.tutorial != null) {
+                    if (s.diceSummoner.CountUnattachedDice() == 0) {
+                        s.turnManager.RecalculateMaxFor("player");
+                        s.turnManager.RecalculateMaxFor("enemy");
+                        s.turnManager.RefreshEnemyPlanIfNeeded();
+                    }
+                    if (s.tutorial != null && s.tutorial.curIndex is 12 or 13) {
                         if (s.diceSummoner.CountUnattachedDice() == 4 || s.diceSummoner.CountUnattachedDice() == 0) {
                             s.tutorial.Increment();
                         }
                     }
                 }
-                s.statSummoner.SetDebugInformationFor("player");
+                s.statSummoner.SetCombatDebugInformationFor("player");
                 // set the debug information
                 return;
                 // found a collider so no need to check others, just end function
@@ -223,6 +228,7 @@ public class HighlightCalculator : MonoBehaviour {
     /// Handle a normal dice being dropped onto a highlight.
     /// </summary>
     private void HandleNormalDrop(string addTo, Dice dice) {
+        bool chestReroll = s.player.woundList.Contains("chest") && dice.diceNum >= 4;
         s.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to the player
         dice.statAddedTo = addTo;
@@ -233,6 +239,7 @@ public class HighlightCalculator : MonoBehaviour {
         else if (dice.diceType == "white" && Save.game.curCharNum == 2) { dice.SetToOne(); }
         // take actions depending on injuries and die types, and character numbers
         // chest wounds are handled elsewhere, so dont worry about it here
+        s.itemManager.TryUpgradeTakenDieWithTarot(dice, chestReroll ? 1.5f : 0.05f);
         s.diceSummoner.SaveDiceValues();
     }
 
@@ -240,12 +247,16 @@ public class HighlightCalculator : MonoBehaviour {
     /// Handle a yellow dice being dropped on to a highlight.
     /// </summary>
     private void HandleYellowDrop(string addTo, Dice dice) {
+        bool wasAlreadyAttached = dice.isAttached;
         s.statSummoner.AddDiceToPlayer(addTo, dice);
         // add the die to player's die list
         dice.statAddedTo = addTo;
         // set attributes
         if (!dice.isAttached && s.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
         // decrease if gut wound
+        if (!wasAlreadyAttached) {
+            s.itemManager.TryUpgradeTakenDieWithTarot(dice, 0.05f);
+        }
         s.turnManager.SetTargetOf("player");
         // update the player's targets
         s.diceSummoner.SaveDiceValues();

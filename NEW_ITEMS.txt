@@ -1,0 +1,20 @@
+new items implementation checklist
+
+- [x] review scripts folder and map the combat, save, item, and level flow
+- [x] fix resume-time status visuals so saved effects visibly return
+- [x] add katar first-wound enemy speed reduction with save tracking
+- [x] add ham next-level stamina gain with delayed sfx on arrival
+- [x] add gladius first-round attack bonus with save tracking
+- [x] add campfire safe-use recovery and wound healing flow
+- [x] add tincture recent-wound healing with neck restriction
+- [x] add mirror die-copy flow after all 6 dice are selected
+- [x] add witch hand enemy curse effect in combat
+- [x] guarantee trader healing stock and remove trader nothing modifiers
+- [x] move blacksmith flow to every trader chain and preserve music
+- [x] update weapon/stat bookkeeping for new weapons and saved state
+- [x] run compile/error validation and resolve any regressions
+
+validation notes
+
+- editor error scan is clean
+- local dotnet build is blocked here by a missing .net framework 4.7.1 targeting pack, not by script errors

@@ -18,8 +18,8 @@ public class TurnManager : MonoBehaviour {
     public Vector3 scale;
     private Coroutine coroutine = null;
     [SerializeField] public TextMeshProUGUI statusText;
-    [SerializeField] public string[] targetArr = { "chest", "guts", "knee", "hip", "head", "hand", "armpits", "face" };
-    [SerializeField] public string[] targetInfoArr = { "reroll any number of enemy's dice", "all enemy's dice suffer a penalty of -1", "your speed is always higher than enemy's", "enemy can't use stamina", "discard one of enemy's die", "enemy can't use white dice", "enemy can't use red dice", "instantaneous death" };
+    [SerializeField] public string[] targetArr = { "chest", "guts", "knee", "hip", "head", "hand", "armpits", "neck" };
+    [SerializeField] public string[] targetInfoArr = { "reroll any number of enemy's dice", "all enemy's dice suffer a penalty of -1", "your speed is always higher than enemy's", "enemy can't use stamina", "discard one of enemy's die", "enemy can't use white dice", "enemy can't use red dice", "target bleeds out next round" };
     private Scripts s;
     public bool isMoving = false;
     public bool actionsAvailable = false;
@@ -30,10 +30,26 @@ public class TurnManager : MonoBehaviour {
     public bool dontRemoveLeechYet = false;
     private bool refreshingEnemyPlan = false;
     private bool enemyPlanRefreshEnabled = false;
+    private int enemyPlanRefreshSuspendDepth = 0;
+    private bool enemyPlanRefreshPendingWhileSuspended = false;
+    private Coroutine queuedEnemyPlanRefresh;
+    private bool playerBleedOutPendingThisRound = false;
+    private bool enemyBleedOutPendingThisRound = false;
+    private bool enemyAttackedFirst = false;   // set at the start of RoundOne
+    private bool queuePlayerKillAsBleedOut;
+    private bool queueEnemyKillAsBleedOut;
+    private bool playerAttackStatusSetThisRound;
+    private bool enemyAttackStatusSetThisRound;
+    private bool pendingEnemyHeadCounterDiscard;
+    private bool softKillInProgress;
+
+    private void Awake() { 
+        s = FindFirstObjectByType<Scripts>();
+    }
 
     private void Start() {
         enemyPlanRefreshEnabled = false;
-        s = FindObjectOfType<Scripts>();
+        
         if (s.mobileMode) {
             statusText.transform.localPosition = new Vector3(0f, -199.33f, 0f);
             onScreen = mobileOnScreen;
@@ -58,17 +74,63 @@ public class TurnManager : MonoBehaviour {
                 s.diceSummoner.SummonDice(true, Save.game.newGame);
             }
         }
+
+        if (s.itemManager != null) {
+            if (s.itemManager.IsFightableEncounter()) {
+                s.itemManager.BeginNewEncounterWeaponState();
+            }
+            else {
+                s.itemManager.EndEncounterWeaponState();
+            }
+        }
+
         s.statSummoner.SummonStats();
+        RefreshEnemyStatVisibility();
         DetermineMove(true);
         enemyPlanRefreshEnabled = true;
+    }
+
+    private bool ShouldHideEnemyStats() {
+        if (s == null || s.enemy == null) { return false; }
+
+        return Save.game.enemyIsDead
+            || s.enemy.enemyName.text == "Merchant"
+            || s.enemy.enemyName.text == "Blacksmith"
+            || s.enemy.enemyName.text == "Tombstone";
+    }
+
+    private void RefreshEnemyStatVisibility() {
+        if (blackBox == null) { return; }
+
+        blackBox.transform.localPosition = ShouldHideEnemyStats() ? onScreen : offScreen;
+    }
+
+    private bool EnemyAlreadyHasDraftedDie(bool ignoreSavedDraftState) {
+        if (s?.diceSummoner?.existingDice != null) {
+            foreach (GameObject diceObject in s.diceSummoner.existingDice) {
+                if (diceObject == null) { continue; }
+
+                Dice dice = diceObject.GetComponent<Dice>();
+                if (dice != null && dice.isAttached && dice.isOnPlayerOrEnemy == "enemy") {
+                    return true;
+                }
+            }
+        }
+
+        if (ignoreSavedDraftState || Save.game?.dicePlayerOrEnemy == null) { return false; }
+
+        return Save.game.dicePlayerOrEnemy.Any(side => side == "enemy");
     }
 
     /// <summary>
     /// Make the enemy move (if it is their turn).
     /// </summary>
     /// <param name="delay"></param>
-    public void DetermineMove(bool delay = false) {
-        if (s.statSummoner.SumOfStat("blue", "player") < s.statSummoner.SumOfStat("blue", "enemy") && !(s.itemManager.PlayerHasWeapon("spear"))) {
+    /// <param name="ignoreSavedDraftState">true when starting a fresh dice set that should not reuse saved draft state.</param>
+    public void DetermineMove(bool delay = false, bool ignoreSavedDraftState = false) {
+        if (EnemyAlreadyHasDraftedDie(ignoreSavedDraftState)) { return; }
+
+        if (s.statSummoner.SumOfStat("blue", "player") < s.statSummoner.SumOfStat("blue", "enemy") && !s.itemManager.PlayerAlwaysChoosesFirstDraftDie()) {
             // if enemy is faster or player doesn't have spear
             StartCoroutine(EnemyMove(delay));
             // make the enemy move
@@ -158,7 +220,7 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Fade and change the color of the player or enemy's wound text.
     /// </summary>
-    private IEnumerator InjuredTextChange(TextMeshProUGUI text) {
+    private IEnumerator InjuredTextChange(TextMeshProUGUI text, string clipAtBlack = null, Action onBlackBeforeSound = null, Action onBlackAfterSound = null) {
         yield return s.delays[0.55f];
         // set a delay
         Color temp = text.color;
@@ -170,7 +232,10 @@ public class TurnManager : MonoBehaviour {
             text.color = temp;
         }
         // fade out
+        onBlackBeforeSound?.Invoke();
         DisplayWounds();
+        if (!string.IsNullOrEmpty(clipAtBlack)) { s.soundManager.PlayClip(clipAtBlack); }
+        onBlackAfterSound?.Invoke();
         // update the wound display
         for (int i = 0; i < 40; i++) {
             yield return s.delays[0.005f];
@@ -178,6 +243,12 @@ public class TurnManager : MonoBehaviour {
             text.color = temp;
         }
         // fade back in
+    }
+
+    public void AnimatePlayerWoundRefresh(string clipAtBlack = null, Action onBlackBeforeSound = null, Action onBlackAfterSound = null) {
+        if (s == null || s.player == null) { return; }
+
+        StartCoroutine(InjuredTextChange(s.player.woundGUIElement, clipAtBlack, onBlackBeforeSound, onBlackAfterSound));
     }
 
     /// <summary>
@@ -224,16 +295,16 @@ public class TurnManager : MonoBehaviour {
                             if (s.enemy.woundList.Contains(targetArr[s.player.targetIndex])) { s.player.target.text = "*" + targetArr[s.player.targetIndex]; }
                             // add an asterisks if already injured
                             else {
-                                if (targetArr[s.player.targetIndex] == "face" && !Save.game.enemyIsDead) {
-                                    // can't aim at the devil's face if hes alive, so notify player
-                                    s.turnManager.SetStatusText("you cannot aim at his face");
+                                if (targetArr[s.player.targetIndex] == "neck" && !Save.game.enemyIsDead) {
+                                    // can't aim at the devil's neck if hes alive, so notify player
+                                    s.turnManager.SetStatusText("you cannot aim at his neck");
                                     s.player.targetIndex--;
                                 }
                                 else {
                                     s.player.target.text = targetArr[s.player.targetIndex];
                                 }
                             }
-                            if (targetArr[s.player.targetIndex] != "face") {
+                            if (targetArr[s.player.targetIndex] != "neck") {
                                 s.player.targetInfo.text = targetInfoArr[s.player.targetIndex];
                             }
                         }
@@ -291,13 +362,22 @@ public class TurnManager : MonoBehaviour {
             // recalculate max (in case stamina was taken from green)
             Save.game.playerStamina = s.player.stamina;
             if (s.tutorial == null) { Save.SaveGame(); }
+            if (s.itemManager != null) {
+                if (s.itemManager.PlayerHasWeapon("claymore")) {
+                    s.itemManager.RefreshPlayerCombatStatsAndDice();
+                }
+                else {
+                    s.itemManager.RefreshHighlightedItemDescription();
+                }
+            }
             RefreshEnemyPlanIfNeeded();
         }
         else if (playerOrEnemy == "enemy") {
             s.enemy.stamina += amount;
             s.enemy.staminaCounter.text = s.enemy.stamina.ToString();
             RecalculateMaxFor(playerOrEnemy);
-            Save.game.enemyStamina = s.enemy.stamina + s.statSummoner.addedEnemyStamina.Values.Sum();
+            Save.game.enemyStamina = s.enemy.stamina;
+            Save.game.enemyTargetIndex = s.enemy.targetIndex;
             if (s.tutorial == null) { Save.SaveGame(); }
             // same as above
         }
@@ -309,15 +389,48 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     public void RoundOne() {
         scimitarParryCount = 0;
+        queuePlayerKillAsBleedOut = false;
+        queueEnemyKillAsBleedOut = false;
+        playerAttackStatusSetThisRound = false;
+        enemyAttackStatusSetThisRound = false;
+        pendingEnemyHeadCounterDiscard = false;
         // reset the scimitar parry (if set true from a previous round)
         isMoving = true;
+        Save.game.pendingMirrorCopy = false;
+        Save.game.pendingSpellbookTransmute = false;
         // set the variable to true so that certain actions can check this and make sure actions are not taken when they shouldn't be
+        playerBleedOutPendingThisRound = Save.game.playerBleedsOutNextRound || s.player.woundList.Contains("neck");
+        enemyBleedOutPendingThisRound = Save.game.enemyBleedsOutNextRound || (s.enemy.enemyName.text != "Lich" && s.enemy.woundList.Contains("neck"));
+        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+            // nightmare: animate the plan reveal, then execute the round
+            StartCoroutine(NightmareRevealThenExecuteRound());
+            return;
+        }
         RunEnemyCalculations();
         // make enemy add stamina to stats as necessary
+        ExecuteRoundOneLogic();
+    }
+
+    // easy and hard both keep the committed enemy plan visible once drafting is complete
+    private static bool ShouldRevealPlanDuringDraft() {
+        return DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)
+            || DifficultyHelper.IsHard(Save.persistent.gameDifficulty);
+    }
+
+    /// <summary>
+    /// Execute the initiative + attack logic shared by all difficulties after the plan is applied.
+    /// </summary>
+    private void ExecuteRoundOneLogic() {
+        Save.persistent.turnsTaken++;
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         // get all the stats so we can use them
+        enemyAttackedFirst = playerSpd < enemySpd;
         if (playerSpd >= enemySpd) {
             // make player go first
+            // CHARM: aether — player is faster → +1 speed next round
+            if (s.itemManager.PlayerHasCharm("aether")) {
+                s.itemManager.QueueCharmTrigger("aether", s.itemManager.GetCharmCount("aether"));
+            }
             if (!PlayerAttacks()) {
                 // if enemy was not killed
                 StartCoroutine(RoundTwo("enemy"));
@@ -325,7 +438,8 @@ public class TurnManager : MonoBehaviour {
             }
             else {
                 // enemy was killed
-                StartCoroutine(Kill("enemy"));
+                StartCoroutine(Kill("enemy", ConsumeQueuedKillAsBleedOut("enemy"), false));
+                ResolveBleedOutAfterRound();
                 // execute the proper commands
             }
         }
@@ -333,6 +447,11 @@ public class TurnManager : MonoBehaviour {
             // enemy goes first
             s.player.SetPlayerStatusEffect("dodge", false);
             // enemy went first, so player can't be dodgy
+            // CHARM: bulwark — player attacks second → +1 parry
+            if (s.itemManager.PlayerHasCharm("bulwark")) {
+                s.itemManager.ActivateCharmTriggerImmediately("bulwark", s.itemManager.GetCharmCount("bulwark"));
+            }
+            // CHARM: inevitable — player attacks second → +1 attack after sound plays (handled in EnemyAttacks)
             if (!EnemyAttacks()) {
                 // if player doesn't die
                 StartCoroutine(RoundTwo("player"));
@@ -340,13 +459,50 @@ public class TurnManager : MonoBehaviour {
             }
             else {
                 // player was killed
-                StartCoroutine(Kill("player"));
+                StartCoroutine(Kill("player", ConsumeQueuedKillAsBleedOut("player"), false));
+                ResolveBleedOutAfterRound();
                 // show animation
             }
         }
-        Save.persistent.weaponUses[Array.IndexOf(s.itemManager.weaponNames, s.player.inventory[0].GetComponent<Item>().itemName.Split(' ')[1])]++;
+        RecordEquippedWeaponUse();
         // increment the # of times the player's current weapon has been used
         Save.SavePersistent();
+    }
+
+    /// <summary>
+    /// Animate the nightmare plan reveal, then execute the round once the animation finishes.
+    /// </summary>
+    private IEnumerator NightmareRevealThenExecuteRound() {
+        yield return StartCoroutine(EnemyAI.AnimateAndApplyNightmarePlan(s));
+        // mirror the bare saves from RunEnemyCalculations after the reveal animation
+        Save.game.enemyStamina = s.enemy.stamina;
+        Save.game.enemyTargetIndex = s.enemy.targetIndex;
+        if (s.tutorial == null) { Save.SaveGame(); }
+        ExecuteRoundOneLogic();
+    }
+
+    private void RecordEquippedWeaponUse() {
+        if (s == null || s.itemManager == null || s.player == null || s.player.inventory == null || s.player.inventory.Count == 0) { return; }
+
+        Item equippedWeapon = s.player.inventory[0].GetComponent<Item>();
+        if (equippedWeapon == null) { return; }
+
+        string equippedWeaponName = ItemManager.NormalizeWeaponSaveName(equippedWeapon.itemName);
+        int weaponIndex = ItemManager.IndexOfWeaponName(equippedWeaponName);
+        if (weaponIndex < 0) {
+            string fallbackWeaponName = ItemManager.GetWeaponBaseName(equippedWeapon.itemName).ToLowerInvariant();
+            weaponIndex = ItemManager.IndexOfWeaponName(fallbackWeaponName);
+        }
+        if (weaponIndex < 0) {
+            Debug.LogWarning($"Unable to record weapon use for '{equippedWeaponName}'");
+            return;
+        }
+
+        if (Save.persistent.weaponUses == null || Save.persistent.weaponUses.Length <= weaponIndex) {
+            Save.persistent.Normalize();
+        }
+
+        Save.persistent.weaponUses[weaponIndex]++;
     }
 
     private IEnumerator AttemptRegenStaminaAfterDelay() {
@@ -384,12 +540,13 @@ public class TurnManager : MonoBehaviour {
                 actionsAvailable = false;
                 // prevent further action
             }
+            yield return StartCoroutine(HandleEnemyCounterattackRescuesBeforePlayerAttack());
             // get necessary stats 
             if (PlayerAttacks()) {
                 // if player kills the enemy
                 SetTargetOf("player");
                 // reset target
-                StartCoroutine(Kill("enemy"));
+                StartCoroutine(Kill("enemy", ConsumeQueuedKillAsBleedOut("enemy"), false));
                 // play information
             }
         }
@@ -421,10 +578,13 @@ public class TurnManager : MonoBehaviour {
             // get necessary stats
             if (EnemyAttacks()) {
                 // if enemy kills player
-                StartCoroutine(Kill("player"));
+                StartCoroutine(Kill("player", ConsumeQueuedKillAsBleedOut("player"), false));
                 // play animation
             }
         }
+
+        ResolveBleedOutAfterRound();
+
         if (!s.player.isDead && !Save.game.enemyIsDead) {
             // if neither player or enemy is dead
             yield return s.delays[2f];
@@ -474,7 +634,7 @@ public class TurnManager : MonoBehaviour {
             // RecalculateMaxFor("player");
             s.player.targetIndex = 0;
             // make sure the player and enemy are aiming at the correct place
-            DetermineMove(true);
+            DetermineMove(true, true);
             yield return s.delays[0.35f];
             isMoving = false;
             SetTargetOf("player");
@@ -489,6 +649,7 @@ public class TurnManager : MonoBehaviour {
     /// Reset all variables used in preparation for the next round.
     /// </summary>
     public void ClearVariablesAfterRound() {
+        s.itemManager.EndEncounterWeaponState();
         ClearPotionStats();
         s.player.SetPlayerStatusEffect("fury", false);
         s.player.SetPlayerStatusEffect("dodge", false);
@@ -503,6 +664,7 @@ public class TurnManager : MonoBehaviour {
         Save.game.usedHelm = false;
         s.diceSummoner.breakOutOfScimitarParryLoop = false;
         scimitarParryCount = 0;
+        pendingEnemyHeadCounterDiscard = false;
         Save.game.discardableDieCounter = s.enemy.woundList.Contains("head") ? 1 : 0;
         Save.game.usedMace = false;
         Save.game.usedAnkh = false;
@@ -519,6 +681,8 @@ public class TurnManager : MonoBehaviour {
         }
         dontRemoveLeechYet = false;
         // set it to be false regardless afterwards, because we only want it to persist for 1 round
+        // CHARM: rotate pending bonuses → active, clear pending, save to GameData
+        s.itemManager.RotatePendingCharmBonusesToActive();
         StartCoroutine(AttemptRegenStaminaAfterDelay());
     }
 
@@ -541,31 +705,42 @@ public class TurnManager : MonoBehaviour {
     /// <summary>
     /// Coroutine to play the death animation, set status text, toggle variables, etc.
     /// </summary>
-    private IEnumerator Kill(string playerOrEnemy) {
-        if (playerOrEnemy == "player") { s.player.isDead = true; }
-        else if (playerOrEnemy == "enemy") { Save.game.enemyIsDead = true; }
-        // make sure whoever is killed is set to be dead
-        Save.game.enemyIsDead = true;
+    private IEnumerator Kill(string playerOrEnemy, bool bleedOut = false, bool showStatusText = true) {
+        bool usePlayerSoftKill = playerOrEnemy == "player"
+            && s != null
+            && s.tombstoneData != null
+            && s.tombstoneData.HasUsableResurrectionAmulet();
+
+        if (playerOrEnemy == "player") {
+            s.player.isDead = true;
+            SetBleedOutNextRound("player", false, saveGame:false);
+        }
+        else if (playerOrEnemy == "enemy") {
+            Save.game.enemyIsDead = true;
+            SetBleedOutNextRound("enemy", false, saveGame:false);
+        }
         if (s.tutorial == null) { Save.SaveGame(); }
         yield return s.delays[0.55f];
         // short delay
-        if (playerOrEnemy == "player") {
-            if (s.enemy.spawnNum is 0 or 1) {
-                SetStatusText("devil twists claws into you... you die");
+        if (showStatusText) {
+            if (bleedOut) {
+                if (playerOrEnemy == "player") { SetStatusText(GetPlayerBleedOutStatusText()); }
+                else { SetStatusText(GetEnemyBleedOutStatusText()); }
+            }
+            else if (playerOrEnemy == "player") {
+                SetStatusText(GetPlayerKilledStatusText());
             }
             else {
-                SetStatusText($"{s.enemy.enemyName.text.ToLower()} hits you... you die");
+                SetStatusText(GetEnemyKilledStatusText());
             }
-            StartCoroutine(PlayDeathAnimation("player"));
-            // set status text and play the animation
-            //
         }
-        else if (playerOrEnemy == "enemy") {
-            SetStatusText($"you hit {s.enemy.enemyName.text.ToLower()}... he dies");
-            StartCoroutine(PlayDeathAnimation("enemy"));
-            // set status text and play the animation
+        if (usePlayerSoftKill) {
+            StartCoroutine(PlaySoftPlayerKillAnimation());
         }
-        Save.persistent.enemiesSlain++;
+        else {
+            StartCoroutine(PlayDeathAnimation(playerOrEnemy));
+        }
+        if (playerOrEnemy == "enemy") { Save.persistent.enemiesSlain++; }
         Save.game.expendedStamina = 0;
         Save.SavePersistent();
         if (s.tutorial == null) { Save.SaveGame(); }
@@ -617,6 +792,7 @@ public class TurnManager : MonoBehaviour {
     /// Play the death animation for the player or enemy. Also handle things like clearing potion stats.
     /// </summary>
     private IEnumerator PlayDeathAnimation(string playerOrEnemy) {
+        bool resurrectWithAmulet = playerOrEnemy == "player" && s.tombstoneData.HasUsableResurrectionAmulet();
         SpriteRenderer spriteRenderer = playerOrEnemy == "player" ? s.player.GetComponent<SpriteRenderer>() : s.enemy.GetComponent<SpriteRenderer>();
         // get the proper spriterenderer
         // conditional is true ? yes : no
@@ -652,7 +828,7 @@ public class TurnManager : MonoBehaviour {
             else { s.soundManager.PlayClip("death"); }
         }
         else {
-            s.soundManager.PlayClip("death");
+            s.soundManager.PlayClip(resurrectWithAmulet ? "cloak" : "death");
         }
         // play sound clip
         if (s.itemManager.PlayerHasWeapon("rapier") && playerOrEnemy == "enemy") {
@@ -663,9 +839,15 @@ public class TurnManager : MonoBehaviour {
             s.player.GetComponent<SpriteRenderer>().sprite = s.player.GetDeathSprite();
             s.player.SetPlayerPositionAfterDeath();
             // if player dies, set sprite and proper position
-            s.tombstoneData.SetTombstoneData();
+            if (resurrectWithAmulet) {
+                s.tombstoneData.PrepareResurrectionAmulet();
+                s.tombstoneData.BeginPreparedResurrection();
+            }
+            else {
+                s.tombstoneData.SetTombstoneData();
+            }
             // allow the player to retry
-            Save.persistent.deaths++;
+            if (!resurrectWithAmulet) { Save.persistent.deaths++; }
         }
         else if (playerOrEnemy == "enemy") {
             if (s.enemy.enemyName.text == "Devil") {
@@ -674,7 +856,7 @@ public class TurnManager : MonoBehaviour {
             }
             if (s.enemy.enemyName.text == "Lich") {
                 s.enemy.GetComponent<Animator>().enabled = true;
-                yield return s.delays[0.65f];
+                yield return s.delays[1f];
                 s.soundManager.PlayClip("clang");
             }
             s.enemy.GetComponent<SpriteRenderer>().sprite = s.enemy.GetDeathSprite();
@@ -682,7 +864,7 @@ public class TurnManager : MonoBehaviour {
             // if enemy dies, set sprite and proper position
             s.itemManager.SpawnItems();
             // spawn items
-            blackBox.transform.localPosition = onScreen;
+            RefreshEnemyStatVisibility();
             // hide the enemy's stats
             if (s.tutorial != null) { s.tutorial.Increment(); }
         }
@@ -700,6 +882,40 @@ public class TurnManager : MonoBehaviour {
         RecalculateMaxFor("enemy");
         // reset target for both
         Save.SavePersistent();
+    }
+
+    private IEnumerator PlaySoftPlayerKillAnimation() {
+        if (softKillInProgress) { yield break; }
+        softKillInProgress = true;
+
+        SpriteRenderer spriteRenderer = s.player.GetComponent<SpriteRenderer>();
+        Color temp = Color.white;
+        temp.a = 0.5f;
+        for (int i = 0; i < 14; i++) {
+            yield return s.delays[0.0125f];
+            temp.a -= 1f / 28f;
+            spriteRenderer.color = temp;
+        }
+
+        Animator playerAnimator = s.player.GetComponent<Animator>();
+        if (playerAnimator != null) {
+            playerAnimator.enabled = false;
+        }
+
+        for (int i = 0; i < 28; i++) {
+            yield return s.delays[0.0125f];
+            temp.a += 1f / 28f;
+            spriteRenderer.color = temp;
+        }
+
+        yield return s.delays[0.8f];
+        s.soundManager.PlayClip("cloak");
+        s.player.GetComponent<SpriteRenderer>().sprite = s.player.GetDeathSprite();
+        s.player.SetPlayerPositionAfterDeath();
+
+        s.tombstoneData.PrepareResurrectionAmulet();
+        s.tombstoneData.BeginPreparedResurrection();
+        softKillInProgress = false;
     }
 
     private IEnumerator RapierGainAfterDelay() { 
@@ -760,10 +976,62 @@ public class TurnManager : MonoBehaviour {
         }
     }
 
+    private void SetPlayerAttackStatusText(string text) {
+        if (string.IsNullOrWhiteSpace(text) || playerAttackStatusSetThisRound) { return; }
+
+        playerAttackStatusSetThisRound = true;
+        SetStatusText(text);
+    }
+
+    private void SetEnemyAttackStatusText(string text) {
+        if (string.IsNullOrWhiteSpace(text) || enemyAttackStatusSetThisRound) { return; }
+
+        enemyAttackStatusSetThisRound = true;
+        SetStatusText(text);
+    }
+
+    public void SetBleedOutNextRound(string playerOrEnemy, bool bleedsOut, bool saveGame = true) {
+        if (playerOrEnemy == "player") {
+            Save.game.playerBleedsOutNextRound = bleedsOut;
+        }
+        else if (playerOrEnemy == "enemy") {
+            Save.game.enemyBleedsOutNextRound = bleedsOut;
+        }
+        else {
+            Debug.LogError("invalid string passed in to SetBleedOutNextRound() in TurnManager.cs");
+            return;
+        }
+
+        if (saveGame && s.tutorial == null) {
+            Save.SaveGame();
+        }
+    }
+
+    private void QueueKillAsBleedOut(string playerOrEnemy) {
+        if (playerOrEnemy == "player") {
+            queuePlayerKillAsBleedOut = true;
+        }
+        else if (playerOrEnemy == "enemy") {
+            queueEnemyKillAsBleedOut = true;
+        }
+    }
+
+    private bool ConsumeQueuedKillAsBleedOut(string playerOrEnemy) {
+        if (playerOrEnemy == "player") {
+            bool useBleedOutStatus = queuePlayerKillAsBleedOut;
+            queuePlayerKillAsBleedOut = false;
+            return useBleedOutStatus;
+        }
+
+        bool enemyUsesBleedOutStatus = queueEnemyKillAsBleedOut;
+        queueEnemyKillAsBleedOut = false;
+        return enemyUsesBleedOutStatus;
+    }
+
     /// <summary>
     /// Perform actions (sound, animation) for when a player or enemy is hit.
     /// </summary>
-    private IEnumerator DoStuffForAttack(string hitOrParry, string playerOrEnemy, bool showAnimation = true, bool armor = false) {
+    private IEnumerator DoStuffForAttack(string hitOrParry, string playerOrEnemy, bool showAnimation = true, bool armor = false, bool charmShatter = false, Action onHitSound = null) {
         yield return s.delays[0.55f];
         // wait
         if (s.statSummoner.SumOfStat("green", "player") < 0 && playerOrEnemy == "enemy") {
@@ -777,21 +1045,26 @@ public class TurnManager : MonoBehaviour {
                 }
                 // player dodges
                 else {
-                    if (!(playerOrEnemy == "player" && armor || (s.enemy.spawnNum == 0 && playerOrEnemy == "enemy"))) {
+                    if (charmShatter) {
+                        s.soundManager.PlayClip("cloak");
+                        onHitSound?.Invoke();
+                    }
+                    else if (!(playerOrEnemy == "player" && armor || (s.enemy.spawnNum == 0 && playerOrEnemy == "enemy"))) {
                         s.soundManager.PlayClip("hit");
+                        onHitSound?.Invoke();
                     }
                     // play sound clip if conditions apply (not hitting armored player or devil)
                     else if (s.enemy.spawnNum == 0 && playerOrEnemy == "enemy") {
                         s.soundManager.PlayClip("cloak");
+                        onHitSound?.Invoke();
                     }
                     // play cloak shatter here if needed
                     if (showAnimation) {
                         // if showing an animation
                         if (!(playerOrEnemy == "player" && armor)) {
-                            // if NOT player is getting hit and has armor
                             StartCoroutine(PlayHitAnimation(playerOrEnemy));
                         }
-                        else { s.soundManager.PlayClip("armor"); } // play sound clip
+                        else if (!charmShatter) { s.soundManager.PlayClip("armor"); } // play sound clip
                     }
                 }
             }
@@ -804,54 +1077,123 @@ public class TurnManager : MonoBehaviour {
     }
 
     /// <summary>
+    /// helper coroutine to trigger inevitable charm after sound plays
+    /// </summary>
+    private IEnumerator TriggerInevitableCharmAfterSound() {
+        yield return s.delays[0.55f];
+        if (s.itemManager.PlayerHasCharm("inevitable")) {
+            s.itemManager.ActivateCharmTriggerImmediately("inevitable", s.itemManager.GetCharmCount("inevitable"));
+        }
+    }
+
+    /// <summary>
     /// Perform actions for the enemy's attack.
     /// </summary>
     private bool EnemyAttacks() {
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         bool armor = false;
+        string enemyAttackStatusText = null;
+        bool blockedByArmorItem = false;
+        bool blockedByExaltedCharm = false;
+        bool chaliceWillDrink = false;
+        bool playerBleedsOutThisRound = PlayerBleedsOutThisRound();
+        bool playerWouldAutoHeal = Save.game.curCharNum == 3 && s.player.woundList.Count < 2 && s.player.stamina >= 7;
+        bool enemyHitCountsAsWounded = !Save.game.isDodgy && !s.player.woundList.Contains(s.enemy.target.text);
+        bool enemyHitAddsPersistentWound = enemyHitCountsAsWounded && !playerWouldAutoHeal;
+        bool enemyHitIsFatal = enemyHitAddsPersistentWound && s.player.woundList.Count == 2;
+        bool phylacteryTriggers = !armor
+            && enemyHitAddsPersistentWound
+            && !enemyHitIsFatal
+            && s.itemManager.PlayerHas("phylactery")
+            && !Save.game.isBloodthirsty;
         // initialize armor as false
         s.soundManager.PlayClip("swing");
         // play sound clip
         if (enemyAtt > playerDef) {
             // if enemy is hitting player
-            if (Save.game.isDodgy) { SetStatusText($"{s.enemy.enemyName.text.ToLower()} hits you... you dodge"); }
+            if (Save.game.isDodgy) { enemyAttackStatusText = $"{s.enemy.enemyName.text.ToLower()} hits you... you dodge"; }
             // if player dodges, notify 
             else {
                 if (s.itemManager.PlayerHas("armor")) {
                     armor = true;
+                    blockedByArmorItem = true;
+                    phylacteryTriggers = false;
                     // set armor to true
-                    SetStatusText($"{s.enemy.enemyName.text.ToLower()} hits you... your armor shatters");
+                    enemyAttackStatusText = $"{s.enemy.enemyName.text.ToLower()} hits you... your armor shatters";
                     Save.persistent.armorBroken++;
+                    s.itemManager.MarkItemUsed("armor");
                     // notify player
                     StartCoroutine(RemoveArmorAfterDelay());
                     s.itemManager.Select(s.player.inventory, 0, playAudio:false);
                     // select weapon
                 }
-                else {
-                    if (s.enemy.target.text != "face") {
-                        if (s.enemy.spawnNum is 0 or 1) {
-                            SetStatusText($"devil twists claws in your {s.enemy.target.text}!");
-                        }
-                        if (s.player.woundList.Count != 2) {
-                            // if player won't die
-                            SetStatusText($"{s.enemy.enemyName.text.ToLower()} hits you, damaging {s.enemy.target.text}!");
-                            // notify player
-                            Save.persistent.woundsReceived++;
-                        }
-                        if (s.itemManager.PlayerHas("phylactery")) {
-                            // if player has phylactery
-                            StartCoroutine(GiveLeechAfterDelay());
-                            // give them leech buff after waiting, so it looks better
-                            dontRemoveLeechYet = true;
-                        }
-                    }
+                else if (!armor && s.itemManager.PlayerHasCharm("exalted")) {
+                    // charm of exalted blocks hit like armor, but plays "cloak" and says "charm shatters"
+                    armor = true;
+                    blockedByExaltedCharm = true;
+                    phylacteryTriggers = false;
+                    enemyAttackStatusText = $"{s.enemy.enemyName.text.ToLower()} hits you... your charm shatters";
+                    StartCoroutine(RemoveCharmAfterDelay("exalted"));
+                    s.itemManager.Select(s.player.inventory, 0, playAudio:false);
+                }
+                else if (phylacteryTriggers) {
+                    enemyAttackStatusText = $"{s.enemy.enemyName.text.ToLower()} hits you... you thirst for blood";
+                }
+                else if (s.enemy.spawnNum is 0 or 1) {
+                    enemyAttackStatusText = $"devil twists claws in your {s.enemy.target.text}!";
+                }
+                else if (enemyHitIsFatal) {
+                    enemyAttackStatusText = GetPlayerKilledStatusText();
+                }
+                else if (!enemyHitIsFatal) {
+                    // if player won't die immediately
+                    chaliceWillDrink = enemyHitCountsAsWounded && s.itemManager.PlayerHas("sacrificial chalice");
+                    enemyAttackStatusText = chaliceWillDrink
+                        ? $"{s.enemy.enemyName.text.ToLower()} hits you... the chalice drinks your blood!"
+                        : $"{s.enemy.enemyName.text.ToLower()} hits you, damaging {s.enemy.target.text}!";
+                    // notify player
+                    Save.persistent.woundsReceived++;
                 }
             }
-            StartCoroutine(DoStuffForAttack("hit", "player", true, armor));
+            SetEnemyAttackStatusText(enemyAttackStatusText);
+            // determine whether this hit should use cloak because something shatters
+            bool exaltedBlockedHit = blockedByExaltedCharm && !blockedByArmorItem;
+            bool woundCountsForTriggers = !armor && enemyHitCountsAsWounded;
+            bool crystalShardShatters = woundCountsForTriggers && s.itemManager.PlayerHas("crystal shard");
+            bool glassSwordShatters = woundCountsForTriggers
+                && s.itemManager.PlayerHasWeapon("glass sword")
+                && !Save.game.glassSwordShattered
+                && !crystalShardShatters;
+            bool charmShatter = exaltedBlockedHit || crystalShardShatters || glassSwordShatters;
+            Action onHitSound = woundCountsForTriggers
+                ? () => s.itemManager.TryAdvanceSacrificialChalice()
+                : null;
+            StartCoroutine(DoStuffForAttack("hit", "player", true, armor, charmShatter, onHitSound));
             // play animation + sound for the attack
+            // CHARM: inevitable — +1 attack when enemy attacks first (triggered after sound)
+            if (enemyAttackedFirst) {
+                StartCoroutine(TriggerInevitableCharmAfterSound());
+            }
             if (!(s.player.woundList.Contains(s.enemy.target.text) || s.player.woundList.Contains(s.enemy.target.text) || armor || Save.game.isDodgy)) {
                 // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
-                if (Save.game.curCharNum == 3 && s.player.woundList.Count < 2 && s.enemy.target.text != "face" && s.player.stamina >= 7) {
+                if (s.itemManager.PlayerHasCharm("vindictive")) {
+                    if (enemyAttackedFirst) {
+                        s.itemManager.ActivateCharmTriggerImmediately("vindictive", s.itemManager.GetCharmCount("vindictive"));
+                    }
+                    else {
+                        s.itemManager.QueueCharmTrigger("vindictive", s.itemManager.GetCharmCount("vindictive"));
+                    }
+                }
+                if (crystalShardShatters) {
+                    s.itemManager.MarkItemUsed("crystal shard");
+                    StartCoroutine(RemoveItemAfterDelay("crystal shard"));
+                }
+                if (glassSwordShatters) {
+                    Save.game.glassSwordShattered = true;
+                    StartCoroutine(ShatterGlassSwordAfterDelay());
+                }
+
+                if (Save.game.curCharNum == 3 && s.player.woundList.Count < 2 && s.player.stamina >= 7) {
                     // if on the 4th char, they are able to heal back (wont die instantly), and has sufficient stamina to heal the next move
                     s.player.woundList.Clear();
                     StartCoroutine(HealAfterDelay());
@@ -863,18 +1205,30 @@ public class TurnManager : MonoBehaviour {
                         ChangeStaminaOf("player", 3);
                         // so merely increment their stamina
                     }
-                    StartCoroutine(InjuredTextChange(s.player.woundGUIElement));
                     if (!s.player.woundList.Contains(s.enemy.target.text)) {
                         s.player.woundList.Add(s.enemy.target.text);
                         // add the hit, but only if the player did not yet have that wound
                         Save.game.playerWounds = s.player.woundList;
+                        StartCoroutine(InjuredTextChange(
+                            s.player.woundGUIElement,
+                            phylacteryTriggers ? "fwoosh" : null,
+                            phylacteryTriggers ? GrantPhylacteryLeech : null));
                         // make it change
                         RecalculateMaxFor("player");
                         // reset stuff
                         if (s.tutorial == null) { Save.SaveGame(); }
                         if (s.player.woundList.Count > 0) {
                             // wounds were not healed, so apply them normally
-                            return ApplyInjuriesDuringMove(s.enemy.target.text, "player");
+                            pendingEnemyHeadCounterDiscard = enemyAttackedFirst && s.enemy.target.text == "head";
+                            bool playerDiesFromAppliedWound = ApplyInjuriesDuringMove(s.enemy.target.text, "player");
+                            if (playerDiesFromAppliedWound) {
+                                pendingEnemyHeadCounterDiscard = false;
+                            }
+                            if (playerDiesFromAppliedWound && playerBleedsOutThisRound) {
+                                QueueKillAsBleedOut("player");
+                                return true;
+                            }
+                            return playerDiesFromAppliedWound;
                         }
                         // wounds were healed, so don't apply them and don't kill the player
                     }
@@ -887,17 +1241,35 @@ public class TurnManager : MonoBehaviour {
             // player parried
             StartCoroutine(DoStuffForAttack("parry", "player"));
             // play sound and animation
-            if (enemyAtt < 0) { SetStatusText($"{s.enemy.enemyName.text.ToLower()} hits you... the attack is to weak"); }
+            // CHARM: inevitable — +1 attack when enemy attacks first (triggered after sound)
+            if (enemyAttackedFirst) {
+                StartCoroutine(TriggerInevitableCharmAfterSound());
+            }
+            if (enemyAtt < 0) { enemyAttackStatusText = $"{s.enemy.enemyName.text.ToLower()} hits you... the attack is to weak"; }
             else {
                 if (s.itemManager.PlayerHasWeapon("scimitar")) {
                     scimitarParryCount += s.itemManager.PlayerHasLegendary() ? 2 : 1;
                     // legendary scimitar gets 2 discard, regular only gets 1
                 }
                 // player has parried (this resets at the start of every round so we can do it regardless)
-                SetStatusText($"{s.enemy.enemyName.text.ToLower()} hits you... you parry");
+                // CHARM: unbroken — parry grants +1 parry next round
+                if (s.itemManager.PlayerHasCharm("unbroken")) {
+                    s.itemManager.QueueCharmTrigger("unbroken", s.itemManager.GetCharmCount("unbroken"));
+                }
+                // CHARM: riposte — parry grants +1 attack (immediate if enemy went first, else next round)
+                if (s.itemManager.PlayerHasCharm("riposte")) {
+                    if (enemyAttackedFirst) {
+                        s.itemManager.ActivateCharmTriggerImmediately("riposte", s.itemManager.GetCharmCount("riposte"));
+                    }
+                    else {
+                        s.itemManager.QueueCharmTrigger("riposte", s.itemManager.GetCharmCount("riposte"));
+                    }
+                }
+                enemyAttackStatusText = $"{s.enemy.enemyName.text.ToLower()} hits you... you parry";
                 Save.persistent.attacksParried++;
                 Save.SavePersistent();
             }
+            SetEnemyAttackStatusText(enemyAttackStatusText);
             // notify player
         }
         return false;
@@ -914,8 +1286,59 @@ public class TurnManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Coroutine to heal the player's wounds, used by the 4th character.
+    /// Removes a charm by modifier after a short delay (used when charm shatters).
     /// </summary>
+    private IEnumerator RemoveCharmAfterDelay(string modifier, float delay = 0.45f) {
+        if (delay > 0f) {
+            yield return new WaitForSeconds(delay);
+        }
+        GameObject charmObj = s.player.inventory
+            .FirstOrDefault(a => {
+                Item it = a.GetComponent<Item>();
+                return it != null && it.itemName == "charm" && it.modifier == modifier;
+            });
+        if (charmObj != null) { charmObj.GetComponent<Item>().Remove(); }
+    }
+
+    private IEnumerator RemoveItemAfterDelay(string itemName, float delay = 0.45f) {
+        if (delay > 0f) {
+            yield return new WaitForSeconds(delay);
+        }
+
+        GameObject itemObj = s.itemManager.GetPlayerItem(itemName);
+        if (itemObj != null) { itemObj.GetComponent<Item>().Remove(); }
+    }
+
+    /// <summary>
+    /// Downgrades glass sword to broken stats after a short delay (1/1/0/0 pattern).
+    /// </summary>
+    private IEnumerator ShatterGlassSwordAfterDelay() {
+        yield return s.delays[0.55f];
+        Item weapon = s.player.inventory[0].GetComponent<Item>();
+        if (weapon == null || !weapon.itemName.Contains("glass sword")) {
+            yield break;
+        }
+
+        weapon.modifier = "shattered";
+        weapon.itemName = "shattered glass sword";
+        weapon.weaponStats["green"] = 0;
+        weapon.weaponStats["blue"]  = 1;
+        weapon.weaponStats["red"]   = 1;
+        weapon.weaponStats["white"] = 0;
+        weapon.GetComponent<SpriteRenderer>().sprite = s.itemManager.GetItemSprite("glass_sword_shattered");
+        s.player.stats = weapon.weaponStats;
+        Save.game.resumeAcc = 0;
+        Save.game.resumeSpd = 1;
+        Save.game.resumeDmg = 1;
+        Save.game.resumeDef = 0;
+        s.itemManager.RefreshPlayerCombatStatsAndDice();
+        if (s.itemManager.highlightedItem == weapon.gameObject) {
+            weapon.Select(playAudio:false);
+        }
+        s.itemManager.SaveInventoryItems();
+    }
+
+
     private IEnumerator HealAfterDelay() {
         yield return s.delays[1f];
         s.turnManager.ChangeStaminaOf("player", -7);
@@ -926,33 +1349,49 @@ public class TurnManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// Coroutine to give the player leech after a delay, given by the phylactery.
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator GiveLeechAfterDelay() {
-        yield return s.delays[0.5f];
-    }
-
-    /// <summary>
     /// Handles the player's attack, returns true if it was a killing blow.
     /// </summary>
     private bool PlayerAttacks() {
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
+        bool enemyBleedsOutThisRound = EnemyBleedsOutThisRound();
+        string playerAttackStatusText = null;
+        string currentTargetWound = GetNormalizedTargetName(s.player.target.text);
+        bool playerHasLeech = Save.game.isBloodthirsty;
+        bool playerWillLeech = playerHasLeech && !string.IsNullOrEmpty(currentTargetWound) && s.player.woundList.Contains(currentTargetWound);
+        bool clearLeechAtBlackout = false;
+        bool glaiveWouldKill = s.itemManager.PlayerHasSecondWoundKillWeapon()
+            && !string.IsNullOrEmpty(currentTargetWound)
+            && !s.player.target.text.Contains("*")
+            && s.enemy.woundList.Count == 1;
+        // CHARM: ruthless \u2014 targeting neck this attack grants +3 accuracy next round
+        if (s.itemManager.PlayerHasCharm("ruthless") && currentTargetWound == "neck") {
+            s.itemManager.QueueCharmTrigger("ruthless", s.itemManager.GetCharmCount("ruthless"));
+        }
         s.soundManager.PlayClip("swing");
         // play sound clip
-        if (playerAtt > enemyDef) {
+        bool playerAttackClearsDefense = PlayerAttackClearsEnemyDefense(playerAtt, enemyDef);
+        if (playerAttackClearsDefense) {
             // if player will hit enemy
-            if (s.statSummoner.SumOfStat("green", "player") < 0) {
+            if (playerAim < 0) {
                 // player doesn't have enough accuracy to hit, so notify
-                SetStatusText($"you hit {s.enemy.enemyName.text.ToLower()}... you miss");
+                playerAttackStatusText = enemyBleedsOutThisRound
+                    ? GetEnemyBleedOutStatusText()
+                    : $"you hit {s.enemy.enemyName.text.ToLower()}... you miss";
                 // s.soundManager.PlayClip("miss");-
                 // play sound clip
                 StartCoroutine(DoStuffForAttack("hit", "enemy"));
             }
             else {
-                if (s.player.target.text == "face" && s.enemy.enemyName.text != "Lich" || (s.enemy.woundList.Count == 2 && !s.player.target.text.Contains("*"))) {
+                if (enemyBleedsOutThisRound) {
+                    StartCoroutine(DoStuffForAttack("hit", "enemy", false));
+                    playerAttackStatusText = GetEnemyBleedOutStatusText();
+                    Save.persistent.woundsInflicted++;
+                    Save.persistent.woundsInflictedArr[s.player.targetIndex]++;
+                }
+                else if ((s.enemy.woundList.Count == 2 || glaiveWouldKill) && !s.player.target.text.Contains("*")) {
                     // enemy is going to die
                     StartCoroutine(DoStuffForAttack("hit", "enemy", false));
+                    playerAttackStatusText = GetEnemyKilledStatusText();
                     // play sound but no animation
                     Save.persistent.woundsInflicted++;
                     Save.persistent.woundsInflictedArr[s.player.targetIndex]++;
@@ -962,111 +1401,116 @@ public class TurnManager : MonoBehaviour {
                     StartCoroutine(DoStuffForAttack("hit", "enemy"));
                     // play sound and animation 
                     if (s.enemy.spawnNum == 0) {
-                        SetStatusText("you hit devil... his cloak shatters");
+                        playerAttackStatusText = "you hit devil... his cloak shatters";
                     }
-                    if (s.player.target.text.Contains("*")) {
-                        SetStatusText($"you hit {s.enemy.enemyName.text.ToLower()}, damaging {s.player.target.text.Substring(1)}!");
-                        Save.persistent.woundsInflicted++;
-                        Save.persistent.woundsInflictedArr[s.player.targetIndex]++;
+                    else if (playerWillLeech) {
+                        playerAttackStatusText = $"you hit {s.enemy.enemyName.text.ToLower()}, leeching his {currentTargetWound}!";
+                    }
+                    else if (s.player.target.text.Contains("*")) {
+                        playerAttackStatusText = $"you hit {s.enemy.enemyName.text.ToLower()}, damaging {s.player.target.text.Substring(1)}!";
                     }
                     else {
-                        // not injured
-                        if (s.itemManager.PlayerHasWeapon("maul")) {}
-                        // don't say anything for maul (we want it to show that it is an instant kill)
-                        else if (s.enemy.spawnNum == 0) {}
-                        // don't say anything for cloaked devil (shattering his cloak handled later on)
-                        else {
-                            SetStatusText($"you hit {s.enemy.enemyName.text.ToLower()}, damaging {s.player.target.text}!");
-                        }
-                        Save.persistent.woundsInflicted++;
-                        Save.persistent.woundsInflictedArr[s.player.targetIndex]++;
-                        
-                        // same as above
+                        playerAttackStatusText = $"you hit {s.enemy.enemyName.text.ToLower()}, damaging {s.player.target.text}!";
                     }
+                    Save.persistent.woundsInflicted++;
+                    Save.persistent.woundsInflictedArr[s.player.targetIndex]++;
                 }
+                SetPlayerAttackStatusText(playerAttackStatusText);
                 if (s.statSummoner.SumOfStat("green", "player") >= 0) {
-                    if (Save.game.isBloodthirsty) {
-                        // if player is wounded
-                        try {
-                            StartCoroutine(HealSFXFromPhylactery());
-                        } catch {}
-                        // try to heal the wound, else don't do anything
-                        s.player.SetPlayerStatusEffect("leech", false);
-                        // turn off bloodthirsty
+                    if (playerWillLeech) {
+                        s.player.woundList.Remove(currentTargetWound);
+                        ClearBleedOutForRecoveredWound("player", currentTargetWound);
+                        clearLeechAtBlackout = true;
                     }
+                    bool enemyWoundTextChanged = false;
                     if (!s.enemy.woundList.Contains(s.player.target.text) && !s.player.target.text.Contains("*")) {
                         // if wound was not injured and player has enough accuracy to hit
+                        Action onEnemyWoundBlackAfterSound = null;
                         if (s.enemy.spawnNum != 0) {
                             s.enemy.woundList.Add(s.player.target.text);
                             // add the wound
                             Save.game.enemyWounds = s.enemy.woundList;
+                            onEnemyWoundBlackAfterSound = () => s.itemManager.TryApplyKatarFirstWoundEffect();
+                            // CHARM: relentless - wounding enemy grants +2 attack next round
+                            if (s.itemManager.PlayerHasCharm("relentless")) {
+                                s.itemManager.QueueCharmTrigger("relentless", s.itemManager.GetCharmCount("relentless"));
+                            }
                         }
                         if (s.tutorial == null) { Save.SaveGame(); }
                         if (Save.game.curCharNum == 2) {
                             s.turnManager.ChangeStaminaOf("player", 1);
                             // increment stamina if on 3rd character
                         }
-                        StartCoroutine(InjuredTextChange(s.enemy.woundGUIElement));
+                        enemyWoundTextChanged = true;
                         // make the text change
                         RecalculateMaxFor("enemy");
+                        StartCoroutine(InjuredTextChange(s.enemy.woundGUIElement, onBlackAfterSound:onEnemyWoundBlackAfterSound));
+                        if (playerWillLeech) {
+                            StartCoroutine(InjuredTextChange(s.player.woundGUIElement, "blip0", null, ClearPlayerLeechEffect));
+                        }
                         // recalculate max
                         if (s.enemy.spawnNum != 0) {
+                            if (playerHasLeech && !clearLeechAtBlackout) { ClearPlayerLeechEffect(); }
                             // cloaked devil is unaffected by all wounds
-                            return ApplyInjuriesDuringMove(s.player.target.text, "enemy");
+                            bool enemyDiesFromAppliedWound = ApplyInjuriesDuringMove(
+                                s.player.target.text,
+                                "enemy",
+                                neckStyleBleedOut: s.itemManager.PlayerHasWeapon("maul") && s.enemy.enemyName.text != "Lich"
+                            );
+                            if (enemyDiesFromAppliedWound && enemyBleedsOutThisRound) {
+                                QueueKillAsBleedOut("enemy");
+                            }
+                            return enemyDiesFromAppliedWound;
                         }
                         // return if the enemy dies and at the same time apply wounds instantly
                         
                     }
+                    if (playerWillLeech) {
+                        if (!enemyWoundTextChanged) {
+                            StartCoroutine(InjuredTextChange(s.player.woundGUIElement, "blip0", null, ClearPlayerLeechEffect));
+                        }
+                    }
                 }
-                if (s.itemManager.PlayerHasWeapon("maul") && s.enemy.spawnNum != 0) { return true; }
-                // kill enemy instantly if player has a maul, excluding cloaked devil
             }
         }
         else {
-            // enemy will parry
-            StartCoroutine(DoStuffForAttack("parry", "enemy"));
-            // play animation and sound
-            if (playerAtt < 0) { SetStatusText($"you hit {s.enemy.enemyName.text.ToLower()}... the attack is too weak"); }
-            else if (s.statSummoner.SumOfStat("green", "player") < 0) {
-                SetStatusText($"you hit {s.enemy.enemyName.text.ToLower()}... you miss");
-                // s.soundManager.PlayClip("miss");
-                // play sound clip
+            if (enemyBleedsOutThisRound) {
+                StartCoroutine(DoStuffForAttack("hit", "enemy", false));
+                playerAttackStatusText = GetEnemyBleedOutStatusText();
             }
-            else { SetStatusText($"you hit {s.enemy.enemyName.text.ToLower()}... he parries"); }
+            else {
+                // enemy will parry
+                StartCoroutine(DoStuffForAttack("parry", "enemy"));
+                // play animation and sound
+                if (PlayerAttackIsTooWeak(playerAtt)) { playerAttackStatusText = $"you hit {s.enemy.enemyName.text.ToLower()}... the attack is too weak"; }
+                else if (playerAim < 0) {
+                    playerAttackStatusText = $"you hit {s.enemy.enemyName.text.ToLower()}... you miss";
+                    // s.soundManager.PlayClip("miss");
+                    // play sound clip
+                }
+                else { playerAttackStatusText = $"you hit {s.enemy.enemyName.text.ToLower()}... he parries"; }
+            }
+            SetPlayerAttackStatusText(playerAttackStatusText);
             // depending on the stats, notify player accordingly
         }
+        if (playerHasLeech && !clearLeechAtBlackout) { ClearPlayerLeechEffect(); }
         return false;
         // enemy has not died, so return false
     }
 
     /// <summary>
-    /// Coroutine to heal the player after using leech (works for the scroll too).
-    /// </summary>
-    private IEnumerator HealSFXFromPhylactery() {
-        yield return s.delays[0.5f];
-        if (s.player.target.text.Contains("*")) {
-            if (s.player.woundList.Remove(s.player.target.text.Substring(1))) {
-                StartCoroutine(InjuredTextChange(s.player.woundGUIElement));
-                s.soundManager.PlayClip("blip0");
-            }
-        }
-        else {
-            if (s.player.woundList.Remove(s.player.target.text)) {
-                StartCoroutine(InjuredTextChange(s.player.woundGUIElement));
-                s.soundManager.PlayClip("blip0");
-            }
-        }
-    }
-
-    /// <summary>
     /// Instantly apply injury effects (such as decreasing die on gut wound).
     /// </summary>
-    private bool ApplyInjuriesDuringMove(string injury, string appliedTo) {
+    private bool ApplyInjuriesDuringMove(string injury, string appliedTo, bool neckStyleBleedOut = false) {
         StartCoroutine(ApplyInjuriesDuringMoveCoro(injury, appliedTo));
         // start applying the injuries
-        if (s.itemManager.PlayerHasWeapon("maul") && appliedTo == "enemy") { return true; }
-        if (injury == "face" && !(appliedTo == "enemy" && s.enemy.enemyName.text == "Lich")) { return true; }
+        if (injury == "neck" || neckStyleBleedOut) {
+            if (!(appliedTo == "enemy" && s.enemy.enemyName.text == "Lich")) {
+                SetBleedOutNextRound(appliedTo, true, saveGame:false);
+            }
+        }
         if (appliedTo == "player" && s.player.woundList.Count == 3) { return true; }
+        if (appliedTo == "enemy" && s.itemManager.PlayerHasSecondWoundKillWeapon() && s.enemy.woundList.Count == 2) { return true; }
         if (appliedTo == "enemy" && s.enemy.woundList.Count == 3) { return true; }
         return false;
         // return true or false here, based on whether the enemy was killed or not.
@@ -1077,7 +1521,6 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     private IEnumerator ApplyInjuriesDuringMoveCoro(string injury, string appliedTo) {
         yield return s.delays[0.45f];
-        // return true immediately if maul
         if (injury == "guts") {
             // for guts, decrease all die
             if (appliedTo == "player") {
@@ -1130,7 +1573,9 @@ public class TurnManager : MonoBehaviour {
         }
         else if (injury == "head") {
             if (appliedTo == "player") {
-                s.enemy.DiscardBestPlayerDie();
+                if (!pendingEnemyHeadCounterDiscard) {
+                    s.enemy.DiscardBestPlayerDie();
+                }
             }
             else if (appliedTo == "enemy" && s.enemy.enemyName.text != "Lich") {
                 Save.game.discardableDieCounter++;
@@ -1192,19 +1637,102 @@ public class TurnManager : MonoBehaviour {
     /// Make the enemy evaluate the current stats and add stamina to attack/defend etc.
     /// </summary>
     private void RunEnemyCalculations() {
-        if (!s.enemy.woundList.Contains("hip") || s.enemy.enemyName.text == "Lich") {
-            EnemyAI.ApplyLivePlan(s);
-            s.statSummoner.SetDebugInformationFor("enemy");
-        }
-        Save.game.enemyStamina = s.enemy.stamina + s.statSummoner.addedEnemyStamina.Values.Sum();
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        #endif
+        EnemyAI.ApplyLivePlan(s);
+        Save.game.enemyStamina = s.enemy.stamina;
+        Save.game.enemyTargetIndex = s.enemy.targetIndex;
         if (s.tutorial == null) { Save.SaveGame(); }
+        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+        stopwatch.Stop();
+        // Debug.Log($"enemy plan refresh total={stopwatch.Elapsed.TotalMilliseconds:F3}ms target={s.enemy.targetIndex} stamina={s.enemy.stamina}");
+        #endif
     }
 
+    public void RecalculateEnemyCombatIntent() {
+        if (s == null || s.enemy == null || s.player == null || s.statSummoner == null) { return; }
+        if (!s.itemManager.IsFightableEncounter() || isMoving) { return; }
+        // only hard reveals the plan live; other difficulties apply it at attack time
+        if (!ShouldRevealPlanDuringDraft()) { return; }
+
+        BeginEnemyPlanRefreshBatch();
+        try {
+            RunEnemyCalculations();
+            s.statSummoner.SummonStats();
+            s.statSummoner.RepositionAllDice("player");
+            s.statSummoner.RepositionAllDice("enemy");
+            s.statSummoner.SetCombatDebugInformationFor("player");
+            s.statSummoner.SetCombatDebugInformationFor("enemy");
+            RecalculateMaxFor("player");
+            RecalculateMaxFor("enemy");
+        }
+        finally {
+            EndEnemyPlanRefreshBatch();
+        }
+    }
+
+    /// <summary>
+    /// queue a deferred enemy-plan refresh if the board is stable enough to do it
+    /// </summary>
     public void RefreshEnemyPlanIfNeeded() {
-        if (refreshingEnemyPlan || s == null || s.enemy == null || s.player == null || s.statSummoner == null) { return; }
+        // only hard shows the live plan during the draft; other difficulties reveal at attack time
+        if (!ShouldRevealPlanDuringDraft()) { return; }
+        if (enemyPlanRefreshSuspendDepth > 0) {
+            enemyPlanRefreshPendingWhileSuspended = true;
+            return;
+        }
+        if (refreshingEnemyPlan || queuedEnemyPlanRefresh != null || s == null || s.enemy == null || s.player == null || s.statSummoner == null) { return; }
         if (!enemyPlanRefreshEnabled) { return; }
         if (isMoving || s.player.isDead || Save.game.enemyIsDead) { return; }
         if (s.enemy.enemyName.text == "Merchant" || s.enemy.enemyName.text == "Blacksmith" || s.enemy.enemyName.text == "Tombstone") { return; }
+
+        queuedEnemyPlanRefresh = StartCoroutine(RefreshEnemyPlanDeferred());
+    }
+
+    /// <summary>
+    /// suspend queued enemy replans until a grouped combat-state update finishes
+    /// </summary>
+    public void BeginEnemyPlanRefreshBatch() {
+        enemyPlanRefreshSuspendDepth++;
+    }
+
+    /// <summary>
+    /// resume queued enemy replans and flush one refresh if the batch changed combat state
+    /// </summary>
+    public void EndEnemyPlanRefreshBatch() {
+        EndEnemyPlanRefreshBatch(true);
+    }
+
+    /// <summary>
+    /// resume queued enemy replans and optionally flush one refresh if the batch changed combat state
+    /// </summary>
+    public void EndEnemyPlanRefreshBatch(bool flushRefresh) {
+        if (enemyPlanRefreshSuspendDepth <= 0) { return; }
+
+        enemyPlanRefreshSuspendDepth--;
+        if (enemyPlanRefreshSuspendDepth > 0) { return; }
+        if (!flushRefresh) {
+            enemyPlanRefreshPendingWhileSuspended = false;
+            return;
+        }
+        if (!enemyPlanRefreshPendingWhileSuspended) { return; }
+
+        enemyPlanRefreshPendingWhileSuspended = false;
+        RefreshEnemyPlanIfNeeded();
+    }
+
+    /// <summary>
+    /// wait one frame so multiple board changes can collapse into one replan
+    /// </summary>
+    private IEnumerator RefreshEnemyPlanDeferred() {
+        yield return null;
+        queuedEnemyPlanRefresh = null;
+        if (!ShouldRevealPlanDuringDraft()) { yield break; }
+        if (refreshingEnemyPlan || s == null || s.enemy == null || s.player == null || s.statSummoner == null) { yield break; }
+        if (!enemyPlanRefreshEnabled) { yield break; }
+        if (isMoving || s.player.isDead || Save.game.enemyIsDead) { yield break; }
+        if (s.enemy.enemyName.text == "Merchant" || s.enemy.enemyName.text == "Blacksmith" || s.enemy.enemyName.text == "Tombstone") { yield break; }
 
         refreshingEnemyPlan = true;
         try {
@@ -1228,10 +1756,10 @@ public class TurnManager : MonoBehaviour {
             }
         }
         if (enemyAim < 7 && enemyAim + s.enemy.stamina > 6 && !s.itemManager.PlayerHas("armor")) {
-            // if enemy can target face, and the player doesnt have a set of armor
+            // if enemy can target neck, and the player doesnt have a set of armor
             UseEnemyStaminaOn("green", 7 - enemyAim);
             s.enemy.TargetBest();
-            // add accuracy to target face
+            // add accuracy to target neck
         }
     }
 
@@ -1268,6 +1796,285 @@ public class TurnManager : MonoBehaviour {
         enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
         playerDef = s.statSummoner.SumOfStat("white", "player");
         enemyDef = s.statSummoner.SumOfStat("white", "enemy");
+    }
+
+    private void GrantPhylacteryLeech() {
+        if (!s.player.SetPlayerStatusEffect("leech", true)) { return; }
+
+        dontRemoveLeechYet = true;
+    }
+
+    private void ClearPlayerLeechEffect() {
+        if (!Save.game.isBloodthirsty) { return; }
+
+        s.player.SetPlayerStatusEffect("leech", false);
+        dontRemoveLeechYet = false;
+    }
+
+    private string GetNormalizedTargetName(string targetName) {
+        return string.IsNullOrEmpty(targetName) ? targetName : targetName.TrimStart('*');
+    }
+
+    private bool PlayerBleedsOutThisRound() {
+        return playerBleedOutPendingThisRound && Save.game.playerBleedsOutNextRound && !s.player.isDead;
+    }
+
+    private bool EnemyBleedsOutThisRound() {
+        return enemyBleedOutPendingThisRound && Save.game.enemyBleedsOutNextRound && !Save.game.enemyIsDead;
+    }
+
+    private string GetPlayerBleedOutStatusText() {
+        return $"{s.enemy.enemyName.text.ToLower()} hits you... {(s.tombstoneData.HasUsableResurrectionAmulet() ? "your amulet shatters" : "you bleed out")}";
+    }
+
+    private string GetEnemyBleedOutStatusText() {
+        return $"you hit {s.enemy.enemyName.text.ToLower()}... he bleeds out";
+    }
+
+    private string GetPlayerKilledStatusText() {
+        bool shattersAmulet = s.tombstoneData.HasUsableResurrectionAmulet();
+        if (s.enemy.spawnNum is 0 or 1) {
+            return shattersAmulet
+                ? "devil twists claws into you... your amulet shatters"
+                : "devil twists claws into you... you die";
+        }
+
+        return shattersAmulet
+            ? $"{s.enemy.enemyName.text.ToLower()} hits you... your amulet shatters"
+            : $"{s.enemy.enemyName.text.ToLower()} hits you... you die";
+    }
+
+    private string GetEnemyKilledStatusText() {
+        return $"you hit {s.enemy.enemyName.text.ToLower()}... he dies";
+    }
+
+    private void ClearBleedOutForRecoveredWound(string playerOrEnemy, string woundName) {
+        if (woundName != "neck") { return; }
+
+        SetBleedOutNextRound(playerOrEnemy, false, saveGame:false);
+        if (playerOrEnemy == "player") {
+            playerBleedOutPendingThisRound = false;
+        }
+        else if (playerOrEnemy == "enemy") {
+            enemyBleedOutPendingThisRound = false;
+        }
+    }
+
+    private void ResolveBleedOutAfterRound() {
+        bool enemyBleedsOutNow = enemyBleedOutPendingThisRound && Save.game.enemyBleedsOutNextRound && !Save.game.enemyIsDead;
+        bool playerBleedsOutNow = playerBleedOutPendingThisRound && Save.game.playerBleedsOutNextRound && !s.player.isDead;
+
+        enemyBleedOutPendingThisRound = false;
+        playerBleedOutPendingThisRound = false;
+
+        if (enemyBleedsOutNow) {
+            StartCoroutine(Kill("enemy", true, false));
+        }
+        if (playerBleedsOutNow) {
+            StartCoroutine(Kill("player", true, false));
+        }
+    }
+
+    private IEnumerator HandleEnemyChestRerollsBeforePlayerAttack() {
+        if (!PlayerWouldDamageEnemyNow()) { yield break; }
+        if (!EnemyHasChestRescueReroll()) { yield break; }
+
+        // if (PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
+        //     SetStatusText($"{s.enemy.enemyName.text.ToLower()} twists the wound... rerolling");
+        //     yield return s.delays[0.55f];
+        // }
+
+        bool rerolledAtLeastOneDie = false;
+        while (PlayerWouldDamageEnemyNow() && TryGetBestEnemyChestRescueDie(out Dice rescueDie)) {
+            rerolledAtLeastOneDie = true;
+            rescueDie.isRerolled = true;
+            yield return StartCoroutine(rescueDie.RerollAnimation(!rerolledAtLeastOneDie));
+        }
+
+        if (rerolledAtLeastOneDie && PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
+            yield return s.delays[0.35f];
+        }
+    }
+
+    private IEnumerator HandleEnemyCounterattackRescuesBeforePlayerAttack() {
+        if (pendingEnemyHeadCounterDiscard) {
+            pendingEnemyHeadCounterDiscard = false;
+
+            // if (PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
+            //     SetStatusText($"{s.enemy.enemyName.text.ToLower()} crushes your focus... discarding");
+            //     yield return s.delays[0.55f];
+            // }
+
+            s.enemy.DiscardBestPlayerDie();
+            yield return s.delays[0.35f];
+        }
+
+        if (s.player.woundList.Contains("chest")) {
+            yield return StartCoroutine(HandleEnemyChestRerollsBeforePlayerAttack());
+        }
+    }
+
+    private bool EnemyHasChestRescueReroll() {
+        return TryGetBestEnemyChestRescueDie(out _);
+    }
+
+    private bool TryGetBestEnemyChestRescueDie(out Dice bestDie) {
+        bestDie = null;
+        int bestSafeOutcomes = 0;
+        int bestKillBreakingOutcomes = 0;
+        bool playerKillsNow = PlayerWouldKillEnemyNow();
+
+        foreach (string key in s.statSummoner.addedPlayerDice.Keys) {
+            foreach (Dice dice in s.statSummoner.addedPlayerDice[key]) {
+                if (dice == null || !dice.isAttached || dice.isOnPlayerOrEnemy != "player" || dice.isRerolled || dice.diceNum < 3) { continue; }
+
+                int safeOutcomes = 0;
+                int killBreakingOutcomes = 0;
+                for (int rerolledValue = 1; rerolledValue <= 6; rerolledValue++) {
+                    if (!PlayerWouldDamageEnemyWithChestRescueBestCase(dice, rerolledValue)) {
+                        safeOutcomes++;
+                    }
+                    if (playerKillsNow && !PlayerWouldKillEnemyWithChestRescueBestCase(dice, rerolledValue)) {
+                        killBreakingOutcomes++;
+                    }
+                }
+
+                if (safeOutcomes <= 0 && killBreakingOutcomes <= 0) { continue; }
+                if (bestDie == null
+                    || safeOutcomes > bestSafeOutcomes
+                    || safeOutcomes == bestSafeOutcomes && killBreakingOutcomes > bestKillBreakingOutcomes
+                    || safeOutcomes == bestSafeOutcomes && killBreakingOutcomes == bestKillBreakingOutcomes && GetChestRescueRerollPriority(dice) > GetChestRescueRerollPriority(bestDie)
+                    || safeOutcomes == bestSafeOutcomes && killBreakingOutcomes == bestKillBreakingOutcomes && GetChestRescueRerollPriority(dice) == GetChestRescueRerollPriority(bestDie) && dice.diceNum > bestDie.diceNum) {
+                    bestDie = dice;
+                    bestSafeOutcomes = safeOutcomes;
+                    bestKillBreakingOutcomes = killBreakingOutcomes;
+                }
+            }
+        }
+
+        return bestDie != null;
+    }
+
+    private int GetChestRescueRerollPriority(Dice dice) {
+        if (dice == null) { return -1; }
+
+        string stat = string.IsNullOrEmpty(dice.statAddedTo)
+            ? dice.diceType
+            : dice.statAddedTo;
+
+        return stat switch {
+            "red" => 3,
+            "green" => 2,
+            "yellow" => 1,
+            _ => 0,
+        };
+    }
+
+    private bool PlayerWouldDamageEnemyNow() {
+        return PlayerWouldDamageEnemyWithEnemyStatOverride(null, 0);
+    }
+
+    private bool PlayerWouldKillEnemyNow() {
+        return PlayerWouldKillEnemyWithEnemyStatOverride(null, 0);
+    }
+
+    private bool PlayerWouldDamageEnemyWithRerolledDieValue(Dice dice, int rerolledValue) {
+        return PlayerWouldDamageEnemyWithEnemyStatOverride(dice, rerolledValue);
+    }
+
+    private bool PlayerWouldKillEnemyWithRerolledDieValue(Dice dice, int rerolledValue) {
+        return PlayerWouldKillEnemyWithEnemyStatOverride(dice, rerolledValue);
+    }
+
+    private bool PlayerWouldDamageEnemyWithChestRescueBestCase(Dice overriddenDie, int overriddenValue) {
+        return PlayerWouldDamageEnemyWithEnemyStatOverride(overriddenDie, overriddenValue, applyBestCaseToOtherChestRerolls:true);
+    }
+
+    private bool PlayerWouldKillEnemyWithChestRescueBestCase(Dice overriddenDie, int overriddenValue) {
+        return PlayerWouldKillEnemyWithEnemyStatOverride(overriddenDie, overriddenValue, applyBestCaseToOtherChestRerolls:true);
+    }
+
+    private bool PlayerWouldDamageEnemyWithEnemyStatOverride(Dice overriddenDie, int overriddenValue) {
+        return PlayerWouldDamageEnemyWithEnemyStatOverride(overriddenDie, overriddenValue, applyBestCaseToOtherChestRerolls:false);
+    }
+
+    private bool PlayerWouldDamageEnemyWithEnemyStatOverride(Dice overriddenDie, int overriddenValue, bool applyBestCaseToOtherChestRerolls) {
+        GetPlayerAttackPreviewAgainstEnemyOverride(overriddenDie, overriddenValue, out int playerAim, out int playerAtt, out int enemyDef, out string playerTarget, applyBestCaseToOtherChestRerolls);
+        bool playerCanHit = PlayerCanHitEnemy(playerAim, playerAtt, enemyDef);
+        if (!playerCanHit) { return false; }
+        if (s.itemManager.PlayerHasWeapon("maul")) { return true; }
+        return playerTarget == "neck" || !s.enemy.woundList.Contains(playerTarget);
+    }
+
+    // preview shorthand: this treats neck as a fatal line because the bleed-out is guaranteed
+    private bool PlayerWouldKillEnemyWithEnemyStatOverride(Dice overriddenDie, int overriddenValue) {
+        return PlayerWouldKillEnemyWithEnemyStatOverride(overriddenDie, overriddenValue, applyBestCaseToOtherChestRerolls:false);
+    }
+
+    private bool PlayerWouldKillEnemyWithEnemyStatOverride(Dice overriddenDie, int overriddenValue, bool applyBestCaseToOtherChestRerolls) {
+        GetPlayerAttackPreviewAgainstEnemyOverride(overriddenDie, overriddenValue, out int playerAim, out int playerAtt, out int enemyDef, out string playerTarget, applyBestCaseToOtherChestRerolls);
+        bool playerCanHit = PlayerCanHitEnemy(playerAim, playerAtt, enemyDef);
+        if (!playerCanHit) { return false; }
+        if (s.itemManager.PlayerHasWeapon("maul")) { return true; }
+        return !s.enemy.woundList.Contains(playerTarget)
+            && (s.enemy.woundList.Count >= 2 || s.itemManager.PlayerHasSecondWoundKillWeapon() && s.enemy.woundList.Count >= 1);
+    }
+
+    private bool PlayerCanHitEnemy(int playerAim, int playerAtt, int enemyDef) {
+        return playerAim >= 0 && PlayerAttackClearsEnemyDefense(playerAtt, enemyDef);
+    }
+
+    private bool PlayerAttackClearsEnemyDefense(int playerAtt, int enemyDef) {
+        if (s.itemManager.PlayerIgnoresEnemyParry()) { return playerAtt > 0; }
+        return playerAtt > enemyDef;
+    }
+
+    private bool PlayerAttackIsTooWeak(int playerAtt) {
+        return s.itemManager.PlayerIgnoresEnemyParry() ? playerAtt <= 0 : playerAtt < 0;
+    }
+
+    private void GetPlayerAttackPreviewAgainstEnemyOverride(Dice overriddenDie, int overriddenValue, out int playerAim, out int playerAtt, out int enemyDef, out string playerTarget, bool applyBestCaseToOtherChestRerolls = false) {
+        playerAim = s.statSummoner.SumOfStat("green", "player");
+        playerAtt = s.statSummoner.SumOfStat("red", "player");
+        enemyDef = s.statSummoner.SumOfStat("white", "enemy");
+        playerTarget = targetArr[Mathf.Clamp(s.player.targetIndex, 0, targetArr.Length - 1)];
+
+        if (applyBestCaseToOtherChestRerolls) {
+            foreach (string key in s.statSummoner.addedPlayerDice.Keys) {
+                foreach (Dice dice in s.statSummoner.addedPlayerDice[key]) {
+                    if (dice == null || !dice.isAttached || dice.isOnPlayerOrEnemy != "player" || dice.isRerolled || dice.diceNum < 3 || dice == overriddenDie) {
+                        continue;
+                    }
+
+                    ApplyPlayerAttackPreviewDieDelta(ref playerAim, ref playerAtt, ref enemyDef, dice, 1);
+                }
+            }
+        }
+
+        if (overriddenDie == null) { return; }
+
+        ApplyPlayerAttackPreviewDieDelta(ref playerAim, ref playerAtt, ref enemyDef, overriddenDie, overriddenValue);
+    }
+
+    private void ApplyPlayerAttackPreviewDieDelta(ref int playerAim, ref int playerAtt, ref int enemyDef, Dice die, int previewValue) {
+        if (die == null) { return; }
+
+        string overriddenStat = string.IsNullOrEmpty(die.statAddedTo)
+            ? die.diceType
+            : die.statAddedTo;
+        int delta = previewValue - die.diceNum;
+
+        if (die.isOnPlayerOrEnemy == "player") {
+            if (overriddenStat == "green") {
+                playerAim += delta;
+            }
+            else if (overriddenStat == "red") {
+                playerAtt += delta;
+            }
+        }
+        else if (overriddenStat == "white") {
+            enemyDef += delta;
+        }
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ public class MobileButton : MonoBehaviour {
     private bool showButtons;
     
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer == null) { text = GetComponent<TextMeshProUGUI>(); }
         // if not a sprite (text button), use textmeshpro instead

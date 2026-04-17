@@ -5,24 +5,100 @@ public class TombstoneData : MonoBehaviour {
     private Scripts s;
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
+    }
+
+    public bool HasUsableResurrectionAmulet() {
+        s = FindFirstObjectByType<Scripts>();
+        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet of resurrection");
+        if (amuletObject == null) { return false; }
+
+        Item amulet = amuletObject.GetComponent<Item>();
+        return amulet != null && amulet.itemName != "broken amulet";
+    }
+
+    public bool PrepareResurrectionAmulet() {
+        s = FindFirstObjectByType<Scripts>();
+        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet of resurrection");
+        if (amuletObject == null) { return false; }
+
+        Item amulet = amuletObject.GetComponent<Item>();
+        if (amulet == null || amulet.itemName == "broken amulet") { return false; }
+
+        s.itemManager.MarkItemUsed("amulet of resurrection");
+        BreakResurrectionAmulet(amulet);
+        PrepareResurrectionDestination();
+        Save.game.showAmuletSurvivalStatusText = true;
+        Save.game.pendingAmuletInventoryCleanup = true;
+        Save.game.pendingAmuletVisualRestore = true;
+        s.itemManager.SaveInventoryItems(true);
+        if (s.tutorial == null) { Save.SaveGame(); }
+        Save.SavePersistent();
+        s.levelManager.lockActions = true;
+        return true;
+    }
+
+    public bool ConsumeResurrectionAmulet() {
+        s = FindFirstObjectByType<Scripts>();
+        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet of resurrection");
+        if (amuletObject == null) { return false; }
+
+        Item amulet = amuletObject.GetComponent<Item>();
+        if (amulet == null || amulet.itemName == "broken amulet") { return false; }
+
+        s.itemManager.MarkItemUsed("amulet of resurrection");
+        BreakResurrectionAmulet(amulet);
+        Save.game.showAmuletSurvivalStatusText = true;
+        Save.game.pendingAmuletInventoryCleanup = true;
+        Save.game.pendingAmuletVisualRestore = true;
+        s.itemManager.SaveInventoryItems(true);
+        if (s.tutorial == null) { Save.SaveGame(); }
+        Save.SavePersistent();
+        return true;
+    }
+
+    public void FinalizePreparedResurrectionInventoryCleanup() {
+        s = FindFirstObjectByType<Scripts>();
+        if (s == null || !Save.game.pendingAmuletInventoryCleanup) { return; }
+
+        s.itemManager.KeepOnlyWeaponAndBrokenAmulet();
+        Save.game.pendingAmuletInventoryCleanup = false;
+        s.itemManager.SaveInventoryItems(true);
+        if (s.tutorial == null) { Save.SaveGame(); }
+        Save.SavePersistent();
+    }
+
+    public void BeginPreparedResurrection() {
+        StartCoroutine(BeginPreparedResurrectionCoro());
+    }
+
+    public void RestorePlayerVisualStateAfterPreparedResurrection() {
+        s = FindFirstObjectByType<Scripts>();
+        if (s == null || !Save.game.pendingAmuletVisualRestore) { return; }
+
+        s.player.RestoreDefaultVisualState();
+        Save.game.pendingAmuletVisualRestore = false;
+    }
+
+    public bool HasPreparedTraderItems() {
+        return Save.game.floorItemNames != null && Save.game.floorItemNames.Any(itemName => !string.IsNullOrEmpty(itemName));
     }
 
     /// <summary>
     /// Sets the tombstone data based on the player's current inventory.
     /// </summary>
     public void SetTombstoneData() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         Save.persistent.tsItemNames = new string[9];
-        Save.persistent.tsItemNames = new string[9];
-        Save.persistent.tsItemNames = new string[9];
+        Save.persistent.tsItemTypes = new string[9];
+        Save.persistent.tsItemMods = new string[9];
         // clear data before placing in new stuff
         Item item = s.player.inventory[0].GetComponent<Item>();
         Save.persistent.tsWeaponAcc = item.weaponStats["green"];
         Save.persistent.tsWeaponSpd = item.weaponStats["blue"];
         Save.persistent.tsWeaponDmg = item.weaponStats["red"];
         Save.persistent.tsWeaponDef = item.weaponStats["white"];
-        Save.persistent.tsItemNames[0] = item.itemName.Split(' ')[1];
+        Save.persistent.tsItemNames[0] = ItemManager.GetWeaponBaseName(item.itemName);
         Save.persistent.tsItemTypes[0] = item.itemType;
         Save.persistent.tsItemMods[0] = item.modifier;
         // Save the weapon first
@@ -40,7 +116,7 @@ public class TombstoneData : MonoBehaviour {
         }
         else { 
             // normal level
-            if (s.levelManager.sub == 4) { Save.persistent.tsSub = 3; }
+            if (s.levelManager.sub >= LevelManager.MerchantSub) { Save.persistent.tsSub = 3; }
             // shift back tombstone to come before trader
             else if (s.levelManager.sub == 1 && s.levelManager.level == 1){ 
                 Save.persistent.tsSub = -1;
@@ -81,6 +157,99 @@ public class TombstoneData : MonoBehaviour {
         Save.SavePersistent();
     }
 
+    private void BreakResurrectionAmulet(Item amulet) {
+        amulet.itemName = "broken amulet";
+        amulet.modifier = "";
+        amulet.gameObject.name = amulet.itemName;
+    }
+
+    private IEnumerator BeginPreparedResurrectionCoro() {
+        yield return new WaitForSeconds(1f);
+        s.player.ResetAfterResurrection(false);
+        s.levelManager.QueueWarpDestination(Save.game.resumeLevel, Save.game.resumeSub, Save.game.enemyNum, HasPreparedTraderItems());
+        s.levelManager.lockActions = false;
+        s.levelManager.NextLevel();
+    }
+
+    private void PrepareResurrectionDestination() {
+        (int level, int sub, int enemyNum, bool useSavedTrader) = GetResurrectionDestination();
+        if (useSavedTrader) {
+            RestoreLastTraderFloorItems();
+        }
+        else {
+            ClearPreparedResurrectionFloorItems();
+        }
+
+        Save.game.newGame = false;
+        Save.game.resumeLevel = level;
+        Save.game.resumeSub = sub;
+        Save.game.enemyNum = enemyNum;
+        Save.game.enemyStamina = 0;
+        Save.game.enemyAcc = 0;
+        Save.game.enemySpd = 0;
+        Save.game.enemyDmg = 0;
+        Save.game.enemyDef = 0;
+        Save.game.enemyTargetIndex = 0;
+        Save.game.enemyIsDead = false;
+        Save.game.playerWounds = new();
+        Save.game.enemyWounds = new();
+        Save.game.playerBleedsOutNextRound = false;
+        Save.game.enemyBleedsOutNextRound = false;
+        Save.game.numItemsDroppedForTrade = 0;
+        Save.game.blacksmithHasForged = false;
+        Save.game.discardableDieCounter = 0;
+        Save.game.usedMace = false;
+        Save.game.usedAnkh = false;
+        Save.game.usedHelm = false;
+        Save.game.usedBoots = false;
+        Save.game.pendingMirrorCopy = false;
+        Save.game.enemyHasKatarSpeedPenalty = false;
+        Save.game.diceNumbers = new();
+        Save.game.diceTypes = new();
+        Save.game.dicePlayerOrEnemy = new();
+        Save.game.diceAttachedToStat = new();
+        Save.game.diceRerolled = new();
+    }
+
+    private (int level, int sub, int enemyNum, bool useSavedTrader) GetResurrectionDestination() {
+        if (s.levelManager.level < 4 && s.levelManager.sub < 4) {
+            return (s.levelManager.level, 4, Enemy.MerchantEnemyNum, false);
+        }
+
+        bool hasSavedTrader = Save.game.lastTraderLevel > 0
+            && Save.game.lastTraderSub > 0
+            && Save.game.lastTraderEnemyNum > 0;
+        if (hasSavedTrader) {
+            return (Save.game.lastTraderLevel, Save.game.lastTraderSub, Save.game.lastTraderEnemyNum, true);
+        }
+
+        return (Mathf.Min(s.levelManager.level, 3), 4, Enemy.MerchantEnemyNum, false);
+    }
+
+    private void RestoreLastTraderFloorItems() {
+        Save.game.floorItemNames = Save.game.lastTraderItemNames.ToArray();
+        Save.game.floorItemTypes = Save.game.lastTraderItemTypes.ToArray();
+        Save.game.floorItemMods = Save.game.lastTraderItemMods.ToArray();
+        Save.game.floorItemAccs = Save.game.lastTraderItemAccs.ToArray();
+        Save.game.floorItemSpds = Save.game.lastTraderItemSpds.ToArray();
+        Save.game.floorItemDmgs = Save.game.lastTraderItemDmgs.ToArray();
+        Save.game.floorItemDefs = Save.game.lastTraderItemDefs.ToArray();
+    }
+
+    private void ClearPreparedResurrectionFloorItems() {
+        Save.game.floorItemNames = new string[9];
+        Save.game.floorItemTypes = new string[9];
+        Save.game.floorItemMods = new string[9];
+        Save.game.floorItemAccs = new int[9];
+        Save.game.floorItemSpds = new int[9];
+        Save.game.floorItemDmgs = new int[9];
+        Save.game.floorItemDefs = new int[9];
+        Save.game.floorAcc = 0;
+        Save.game.floorSpd = 0;
+        Save.game.floorDmg = 0;
+        Save.game.floorDef = 0;
+    }
+
     /// <summary>
     /// Spawn the Saved tombstone items from the player's Save file.
     /// </summary>
@@ -108,15 +277,22 @@ public class TombstoneData : MonoBehaviour {
     private IEnumerator SpawnSavedTSItemsCoro(bool delay) {
         if (delay) { yield return new WaitForSeconds(0.01f); }
         // optional slight delay so that resuming on a tombstone level doesn't mess things up
-        s = FindObjectOfType<Scripts>();
-        s.itemManager.CreateWeaponWithStats(Save.persistent.tsItemNames[0], "rusty", Save.persistent.tsWeaponAcc - 1, Save.persistent.tsWeaponSpd - 1, Save.persistent.tsWeaponDmg - 1, Save.persistent.tsWeaponDef - 1);
+        s = FindFirstObjectByType<Scripts>();
+        string tombstoneWeaponName = ItemManager.NormalizeWeaponSaveName(Save.persistent.tsItemNames[0]);
+        s.itemManager.CreateWeaponWithStats(
+            tombstoneWeaponName,
+            tombstoneWeaponName == "ham" ? "rotten" : "rusty",
+            Save.persistent.tsWeaponAcc - 1,
+            Save.persistent.tsWeaponSpd - 1,
+            Save.persistent.tsWeaponDmg - 1,
+            Save.persistent.tsWeaponDef - 1);
         // make the item with worse stats
         for (int i = 1; i < Save.persistent.tsItemNames.Length; i++) {
             if (Save.persistent.tsItemNames[i] != null && Save.persistent.tsItemNames[i] != "") { 
                 GameObject created = s.itemManager.CreateItem(Save.persistent.tsItemNames[i].Replace(' ', '_'), Save.persistent.tsItemMods[i]);
                 switch (created.GetComponent<Item>().itemName) { 
                     case "helm of might":
-                        created.GetComponent<Item>().itemName = "broken helm"; break;
+                        created.GetComponent<Item>().itemName = "rusted helm"; break;
                     case "boots of dodge":
                         created.GetComponent<Item>().itemName = "ruined boots"; break;
                     case "ankh":
@@ -142,7 +318,7 @@ public class TombstoneData : MonoBehaviour {
     private IEnumerator SpawnSavedFloorItemsCoro(bool delay) { 
         if (delay) { yield return new WaitForSeconds(0.01f); }
         // quick delay so its not super buggy
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         for (int i = 0; i < 9; i++) {  
             if (Save.game.floorItemNames[i] != null && Save.game.floorItemNames[i] != "") {
                 s.itemManager.CreateSavedFloorItem(
@@ -164,7 +340,7 @@ public class TombstoneData : MonoBehaviour {
     /// </summary>
     private IEnumerator SpawnSavedMerchantItemsCoro(bool delay) { 
         if (delay) { yield return new WaitForSeconds(0.01f); }
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         for (int i = 0; i < 9; i++) {  
             if (Save.game.floorItemNames[i] != null && Save.game.floorItemNames[i] != "") {
                 s.itemManager.CreateSavedFloorItem(

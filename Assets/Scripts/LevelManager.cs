@@ -5,6 +5,8 @@ using TMPro;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour {
+    public const int MerchantSub = 4;
+    public const int BlacksmithSub = 5;
     [SerializeField] private GameObject levelBox;
     [SerializeField] private GameObject loadingCircle;
     [SerializeField] private TextMeshProUGUI levelTransText;
@@ -16,23 +18,23 @@ public class LevelManager : MonoBehaviour {
     [SerializeField] private string thinCharacters = "";
     private readonly Vector3 onScreen = new Vector2(0.0502f, -1.533f);
     private readonly Vector3 offScreen = new Vector2(-20f, 15f);
-    private readonly float[] balanced = { 0f, 10f, 10f, 0f };
-    private readonly float[] fast =     { 0f, 20f, 10f, 0f };
-    private readonly float[] damage =   { 10f, 3f, 23f, 3f };
-    private readonly float[] defense =  { 2f, 10f, 2f, 23f };
-    private readonly float[] mix =      { 2f, -10f, 18f, 18f };
+    private readonly float[] balanced = { 5f, 15f, 15f, 5f };
+    private readonly float[] fast =     { 5f, 33f, 5f, 5f };
+    private readonly float[] damage =   { 15f, 8f, 28f, 8f };
+    private readonly float[] defense =  { 5f, 5f, 5f, 38f };
+    private readonly float[] mix =      { 5f, -10f, 23f, 23f };
     private readonly Dictionary<string, float[]> levelStats = new() {
         // add on the stats and iterate (add) through with random variance, divide, then round to get final stats
         //                    aim, spd, atk, def, var,   bal/fas/dmg/def/mix
-        { "11", new[] { 10f, 10f, 10f, 10f, 0f,    10f, 0f, 0f, 0f, 0f } },
-        { "12", new[] { 10f, 10f, 10f, 10f, 0f,    4f, 2f, 2f, 1f, 1f  } },
-        { "13", new[] { 10f, 10f, 10f, 10f, 0.75f, 3f, 2f, 2f, 2f, 1f  } },
-        { "21", new[] { 10f, 10f, 10f, 10f, 1f,    3f, 2f, 2f, 2f, 1f  } },
-        { "22", new[] { 10f, 15f, 10f, 10f, 1f,    2f, 2f, 2f, 2f, 2f  } },
-        { "23", new[] { 10f, 10f, 11f, 11f, 1.25f, 2f, 2f, 2f, 2f, 2f  } },
-        { "31", new[] { 10f, 10f, 12f, 12f, 1.25f, 1f, 3f, 2f, 2f, 2f  } },
-        { "32", new[] { 12f, 15f, 14f, 14f, 1.5f,  0f, 2f, 3f, 2f, 3f  } },
-        { "33", new[] { 15f, 15f, 15f, 15f, 3f,    2f, 2f, 2f, 2f, 2f  } }
+        { "11", new[] { 10f, 10f, 10f, 10f, 0f,          10f, 0f, 0f, 0f, 0f } },
+        { "12", new[] { 10f, 10f, 10f, 10f, 0f,          4f, 2f, 2f, 1f, 1f  } },
+        { "13", new[] { 10f, 10f, 10f, 10f, 0.75f,       3f, 2f, 2f, 2f, 1f  } },
+        { "21", new[] { 10f, 10f, 10f, 10f, 1f,          3f, 2f, 2f, 2f, 1f  } },
+        { "22", new[] { 10f, 15f, 10f, 10f, 1f,          1f, 1f, 1f, 6f, 1f  } },
+        { "23", new[] { 10f, 10f, 11f, 11f, 1.25f,       2f, 2f, 2f, 2f, 2f  } },
+        { "31", new[] { 10f, 10f, 12f, 12f, 1.25f,       1f, 3f, 2f, 2f, 2f  } },
+        { "32", new[] { 12f, 15f, 14f, 14f, 1.5f,        0f, 2f, 3f, 2f, 3f  } },
+        { "33", new[] { 15f, 15f, 15f, 15f, 3f,          2f, 2f, 2f, 2f, 2f  } }
         // something to make it more probable that genstats will gen more difficult enemies later
     };
     private Coroutine transGlitchCoro;
@@ -40,13 +42,47 @@ public class LevelManager : MonoBehaviour {
     private SpriteRenderer boxSR;
     private Color temp;
     private Scripts s;
+    private bool hasQueuedWarpDestination;
+    private int queuedWarpLevel;
+    private int queuedWarpSub;
+    private int queuedWarpEnemyNum;
+    private bool queuedWarpUseSavedTrader;
 
     public bool ShouldForceBlacksmithSpawn() {
-        return level == 1 && sub == 2;
+        return sub == BlacksmithSub;
+    }
+
+    private static bool IsVendorSub(int currentSub) {
+        return currentSub == MerchantSub || currentSub == BlacksmithSub;
+    }
+
+    private static string GetLevelLabel(int currentLevel, int currentSub) {
+        return $"level {currentLevel}-{currentSub}";
+    }
+
+    private void QueuePendingArrivalBonuses() {
+        if (s == null || s.itemManager == null) { return; }
+
+        Save.game.pendingLevelStartStaminaBonus = s.itemManager.GetHamLevelStartBonus();
+    }
+
+    private IEnumerator ApplyPendingArrivalBonuses() {
+        while (s == null || s.player == null || s.turnManager == null || s.soundManager == null) {
+            yield return null;
+        }
+
+        if (Save.game.pendingLevelStartStaminaBonus <= 0) { yield break; }
+
+        yield return s.delays[0.25f];
+        int staminaBonus = Save.game.pendingLevelStartStaminaBonus;
+        Save.game.pendingLevelStartStaminaBonus = 0;
+        s.soundManager.PlayClip("eat");
+        s.turnManager.ChangeStaminaOf("player", staminaBonus);
+        if (s.tutorial == null) { Save.SaveGame(); }
     }
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         levelText.gameObject.SetActive(PlayerPrefs.GetString(s.DEBUG_KEY) == "on");
         // show the level text only if debug is on
         level = Save.game.resumeLevel;
@@ -64,7 +100,7 @@ public class LevelManager : MonoBehaviour {
         lockActions = false;
         // make sure actions aren't locked
         if (s.tutorial == null) {
-            if (sub == 4) { levelText.text = $"(level {level}-3+)"; }
+            if (IsVendorSub(sub)) { levelText.text = $"({GetLevelLabel(level, sub)})"; }
             else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
             { levelText.text = $"(level {level}-{sub}*)"; }
             else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
@@ -72,6 +108,7 @@ public class LevelManager : MonoBehaviour {
             else { levelText.text = $"(level {level}-{sub})"; }
         }
         else { levelText.text = ""; }
+        StartCoroutine(ApplyPendingArrivalBonuses());
         
     }
 
@@ -88,10 +125,10 @@ public class LevelManager : MonoBehaviour {
         if (lichOrDevilOrNormal != "normal") {
             if (lichOrDevilOrNormal == "lich") {
                 if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-                    return new[] { 3f, 3f, 3f, 3f };
+                    return new[] { 4f, 4f, 4f, 4f };
                 }
                 else { 
-                    return new[] { 1f, 1f, 1f, 1f };
+                    return new[] { 2f, 2f, 2f, 2f };
                 }
             }
             else if (lichOrDevilOrNormal == "devil") {
@@ -103,7 +140,7 @@ public class LevelManager : MonoBehaviour {
                 }
             }
         }
-        if (sub == 4) { return new[] { 0f, 0f, 0f, 0f }; }
+        if (sub >= MerchantSub) { return new[] { 0f, 0f, 0f, 0f }; }
         // given key is not present in the dictionary for sub-4s, instantly return blank
         float[] stats = levelStats[level + sub.ToString()];
         // based on the level and sub, get the stats from the level
@@ -161,6 +198,70 @@ public class LevelManager : MonoBehaviour {
     /// </summary>
     public void NextLevel(bool isLich = false) { StartCoroutine(NextLevelCoroutine(isLich)); }
 
+    public void QueueWarpDestination(int targetLevel, int targetSub, int targetEnemyNum, bool useSavedTrader = false) {
+        hasQueuedWarpDestination = true;
+        queuedWarpLevel = targetLevel;
+        queuedWarpSub = targetSub;
+        queuedWarpEnemyNum = targetEnemyNum;
+        queuedWarpUseSavedTrader = useSavedTrader;
+    }
+
+    public void ClearSavedEnemyCombatStateForEscape() {
+        Save.game.enemyStamina = 0;
+        Save.game.enemyAcc = 0;
+        Save.game.enemySpd = 0;
+        Save.game.enemyDmg = 0;
+        Save.game.enemyDef = 0;
+        Save.game.enemyTargetIndex = 0;
+        Save.game.enemyWounds = new();
+        Save.game.enemyBleedsOutNextRound = false;
+        Save.game.enemyHasKatarSpeedPenalty = false;
+        Save.game.discardableDieCounter = 0;
+        Save.game.enemyIsDead = false;
+        Save.game.isFirstCombatRoundOfEncounter = false;
+        Save.game.diceNumbers = new();
+        Save.game.diceTypes = new();
+        Save.game.dicePlayerOrEnemy = new();
+        Save.game.diceAttachedToStat = new();
+        Save.game.diceRerolled = new();
+        Save.game.diceTarotUpgraded = new();
+
+        if (s == null) { s = FindFirstObjectByType<Scripts>(); }
+        if (s?.enemy != null) {
+            s.enemy.woundList.Clear();
+            s.enemy.stamina = 0;
+            s.enemy.targetIndex = 0;
+            s.enemy.staminaCounter.text = "0";
+        }
+        if (s?.statSummoner != null) {
+            foreach (string stat in s.itemManager.statArr) {
+                s.statSummoner.addedEnemyStamina[stat] = 0;
+                s.statSummoner.addedEnemyDice[stat].Clear();
+            }
+        }
+        EnemyAI.InvalidateCachedPlan();
+    }
+
+    public void ShowTransferDestination(int targetLevel, int targetSub, int targetEnemyNum) {
+        if (boxSR == null) { return; }
+
+        Color tempColor = boxSR.color;
+        tempColor.a = 1f;
+        boxSR.color = tempColor;
+        levelBox.transform.position = onScreen;
+        loadingCircle.transform.position = onScreen;
+        levelTransText.text = GetTransferDestinationText(targetLevel, targetSub, targetEnemyNum);
+        if (s != null && s.soundManager != null) { s.soundManager.PlayClip("next"); }
+    }
+
+    private string GetTransferDestinationText(int targetLevel, int targetSub, int targetEnemyNum) {
+        if (targetEnemyNum == 2) {
+            return "level ???";
+        }
+
+        return GetLevelLabel(targetLevel, targetSub);
+    }
+
 
     /// <summary>
     /// Do not call this coroutine, use NextLevel() instead.
@@ -168,15 +269,19 @@ public class LevelManager : MonoBehaviour {
     private IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
             lockActions = true;
+            bool shouldAdvanceTorchCounter = s != null
+                && s.enemy != null
+                && s.enemy.enemyName.text is not "Merchant" and not "Blacksmith" and not "Tombstone";
             Color tempColor = boxSR.color;
             tempColor.a = 0f;
             boxSR.color = tempColor;
             // hide the level loading box
-            s = FindObjectOfType<Scripts>();
+            s = FindFirstObjectByType<Scripts>();
             // re-get s
             s.soundManager.PlayClip("next");
             // play sound clip
-            if (level == 4 && sub == 1) {
+            QueuePendingArrivalBonuses();
+            if (level == 4 && sub == 1 && !hasQueuedWarpDestination) {
                 if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
                 // going to next level after having defeated devil
                 if (Save.game.curCharNum != 3 && !Save.persistent.unlockedChars[Save.game.curCharNum + 1]) { 
@@ -188,7 +293,8 @@ public class LevelManager : MonoBehaviour {
                 else {
                     Initiate.Fade("Credits", Color.black, 2.5f);
                 }
-                Save.persistent.successfulRuns++; 
+                Save.persistent.IncrementSuccessfulRuns(Save.persistent.gameDifficulty);
+                Save.SavePersistent();
                 Save.game = new GameData();
                 if (s.tutorial == null) { Save.SaveGame(); }
                 // for some reason file.delete doesn't want to work here
@@ -196,12 +302,15 @@ public class LevelManager : MonoBehaviour {
             }
             s.turnManager.ClearVariablesAfterRound();
             // remove variables before going to next level
+            if (s.statSummoner != null) {
+                s.statSummoner.ResetDiceAndStamina();
+            }
             foreach (GameObject dice in s.diceSummoner.existingDice) {
                 StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
             }
             // fade out all die (die are only faded out upon kill normally)
             // yield return s.delays[1.5f]; // uncomment for tombstone tests
-            if (isLich || level == 3 && sub == 4) { 
+            if (isLich || level == 3 && sub == BlacksmithSub) { 
                 s.music.FadeVolume("LaBossa");
                 // if spawning lich or devil, fade to boss music
             }
@@ -210,8 +319,8 @@ public class LevelManager : MonoBehaviour {
                 // if spawning merchant, fade to smoke, as long as we are not fading from tombstone
             }
             else { 
-                if (s.enemy.enemyName.text == "Lich" || sub == 4) { 
-                    // leaving lich or merchant, so change back to main
+                if (s.enemy.enemyName.text == "Lich" || s.enemy.enemyName.text == "Blacksmith" || sub == BlacksmithSub) { 
+                    // leaving lich or blacksmith, so change back to main
                     s.music.FadeVolume("Through");
                 }
                 else { s.music.FadeVolume(); }
@@ -225,44 +334,59 @@ public class LevelManager : MonoBehaviour {
             // fade in the box
             loadingCircle.transform.position = onScreen;
             // make the loading thing go on screen
-            Save.game.floorItemNames = new string[9];
-            Save.game.floorItemTypes = new string[9];
-            Save.game.floorItemMods = new string[9];
-            Save.game.floorItemAccs = new int[9];
-            Save.game.floorItemSpds = new int[9];
-            Save.game.floorItemDmgs = new int[9];
-            Save.game.floorItemDefs = new int[9];
-            Save.game.floorAcc = 0;
-            Save.game.floorSpd = 0;
-            Save.game.floorDmg = 0;
-            Save.game.floorDef = 0;
+            if (Save.game.pendingAmuletVisualRestore) {
+                s.tombstoneData.RestorePlayerVisualStateAfterPreparedResurrection();
+            }
+            if (Save.game.pendingAmuletInventoryCleanup) {
+                s.tombstoneData.FinalizePreparedResurrectionInventoryCleanup();
+            }
+            if (!hasQueuedWarpDestination || !queuedWarpUseSavedTrader) {
+                Save.game.floorItemNames = new string[9];
+                Save.game.floorItemTypes = new string[9];
+                Save.game.floorItemMods = new string[9];
+                Save.game.floorItemAccs = new int[9];
+                Save.game.floorItemSpds = new int[9];
+                Save.game.floorItemDmgs = new int[9];
+                Save.game.floorItemDefs = new int[9];
+                Save.game.floorAcc = 0;
+                Save.game.floorSpd = 0;
+                Save.game.floorDmg = 0;
+                Save.game.floorDef = 0;
+            }
             Save.game.blacksmithHasForged = false;
             // clear merchant and floor items when going to the next level
             if (!isLich) {
-                // if spawning a normal enemy
-                sub++;
-                // increment the sub counter
-                if (sub > 4) { sub = 1; level++; }
-                // increment level and reset sub if we passed sub 4
-                if (level > Save.persistent.highestLevel || level == Save.persistent.highestLevel && sub > Save.persistent.highestSub) {
-                    Save.persistent.highestLevel = level;
-                    Save.persistent.highestSub = sub;
+                if (hasQueuedWarpDestination) {
+                    level = queuedWarpLevel;
+                    sub = queuedWarpSub;
+                    Save.game.enemyNum = queuedWarpEnemyNum;
                 }
-                if (s.enemy.enemyName.text == "Tombstone") {
-                    Save.persistent.tsLevel = -1;
-                    Save.persistent.tsSub = -1;
-                    Save.persistent.tsWeaponAcc = -1;
-                    Save.persistent.tsWeaponSpd = -1;
-                    Save.persistent.tsWeaponDmg = -1;
-                    Save.persistent.tsWeaponDef = -1;
-                    Save.persistent.tsItemNames = new string[9];
-                    Save.persistent.tsItemNames = new string[9];
-                    Save.persistent.tsItemNames = new string[9];
-                    sub--;
-                    // make tombstone inaccessible
+                else {
+                    // if spawning a normal enemy
+                    sub++;
+                    // increment the sub counter
+                    if (sub > BlacksmithSub) { sub = 1; level++; }
+                    // increment level and reset sub if we passed sub 4
+                    if (level > Save.persistent.highestLevel || level == Save.persistent.highestLevel && sub > Save.persistent.highestSub) {
+                        Save.persistent.highestLevel = level;
+                        Save.persistent.highestSub = sub;
+                    }
+                    if (s.enemy.enemyName.text == "Tombstone") {
+                        Save.persistent.tsLevel = -1;
+                        Save.persistent.tsSub = -1;
+                        Save.persistent.tsWeaponAcc = -1;
+                        Save.persistent.tsWeaponSpd = -1;
+                        Save.persistent.tsWeaponDmg = -1;
+                        Save.persistent.tsWeaponDef = -1;
+                        Save.persistent.tsItemNames = new string[9];
+                        Save.persistent.tsItemNames = new string[9];
+                        Save.persistent.tsItemNames = new string[9];
+                        sub--;
+                        // make tombstone inaccessible
+                    }
                 }
                 // going on to the next level (as opposed to next sub, so make sure to set the variables up correctly)
-                if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1)) {
+                if (!hasQueuedWarpDestination && sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1)) {
                     // spawn tombstone if we are on the correct level and not on 1-1
                     toSpawn = "tombstone";
                     // level matches which level to add to
@@ -272,22 +396,22 @@ public class LevelManager : MonoBehaviour {
                     s.enemy.SpawnNewEnemy(8, true);
                     // spawn the tombstone
                 }
-                else if (sub == 4) { 
+                else if (queuedWarpEnemyNum == Enemy.BlacksmithEnemyNum || !hasQueuedWarpDestination && ShouldForceBlacksmithSpawn()) {
+                    toSpawn = "blacksmith";
+                    s.enemy.SpawnNewEnemy(Enemy.BlacksmithEnemyNum, true);
+                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+                    levelTransText.text = GetTransferDestinationText(level, sub, Enemy.BlacksmithEnemyNum);
+                    levelText.text = $"({GetTransferDestinationText(level, sub, Enemy.BlacksmithEnemyNum)})";
+                }
+                else if (sub == MerchantSub || hasQueuedWarpDestination && queuedWarpEnemyNum == Enemy.MerchantEnemyNum) { 
                     toSpawn = "merchant";
                     s.enemy.SpawnNewEnemy(Enemy.MerchantEnemyNum, true);
                     // create the trader enemy
                     s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
                     // summon trader if necessary
-                    levelTransText.text = $"level {level}-3+";
-                    levelText.text = $"(level {level}-3+)";
+                    levelTransText.text = GetLevelLabel(level, sub);
+                    levelText.text = $"({GetLevelLabel(level, sub)})";
                     // set the correct level loading text
-                }
-                else if (ShouldForceBlacksmithSpawn()) {
-                    toSpawn = "blacksmith";
-                    s.enemy.SpawnNewEnemy(Enemy.BlacksmithEnemyNum, true);
-                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
-                    levelTransText.text = $"level {level}-{sub}";
-                    levelText.text = $"(level {level}-{sub})";
                 }
                 else if (level == 4 && sub == 1) { 
                     toSpawn = "devil";
@@ -341,10 +465,12 @@ public class LevelManager : MonoBehaviour {
             }
             else if (toSpawn == "merchant") {
                 // going to trader, so spawn trader items
-                s.itemManager.SpawnMerchantItems();
+                if (hasQueuedWarpDestination && queuedWarpUseSavedTrader) { s.tombstoneData.SpawnSavedMerchantItems(); }
+                else { s.itemManager.SpawnMerchantItems(); }
             }
             else if (toSpawn == "blacksmith") {
-                s.itemManager.SpawnBlacksmithItems();
+                if (hasQueuedWarpDestination && queuedWarpUseSavedTrader) { s.tombstoneData.SpawnSavedMerchantItems(); }
+                else { s.itemManager.SpawnBlacksmithItems(); }
             }
             else {
                 // not going to the trader or tombstone
@@ -352,6 +478,8 @@ public class LevelManager : MonoBehaviour {
                 s.turnManager.blackBox.transform.localPosition = s.turnManager.offScreen;
                 // summon die and make sure the enemy's stats can be seen
             }
+            if (toSpawn is "normal" or "devil" or "lich") { s.itemManager.BeginNewEncounterWeaponState(); }
+            else { s.itemManager.EndEncounterWeaponState(); }
             // can spawn the items here because we have a deletion queue rather than just deleting all
             s.player.targetIndex = 0;
             s.turnManager.SetTargetOf("player");
@@ -361,19 +489,26 @@ public class LevelManager : MonoBehaviour {
                 tempColor.a -= 1f/15f;
                 boxSR.color = tempColor;
             }
-            if (toSpawn == "tombstone") { s.turnManager.SetStatusText("you come across a humble tombstone", true); }
+            if (Save.game.showAmuletSurvivalStatusText) {
+                Save.game.showAmuletSurvivalStatusText = false;
+                s.turnManager.SetStatusText("you live another day", true);
+            }
+            else if (toSpawn == "tombstone") { s.turnManager.SetStatusText("you come across a humble tombstone", true); }
             else if (toSpawn == "lich") { s.turnManager.SetStatusText("impervious, he seems to be immune to wound effects", true); }
             else if (toSpawn == "devil") { s.turnManager.SetStatusText("dice of slain heroes rattle around his neck", true); }
             else if (toSpawn == "blacksmith") { s.turnManager.SetStatusText("forge one stat", true); }
             // fade the level box back out
-            s.itemManager.AttemptFadeTorches();
+            s.itemManager.AttemptFadeTorches(shouldAdvanceTorchCounter);
+            StartCoroutine(ApplyPendingArrivalBonuses());
             // try to remove torches
             // spawn the items so the player can interact with them, after the items are destroyed
-            s.turnManager.DetermineMove(false);
+            s.turnManager.DetermineMove(false, true);
             // determine who moves
             lockActions = false;
             Save.game.resumeSub = s.levelManager.sub;
             Save.game.resumeLevel = s.levelManager.level;
+            hasQueuedWarpDestination = false;
+            queuedWarpUseSavedTrader = false;
         }
         Save.SavePersistent();
         if (s.tutorial == null) { Save.SaveGame(); }

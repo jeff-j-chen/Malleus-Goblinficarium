@@ -25,7 +25,7 @@ public class MenuIcon : MonoBehaviour {
     public GameObject[] menuIconTextOrdering;
     
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         debugSR = debug.GetComponent<SpriteRenderer>();
         hintsSR = hints.GetComponent<SpriteRenderer>();
         soundsSR = sound.GetComponent<SpriteRenderer>();
@@ -55,7 +55,7 @@ public class MenuIcon : MonoBehaviour {
 
     private IEnumerator FindMusicLate() { 
         yield return s.delays[0.25f];
-        musicPlayer = FindObjectOfType<Music>().GetComponent<AudioSource>();
+        musicPlayer = FindFirstObjectByType<Music>().GetComponent<AudioSource>();
     }
 
     private void Update() {
@@ -103,7 +103,7 @@ public class MenuIcon : MonoBehaviour {
         else if (key == s.MUSIC_KEY) { musicPlayer.volume = 0.5f; }
         else if (key == s.BUTTONS_KEY) { 
             s.mobileResizer.FlipMenuIconMode();
-            s.arrow = FindObjectOfType<Arrow>();
+            s.arrow = FindFirstObjectByType<Arrow>();
         }
     }
 
@@ -117,7 +117,7 @@ public class MenuIcon : MonoBehaviour {
         else if (key == s.MUSIC_KEY) { musicPlayer.volume = 0f; }
         else if (key == s.BUTTONS_KEY) { 
             s.mobileResizer.FlipMenuIconMode();
-            s.arrow = FindObjectOfType<Arrow>();
+            s.arrow = FindFirstObjectByType<Arrow>();
         }
     }
 }

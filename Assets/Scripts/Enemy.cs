@@ -51,11 +51,23 @@ public class Enemy : MonoBehaviour {
         {"33", 4},
         {"41", 5},
     };
+    private readonly Dictionary<string, int> givenStaminaHard = new() {
+        {"11", 2},
+        {"12", 2},
+        {"13", 3},
+        {"21", 3},
+        {"22", 3},
+        {"23", 4},
+        {"31", 4},
+        {"32", 4},
+        {"33", 5},
+        {"41", 7},
+    };
     private Scripts s;
     public int spawnNum;
     private readonly List<Dice> availableDice = new();
     private readonly List<int> diceValuations = new();
-    public readonly int lichStamina = 3;
+    public readonly int lichStamina = 5;
 
     private int GetDisplayIndex(int enemyNum) {
         return enemyNum == BlacksmithEnemyNum ? MerchantEnemyNum : enemyNum;
@@ -65,8 +77,23 @@ public class Enemy : MonoBehaviour {
         return enemyNum == MerchantEnemyNum || enemyNum == BlacksmithEnemyNum;
     }
 
+    private int GetSpawnStamina(int enemyNum) {
+        if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) { return 0; }
+        if (enemyArr[enemyNum] == "Lich") { return lichStamina; }
+
+        bool useHardStamina = DifficultyHelper.IsHard(Save.persistent.gameDifficulty)
+            || DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty);
+        Dictionary<string, int> staminaTable = useHardStamina ? givenStaminaHard : givenStamina;
+        return staminaTable[$"{s.levelManager.level}{s.levelManager.sub}"];
+    }
+
+    private bool HasSavedFloorItems() {
+        return Save.game.floorItemNames != null
+            && Save.game.floorItemNames.Any(itemName => !string.IsNullOrEmpty(itemName));
+    }
+
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         s.turnManager.blackBox.transform.localPosition = s.turnManager.offScreen;
         // make sure to show the enemy's stats at the start
         if (s.levelManager.level == Save.persistent.tsLevel && s.levelManager.sub == Save.persistent.tsSub) {
@@ -85,7 +112,8 @@ public class Enemy : MonoBehaviour {
             SpawnNewEnemy(BlacksmithEnemyNum, spawnNewBlacksmith);
             s.itemManager.lootText.text = "goods:";
             if (spawnNewBlacksmith) { s.itemManager.SpawnBlacksmithItems(true); }
-            else { s.tombstoneData.SpawnSavedMerchantItems(true); }
+            else if (HasSavedFloorItems()) { s.tombstoneData.SpawnSavedMerchantItems(true); }
+            else { s.itemManager.SpawnBlacksmithItems(true); }
             s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
         }
         else if (s.levelManager.sub == 4) {
@@ -94,7 +122,8 @@ public class Enemy : MonoBehaviour {
             // spawn the merchant
             s.itemManager.lootText.text = "goods:";
             // indicate that the player should trade
-            s.tombstoneData.SpawnSavedMerchantItems(true);
+            if (HasSavedFloorItems()) { s.tombstoneData.SpawnSavedMerchantItems(true); }
+            else { s.itemManager.SpawnMerchantItems(); }
             // spawn the Saved merchant items
             s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
             // hide the stats (don't fight merchants)
@@ -149,9 +178,11 @@ public class Enemy : MonoBehaviour {
     /// Spawn an enemy based on its number on in the array.
     /// </summary>
     public void SpawnNewEnemy(int enemyNum, bool isNewEnemy) {
+        EnemyAI.InvalidateCachedPlan();
         if (isNewEnemy) {
             // creating new enemy
             Save.game.enemyIsDead = false;
+            Save.game.enemyBleedsOutNextRound = false;
             // make sure enemy is not dead
             float[] temp;
             // array to hold stats
@@ -196,21 +227,11 @@ public class Enemy : MonoBehaviour {
             }
             enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
             // set the name, when spawning the cloaked just set it to be "Devil"
-            if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) {
-                stamina = 0;
-                // tombstone and merchant don't have stamina
-            }
-            else if (enemyArr[enemyNum] == "Lich") {
-                // if lich, has 3 stamina by default
-                stamina = lichStamina;
-            }
-            else {
-                // normal enemy 
-                stamina = givenStamina[$"{s.levelManager.level}{s.levelManager.sub}"];
-                // assign stamina based on level and sub
-            }
+            stamina = GetSpawnStamina(enemyNum);
+            // assign stamina based on level, sub, and difficulty
             woundList.Clear();
             Save.game.enemyStamina = stamina;
+            Save.game.enemyTargetIndex = targetIndex;
             Save.SaveGame();
         }
         else { 
@@ -248,9 +269,10 @@ public class Enemy : MonoBehaviour {
             enemyName.text = enemyArr[enemyNum] == "Cloaked" ? "Devil" : enemyArr[enemyNum];
             // devil should only be called 'cloaked', not devil
             if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) { stamina = 0; }
-            else if (enemyArr[enemyNum] == "Lich") { stamina = 3; }
+            else if (enemyArr[enemyNum] == "Lich") { stamina = s.enemy.lichStamina; }
             else { stamina = Save.game.enemyStamina; }
             woundList = Save.game.enemyWounds;
+            targetIndex = Mathf.Clamp(Save.game.enemyTargetIndex, 0, 7);
             // set stamina, show wounds and name
         }
         staminaCounter.text = stamina.ToString();

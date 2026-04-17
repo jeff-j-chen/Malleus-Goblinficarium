@@ -3,7 +3,7 @@ public class OnClickToggle : MonoBehaviour {
     private Scripts s;
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
     }
 
     private void OnMouseDown() {

@@ -12,7 +12,7 @@ public class Arrow : MonoBehaviour {
     private bool preventPlayingFX = true;
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         // find s
         // hide/show the continue button if there is a game or not
         MoveToButtonPos(currentIndex);
@@ -56,7 +56,7 @@ public class Arrow : MonoBehaviour {
     /// Move the selection arrow to a menu item to a given index.
     /// </summary>
     public void MoveToButtonPos(int index) {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         // function used to move the arrow to the desired button position
         if (!(index == 0 && Save.game.newGame)) {
             // as long as we are not trying to select continue when new game is true (previous Save wiped)

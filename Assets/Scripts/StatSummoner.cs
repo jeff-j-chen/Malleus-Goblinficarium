@@ -1,24 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using TMPro;
 using UnityEngine;
 public class StatSummoner : MonoBehaviour {
+    private enum PlayerStatShape {
+        Square,
+        Circle,
+        Diamond,
+    }
+
     [SerializeField] private GameObject plus;
     [SerializeField] private GameObject minus;
     [SerializeField] private GameObject square;
     [SerializeField] private GameObject negSquare;
     [SerializeField] private GameObject circle;
+    [SerializeField] private GameObject diamond;
     [SerializeField] private TextMeshProUGUI playerDebug;
     [SerializeField] private TextMeshProUGUI enemyDebug;
     private readonly float xCoord = -10.5f;
-    private readonly float desktopDiceOffset = 1f;
-    private readonly float mobileDiceOffset = 1f*1.5f;
+    private readonly float desktopDiceOffset = 1.0f;
+    private readonly float mobileDiceOffset = 1.0f*1.5f;
     public float diceOffset;
-    private readonly float desktopXOffset = 0.65f;
-    private readonly float desktopHighlightOffset = 0.85f;
-    private readonly float mobileXOffset = 0.65f;
-    private readonly float mobileHighlightOffset = 0.85f*1.25f;
+    private readonly float desktopXOffset = 0.6f;
+    private readonly float desktopHighlightOffset = 0.8333f;
+    private readonly float mobileXOffset = 0.6f;
+    private readonly float mobileHighlightOffset = 0.8333f*1.25f;
     public float xOffset;
     public float highlightOffset;
     private readonly float desktopButtonXCoord = -11.7f;
@@ -63,7 +71,7 @@ public class StatSummoner : MonoBehaviour {
     private Scripts s;
 
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         if (PlayerPrefs.GetString("debug") == "on") {
             playerDebug.color = Colors.disabled;
             enemyDebug.color = Colors.disabled;
@@ -93,6 +101,14 @@ public class StatSummoner : MonoBehaviour {
         }
         SummonStaminaButtons();
         // create the stamina buttons
+    }
+
+    private void Update() {
+        if (s == null || s.player == null || s.enemy == null || s.turnManager == null) { return; }
+        if (PlayerPrefs.GetString(s.DEBUG_KEY) != "on") { return; }
+        if (Input.GetKeyDown(KeyCode.S)) {
+            Debug.Log(BuildDebugSnapshot());
+        }
     }
 
     /// <summary>
@@ -126,11 +142,11 @@ public class StatSummoner : MonoBehaviour {
         if (playerOrEnemy == "player") {
             // get for player
             if (stat == "blue") {
-                if (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || !s.player.isDead && s.itemManager.PlayerHasWeapon("spear") && s.itemManager.PlayerHasLegendary()) { return 99; }
-                // return 99 speed if enemy has knee wound (lich not affected by wounds), or the player has legendary spear
+                if (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || !s.player.isDead && s.itemManager.PlayerAlwaysActsFirst()) { return 99; }
+                // return 99 speed if enemy has knee wound (lich not affected by wounds), or the player always acts first
             }
-            int sum = s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat];
-            // get the sum of base stats + potion + stamina + necklet
+                int sum = s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + s.itemManager.GetSacrificialChaliceAppliedBonus() + GetEncounterWeaponStatBonus(stat) + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
+            // get the sum of base stats + potion + stamina + necklet + charm
             foreach (Dice dice in addedPlayerDice[stat]) {
                 // add to the sum all the added die
                 if (dice != null) { sum += dice.GetComponent<Dice>().diceNum; }
@@ -161,7 +177,7 @@ public class StatSummoner : MonoBehaviour {
             return 0;
         }
         if (playerOrEnemy == "player") {
-            return s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat];
+              return s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + s.itemManager.GetSacrificialChaliceAppliedBonus() + GetEncounterWeaponStatBonus(stat) + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
         }
         if (playerOrEnemy == "enemy") {
             return s.enemy.stats[stat] + addedEnemyStamina[stat];
@@ -194,40 +210,46 @@ public class StatSummoner : MonoBehaviour {
     private void GenerateForStat(int i, string colorName) {
         // could use Colors.colorNameArr[i] instead of colorName but that takes up way more space and its much more confusing
         Color statColor = Colors.colorArr[Array.IndexOf(Colors.colorNameArr, colorName)];
+        int encounterWeaponBonus = GetEncounterWeaponStatBonus(colorName);
+        int encounterWeaponDiamondBonus = s.itemManager.GetCurrentPlayerWeaponDiamondBonus(colorName);
+        int playerSquareStats = s.player.stats[colorName] + s.player.potionStats[colorName] + encounterWeaponBonus - encounterWeaponDiamondBonus;
+        int playerCircleStats = s.itemManager.neckletStats[colorName];
+        int playerDiamondStats = s.itemManager.charmPassiveStats[colorName] + s.itemManager.charmActiveBonus[colorName] + s.itemManager.GetSacrificialChaliceAppliedBonus() + encounterWeaponDiamondBonus + s.itemManager.GetLuckyDiceRoundStatBonus(colorName);
+        int playerNonStaminaTotal = playerSquareStats + playerCircleStats + playerDiamondStats;
+        int playerTotal = playerNonStaminaTotal + addedPlayerStamina[colorName];
         // get the color of the given colorname
-        if (s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName] > 0) {
+        if (playerNonStaminaTotal > 0) {
             // if player's stats are greater than 0
+            int visibleSquareStats = Mathf.Min(Mathf.Max(0, playerSquareStats), playerNonStaminaTotal);
+            int remainingAfterSquares = playerNonStaminaTotal - visibleSquareStats;
+            int visibleCircleStats = Mathf.Min(Mathf.Max(0, playerCircleStats), remainingAfterSquares);
+            int remainingAfterCircles = remainingAfterSquares - visibleCircleStats;
+            int visibleDiamondStats = Mathf.Min(Mathf.Max(0, playerDiamondStats), remainingAfterCircles);
+
             int k0;
-            for (k0 = 0; k0 < s.player.stats[colorName] + s.player.potionStats[colorName]; k0++) {
-                SpawnGeneratedShape(i, statColor, k0, xCoord, xOffset, true, true);
+            for (k0 = 0; k0 < visibleSquareStats; k0++) {
+                SpawnGeneratedShape(i, statColor, k0, xCoord, xOffset, true, PlayerStatShape.Square);
             }
             // summon the positive stat squares at the proper place
-            if (s.player.stats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName] < 0) {
-                // if total without necklet is negative, but total with necklet is positive
-                for (int k1 = 0; k1 < 0 - Mathf.Abs(s.player.stats[colorName]) + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]; k1++) {
-                    // create circles based on the number over the negative
-                    SpawnGeneratedShape(i, statColor, k0 + k1, xCoord, xOffset, true, false);
-                }
+            for (int k1 = 0; k1 < visibleCircleStats && k0 < playerNonStaminaTotal; k1++, k0++) {
+                SpawnGeneratedShape(i, statColor, k0, xCoord, xOffset, true, PlayerStatShape.Circle);
             }
-            else {
-                // spawn circles normally
-                for (int k2 = 0; k2 < s.itemManager.neckletStats[colorName]; k2++) {
-                    SpawnGeneratedShape(i, statColor, k0 + k2, xCoord, xOffset, true, false);
-                }
+            for (int k2 = 0; k2 < visibleDiamondStats && k0 < playerNonStaminaTotal; k2++, k0++) {
+                SpawnGeneratedShape(i, statColor, k0, xCoord, xOffset, true, PlayerStatShape.Diamond);
             }
         }
         else {
             // stats are less than 0
-            for (int k = 0; k < -(s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]); k++) {
+            for (int k = 0; k < Mathf.Max(0, -playerTotal); k++) {
                 SpawnGeneratedShape(i, statColor, k, xCoord, xOffset, false);
             }
             // create negative stat squares
         }
-        if (addedPlayerStamina[colorName] > 0 && s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName] > 0) {
+        if (addedPlayerStamina[colorName] > 0 && playerTotal > 0) {
             // if player stamina is greater than 0 and total stats) are greater than 0
-            if (s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] > 0) {
+            if (playerNonStaminaTotal > 0) {
                 // if player's total stats (without stamina) are greater than 0
-                for (int j = s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName]; j < s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
+                for (int j = playerNonStaminaTotal; j < playerTotal; j++) {
                     GameObject addedStaminaSquare = SpawnGeneratedShape(i, Colors.yellow, j, xCoord, xOffset, true);
                     Vector3 position = addedStaminaSquare.transform.position;
                     position = new Vector2(position.x - 0.01f, position.y);
@@ -241,7 +263,7 @@ public class StatSummoner : MonoBehaviour {
             }
             else {
                 // player's total stats w/o stamina are less than 0
-                for (int j = 0; j < s.player.stats[colorName] + s.itemManager.neckletStats[colorName] + s.player.potionStats[colorName] + addedPlayerStamina[colorName]; j++) {
+                for (int j = 0; j < playerTotal; j++) {
                     SpawnGeneratedShape(i, Colors.yellow, j, xCoord, xOffset, true);
                 }
                 // make yellow squares in the correct place
@@ -253,7 +275,7 @@ public class StatSummoner : MonoBehaviour {
             }
         }
         else {
-            for (int l = 0; l < -(s.enemy.stats[colorName] + addedEnemyStamina[colorName]); l++) {
+            for (int l = 0; l < Mathf.Max(0, -(s.enemy.stats[colorName] + addedEnemyStamina[colorName])); l++) {
                 SpawnGeneratedShape(i, statColor, l, -xCoord + 1, -xOffset, false);
             }
         }
@@ -281,13 +303,18 @@ public class StatSummoner : MonoBehaviour {
     /// <param name="coord">The base x-coordinate at which to create the stats.</param>
     /// <param name="offset">The offset of which to apply between each square.</param>
     /// <param name="isPositive">true to make a positive square, false to make a negative square.</param>
-    /// <param name="isSquare">true to create a square, false to create a circle.</param>
-    private GameObject SpawnGeneratedShape(int i, Color statColor, int k, float coord, float offset, bool isPositive, bool isSquare=true) {
+    /// <param name="shapeType">the positive shape to create.</param>
+    private GameObject SpawnGeneratedShape(int i, Color statColor, int k, float coord, float offset, bool isPositive, PlayerStatShape shapeType=PlayerStatShape.Square) {
         Vector3 instantiationsPos = new Vector2(coord + (k * offset), yCoords[i]);
         // set where the shape will be created
         GameObject spawnedShape;
         if (isPositive) {
-            spawnedShape = isSquare ? Instantiate(square, instantiationsPos, Quaternion.identity) : Instantiate(circle, new Vector2(instantiationsPos.x, instantiationsPos.y), Quaternion.identity);
+            GameObject prefab = shapeType switch {
+                PlayerStatShape.Circle => circle,
+                PlayerStatShape.Diamond => diamond,
+                _ => square,
+            };
+            spawnedShape = Instantiate(prefab, instantiationsPos, Quaternion.identity);
         }
         else { 
             if (instantiationsPos.x <= 0) { spawnedShape = Instantiate(negSquare, instantiationsPos, Quaternion.identity);  }
@@ -334,6 +361,10 @@ public class StatSummoner : MonoBehaviour {
             addedEnemyStamina[key] = 0;
         }
         s.highlightCalculator.diceTakenByPlayer = 0;
+        Save.game.playerStamina = s.player.stamina;
+        Save.game.enemyStamina = s.enemy.stamina;
+        s.player.staminaCounter.text = s.player.stamina.ToString();
+        s.enemy.staminaCounter.text = s.enemy.stamina.ToString();
         SetDebugInformationFor("player");
         SetDebugInformationFor("enemy");
         // set the debug information
@@ -417,8 +448,13 @@ public class StatSummoner : MonoBehaviour {
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         optionalDiceOffsetStatToMultiplyBy ??= statType;
         // not setting the optional variable will just default it to the base stat type
-        return xCoord + ((Mathf.Abs(s.player.stats[statType] + s.player.potionStats[statType] + s.itemManager.neckletStats[statType] + addedPlayerStamina[statType]) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
+            return xCoord + ((Mathf.Abs(s.player.stats[statType] + s.player.potionStats[statType] + s.itemManager.neckletStats[statType] + s.itemManager.charmPassiveStats[statType] + s.itemManager.charmActiveBonus[statType] + s.itemManager.GetSacrificialChaliceAppliedBonus() + addedPlayerStamina[statType] + GetEncounterWeaponStatBonus(statType) + s.itemManager.GetLuckyDiceRoundStatBonus(statType)) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
+    }
+
+    private int GetEncounterWeaponStatBonus(string statType) {
+        if (s == null || s.itemManager == null) { return 0; }
+        return s.itemManager.GetCurrentPlayerWeaponStatBonus(statType);
     }
 
     /// <summary>
@@ -451,8 +487,16 @@ public class StatSummoner : MonoBehaviour {
             // (2)
             // for example
             else { Debug.Log("error"); }
-            s.enemy.TargetBest();
         }
+    }
+
+    /// <summary>
+    /// Update debug text and queue a deferred enemy replan for real combat-state changes.
+    /// </summary>
+    public void SetCombatDebugInformationFor(string playerOrEnemy) {
+        SetDebugInformationFor(playerOrEnemy);
+        if (s == null || s.turnManager == null) { return; }
+        s.turnManager.RefreshEnemyPlanIfNeeded();
     }
 
     /// <summary>
@@ -469,5 +513,141 @@ public class StatSummoner : MonoBehaviour {
             // update the instantiation position
         }
         SetDebugInformationFor("player");
+    }
+
+    private string BuildDebugSnapshot() {
+        StringBuilder builder = new();
+        builder.AppendLine("PLAYER: " + BuildStatSummary("player"));
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("green", "player", "accuracy"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("blue", "player", "speed"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("red", "player", "damage"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("white", "player", "parry"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"stamina: {s.player.stamina} remaining");
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"wounds: {BuildWoundsLine(s.player.woundList)}");
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"targeting: {CleanTargetText(s.player.target.text)}");
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"available dice: {BuildAvailableDiceLine()}");
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"enemy: {s.enemy.enemyName.text}");
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine("ENEMY: " + BuildStatSummary("enemy"));
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("green", "enemy", "accuracy"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("blue", "enemy", "speed"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("red", "enemy", "damage"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine(BuildDetailedStatLine("white", "enemy", "parry"));
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"stamina: {s.enemy.stamina} remaining");
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"wounds: {BuildWoundsLine(s.enemy.woundList)}");
+        builder.AppendLine();
+        builder.AppendLine();
+        builder.AppendLine($"targeting: {CleanTargetText(s.enemy.target.text)}");
+        return builder.ToString();
+    }
+
+    private string BuildStatSummary(string playerOrEnemy) {
+        return $"{SumOfStat("green", playerOrEnemy)} / {SumOfStat("blue", playerOrEnemy)} / {SumOfStat("red", playerOrEnemy)} / {SumOfStat("white", playerOrEnemy)}";
+    }
+
+    private string BuildDetailedStatLine(string stat, string playerOrEnemy, string label) {
+        return $"{label}: {SumOfStat(stat, playerOrEnemy)} = {BuildStatBreakdown(stat, playerOrEnemy)}";
+    }
+
+    private string BuildStatBreakdown(string stat, string playerOrEnemy) {
+        if (stat == "blue" && SumOfStat(stat, playerOrEnemy) == 99) {
+            return "(always higher)";
+        }
+
+        List<string> parts = new();
+        parts.Add(GetBaseStatWithoutAddedStamina(stat, playerOrEnemy).ToString());
+
+        foreach (Dice die in GetAttachedDice(stat, playerOrEnemy)) {
+            if (die != null) { parts.Add(FormatDie(die)); }
+        }
+
+        int addedStamina = GetAddedStamina(stat, playerOrEnemy);
+        if (addedStamina > 0) { parts.Add($"{addedStamina} s"); }
+
+        return "(" + string.Join(" + ", parts) + ")";
+    }
+
+    private int GetBaseStatWithoutAddedStamina(string stat, string playerOrEnemy) {
+        if (playerOrEnemy == "player") {
+            return s.player.stats[stat] + s.player.potionStats[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + GetEncounterWeaponStatBonus(stat);
+        }
+
+        return s.enemy.stats[stat];
+    }
+
+    private int GetAddedStamina(string stat, string playerOrEnemy) {
+        return playerOrEnemy == "player"
+            ? addedPlayerStamina[stat]
+            : addedEnemyStamina[stat];
+    }
+
+    private IEnumerable<Dice> GetAttachedDice(string stat, string playerOrEnemy) {
+        return playerOrEnemy == "player"
+            ? addedPlayerDice[stat].Where(die => die != null)
+            : addedEnemyDice[stat].Where(die => die != null);
+    }
+
+    private string BuildWoundsLine(IEnumerable<string> wounds) {
+        List<string> woundList = wounds.Where(wound => !string.IsNullOrWhiteSpace(wound)).ToList();
+        return woundList.Count == 0 ? "none" : string.Join(", ", woundList);
+    }
+
+    private string BuildAvailableDiceLine() {
+        List<string> dice = s.diceSummoner.existingDice
+            .Where(dieObject => dieObject != null)
+            .Select(dieObject => dieObject.GetComponent<Dice>())
+            .Where(die => die != null && !die.isAttached)
+            .Select(FormatDie)
+            .ToList();
+
+        return dice.Count == 0 ? "none" : string.Join(", ", dice);
+    }
+
+    private string CleanTargetText(string targetText) {
+        return string.IsNullOrWhiteSpace(targetText) ? "none" : targetText.TrimStart('*');
+    }
+
+    private string FormatDie(Dice die) {
+        return ColorAbbreviation(die.diceType) + die.diceNum;
+    }
+
+    private string ColorAbbreviation(string colorName) {
+        return colorName switch {
+            "green" => "g",
+            "blue" => "b",
+            "red" => "r",
+            "white" => "w",
+            "yellow" => "y",
+            _ => colorName.Length > 0 ? colorName.Substring(0, 1).ToLower() : "?"
+        };
     }
 }

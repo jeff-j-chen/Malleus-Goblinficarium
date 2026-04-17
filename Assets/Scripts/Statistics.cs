@@ -11,14 +11,14 @@ public class Statistics : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI rightGray;
     [SerializeField] private TextMeshProUGUI bottomText;
     private readonly string[] weaponNames = 
-        { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword" };
+        { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword", "katar", "buckler", "ham", "gladius", "glass sword", "stave", "gauntlets", "glaive", "claymore", "crossbow" };
     private readonly WaitForSeconds tenthSecond = new(0.1f);
     private readonly WaitForSeconds oneSecond = new(1f);
     private readonly string baseText = "hold [space] to delete all data - this action is irrecoverable";
     private Scripts s;
     
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         bottomText.gameObject.SetActive(PlayerPrefs.GetString(s.BUTTONS_KEY) != "on");
         ShowStatistics();
     }
@@ -30,11 +30,21 @@ public class Statistics : MonoBehaviour {
     }
 
     private void ShowStatistics() { 
+        Save.persistent ??= new PersistentData();
+        Save.persistent.Normalize();
         leftWhite.text = $"\n{Save.persistent.gamesPlayed}\n\n\n\n\n{Save.persistent.attacksParried}\n{Save.persistent.woundsReceived}\n{Save.persistent.woundsInflicted}";
-        leftGray.text = $"\n\n{Save.persistent.highestLevel}-{Save.persistent.highestSub}\n{Save.persistent.successfulRuns}\n{Save.persistent.deaths}\n\n\n\n\n{Save.persistent.woundsInflictedArr[0]}\n{Save.persistent.woundsInflictedArr[1]}\n{Save.persistent.woundsInflictedArr[2]}\n{Save.persistent.woundsInflictedArr[3]}\n{Save.persistent.woundsInflictedArr[4]}\n{Save.persistent.woundsInflictedArr[5]}\n{Save.persistent.woundsInflictedArr[6]}\n{Save.persistent.woundsInflictedArr[7]}";
-        favWeapon.text = weaponNames[Array.IndexOf(Save.persistent.weaponUses, Save.persistent.weaponUses.Max())];
+        leftGray.text = $"\n\n{Save.persistent.highestLevel}-{Save.persistent.highestSub}\n{GetSuccessfulRunsText()}\n{Save.persistent.deaths}\n\n\n\n\n{Save.persistent.woundsInflictedArr[0]}\n{Save.persistent.woundsInflictedArr[1]}\n{Save.persistent.woundsInflictedArr[2]}\n{Save.persistent.woundsInflictedArr[3]}\n{Save.persistent.woundsInflictedArr[4]}\n{Save.persistent.woundsInflictedArr[5]}\n{Save.persistent.woundsInflictedArr[6]}\n{Save.persistent.woundsInflictedArr[7]}";
+        int favoriteWeaponIndex = Save.persistent.weaponUses == null || Save.persistent.weaponUses.Length == 0
+            ? 0
+            : Array.IndexOf(Save.persistent.weaponUses, Save.persistent.weaponUses.Max());
+        favoriteWeaponIndex = Mathf.Clamp(favoriteWeaponIndex, 0, weaponNames.Length - 1);
+        favWeapon.text = weaponNames[favoriteWeaponIndex];
         rightWhite.text = $"\n\n\n\n\n\n{Save.persistent.enemiesSlain}\n{Save.persistent.staminaUsed}";
         rightGray.text = $"\n\n\n\n\n\n\n\n{Save.persistent.armorBroken}\n{Save.persistent.weaponsSwapped}\n{Save.persistent.scrollsRead}\n{Save.persistent.potionsQuaffed}\n{Save.persistent.foodEaten}\n{Save.persistent.shurikensThrown}\n{Save.persistent.itemsTraded}\n{Save.persistent.diceRerolled}\n{Save.persistent.diceDiscarded}";
+    }
+
+    private static string GetSuccessfulRunsText() {
+        return $"{Save.persistent.GetSuccessfulRuns(DifficultyHelper.Easy)} / {Save.persistent.GetSuccessfulRuns(DifficultyHelper.Normal)} / {Save.persistent.GetSuccessfulRuns(DifficultyHelper.Hard)} / {Save.persistent.GetSuccessfulRuns(DifficultyHelper.Nightmare)}";
     }
 
     /// <summary>
@@ -68,6 +78,7 @@ public class Statistics : MonoBehaviour {
 
     public void ResetStats() {
         Save.persistent = new PersistentData();
+        Save.persistent.Normalize();
         Save.SavePersistent();
         bottomText.text = "[done]";
         s.soundManager.PlayClip("click1");

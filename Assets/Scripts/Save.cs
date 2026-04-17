@@ -7,7 +7,7 @@ public static class Save {
     // private static string persistentPath = "persistentSave.txt";
     private static readonly string PersistentPath = Application.persistentDataPath + "persistentSave.txt";
     
-    private static readonly string tutorialJson = "{\"newGame\":false,\"curCharNum\":0,\"floorItemNames\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"floorItemTypes\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"floorItemMods\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeItemNames\":[\"sword\",\"scroll\",\"torch\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeItemTypes\":[\"weapon\",\"common\",\"common\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeItemMods\":[\"harsh\",\"nothing\",\"2-1\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeLevel\":1,\"resumeSub\":1,\"resumeAcc\":2,\"resumeSpd\":2,\"resumeDmg\":1,\"resumeDef\":2,\"floorAcc\":0,\"floorSpd\":0,\"floorDmg\":0,\"floorDef\":0,\"potionAcc\":0,\"potionSpd\":0,\"potionDmg\":0,\"potionDef\":0,\"playerStamina\":3,\"enemyStamina\":1,\"diceNumbers\":[2,1,1,1,6,2],\"diceTypes\":[\"green\",\"blue\",\"blue\",\"blue\",\"red\",\"white\"],\"dicePlayerOrEnemy\":[\"none\",\"none\",\"none\",\"none\",\"none\",\"none\"],\"diceAttachedToStat\":[\"\",\"\",\"\",\"\",\"\",\"\"],\"diceRerolled\":[false,false,false,false,false,false],\"playerWounds\":[],\"enemyWounds\":[],\"enemyNum\":6,\"usedMace\":false,\"usedAnkh\":false,\"usedHelm\":false,\"usedBoots\":false,\"isFurious\":false,\"isDodgy\":false,\"isHasty\":false,\"isBloodthirsty\":false,\"isCourageous\":false,\"expendedStamina\":0,\"numItemsDroppedForTrade\":0,\"discardableDieCounter\":0,\"enemyIsDead\":false,\"enemyAcc\":1,\"enemySpd\":1,\"enemyDmg\":1,\"enemyDef\":1}";
+    private static readonly string tutorialJson = "{\"newGame\":false,\"curCharNum\":0,\"floorItemNames\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"floorItemTypes\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"floorItemMods\":[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeItemNames\":[\"sword\",\"scroll\",\"torch\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeItemTypes\":[\"weapon\",\"common\",\"common\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeItemMods\":[\"harsh\",\"nothing\",\"2-1\",\"\",\"\",\"\",\"\",\"\",\"\"],\"resumeLevel\":1,\"resumeSub\":1,\"resumeAcc\":2,\"resumeSpd\":2,\"resumeDmg\":1,\"resumeDef\":2,\"floorAcc\":0,\"floorSpd\":0,\"floorDmg\":0,\"floorDef\":0,\"potionAcc\":0,\"potionSpd\":0,\"potionDmg\":0,\"potionDef\":0,\"playerStamina\":3,\"enemyStamina\":1,\"diceNumbers\":[2,1,1,1,6,2],\"diceTypes\":[\"green\",\"blue\",\"blue\",\"blue\",\"red\",\"white\"],\"dicePlayerOrEnemy\":[\"none\",\"none\",\"none\",\"none\",\"none\",\"none\"],\"diceAttachedToStat\":[\"\",\"\",\"\",\"\",\"\",\"\"],\"diceRerolled\":[false,false,false,false,false,false],\"playerWounds\":[],\"enemyWounds\":[],\"playerBleedsOutNextRound\":false,\"enemyBleedsOutNextRound\":false,\"enemyNum\":6,\"usedMace\":false,\"usedAnkh\":false,\"usedHelm\":false,\"usedBoots\":false,\"isFurious\":false,\"isDodgy\":false,\"isHasty\":false,\"isBloodthirsty\":false,\"isCourageous\":false,\"expendedStamina\":0,\"numItemsDroppedForTrade\":0,\"discardableDieCounter\":0,\"enemyIsDead\":false,\"enemyAcc\":1,\"enemySpd\":1,\"enemyDmg\":1,\"enemyDef\":1}";
     public static GameData game;
     public static PersistentData persistent;
 
@@ -17,11 +17,25 @@ public static class Save {
     }
 
     public static void SaveGame() { 
-        Scripts s = Object.FindObjectOfType<Scripts>();
-        if (game != null && s != null && s.enemy != null && s.statSummoner != null) {
-            game.enemyStamina = s.enemy.stamina + s.statSummoner.addedEnemyStamina.Values.Sum();
-        }
+        Scripts s = Object.FindFirstObjectByType<Scripts>();
+        SyncCombatStateForSave(s);
         File.WriteAllText(GamePath, JsonUtility.ToJson(game));
+    }
+
+    private static void SyncCombatStateForSave(Scripts s) {
+        if (game == null || s == null) { return; }
+
+        if (s.itemManager != null) {
+            s.itemManager.SyncCharmStateToSave();
+        }
+
+        if (s.enemy == null) { return; }
+
+        int investedEnemyStamina = s.statSummoner != null
+            ? s.statSummoner.addedEnemyStamina.Values.Sum()
+            : 0;
+        game.enemyStamina = s.enemy.stamina + investedEnemyStamina;
+        game.enemyTargetIndex = s.enemy.targetIndex;
     }
 
     public static void LoadGame() { 
@@ -44,6 +58,8 @@ public static class Save {
     }
 
     public static void SavePersistent() { 
+        persistent ??= new PersistentData();
+        persistent.Normalize();
         File.WriteAllText(PersistentPath, JsonUtility.ToJson(persistent));
     }
 
@@ -56,15 +72,16 @@ public static class Save {
             }
             else {
                 string migratedDifficulty = DifficultyHelper.Migrate(persistent.gameDifficulty, persistent.difficultyVersion);
-                bool changed = migratedDifficulty != persistent.gameDifficulty || persistent.difficultyVersion != DifficultyHelper.CurrentDifficultyVersion;
                 persistent.gameDifficulty = migratedDifficulty;
                 persistent.difficultyVersion = DifficultyHelper.CurrentDifficultyVersion;
-                if (changed) { SavePersistent(); }
+                persistent.Normalize();
+                SavePersistent();
             }
         }
         else { 
             Debug.Log("no statistics found, so just created one!");
             persistent = new PersistentData();
+            persistent.Normalize();
             SavePersistent();
         }
     }

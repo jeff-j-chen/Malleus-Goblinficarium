@@ -16,6 +16,7 @@ public class MobileResizer : MonoBehaviour {
         new(0f, -1.24f), 
         new(0f, -2.24f), 
         new(0f, -3.24f),
+        new(0f, -4.24f),
     };
     private readonly Vector2[] menuIconTextDesktopPos = { 
         new(-253.7f, -157.1f), 
@@ -23,6 +24,7 @@ public class MobileResizer : MonoBehaviour {
         new(-253.7f, -216.6f), 
         new(-253.7f, -246.8f), 
         new(-253.7f, -277.0f),
+        new(-253.7f, -308.0f),
     };
     private readonly Vector3 menuIconMobileScale = new(0.5f, 0.5f, 1f);
     private readonly Vector2[] menuIconMobilePos = { 
@@ -47,7 +49,8 @@ public class MobileResizer : MonoBehaviour {
         new(46.6f, -15f), 
         new(46.6f, -45f), 
         new(46.6f, -75f), 
-        new(46.6f, -105f), 
+        new(46.6f, -105f),
+        new(46.6f, -135f),
     };
     private readonly Vector3 menuButtonMobileScale = new(1.5f, 1.5f, 1f);
     private readonly Vector2[] menuButtonMobilePos = { 
@@ -57,6 +60,7 @@ public class MobileResizer : MonoBehaviour {
         new(70.5f, -60f+15f), 
         new(70.5f, -105f+15f), 
         new(70.5f, -150f+15f), 
+        new(70.5f, -195f+15f),
     };
     [SerializeField] private GameObject titleText;
     private readonly Vector2 titleTextDesktopPos = new(0f, 200f);
@@ -70,7 +74,7 @@ public class MobileResizer : MonoBehaviour {
     
     
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         if (s.menuIcon != null) {
             FlipMenuIconMode();
         }

@@ -5,7 +5,7 @@ public class BackToMenu : MonoBehaviour {
     private Scripts s;
 
     private void Awake() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
     }
 
     private void Update() {

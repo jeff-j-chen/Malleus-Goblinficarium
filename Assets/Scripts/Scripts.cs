@@ -35,29 +35,30 @@ public class Scripts : MonoBehaviour {
     public bool mobileMode; // only for use in-game, don't use this for menu screen!
 
     private void Start() {
-        tutorial = FindObjectOfType<Tutorial>();
+        tutorial = FindFirstObjectByType<Tutorial>();
         if (tutorial == null) { Save.LoadGame(); }
         else { Save.LoadTutorial(); }
         Save.LoadPersistent();
+        EnemyAI.InvalidateCachedPlan();
         mobileMode = PlayerPrefs.GetString(BUTTONS_KEY) == "on";
-        dice = FindObjectOfType<Dice>();
-        arrow = FindObjectOfType<Arrow>();
-        enemy = FindObjectOfType<Enemy>();
-        player = FindObjectOfType<Player>();
-        menuIcon = FindObjectOfType<MenuIcon>();
-        backToMenu = FindObjectOfType<BackToMenu>();
-        menuButton = FindObjectOfType<MenuButton>();
-        statistics = FindObjectOfType<Statistics>();
-        turnManager = FindObjectOfType<TurnManager>();
-        itemManager = FindObjectOfType<ItemManager>();
-        diceSummoner = FindObjectOfType<DiceSummoner>();
-        soundManager = FindObjectOfType<SoundManager>();
-        levelManager = FindObjectOfType<LevelManager>();
-        statSummoner = FindObjectOfType<StatSummoner>();
-        tombstoneData = FindObjectOfType<TombstoneData>();
-        mobileResizer = FindObjectOfType<MobileResizer>();
-        characterSelector = FindObjectOfType<CharacterSelector>();
-        highlightCalculator = FindObjectOfType<HighlightCalculator>();
+        dice = FindFirstObjectByType<Dice>();
+        arrow = FindFirstObjectByType<Arrow>();
+        enemy = FindFirstObjectByType<Enemy>();
+        player = FindFirstObjectByType<Player>();
+        menuIcon = FindFirstObjectByType<MenuIcon>();
+        backToMenu = FindFirstObjectByType<BackToMenu>();
+        menuButton = FindFirstObjectByType<MenuButton>();
+        statistics = FindFirstObjectByType<Statistics>();
+        turnManager = FindFirstObjectByType<TurnManager>();
+        itemManager = FindFirstObjectByType<ItemManager>();
+        diceSummoner = FindFirstObjectByType<DiceSummoner>();
+        soundManager = FindFirstObjectByType<SoundManager>();
+        levelManager = FindFirstObjectByType<LevelManager>();
+        statSummoner = FindFirstObjectByType<StatSummoner>();
+        tombstoneData = FindFirstObjectByType<TombstoneData>();
+        mobileResizer = FindFirstObjectByType<MobileResizer>();
+        characterSelector = FindFirstObjectByType<CharacterSelector>();
+        highlightCalculator = FindFirstObjectByType<HighlightCalculator>();
         foreach (float delay in delayArr) {
             delays.Add(delay, new WaitForSeconds(delay));
         }
@@ -71,7 +72,7 @@ public class Scripts : MonoBehaviour {
         if (player != null) { Save.game.newGame = false; }
         
         if (tutorial == null) { Save.SaveGame(); }
-        music = FindObjectOfType<Music>();
+        music = FindFirstObjectByType<Music>();
         // also get the music here, because we need it to set up the singleton pattern first
     }
 

@@ -26,7 +26,7 @@ public class DiceSummoner : MonoBehaviour
     
     
     private void Start() {
-        s = FindObjectOfType<Scripts>();
+        s = FindFirstObjectByType<Scripts>();
         if (s.mobileMode) {
             xCoords = mobileXCoords;
             diceScale = mobileDiceScale;
@@ -73,11 +73,19 @@ public class DiceSummoner : MonoBehaviour
             }
             existingDice.Clear();
             // clear the list so we have a fresh array
-            GenerateDiceTypes();
-            for (int i = 0; i < 6; i++) {
-                yield return s.delays[0.025f];
-                GenerateSingleDie(Random.Range(1, 7), null, "none", null, i, initialSix:true);
-                // generate the 6 base die for every round
+            if (s.tutorial != null && s.tutorial.ConsumeQueuedParryDraft()) {
+                for (int i = 0; i < 6; i++) {
+                    yield return s.delays[0.025f];
+                    GenerateSingleDie(i + 1, "white", "none", null, i, initialSix:true);
+                }
+            }
+            else {
+                GenerateDiceTypes();
+                for (int i = 0; i < 6; i++) {
+                    yield return s.delays[0.025f];
+                    GenerateSingleDie(Random.Range(1, 7), null, "none", null, i, initialSix:true);
+                    // generate the 6 base die for every round
+                }
             }
             if (s.itemManager.PlayerHasWeapon("flail")) {
                 StartCoroutine(SpawnFlailDice());
@@ -98,35 +106,49 @@ public class DiceSummoner : MonoBehaviour
         else { 
             existingDice.Clear();
             int initialSpawnCount = 0;
-            for (int i = 0; i < Save.game.diceTypes.Count; i++) {
-                yield return s.delays[0.05f];
-                // for every die
-                if (Save.game.dicePlayerOrEnemy[i] == "none") {
-                    // if its not attached, its part of the 6 pickup-able
-                    GenerateSingleDie(
-                        Save.game.diceNumbers[i],
-                        Save.game.diceTypes[i],
-                        "none",
-                        Save.game.diceAttachedToStat[i],
-                        initialSpawnCount,
-                        initialSix:true
-                    );
-                    // create the die
-                    initialSpawnCount++;
-                    // increment the counter (used in generation to calculate offset)
+            s.turnManager.BeginEnemyPlanRefreshBatch();
+            try {
+                for (int i = 0; i < Save.game.diceTypes.Count; i++) {
+                    yield return s.delays[0.05f];
+                    // for every die
+                    bool tarotUpgradeAlreadyApplied = Save.game.diceTarotUpgraded != null
+                        && i < Save.game.diceTarotUpgraded.Count
+                        && Save.game.diceTarotUpgraded[i];
+                    if (Save.game.dicePlayerOrEnemy[i] == "none") {
+                        // if its not attached, its part of the 6 pickup-able
+                        Dice createdDie = GenerateSingleDie(
+                            Save.game.diceNumbers[i],
+                            Save.game.diceTypes[i],
+                            "none",
+                            Save.game.diceAttachedToStat[i],
+                            initialSpawnCount,
+                            initialSix:true
+                        );
+                        createdDie.tarotUpgradeApplied = tarotUpgradeAlreadyApplied;
+                        // create the die
+                        initialSpawnCount++;
+                        // increment the counter (used in generation to calculate offset)
+                    }
+                    else {
+                        // else its a die attached by some other means (e.g. flail, devil)
+                        Dice createdDie = GenerateSingleDie(
+                            Save.game.diceNumbers[i],
+                            Save.game.diceTypes[i],
+                            Save.game.dicePlayerOrEnemy[i],
+                            Save.game.diceAttachedToStat[i],
+                            initialSpawnCount,
+                            initialSix:true
+                        );
+                        createdDie.tarotUpgradeApplied = tarotUpgradeAlreadyApplied;
+                        if (createdDie.isAttached && createdDie.isOnPlayerOrEnemy == "player" && !createdDie.tarotUpgradeApplied) {
+                            s.itemManager.TryUpgradeTakenDieWithTarot(createdDie, 0.05f);
+                        }
+                        // so create it and attach directly
+                    }
                 }
-                else {
-                    // else its a die attached by some other means (e.g. flail, devil)
-                    GenerateSingleDie(
-                        Save.game.diceNumbers[i],
-                        Save.game.diceTypes[i],
-                        Save.game.dicePlayerOrEnemy[i],
-                        Save.game.diceAttachedToStat[i],
-                        initialSpawnCount,
-                        initialSix:true
-                    );
-                    // so create it and attach directly
-                }
+            }
+            finally {
+                s.turnManager.EndEnemyPlanRefreshBatch();
             }
         } 
         SaveDiceValues(0.35f);
@@ -154,7 +176,7 @@ public class DiceSummoner : MonoBehaviour
     private IEnumerator SpawnHatchetDice() {
         yield return s.delays[0.2f];
         // legendary hatchet lets player start out with yellow die
-        s.diceSummoner.GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+        StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true)));
     }
 
     private IEnumerator SpawnDevilDice() {
@@ -170,6 +192,11 @@ public class DiceSummoner : MonoBehaviour
             }
             // devil doesn't get to take its starting red and white if its wounded there
         }
+
+        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+            yield return s.delays[0.05f];
+            GenerateSingleDie(Random.Range(1, 7), "yellow", "enemy", "red", initialSix:true);
+        }
     }
 
     private IEnumerator SpawnCourageDice() {
@@ -182,6 +209,7 @@ public class DiceSummoner : MonoBehaviour
     private IEnumerator ApplyWoundsToDice(Dice dice) {
         yield return s.delays[0.1f];
         // ensure that if a new die is created from a source like flail, wound effects are applied as expected
+        bool chestReroll = s.player.woundList.Contains("chest") && dice.diceNum >= 4;
         if (s.player.woundList.Contains("chest") && dice.diceNum >= 4) {
             StartCoroutine(dice.RerollAnimation());
         }
@@ -189,6 +217,14 @@ public class DiceSummoner : MonoBehaviour
         if (dice.diceType == "red" && s.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
         else if (dice.diceType == "white" && s.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
         else if (dice.diceType == "white" && Save.game.curCharNum == 2) { dice.SetToOne(); }
+        s.itemManager.TryUpgradeTakenDieWithTarot(dice, chestReroll ? 1.5f : 0.05f);
+    }
+
+    public Dice DuplicateDieToPlayer(int diceNum, string diceType) {
+        string statToAttachTo = diceType == "yellow" ? "red" : diceType;
+        Dice createdDie = GenerateSingleDie(diceNum, diceType, "player", statToAttachTo, initialSix:true);
+        StartCoroutine(ApplyWoundsToDice(createdDie));
+        return createdDie;
     }
     
     /// <summary>
@@ -249,16 +285,18 @@ public class DiceSummoner : MonoBehaviour
         // fade in the die
         existingDice.Add(number);
         if (attachToPlayerOrEnemy == "player" && isFromMight)  { 
+            bool chestReroll = s.player.woundList.Contains("chest") && number.GetComponent<Dice>().diceNum >= 4;
             if (s.player.woundList.Contains("guts")) { 
                 StartCoroutine(number.GetComponent<Dice>().DecreaseDiceValue());
             }
             if (s.player.woundList.Contains("chest") && number.GetComponent<Dice>().diceNum >= 4) { 
                 StartCoroutine(number.GetComponent<Dice>().RerollAnimation());
             }
+            s.itemManager.TryUpgradeTakenDieWithTarot(number.GetComponent<Dice>(), chestReroll ? 1.5f : 0.05f);
         }
         // add it to the array of existing dice so that functions can be performed on all die at once
-        if (attachToPlayerOrEnemy == "player") { s.statSummoner.SetDebugInformationFor("player"); }
-        else if (attachToPlayerOrEnemy == "enemy") { s.statSummoner.SetDebugInformationFor("enemy"); }
+        if (attachToPlayerOrEnemy == "player") { s.statSummoner.SetCombatDebugInformationFor("player"); }
+        else if (attachToPlayerOrEnemy == "enemy") { s.statSummoner.SetCombatDebugInformationFor("enemy"); }
         // set the necessary debug information
         if (!initialSix) { SaveDiceValues(); }
         return number.GetComponent<Dice>();
@@ -282,6 +320,7 @@ public class DiceSummoner : MonoBehaviour
         Save.game.diceAttachedToStat.Clear();
         Save.game.dicePlayerOrEnemy.Clear();
         Save.game.diceRerolled.Clear();
+        Save.game.diceTarotUpgraded.Clear();
         // make sure to clear everything before saving new data
         foreach (GameObject g in existingDice) {
             // for every existing dice
@@ -291,6 +330,7 @@ public class DiceSummoner : MonoBehaviour
             Save.game.diceAttachedToStat.Add(dice.statAddedTo);
             Save.game.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
             Save.game.diceRerolled.Add(dice.isRerolled);
+            Save.game.diceTarotUpgraded.Add(dice.tarotUpgradeApplied);
             // add its info to the info 
         }
         if (s.tutorial == null) { Save.SaveGame(); }
