@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,8 +13,16 @@ public class ItemManager : MonoBehaviour {
         "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword", "katar", "buckler", "ham", "gladius", "glass sword", "stave", "gauntlets", "glaive", "claymore", "crossbow"
     };
     private static readonly string[] CanonicalNeckletTypes = { "solidity", "rapidity", "strength", "defense", "arcane", "nothing", "victory" };
-    private static readonly string[] CanonicalCharmTypes = { "unbroken", "relentless", "aether", "ruthless", "arcane", "exalted", "riposte", "bulwark", "vindictive", "inevitable", "nothing" };
+    private static readonly string[] CanonicalCharmTypes = { "unbroken", "relentless", "aether", "ruthless", "arcane", "riposte", "bulwark", "vindictive", "inevitable", "nothing" };
     private static readonly string[] CanonicalTarotTypes = { "abyss", "verdant", "inferno", "glacier", "dawn", "arcane", "nothing" };
+    private static readonly Dictionary<string, string> RuinedCommonItemNames = new() {
+        { "helm of might", "rusted helm" },
+        { "boots of dodge", "ruined boots" },
+        { "ankh", "shattered ankh" },
+        { "kapala", "defiled kapala" },
+        { "steak", "rotten steak" },
+        { "cheese", "moldy cheese" },
+    };
     private static readonly HashSet<string> WeaponNamePrefixes = new() {
         "common", "legendary", "forged", "accurate", "brisk", "blunt", "heavy", "nimble", "precise", "ruthless",
         "stable", "sharp", "harsh", "quick", "rotten", "rusty", "shattered"
@@ -46,6 +55,7 @@ public class ItemManager : MonoBehaviour {
     private readonly Dictionary<string, GameObject> firstInventoryItemByName = new();
     private readonly Dictionary<string, int> charmCountsByModifier = new();
     private readonly Dictionary<string, int> tarotCountsByModifier = new();
+    private bool luckyDiceRoundStatsInitialized;
     private Item cachedEquippedWeapon;
     private string cachedEquippedWeaponBaseName = "";
     private bool cachedEquippedWeaponIsLegendary;
@@ -156,32 +166,32 @@ public class ItemManager : MonoBehaviour {
             // +2g 1r
     };  
     private readonly Dictionary<string, int> itemDropDict = new() {
-        { "cheese",         8 },
-        { "scroll",         8 },
-        { "potion",         8 },
-        { "shuriken",       8 },
-        { "mirror",         4 },
-        { "necklet",        4 },
-        { "steak",          4 },
+        { "potion",         16 },
+        { "charm",          16 },
+        { "scroll",         16 },
+        { "cheese",         16 },
+        { "shuriken",       16 },
+        { "necklet",        12 },
+        { "tarot",          12 },
+        { "steak",          8 },
+        { "mirror",         8 },
+        { "witch_hand",     8 },
+        { "torch",          8 },
         { "tincture",       4 },
         { "skeleton_key",   4 },
-        { "witch_hand",     4 },
-        { "charm",          4 },
-        { "tarot",          4 },
-        { "torch",          2 },
-        { "armor",          2 },
-        { "crystal_shard",  2 },
-        { "lucky_dice",     2 },
-        { "campfire",       1 },
-        { "ankh",           1 },
-        { "kapala",         1 },
-        { "boots_of_dodge", 1 },
-        { "helm_of_might",  1 },
+        { "crystal_shard",  4 },
+        { "lucky_dice",     4 },
+        { "campfire",       2 },
+        { "kapala",         2 },
+        { "boots_of_dodge", 2 },
+        { "helm_of_might",  2 },
+        { "sacrificial_chalice", 2 },
+        { "unstable_spellbook", 2 },
+        { "thief's armband", 2 },
+        { "cornucopia",     2 },
         { "amulet_of_resurrection", 1 },
-        { "sacrificial_chalice", 1 },
-        { "unstable_spellbook", 1 },
-        { "thief's armband", 1 },
-        { "cornucopia",     1 },
+        { "ankh",           1 },
+        { "armor",          1 },
     };
     [SerializeField] private List<string> itemDropTable;
 
@@ -222,7 +232,7 @@ public class ItemManager : MonoBehaviour {
         "arcane necklet", "necklet of nothing", "necklet of victory",
         // charms
         "charm of the unbroken", "charm of the relentless", "charm of the aether", "charm of the ruthless",
-        "charm of the arcane", "charm of the exalted", "charm of the riposte",
+        "charm of the arcane", "charm of the riposte",
         "charm of the bulwark", "charm of the vindictive", "charm of the inevitable", "charm of the nothing",
         // tarots
         "tarot of the abyss", "tarot of the verdant", "tarot of the inferno",
@@ -320,7 +330,7 @@ public class ItemManager : MonoBehaviour {
         {"flail",              "start with red die"}, 
         {"legendary flail",    "start with two red die"}, 
         {"forge",              ""},
-        {"hatchet",            "enemy can't choose yellow die"},  
+        {"hatchet",            "enemy can't use yellow die"},  
         {"legendary hatchet",  "start with yellow die"},  
         {"helm of might",      "pay 3 stamina to gain a yellow die"}, 
         {"kapala",             "offer an item to become furious"}, 
@@ -405,7 +415,6 @@ public class ItemManager : MonoBehaviour {
         {"charm of the aether",         "attack first to gain +1 speed"},
         {"charm of the ruthless",       "attack neck for +1 accuracy"},
         {"charm of the arcane",         "all charms are more effective"},
-        {"charm of the exalted",        "absorbs one hit"},
         {"charm of the riposte",        "parry to gain +1 attack"},
         {"charm of the bulwark",        "attack second to gain +1 parry"},
         {"charm of the vindictive",     "gain +2 attack when wounded"},
@@ -438,11 +447,11 @@ public class ItemManager : MonoBehaviour {
     public Dictionary<string, int> charmPendingBonus = new() { { "green", 0 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } };
     private readonly Dictionary<string, int> charmActiveProcCounts = new() {
         { "unbroken", 0 }, { "relentless", 0 }, { "aether", 0 }, { "ruthless", 0 },
-        { "arcane", 0 }, { "exalted", 0 }, { "riposte", 0 }, { "bulwark", 0 }, { "vindictive", 0 }, { "inevitable", 0 }, { "nothing", 0 }
+        { "arcane", 0 }, { "riposte", 0 }, { "bulwark", 0 }, { "vindictive", 0 }, { "inevitable", 0 }, { "nothing", 0 }
     };
     private readonly Dictionary<string, int> charmPendingProcCounts = new() {
         { "unbroken", 0 }, { "relentless", 0 }, { "aether", 0 }, { "ruthless", 0 },
-        { "arcane", 0 }, { "exalted", 0 }, { "riposte", 0 }, { "bulwark", 0 }, { "vindictive", 0 }, { "inevitable", 0 }, { "nothing", 0 }
+        { "arcane", 0 }, { "riposte", 0 }, { "bulwark", 0 }, { "vindictive", 0 }, { "inevitable", 0 }, { "nothing", 0 }
     };
     private readonly string[] scrollTypes = { "fury", "haste", "dodge", "leech", "courage", "challenge", "nothing" };
     private readonly string[] potionTypes = { "accuracy", "speed", "strength", "defense", "might", "life", "nothing" };
@@ -644,6 +653,41 @@ public class ItemManager : MonoBehaviour {
             && s.enemy.enemyName.text is not "Merchant" and not "Blacksmith" and not "Tombstone";
     }
 
+    public bool ShouldPreviewWeaponOnRight(GameObject selectedItem) {
+        if (selectedItem == null || s == null || s.player == null || IsFightableEncounter()) {
+            return false;
+        }
+
+        Item selectedItemScript = selectedItem.GetComponent<Item>();
+        if (selectedItemScript == null || selectedItemScript.itemType != "weapon") {
+            return false;
+        }
+
+        return s.player.inventory == null
+            || s.player.inventory.Count == 0
+            || s.player.inventory[0] != selectedItem;
+    }
+
+    public bool IsShowingForeignWeaponPreview(GameObject selectedItem = null) {
+        return ShouldPreviewWeaponOnRight(selectedItem ?? highlightedItem);
+    }
+
+    public void RestoreCurrentEnemyStatsForDisplay() {
+        if (s == null || s.enemy == null || Save.game == null) { return; }
+
+        s.enemy.stats = new Dictionary<string, int> {
+            { "green", Save.game.enemyAcc },
+            { "blue", Save.game.enemySpd },
+            { "red", Save.game.enemyDmg },
+            { "white", Save.game.enemyDef },
+        };
+
+        if (s.statSummoner == null) { return; }
+
+        s.statSummoner.SummonStats();
+        s.statSummoner.SetDebugInformationFor("enemy");
+    }
+
     public int GetHamLevelStartBonus() {
         if (!PlayerHasWeapon("ham")) { return 0; }
         Item equippedWeapon = GetEquippedWeapon();
@@ -653,11 +697,44 @@ public class ItemManager : MonoBehaviour {
     }
 
     public bool PlayerAlwaysChoosesFirstDraftDie() {
-        return PlayerHasWeapon("spear") || PlayerHasWeapon("gauntlets");
+        return EnemyHasForcedKneeInitiativeLoss() || PlayerHasForcedDraftInitiativeOverride();
+    }
+
+    public bool PlayerAlwaysChoosesLastDraftDie() {
+        return s != null
+            && s.player != null
+            && s.player.woundList.Contains("knee")
+            && !PlayerAlwaysChoosesFirstDraftDie();
     }
 
     public bool PlayerAlwaysActsFirst() {
-        return PlayerHasWeapon("gauntlets") || (PlayerHasWeapon("spear") && PlayerHasLegendary());
+        return EnemyHasForcedKneeInitiativeLoss() || PlayerHasForcedActionInitiativeOverride();
+    }
+
+    public bool PlayerAlwaysActsLast() {
+        return s != null
+            && s.player != null
+            && s.player.woundList.Contains("knee")
+            && !PlayerAlwaysActsFirst();
+    }
+
+    public bool PlayerHasForcedDraftInitiativeOverride() {
+        return PlayerHasWeapon("gauntlets") || PlayerHasWeapon("spear");
+    }
+
+    public bool PlayerHasForcedActionInitiativeOverride() {
+        return PlayerHasWeapon("gauntlets") || PlayerHasLegendarySpear();
+    }
+
+    public bool PlayerHasLegendarySpear() {
+        return PlayerHasWeapon("spear") && PlayerHasLegendary();
+    }
+
+    public bool EnemyHasForcedKneeInitiativeLoss() {
+        return s != null
+            && s.enemy != null
+            && s.enemy.enemyName.text != "Lich"
+            && s.enemy.woundList.Contains("knee");
     }
 
     public int GetGladiusOpeningAttackBonus() {
@@ -894,14 +971,6 @@ public class ItemManager : MonoBehaviour {
         return true;
     }
 
-    public bool PlayerHasSecondWoundKillWeapon() {
-        return PlayerHasWeapon("glaive");
-    }
-
-    public bool PlayerIgnoresEnemyParry() {
-        return PlayerHasWeapon("crossbow");
-    }
-
     public string GetAttachedStatForDieType(string diceType, string owner) {
         if (owner == "player") {
             if (diceType == "yellow" || diceType == "green" && PlayerHasWeapon("dagger") || diceType == "white" && Save.game.curCharNum == 3) {
@@ -985,8 +1054,13 @@ public class ItemManager : MonoBehaviour {
         int newValue = Random.Range(1, 7);
         
         dice.tarotUpgradeApplied = false;
+        dice.isAttached = false;
+        dice.isOnPlayerOrEnemy = "none";
+        dice.statAddedTo = string.Empty;
         dice.SetDieType(newType);
         dice.SetDiceValue(newValue);
+        dice.instantiationPos = dice.transform.position;
+        s.diceSummoner.SaveDiceValues(0.05f);
     }
 
     private void ApplyPlayerDieTransmuteWoundEffects(Dice dice) {
@@ -1017,13 +1091,32 @@ public class ItemManager : MonoBehaviour {
         luckyDiceRoundStats["blue"] = Save.game.luckyStatBlue;
         luckyDiceRoundStats["red"] = Save.game.luckyStatRed;
         luckyDiceRoundStats["white"] = Save.game.luckyStatWhite;
+        ClampLuckyDiceRoundStatsToMinimums();
+        luckyDiceRoundStatsInitialized = Save.game.hasLuckyDiceRoundStats
+            || luckyDiceRoundStats.Values.Any(value => value != 0);
     }
 
-    private void SyncLuckyDiceRoundStatsToSave() {
+    public void SyncLuckyDiceRoundStatsToSave() {
+        if (!luckyDiceRoundStatsInitialized
+            && Save.game != null
+            && (Save.game.hasLuckyDiceRoundStats
+            || Save.game.luckyStatGreen != 0
+            || Save.game.luckyStatBlue != 0
+            || Save.game.luckyStatRed != 0
+            || Save.game.luckyStatWhite != 0)) {
+            return;
+        }
+
+        SyncLuckyDiceRoundStatsToSave(luckyDiceRoundStatsInitialized);
+    }
+
+    private void SyncLuckyDiceRoundStatsToSave(bool hasRoundStats) {
+        ClampLuckyDiceRoundStatsToMinimums();
         Save.game.luckyStatGreen = luckyDiceRoundStats["green"];
         Save.game.luckyStatBlue = luckyDiceRoundStats["blue"];
         Save.game.luckyStatRed = luckyDiceRoundStats["red"];
         Save.game.luckyStatWhite = luckyDiceRoundStats["white"];
+        Save.game.hasLuckyDiceRoundStats = hasRoundStats;
     }
 
     private int GetPlayerStatTotalWithoutLuckyDice(string stat) {
@@ -1036,16 +1129,93 @@ public class ItemManager : MonoBehaviour {
             + GetCurrentPlayerWeaponStatBonus(stat);
     }
 
+    private int GetMinimumLuckyDiceRoundBonus(string stat) {
+        if (s?.player == null || string.IsNullOrWhiteSpace(stat) || !luckyDiceRoundStats.ContainsKey(stat)) {
+            return int.MinValue;
+        }
+
+        return -1 - GetPlayerStatTotalWithoutLuckyDice(stat);
+    }
+
+    private void ClampLuckyDiceRoundStatsToMinimums() {
+        if (s?.player == null) { return; }
+
+        foreach (string stat in statArr) {
+            int minimumBonus = GetMinimumLuckyDiceRoundBonus(stat);
+            if (luckyDiceRoundStats[stat] < minimumBonus) {
+                luckyDiceRoundStats[stat] = minimumBonus;
+            }
+        }
+    }
+
+    private bool HasSavedLuckyDiceRoundStats() {
+        return luckyDiceRoundStatsInitialized
+            || (Save.game != null && (Save.game.hasLuckyDiceRoundStats
+            || Save.game.luckyStatGreen != 0
+            || Save.game.luckyStatBlue != 0
+            || Save.game.luckyStatRed != 0
+            || Save.game.luckyStatWhite != 0));
+    }
+
+    private bool IsLuckyDiceInventoryStatePendingRestore() {
+        return s?.player?.inventory != null
+            && !Save.game.newGame
+            && s.player.inventory.Count == 0
+            && Save.game.resumeItemNames != null
+            && Save.game.resumeItemNames.Any(itemName => !string.IsNullOrWhiteSpace(itemName));
+    }
+
+    private void RefreshLuckyDiceRoundStatsForCurrentState(bool rerollLuckyDice, bool refreshCombatUI = true) {
+        if (IsLuckyDiceInventoryStatePendingRestore()) {
+            if (HasSavedLuckyDiceRoundStats()) {
+                LoadLuckyDiceRoundStatsFromSave();
+            }
+            return;
+        }
+
+        int luckyDiceCount = GetInventoryItemCount("lucky dice");
+        bool shouldApplyLuckyDice = luckyDiceCount > 0 && ShouldApplyLuckyDiceRoundStats();
+
+        if (!shouldApplyLuckyDice) {
+            ClearLuckyDiceRoundStats();
+            if (refreshCombatUI) {
+                RefreshPlayerCombatStatsAndDice();
+            }
+            return;
+        }
+
+        if (rerollLuckyDice || !HasSavedLuckyDiceRoundStats()) {
+            RollLuckyDiceRoundStats(refreshCombatUI);
+            return;
+        }
+
+        LoadLuckyDiceRoundStatsFromSave();
+        SyncLuckyDiceRoundStatsToSave(true);
+
+        if (refreshCombatUI) {
+            RefreshPlayerCombatStatsAndDice();
+        }
+    }
+
     public void ClearLuckyDiceRoundStats() {
         luckyDiceRoundStats["green"] = 0;
         luckyDiceRoundStats["blue"] = 0;
         luckyDiceRoundStats["red"] = 0;
         luckyDiceRoundStats["white"] = 0;
-        SyncLuckyDiceRoundStatsToSave();
+        luckyDiceRoundStatsInitialized = false;
+        SyncLuckyDiceRoundStatsToSave(false);
     }
 
     public int GetLuckyDiceRoundStatBonus(string stat) {
-        return luckyDiceRoundStats.TryGetValue(stat, out int value) ? value : 0;
+        if (!luckyDiceRoundStats.TryGetValue(stat, out int value)) { return 0; }
+
+        int minimumBonus = GetMinimumLuckyDiceRoundBonus(stat);
+        if (minimumBonus != int.MinValue && value < minimumBonus) {
+            value = minimumBonus;
+            luckyDiceRoundStats[stat] = value;
+        }
+
+        return value;
     }
 
     private bool ShouldApplyLuckyDiceRoundStats() {
@@ -1053,11 +1223,15 @@ public class ItemManager : MonoBehaviour {
     }
 
     public void RollLuckyDiceRoundStats(bool refreshCombatUI = true) {
-        ClearLuckyDiceRoundStats();
+        luckyDiceRoundStats["green"] = 0;
+        luckyDiceRoundStats["blue"] = 0;
+        luckyDiceRoundStats["red"] = 0;
+        luckyDiceRoundStats["white"] = 0;
         int luckyDiceCount = GetInventoryItemCount("lucky dice");
-        Debug.Log($"[Lucky Dice] Roll called, found {luckyDiceCount} lucky dice in inventory");
-        
+
         if (luckyDiceCount <= 0 || !ShouldApplyLuckyDiceRoundStats()) {
+            luckyDiceRoundStatsInitialized = false;
+            SyncLuckyDiceRoundStatsToSave(false);
             if (refreshCombatUI) {
                 RefreshPlayerCombatStatsAndDice();
             }
@@ -1065,37 +1239,36 @@ public class ItemManager : MonoBehaviour {
         }
 
         for (int i = 0; i < luckyDiceCount; i++) {
-            List<string> rollSummary = new();
+            Dictionary<string, int> rollDeltas = new();
+            List<string> positiveStats = new();
+
             foreach (string stat in statArr) {
                 int delta = Random.value < 0.5f ? -1 : 1;
-                luckyDiceRoundStats[stat] += delta;
-
-                int totalAfterRoll = GetPlayerStatTotalWithoutLuckyDice(stat) + luckyDiceRoundStats[stat];
-                if (totalAfterRoll < -1) {
-                    luckyDiceRoundStats[stat] += -1 - totalAfterRoll;
+                rollDeltas[stat] = delta;
+                if (delta > 0) {
+                    positiveStats.Add(stat);
                 }
-
-                int appliedDelta = delta;
-                if (totalAfterRoll < -1) {
-                    appliedDelta += -1 - totalAfterRoll;
-                }
-
-                rollSummary.Add($"{stat} {(appliedDelta >= 0 ? "+" : "")}{appliedDelta}");
             }
 
-            // Debug.Log($"[Lucky Dice #{i + 1}] {string.Join(", ", rollSummary)}");
+            if (positiveStats.Count > 0) {
+                string boostedStat = positiveStats[Random.Range(0, positiveStats.Count)];
+                rollDeltas[boostedStat] += 1;
+            }
+            else {
+                string boostedStat = statArr[Random.Range(0, statArr.Length)];
+                rollDeltas[boostedStat] = 2;
+            }
+
+            foreach (string stat in statArr) {
+                luckyDiceRoundStats[stat] += rollDeltas[stat];
+            }
+
+            ClampLuckyDiceRoundStatsToMinimums();
         }
 
-        foreach (string stat in statArr) {
-            int total = GetPlayerStatTotalWithoutLuckyDice(stat) + luckyDiceRoundStats[stat];
-            if (total < -1) {
-                luckyDiceRoundStats[stat] += -1 - total;
-            }
-        }
-        
-        // Debug.Log($"[Lucky Dice] Final bonuses - green:{luckyDiceRoundStats["green"]} blue:{luckyDiceRoundStats["blue"]} red:{luckyDiceRoundStats["red"]} white:{luckyDiceRoundStats["white"]}");
-        
-        SyncLuckyDiceRoundStatsToSave();
+        ClampLuckyDiceRoundStatsToMinimums();
+    luckyDiceRoundStatsInitialized = true;
+        SyncLuckyDiceRoundStatsToSave(true);
         
         if (refreshCombatUI) {
             RefreshPlayerCombatStatsAndDice();
@@ -1171,42 +1344,22 @@ public class ItemManager : MonoBehaviour {
         return $"rooms:{Random.Range(MinTorchCombatLifetime, MaxTorchCombatLifetime + 1)}";
     }
 
-    public void BeginNewEncounterWeaponState() {
+    public void BeginNewEncounterWeaponState(bool rerollLuckyDice = false) {
         InvalidateInventoryCache();
         Save.game.enemyHasKatarSpeedPenalty = false;
         bool isFightable = IsFightableEncounter();
         Save.game.isFirstCombatRoundOfEncounter = isFightable;
         Save.game.pendingMirrorCopy = false;
         Save.game.pendingSpellbookTransmute = false;
-        ClearLuckyDiceRoundStats();
-        
-        int luckyDiceCount = GetInventoryItemCount("lucky dice");
-        
-        // lucky dice only apply in live fightable combat
-        if (luckyDiceCount > 0) {
-            RollLuckyDiceRoundStats(refreshCombatUI: true);
-        } else if (s != null && s.statSummoner != null) {
-            s.statSummoner.SummonStats();
-            s.statSummoner.SetCombatDebugInformationFor("player");
-        }
+        RefreshLuckyDiceRoundStatsForCurrentState(rerollLuckyDice, refreshCombatUI:true);
     }
 
-    public void EndEncounterWeaponState() {
+    public void EndEncounterWeaponState(bool rerollLuckyDice = false) {
         InvalidateInventoryCache();
         Save.game.isFirstCombatRoundOfEncounter = false;
         Save.game.pendingMirrorCopy = false;
         Save.game.pendingSpellbookTransmute = false;
-        ClearLuckyDiceRoundStats();
-        
-        int luckyDiceCount = GetInventoryItemCount("lucky dice");
-        
-        // lucky dice only apply in live fightable combat
-        if (luckyDiceCount > 0) {
-            RollLuckyDiceRoundStats(refreshCombatUI: true);
-        } else if (s != null && s.statSummoner != null) {
-            s.statSummoner.SummonStats();
-            s.statSummoner.SetCombatDebugInformationFor("player");
-        }
+        RefreshLuckyDiceRoundStatsForCurrentState(rerollLuckyDice, refreshCombatUI:true);
     }
 
     public void RefreshEncounterWeaponState() {
@@ -1214,12 +1367,8 @@ public class ItemManager : MonoBehaviour {
         Save.game.pendingSpellbookTransmute = Save.game.pendingSpellbookTransmute && IsFightableEncounter();
         if (!IsFightableEncounter()) {
             Save.game.isFirstCombatRoundOfEncounter = false;
-            ClearLuckyDiceRoundStats();
         }
-        if (s != null && s.statSummoner != null) {
-            s.statSummoner.SummonStats();
-            s.statSummoner.SetCombatDebugInformationFor("player");
-        }
+        RefreshLuckyDiceRoundStatsForCurrentState(rerollLuckyDice:false, refreshCombatUI:true);
     }
 
     public bool TryApplyKatarFirstWoundEffect() {
@@ -1263,13 +1412,7 @@ public class ItemManager : MonoBehaviour {
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
         InvalidateInventoryCache();
-        itemDropTable = new List<string>();
-        foreach (KeyValuePair<string, int> entry in itemDropDict) {
-            for (int i = 0; i < entry.Value; i++) { itemDropTable.Add(entry.Key); }
-        }
-        foreach (KeyValuePair<string, int> entry in modifierDropDict) {
-            for (int i = 0; i < entry.Value; i++) { modifierDropTable.Add(entry.Key); }
-        }
+        EnsureDropTablesBuilt();
         // assemble weighted drop tables for items and weapon modifiers
         if (isCharSelect) {
             // in character selection screen
@@ -1296,6 +1439,17 @@ public class ItemManager : MonoBehaviour {
             // need to implement a check if continuing or new game
         }
         // assign variables based on the Save, preventing cheating
+        StringBuilder builder = new();
+        builder.AppendLine("[startup debug loot printer] 50 random weapons");
+        for (int i = 0; i < 50; i++) {
+            builder.AppendLine($"{i + 1}. {DebugRollRandomWeaponName()}");
+        }
+
+        builder.AppendLine("[startup debug loot printer] 100 random items");
+        for (int i = 0; i < 100; i++) {
+            builder.AppendLine($"{i + 1}. {DebugRollRandomItemName()}");
+        }
+        Debug.Log(builder.ToString());
     }
 
     private void Update() {
@@ -1505,12 +1659,12 @@ public class ItemManager : MonoBehaviour {
     public void GiveStarterItems() {
         if (Save.game.newGame) {
             ClearLuckyDiceRoundStats();
-            bool getsStandardExtras = !DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty);
+            bool isNightmare = DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty);
             bool isEasy = DifficultyHelper.IsEasy(Save.persistent.gameDifficulty);
             switch (Save.game.curCharNum) {
                 // new game, so give the base weapons
                 case 0: {
-                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+                    if (isNightmare) {
                         CreateWeaponWithStats("sword", "rusty", 2, 1, 1, 2);
                     }
                     else { 
@@ -1518,10 +1672,8 @@ public class ItemManager : MonoBehaviour {
                     }
                     // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
-                    if (getsStandardExtras) {
-                        CreateItem("steak");
-                        MoveToInventory(0, true, false, false);
-                    }
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(0).Replace(' ', '_') : "steak");
+                    MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("torch");
                         MoveToInventory(0, true, false, false);
@@ -1529,17 +1681,15 @@ public class ItemManager : MonoBehaviour {
                     break;
                 }
                 case 1: {
-                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+                    if (isNightmare) {
                         CreateWeaponWithStats("maul", "rusty", -1, -1, 1, -1);
                     }
                     else { 
                         CreateWeaponWithStats("maul", "common", -1, -1, 4, 1);
                     }
                     MoveToInventory(0, true, false, false);
-                    if (getsStandardExtras) {
-                        CreateItem("armor");
-                        MoveToInventory(0, true, false, false);
-                    }
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(1).Replace(' ', '_') : "armor");
+                    MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("helm_of_might");
                         MoveToInventory(0, true, false, false);
@@ -1547,17 +1697,15 @@ public class ItemManager : MonoBehaviour {
                     break;
                 }
                 case 2: {
-                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+                    if (isNightmare) {
                         CreateWeaponWithStats("dagger", "rusty", 2, 3, 0, 0);
                     }
                     else { 
                         CreateWeaponWithStats("dagger", "common", 3, 6, 0, 0);
                     }
                     MoveToInventory(0, true, false, false);
-                    if (getsStandardExtras) {
-                        CreateItem("boots_of_dodge");
-                        MoveToInventory(0, true, false, false);
-                    }
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(2).Replace(' ', '_') : "boots_of_dodge");
+                    MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("ankh");
                         MoveToInventory(0, true, false, false);
@@ -1565,17 +1713,15 @@ public class ItemManager : MonoBehaviour {
                     break;
                 }
                 case 3: {
-                    if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+                    if (isNightmare) {
                         CreateWeaponWithStats("mace", "rusty", 2, 2, 1, 0);
                     }
                     else { 
                         CreateWeaponWithStats("mace", "ruthless", 3, 3, 2, 1);
                     }
                     MoveToInventory(0, true, false, false);
-                    if (getsStandardExtras) {
-                        CreateItem("cheese");
-                        MoveToInventory(0, true, false, false);
-                    }
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(3).Replace(' ', '_') : "cheese");
+                    MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("kapala");
                         MoveToInventory(0, true, false, false);
@@ -1744,6 +1890,85 @@ public class ItemManager : MonoBehaviour {
         // assign a modifier for a necklet, scroll, potion, charm, or tarot
     }
 
+    private void ApplyNightmareRandomWeaponPenalty(Dictionary<string, int> rolledStats) {
+        if (!DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) { return; }
+
+        List<string> nonNegativeStats = statArr
+            .Where(stat => rolledStats.TryGetValue(stat, out int value) && value >= 0)
+            .ToList();
+        if (nonNegativeStats.Count == 0) { return; }
+
+        string guaranteedPenaltyStat = nonNegativeStats[Random.Range(0, nonNegativeStats.Count)];
+        rolledStats[guaranteedPenaltyStat] = Mathf.Max(-1, rolledStats[guaranteedPenaltyStat] - 1);
+
+        foreach (string stat in statArr) {
+            if (stat == guaranteedPenaltyStat) { continue; }
+
+            rolledStats[stat] = Mathf.Max(-1, rolledStats[stat] - Random.Range(0, 2));
+        }
+    }
+
+    private void EnsureDropTablesBuilt() {
+        if (itemDropTable == null) {
+            itemDropTable = new List<string>();
+        }
+        if (modifierDropTable == null) {
+            modifierDropTable = new List<string>();
+        }
+
+        if (itemDropTable.Count == 0) {
+            foreach (KeyValuePair<string, int> entry in itemDropDict) {
+                for (int i = 0; i < entry.Value; i++) {
+                    itemDropTable.Add(entry.Key);
+                }
+            }
+        }
+
+        if (modifierDropTable.Count == 0) {
+            foreach (KeyValuePair<string, int> entry in modifierDropDict) {
+                for (int i = 0; i < entry.Value; i++) {
+                    modifierDropTable.Add(entry.Key);
+                }
+            }
+        }
+    }
+
+    public string DebugRollRandomWeaponName() {
+        EnsureDropTablesBuilt();
+        WeaponRollData weaponRoll = RollRandomWeaponData();
+        return BuildWeaponFullName(weaponRoll.BaseName, weaponRoll.Modifier);
+    }
+
+    public string DebugRollRandomItemName() {
+        EnsureDropTablesBuilt();
+
+        string itemKey = itemDropTable[Random.Range(0, itemDropTable.Count)];
+        string itemName = GetCanonicalCreatedItemName(itemKey.Replace("_", " "));
+        string modifier = "";
+
+        switch (itemName) {
+            case "necklet":
+                modifier = neckletTypes[Random.Range(0, 5)];
+                break;
+            case "scroll":
+                modifier = scrollTypes[Random.Range(0, scrollTypes.Length)];
+                break;
+            case "potion":
+                modifier = potionTypes[Random.Range(0, potionTypes.Length)];
+                break;
+            case "charm":
+                modifier = charmTypes[Random.Range(0, charmTypes.Length)];
+                break;
+            case "tarot":
+                modifier = tarotTypes[Random.Range(0, tarotTypes.Length)];
+                break;
+        }
+
+        return string.IsNullOrEmpty(modifier)
+            ? itemName
+            : GetCanonicalItemDisplayName(itemName, modifier);
+    }
+
     private WeaponRollData RollRandomWeaponData(string forcedWeaponName = null) {
         string weaponBaseName = NormalizeWeaponSaveName(forcedWeaponName);
         if (string.IsNullOrEmpty(weaponBaseName) || !weaponSpriteByBaseName.ContainsKey(weaponBaseName)) {
@@ -1764,9 +1989,10 @@ public class ItemManager : MonoBehaviour {
             else {
                 value += modifierStatDict[modifierRoll][key];
             }
-
             rolledStats[key] = Mathf.Max(-1, value);
         }
+
+        ApplyNightmareRandomWeaponPenalty(rolledStats);
 
         return new WeaponRollData {
             BaseName = weaponBaseName,
@@ -1915,9 +2141,7 @@ public class ItemManager : MonoBehaviour {
             return;
         }
 
-        // if the player doesn't have 9 or more items or is trying to pick up weapon 
-        if (!starter && playAudio) { s.soundManager.PlayClip("click0"); }
-        // if the item is not the starter (so it doesn't instantly play a click), play the click sound
+        // selection after pickup already plays the cursor sound once
         if (floorItem.itemType == "weapon") {
             MoveWeaponToInventory(index, starter);
         }
@@ -1975,11 +2199,11 @@ public class ItemManager : MonoBehaviour {
     }
 
     private void MoveWeaponToInventory(int index, bool starter) {
-        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) && !starter) {
-            s.turnManager.SetStatusText($"you may only wield {GetEquippedWeapon()?.itemName}");
-            // prevent player from swapping weapons if they are in hard mode
-            return;
-        }
+        // if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) && !starter) {
+        //     s.turnManager.SetStatusText($"you may only wield {GetEquippedWeapon()?.itemName}");
+        //     // prevent player from swapping weapons if they are in hard mode
+        //     return;
+        // }
 
         if (!starter) { Save.persistent.weaponsSwapped++; }
         if (!starter) { Save.persistent.itemsFound++; }
@@ -2027,8 +2251,18 @@ public class ItemManager : MonoBehaviour {
         InvalidateInventoryCache();
         RefreshPassiveInventoryEffects();
         // update debug, because player just took a new weapon
-        s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
-        Select(s.player.inventory, 0);
+        s.turnManager.RefreshBlackBoxVisibility();
+        SelectPostWeaponSwap(index);
+    }
+
+    private void SelectPostWeaponSwap(int previousFloorIndex) {
+        if (IsBlacksmithEncounter()) {
+            Select(s.player.inventory, 0);
+            return;
+        }
+
+        int nextFloorIndex = Mathf.Clamp(previousFloorIndex + 1, 0, floorItems.Count - 1);
+        Select(floorItems, nextFloorIndex);
     }
 
     private void MoveCommonItemToInventory(int index, bool starter, bool playAudio, string actionVerbOverride = null) {
@@ -2143,7 +2377,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     private int GetTorchBonusDropCount(int torchCount) {
         int bonusCount = 0;
-        for (int i = 0; i < torchCount+1; i++) {
+        for (int i = 0; i < torchCount; i++) {
             bonusCount += Random.Range(0, 2);
         }
         return bonusCount;
@@ -2193,8 +2427,10 @@ public class ItemManager : MonoBehaviour {
         // set the text 
         if (s.tutorial == null) { 
             if (s.enemy.enemyName.text == "Lich") {
+                CreateRandomWeapon();
                 CreateItem("phylactery");
-                // defeated lich, so give phylactery
+                CreateItem("tincture");
+                // defeated lich, so give phylactery & tincture
             }
             else if (s.enemy.enemyName.text == "Devil") {
                 CreateItem("necklet", "victory");
@@ -2208,8 +2444,8 @@ public class ItemManager : MonoBehaviour {
                 int spawnCount = GetBaseDropCountForCurrentStage() + GetTorchBonusDropCount(torchCount);
                 spawnCount = Mathf.Clamp(spawnCount, 1, 5);
                 if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-                    spawnCount -= UnityEngine.Random.Range(0, s.levelManager.level-1);
-                    spawnCount = Mathf.Clamp(spawnCount, 0, 3);
+                    spawnCount -= UnityEngine.Random.Range(0, s.levelManager.level);
+                    spawnCount = Mathf.Clamp(spawnCount, 1, 4);
                 }
                 CreateRandomWeapon();
                 // create a random weapon at index 0
@@ -2238,9 +2474,9 @@ public class ItemManager : MonoBehaviour {
         lootText.text = "goods:";
         // set the test
         CreateGuaranteedTraderHealingItem(tempOffset);
-        int randomItemCount = DifficultyHelper.IsEasy(Save.persistent.gameDifficulty) || DifficultyHelper.IsNormal(Save.persistent.gameDifficulty) ? 4 : 3;
+        // 5 for easy, 4 normal, 3 for hard & nightmare
+        int randomItemCount = DifficultyHelper.IsEasy(Save.persistent.gameDifficulty) ? 5 : DifficultyHelper.IsNormal(Save.persistent.gameDifficulty) ? 4 : 3;
         for (int i = 0; i < randomItemCount; i++) { CreateTraderRandomItem(tempOffset); }
-        // create a guaranteed healing item plus 3 common items, negatively offsetting by the deletion
         CreateItem("arrow", tempOffset);
         // create the next level arrow
         Save.game.numItemsDroppedForTrade = GetVendorTakeAllowance();
@@ -2271,7 +2507,7 @@ public class ItemManager : MonoBehaviour {
     private void SpawnBlacksmithItemsImmediate() {
         lootText.text = "goods:";
         if (s != null && s.turnManager != null) {
-            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+            s.turnManager.RefreshBlackBoxVisibility();
         }
         List<string> availableWeapons = new(weaponBaseNames);
         for (int i = 0; i < 2; i++) {
@@ -2279,10 +2515,17 @@ public class ItemManager : MonoBehaviour {
             CreateRandomWeapon(forcedWeaponName: availableWeapons[rand]);
             availableWeapons.RemoveAt(rand);
         }
-        int forgeSlotCount = DifficultyHelper.IsHard(Save.persistent.gameDifficulty)
-            || DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)
-            ? 1
-            : 2;
+        int forgeSlotCount = 0;
+        // forge slot count: easy/normal: 75% 2, 25%3. hard: 50% 1, 50% 2. nightmare: 75% 1, 25% 2.
+        if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty) || DifficultyHelper.IsNormal(Save.persistent.gameDifficulty)) {
+            forgeSlotCount = Random.Range(0, 4) == 0 ? 3 : 2;
+        }
+        else if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
+            forgeSlotCount = Random.Range(0, 2) + 1;
+        }
+        else if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+            forgeSlotCount = Random.Range(0, 4) == 0 ? 2 : 1;
+        }
         foreach (string stat in GetRandomForgeStats(forgeSlotCount)) {
             CreateSmithUpgradeArrow(stat);
         }
@@ -2314,6 +2557,25 @@ public class ItemManager : MonoBehaviour {
     public bool PlayerHas(string itemName) { return GetInventoryItemCount(itemName) > 0; }
 
     public int GetPlayerItemCount(string itemName) { return GetInventoryItemCount(itemName); }
+
+    public static string GetRuinedCommonItemName(string itemName) {
+        if (string.IsNullOrWhiteSpace(itemName)) { return itemName; }
+
+        string normalizedItemName = itemName.Replace('_', ' ');
+        return RuinedCommonItemNames.TryGetValue(normalizedItemName, out string ruinedItemName)
+            ? ruinedItemName
+            : normalizedItemName;
+    }
+
+    public static string GetNightmareStarterTradeItemName(int characterNum) {
+        return characterNum switch {
+            0 => "rotten steak",
+            1 => "rusted helm",
+            2 => "ruined boots",
+            3 => "moldy cheese",
+            _ => ""
+        };
+    }
 
     // returns the weapon base name; handles multi-word names like "glass sword" correctly
     // e.g. "common glass sword" → "glass sword", "legendary sword" → "sword"
@@ -2395,7 +2657,7 @@ public class ItemManager : MonoBehaviour {
     }
 
     private static bool CharmUsesArcaneScaling(string modifier) {
-        return modifier is not "" and not "arcane" and not "exalted" and not "nothing";
+        return modifier is not "" and not "arcane" and not "nothing";
     }
 
     private static bool TarotUsesArcaneScaling(string modifier) {
@@ -2714,14 +2976,7 @@ public class ItemManager : MonoBehaviour {
                 continue;
             }
 
-            if ($"{s.levelManager.level}-{s.levelManager.sub}" != torch.modifier) { continue; }
-            if (!advanceCounter) {
-                torch.modifier = "rooms:1";
-                updatedTorchState = true;
-                continue;
-            }
-
-            torchesToFade.Add(curItem);
+            continue;
         }
 
         if (updatedTorchState) {
@@ -2968,10 +3223,24 @@ public class ItemManager : MonoBehaviour {
         return itemName switch {
             "broken_amulet"  => "amulet_of_resurrection",
             "broken amulet"  => "amulet_of_resurrection",
+            "broken_helm"    => "helm_of_might",
+            "broken helm"    => "helm_of_might",
+            "rusted_helm"    => "helm_of_might",
+            "rusted helm"    => "helm_of_might",
             "glass sword"    => "glass_sword",
+            "rotten_steak"   => "steak",
+            "rotten steak"   => "steak",
+            "moldy_cheese"   => "cheese",
+            "moldy cheese"   => "cheese",
+            "ruined_boots"   => "boots_of_dodge",
+            "ruined boots"   => "boots_of_dodge",
             "sacrificial chalice" => "sacrificial_chalice",
+            "shattered_ankh" => "ankh",
+            "shattered ankh" => "ankh",
             "unstable spellbook" => "unstable_spellbook",
             "lucky dice" => "lucky_dice",
+            "defiled_kapala" => "kapala",
+            "defiled kapala" => "kapala",
             "thief's armband" => "thiefs_armband",
             "thief's_armband" => "thiefs_armband",
             "thiefs armband" => "thiefs_armband",
@@ -2985,6 +3254,13 @@ public class ItemManager : MonoBehaviour {
 
     private static string GetCanonicalCreatedItemName(string itemName) {
         return itemName switch {
+            "broken_helm" => "broken helm",
+            "defiled_kapala" => "defiled kapala",
+            "moldy_cheese" => "moldy cheese",
+            "rotten_steak" => "rotten steak",
+            "ruined_boots" => "ruined boots",
+            "rusted_helm" => "rusted helm",
+            "shattered_ankh" => "shattered ankh",
             "thiefs armband" => "thief's armband",
             "thief's armband" => "thief's armband",
             _ => itemName,

@@ -1310,3 +1310,677 @@ why the fixed line is correct
 
 result
 - the enemy now tests and can choose the reachable white-spend defense line in this scenario instead of refusing to defend
+
+---
+
+## case 13 - hip-wounded gog must not let preview cleanup beat denying `y6`
+
+PLAYER: 0 / 4 / 13 / 0
+
+accuracy: 0 = (0)
+
+
+speed: 4 = (4)
+
+
+damage: 13 = (7 + y6)
+
+
+parry: 0 = (0)
+
+
+stamina: 0 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: y6, g2, b4, w4
+
+
+enemy: Gog
+
+
+ENEMY: 3 / 2 / 9 / 2
+
+accuracy: 3 = (3)
+
+
+speed: 2 = (2)
+
+
+damage: 9 = (4 + r5)
+
+
+parry: 2 = (2)
+
+
+stamina: 3 remaining
+
+
+wounds: hip
+
+
+targeting: hip
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `canUseStamina = !enemyHipWound || enemyIsLich` -> false
+- Gog is hip-wounded, so the draft preview cannot assume any future stamina rescue
+
+if: `IsBetterDraftPlanPreview(BestPlan(r5), BestPlan(y6))` -> false
+- the observed bad draft was the earlier `r5` over `y6` choice that produced this live board
+- at the real gate level, neither pick wins by kill / survival / disable alone in a way that should erase denial value
+
+if: `DeniesPlayerKill(r5) != DeniesPlayerKill(y6)` -> false
+- neither draft removes a binary player kill line here
+
+if: `DeniesPlayerDamage(r5) != DeniesPlayerDamage(y6)` -> false
+- the player still keeps a damage line either way
+
+if: `PlayerDenialScore(y6) > PlayerDenialScore(r5)` -> true
+- denying a `y6` removes far more player flexibility than denying a narrower `r5`
+- with Gog hip-wounded, that denial matters even more because Gog cannot repair a weak draft later with stamina
+
+if in the old code: `IsBetterAdvancedEvaluation(BestPlan(r5), BestPlan(y6))` -> reached before denied-player value
+- this was the bug path
+- the full advanced comparator fell through to overspend / resource cleanup too early
+- that let the narrower red line look cleaner on paper before the draft asked which die was safer to deny from the player
+
+why the old line was wrong
+- hip wound removes Gog's future stamina escape hatch
+- once the strategic preview is tied, denying the player a `y6` is more important than keeping a slightly tidier preview plan
+- `r5` should not beat `y6` just because the resulting paper plan wastes fewer points
+
+why the fixed line is correct
+- the draft comparator now resolves strategic preview gates first, then denial, then denied player value and die strength
+- only after those ties are exhausted may full overspend / resource tie-breaks decide the draft
+- that keeps `y6` above the narrower `r5` line here
+
+result
+- Gog should take `y6`
+- paper-cleaner preview waste must no longer beat the stronger denial pick
+
+---
+
+## case 14 - goblin must respect player yellow reassign defense and take `r6`
+
+PLAYER: 0 / 4 / 14 / 0
+
+accuracy: 0 = (0)
+
+
+speed: 4 = (4)
+
+
+damage: 14 = (8 + y6)
+
+
+parry: 0 = (0)
+
+
+stamina: 0 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: g4, b1, r6, w1
+
+
+enemy: Goblin
+
+
+ENEMY: 2 / 10 / 2 / 2
+
+accuracy: 2 = (2)
+
+
+speed: 10 = (4 + b6)
+
+
+damage: 2 = (2)
+
+
+parry: 2 = (2)
+
+
+stamina: 4 remaining
+
+
+wounds: none
+
+
+targeting: knee
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `enemyActsFirst = EnemySpeedLockedHigh || (!PlayerSpeedLockedHigh && E.spd > P.spd)` -> true
+- `10 > 4` is true, so Goblin already attacks first before taking a new die
+
+if in the old preview: `playerDef` was read only from the current live board -> `0`
+- the preview treated the player as if the attached `y6` were locked on red
+- that flattened many draft choices into the same immediate hit line because `2 > 0` was already true
+
+if: `GetPlayerYellowReassignmentPreviewOptions()` includes moving the player's `y6` from red to white -> true in the fixed preview
+- the player can still reposition attached yellow dice during draft
+- the worst-case reply must therefore test the player at `parry = 6`, not only `parry = 0`
+
+if after player yellow reassignment: `enemyAtt without r6 > playerDef` -> false
+- the non-`r6` lines no longer force damage once the player moves `y6` to white
+
+if after player yellow reassignment: `enemyAtt with r6 > playerDef` -> true
+- `2 + 6 > 6`
+- only `r6` preserves the real enemy damage line against the player's flexible defense reply
+
+if: `BestPlan(r6).EnemyDamagesPlayer` -> true under the worst-case player reply
+- the red pickup still forces a hit after the yellow move
+
+if: `BestPlan(g4 or b1 or w1).EnemyDamagesPlayer` -> false under the same worst-case player reply
+- those picks let the player slide the `y6` into parry and erase the hit
+
+why the old line was wrong
+- draft preview only modeled the player's future picked die, not the player's existing movable yellow dice
+- that made the preview underrate forced-hit red pickups whenever the player could simply retarget yellow into defense
+
+why the fixed line is correct
+- worst-case draft reply preview now enumerates current player yellow reassignments before judging the enemy pick
+- that exposes the real defense line the player can create
+- once that defense is modeled, `r6` is the only pick that still keeps gate 2
+
+result
+- Goblin should take `r6`
+- the enemy must now account for player yellow defense reassignments during draft preview
+
+---
+
+## case 15 - gog must take `w6` when tiny yellow only matches the line by burning stamina
+
+PLAYER: 2 / 1 / 4 / 3
+
+
+accuracy: 2 = (2)
+
+
+speed: 1 = (1)
+
+
+damage: 4 = (4)
+
+
+parry: 3 = (3)
+
+
+stamina: 3 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: y1, r4, w6
+
+
+enemy: Gog
+
+
+ENEMY: 3 / 0 / 2 / 5
+
+
+accuracy: 3 = (3)
+
+
+speed: 0 = (0)
+
+
+damage: 2 = (2)
+
+
+parry: 5 = (5)
+
+
+stamina: 2 remaining
+
+
+wounds: none
+
+
+targeting: hip
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `IsBetterDraftPlanPreview(BestPlan(w6), BestPlan(y1))` -> false
+- the full real preview gates tie here
+- neither pick wins on kill / survive / damage gates alone
+
+if: `IsBetterDraftPlanPreview(BestPlan(y1), BestPlan(w6))` -> false
+- the tiny yellow does not create a stronger real preview than the white die
+
+if: `IsBetterDraftOutcomePreview(BestPlan(w6), BestPlan(y1))` -> false
+- the coarse kill / damage / survive bucket also ties
+
+if: `candidate.DeniesPlayerKill != current.DeniesPlayerKill` -> false
+- neither pick uniquely blocks an immediate player kill line
+
+if: `candidate.DeniesPlayerDamage != current.DeniesPlayerDamage` -> false
+- neither pick uniquely flips the raw player-damage gate before deeper tie-breaks
+
+if in the fixed comparator: `candidateSpentStamina != currentSpentStamina` -> true for `w6` vs `y1`
+- the `w6` line reaches the same real preview result with less stamina
+- the `y1` line only keeps up because the planner can spend permanent stamina later
+
+if in the old comparator: `candidate.DeniesPlayerGoFirst != current.DeniesPlayerGoFirst` -> false
+- this soft denial flag did not separate the lines
+
+if in the old comparator: `candidate.DeniesPlayerTarget != current.DeniesPlayerTarget` -> false
+- this soft denial flag also tied
+
+if in the old comparator: `!Mathf.Approximately(candidate.PlayerDenialScore, current.PlayerDenialScore)` -> true for `y1`
+- `GetPlayerDieDesireScore(...)` gives yellow a flat desirability bump
+- that let the weak yellow look like the better denial pick even though it was the less efficient self-securing line
+
+if in the fixed comparator: `candidateSpentStamina < currentSpentStamina` -> true for `w6`
+- `w6` now wins before soft denial scoring is allowed to decide the draft
+
+why the old line was wrong
+- the draft comparator treated soft player-denial value as more important than how much stamina the enemy had to burn to reproduce the same preview line
+- that let a tiny yellow beat a die that directly secured the same outcome more cleanly
+- in this board, Gog could talk itself into taking `y1` and leaving both `r4` and `w6` behind
+
+why the fixed line is correct
+- once the real preview gates tie, lower `BestPlan.SpentStamina` now resolves the draft before softer denial heuristics
+- that keeps direct self-securing dice above weak yellow nuisance value
+- `w6` therefore beats `y1` here, while still preserving the existing high-level preview ordering
+
+result
+- Gog should take `w6`
+- soft yellow denial must not beat the same real draft line when it costs more stamina to maintain
+
+## case 16 - gog must take `w6` over blue nuisance value when white secures the real line
+
+PLAYER: 2 / 2 / 5 / 6
+
+
+accuracy: 2 = (2)
+
+
+speed: 2 = (2)
+
+
+damage: 5 = (-1 + y6)
+
+
+parry: 6 = (6)
+
+
+stamina: 0 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: g6, b2, b1, w6
+
+
+enemy: Gog
+
+
+ENEMY: 5 / 8 / 5 / 4
+
+
+accuracy: 5 = (5)
+
+
+speed: 8 = (4 + b4)
+
+
+damage: 5 = (5)
+
+
+parry: 4 = (4)
+
+
+stamina: 3 remaining
+
+
+wounds: none
+
+
+targeting: hand
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `IsBetterDraftPlanPreview(BestPlan(w6), BestPlan(b2))` -> false
+- the high-level real preview gates can tie here
+- both picks can still reach a deny-and-hit line once Gog spends the remaining stamina well
+
+if: `IsBetterDraftPlanPreview(BestPlan(b2), BestPlan(w6))` -> false
+- the blue die does not create a stronger real post-pick plan than the white die
+
+if: `IsBetterDraftOutcomePreview(BestPlan(w6), BestPlan(b2))` -> false
+- the coarse kill / damage / survive bucket also ties
+
+if: `candidate.DeniesPlayerKill != current.DeniesPlayerKill` -> false
+- neither die uniquely flips an immediate player kill line here
+
+if: `candidate.DeniesPlayerDamage != current.DeniesPlayerDamage` -> false
+- neither die wins solely on the hard player-damage denial flag
+
+if in the old comparator: `!Mathf.Approximately(candidate.PlayerDenialScore, current.PlayerDenialScore)` -> true for `b2`
+- `GetPlayerDieDesireScore(...)` heavily values blue because the player likes speed
+- that soft nuisance score could beat the white die before the enemy's own direct draft benefit was allowed to decide the tie
+
+if in the fixed comparator: `!Mathf.Approximately(candidate.ProgressScore, current.ProgressScore)` or later `candidate.DieValue != current.DieValue` -> true for `w6`
+- `w6` directly closes the enemy's defense gap and is the larger self-securing die
+- that self-benefit now resolves the tie before the softer denied-player-value score
+
+why the old line was wrong
+- the draft comparator let a soft "the player wants this blue" score outrank a die that directly improved Gog's own real attack / defense plan
+- that made blue nuisance value look better than the stronger white setup die even though Gog still needed a real self-securing line
+
+why the fixed line is correct
+- once the real preview and hard denial gates tie, the comparator now prefers direct enemy progress and stronger self-value before falling back to `PlayerDenialScore`
+- this keeps blue annoyance picks from beating a die that actually secures the better draft line for Gog
+
+result
+- Gog should take `w6`
+- soft player desire for blue must not beat the stronger self-benefiting white draft line
+
+## case 17 - kobold must take `r2` when utility dice only create the line by later stamina
+
+PLAYER: 2 / 2 / 1 / 2
+
+
+accuracy: 2 = (2)
+
+
+speed: 2 = (2)
+
+
+damage: 1 = (-1 + y2)
+
+
+parry: 2 = (2)
+
+
+stamina: 2 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: b5, b6, r2
+
+
+enemy: Kobold
+
+
+ENEMY: 6 / 4 / 2 / 11
+
+
+accuracy: 6 = (4 + g2)
+
+
+speed: 4 = (4)
+
+
+damage: 2 = (2)
+
+
+parry: 11 = (5 + w6)
+
+
+stamina: 3 remaining
+
+
+wounds: none
+
+
+targeting: armpits
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `playerCanHitBefore = PlayerAim >= 0 && PlayerAtt > EnemyDef` -> false
+- `2 >= 0` is true, but `1 > 11` is false
+- the player already cannot damage the enemy, so soft denial value is low here
+
+if: `enemyCanHitBefore = EnemyAim >= 0 && EnemyAtt > PlayerDef` -> false
+- `6 >= 0` is true, but `2 > 2` is false
+- Kobold does not currently have a wound line
+
+if: `BestPlan(r2).EnemyDamagesPlayer` -> true
+- taking `r2` immediately raises enemy attack from `2` to `4`
+- `4 > 2` turns on the hit threshold with no extra stamina required
+
+if: `BestPlan(b5 or b6).EnemyDamagesPlayer` -> true only after later red stamina
+- the blue utility pick still needs Kobold to burn stamina into red before any wound can land
+- it does not directly complete the missing hit threshold by itself
+
+if: `candidateSpentStamina != currentSpentStamina` -> true for `r2` vs utility blue lines whenever the real preview ties
+- `r2` reaches the same real post-pick line more cheaply
+
+if in the fixed comparator: `candidate.CompletesHitBreakpoint != current.CompletesHitBreakpoint` -> true for `r2`
+- the red die directly turns on the first real attack breakpoint
+- that breakpoint now resolves the draft before softer utility / denial cleanup can interfere
+
+if: `candidate.DeniesPlayerGoFirst != current.DeniesPlayerGoFirst` -> false as a useful separator
+- Kobold already acts first at `4 > 2`
+- extra blue does not create a new action-order gate here
+
+why the old line was wrong
+- a utility die could survive long enough in the draft comparator to beat the direct hit-enabling red die, even though the enemy had no live attack line yet
+- that forced the enemy to rely on later stamina spending for a wound it could have secured immediately by drafting red
+
+why the fixed line is correct
+- once the real preview gates and hard denial flags tie, direct breakpoint completion now beats softer utility considerations
+- when the enemy cannot yet hit, the die that actually turns on the hit threshold must win over dice that only help indirectly
+
+result
+- Kobold should take `r2`
+- utility dice must not beat a direct hit-enabling draft when the enemy has no live wound line
+
+## case 18 - kobold rebuild must still take `r2` over utility blue
+
+PLAYER: 2 / 2 / 1 / 2
+
+
+accuracy: 2 = (2)
+
+
+speed: 2 = (2)
+
+
+damage: 1 = (-1 + y2)
+
+
+parry: 2 = (2)
+
+
+stamina: 2 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: b5, b6, r2
+
+
+enemy: Kobold
+
+
+ENEMY: 6 / 4 / 2 / 11
+
+
+accuracy: 6 = (4 + g2)
+
+
+speed: 4 = (4)
+
+
+damage: 2 = (2)
+
+
+parry: 11 = (5 + w6)
+
+
+stamina: 3 remaining
+
+
+wounds: none
+
+
+targeting: armpits
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `playerCanHitBefore = PlayerAim >= 0 && PlayerAtt > EnemyDef` -> false
+- `2 >= 0` is true, but `1 > 11` is false
+- the player still cannot damage Kobold here, so denial value should not drive the draft
+
+if: `enemyCanHitBefore = EnemyAim >= 0 && EnemyAtt > PlayerDef` -> false
+- `6 >= 0` is true, but `2 > 2` is false
+- Kobold starts with no live wound line
+
+if: `BestPlan(r2).EnemyDamagesPlayer` -> true
+- drafting `r2` raises enemy attack from `2` to `4`
+- `4 > 2` immediately turns on the hit threshold
+
+if: `BestPlan(b5)` or `BestPlan(b6)` damages only after later stamina help -> true
+- blue can still participate in a later plan, but it does not directly create the missing wound line
+- the enemy would be choosing an indirect setup die over a direct winning die
+
+if: `candidateSpentStamina != currentSpentStamina` -> true for `r2` against the utility lines whenever the real preview ties
+- `r2` reaches the same strategic line with less permanent stamina
+
+if in the fixed comparator: `candidate.CompletesHitBreakpoint != current.CompletesHitBreakpoint` -> true for `r2`
+- the direct hit-enabling breakpoint now resolves the draft before softer utility cleanup
+
+if: `candidate.DeniesPlayerGoFirst != current.DeniesPlayerGoFirst` -> false as a deciding gate
+- Kobold already acts first at `4 > 2`
+- more blue does not create a new meaningful order change
+
+why the old line was wrong
+- the hard/nightmare draft comparator could let soft utility value linger too long even when the enemy still lacked a live hit line
+- that made Kobold pass up `r2` and rely on later stamina for something the draft itself could already secure
+
+why the fixed line is correct
+- once real preview gates and hard denial tie, direct breakpoint completion now wins first
+- this keeps hard/nightmare enemies from taking utility dice over the die that actually enables the wound line
+
+result
+- Kobold should take `r2`
+- case 17 and case 18 both stay protected by the same hard/nightmare comparator rule
+
+## case 19 - kobold must take the highest yellow once yellow is the winning color
+
+PLAYER: 2 / 2 / -1 / 2
+
+
+accuracy: 2 = (2)
+
+
+speed: 2 = (2)
+
+
+damage: -1 = (-1)
+
+
+parry: 2 = (2)
+
+
+stamina: 69 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: y5, g4, b6, r6, w3
+
+
+enemy: Kobold
+
+
+ENEMY: 4 / 3 / 6 / 7
+
+
+accuracy: 4 = (4)
+
+
+speed: 3 = (3)
+
+
+damage: 6 = (2 + y4)
+
+
+parry: 7 = (7)
+
+
+stamina: 4 remaining
+
+
+wounds: none
+
+
+targeting: head
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `playerCanHitBefore = PlayerAim >= 0 && PlayerAtt > EnemyDef` -> false
+- `2 >= 0` is true, but `-1 > 7` is false
+- the player cannot threaten Kobold here, so this is mostly a self-value draft question
+
+if: `enemyCanHitBefore = EnemyAim >= 0 && EnemyAtt > PlayerDef` -> true
+- `4 >= 0` is true and `6 > 2` is true
+- Kobold already has a live wound line before drafting
+
+if two candidate picks are both yellow and `IsBetterDraftPlanPreview(...)` plus `IsBetterDraftOutcomePreview(...)` tie -> possible
+- same-color candidates can reach the same strategic preview bucket
+- the old comparator could then drift into later cleanup and occasionally keep the lower yellow
+
+if in the fixed comparator: `candidate.DieType == current.DieType && candidate.DieValue != current.DieValue` -> true for higher yellow
+- once both candidates are yellow and the strategic preview ties, the higher face value wins immediately
+- a lower yellow can no longer survive by looking slightly cleaner on later utility cleanup
+
+if in the second safety layer: `ChooseAdvancedDraftDie(...)` returns the highest face die matching the winning color -> true
+- even if an earlier comparison path ever settled on yellow without distinguishing `y5` from a lower yellow, the final selection upgrades to the highest yellow still available
+- this gives a color-level guarantee on top of the comparator fix
+
+why the old line was wrong
+- same-color candidates could occasionally fall through to later cleanup where lower overspend or similar noise kept the smaller die
+- that allowed the ai to pick a weaker die even after effectively deciding that the color itself was correct
+
+why the fixed line is correct
+- hard/nightmare draft choice now has two defenses
+- first, same-color ties resolve to the higher face value early in the comparator
+- second, the final hard/nightmare picker upgrades any chosen color to the highest die of that color still on the board
+
+result
+- if Kobold chooses yellow here, it must take `y5`
+- once hard/nightmare commits to a color, it must never leave a higher-value die of that same color behind

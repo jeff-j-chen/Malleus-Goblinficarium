@@ -55,7 +55,8 @@ public class Player : MonoBehaviour {
         s.itemManager.GiveStarterItems();
         transform.position = basePosition;
         iconGameobject.transform.position = iconPosition;
-        woundList = Save.game.playerWounds;
+        woundList = Save.game.playerWounds != null ? new List<string>(Save.game.playerWounds) : new List<string>();
+        Save.game.playerWounds = woundList;
         // set the initial positions
         identifier.text = "You";
         // set the identifier text
@@ -201,7 +202,7 @@ public class Player : MonoBehaviour {
                 s.turnManager.RoundOne();
                 // begin the round
             }
-            else if (s.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "neck" && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul")) {
+            else if (s.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "neck" && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul") && s.statSummoner.SumOfStat("red", "player") > s.statSummoner.SumOfStat("white", "enemy")) {
                 // if player wants hints, can aim for the neck, but is not doing so, and doesn't have a maul
                 coroutine = StartCoroutine(HintNeck());
                 // hint the player

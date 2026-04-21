@@ -2,6 +2,8 @@
 
 this document defines the enemy ai across four difficulties and serves as the authoritative
 specification for expected planning behavior. it should be read alongside EnemyAI.cs.
+if the user pastes a debug scenario, you are expected to add that to DEBUG.md as well. 
+Note the AI changes are strictly for the hard/nightmare AI only; do not touch the lower level AI.
 
 difficulties: easy / normal / hard / nightmare
 
@@ -16,17 +18,29 @@ and reveals it with a short click-by-click animation.
 
 pulled from TurnManager.cs. these are the only rules the AI reasons about.
 
-**initiative:**
-- player goes first when `playerSpd >= enemySpd` (player wins ties)
-- enemy goes first ONLY when `enemySpd > playerSpd` (strictly greater)
-- spear+legendary: player always acts first regardless of speed
+**draft initiative:**
+- player drafts first when `playerSpd >= enemySpd` (player wins ties)
+- enemy drafts first ONLY when `enemySpd > playerSpd` (strictly greater)
+- spear OR gauntlets: player always drafts first regardless of speed
+- knee wound on ENEMY → player drafts first
+- knee wound on PLAYER → enemy drafts first unless the player has spear or gauntlets
+- if both sides have a draft-order override, the player override wins
+
+**attack initiative:**
+- player acts first when `playerSpd >= enemySpd` (player wins ties)
+- enemy acts first ONLY when `enemySpd > playerSpd` (strictly greater)
+- spear+legendary OR gauntlets: player always acts first regardless of speed
 - knee wound on ENEMY → player speed locked high (player always goes first)
-- knee wound on PLAYER → enemy speed locked high (enemy always goes first)
+- knee wound on PLAYER → enemy speed locked high unless the player has gauntlets or a legendary spear
+- if both sides have an action-order override, the player override wins
+- examples:
+  - both sides knee-wounded → player drafts first and acts first
+  - player knee-wounded + plain spear → player drafts first, but enemy still acts first
 
 **hit conditions:**
 - any attack lands when `attacker_attack > defender_defense` (strictly greater)
 - a defense holds when `defender_defense >= attacker_attack`
-- accuracy (green) must be >= 0 to land any hit; negative aim = automatic miss
+- player attacks require `playerAim >= 0` to land; current runtime enemy attacks do NOT check enemy accuracy
 - accuracy must be >= 7 to target neck
 
 **kill conditions:**
@@ -36,8 +50,8 @@ pulled from TurnManager.cs. these are the only rules the AI reasons about.
 
 **planner shorthand used in EnemyAI.cs:**
 - `PlayerWouldKillEnemy` and `EnemyWouldKillPlayer` are fatal-line helpers, not strict same-round death checks
-- a landed neck hit is folded into that fatal bucket because the resulting bleed-out is guaranteed unless separately prevented
-- gate names like `EnemyKills` and `BreaksPlayerKill` therefore mean "creates or prevents a fatal line" inside the planner
+- those helpers currently do NOT fold neck bleed-out into the fatal bucket
+- gate names like `EnemyKills` and `BreaksPlayerKill` therefore mean "creates or prevents an immediate kill line" inside the planner
 
 **wound effects (immediate, applied the same round):**
 - chest: player can reroll enemy dice >= 3 face value (once per die); forces enemy rerolls
@@ -59,12 +73,13 @@ pulled from TurnManager.cs. these are the only rules the AI reasons about.
 
 **items that affect planning:**
 - armor: absorbs one hit; the hit produces no wound; armor then breaks
-- exalted: behaves like armor for one hit; the hit produces no wound; the charm then breaks, and enemy planning must NOT cash in any same-hit wound followup gates from that blocked attack
 - dodgy: if the player is still dodgy when the enemy attack resolves, the hit is dodged; if enemy goes first, dodgy is cleared before that hit
 - maul: any successful player hit = kill; changes threat calculation entirely
 - hatchet: enemy yellow dice fade out on attach (yellow self-value becomes zero)
-- spear+legendary: player always acts first; blue investment has zero return
-- crystal shard: when the player takes a real wound, one crystal shard breaks immediately and the player loses 2 red before any same-round counterattack; this is NOT charm-arcane-scaled
+- spear: player always drafts first
+- spear+legendary: player also always acts first; blue investment has zero return
+- gauntlets: player always drafts first and always acts first; blue investment has zero return
+- crystal shard: when the player takes a real wound, one crystal shard breaks immediately and the player loses 2 red before any same-round counterattack; this is NOT charm-arcane-scaled, and that same hit will NOT also shatter glass sword
 - bulwark: if the enemy will attack first, the player gains +1 white per effective bulwark immediately before that hit is checked, so enemy-first hit math must use the boosted defense threshold
 - inevitable: if the enemy attacks first, the player's round-two counterattack gains +1 red per effective inevitable immediately after the enemy swing resolves, even on a parry; this is charm-arcane / stave scaled and must be modeled before the player's reply
 - glass sword: when the player takes a real wound, an unshattered glass sword immediately becomes 0 / 1 / 1 / 0 before any same-round counterattack
@@ -86,13 +101,13 @@ pulled from TurnManager.cs. these are the only rules the AI reasons about.
 candidates are compared left-to-right. first differing gate wins. no floating-point values.
 
 ```
- 1  EnemyKills                       the enemy creates a fatal line (third wound or guaranteed neck bleed-out)
+ 1  EnemyKills                       the enemy creates an immediate kill line under the current helper rules
  2  EnemyDamagesPlayer               the enemy inflicts any wound
  3  EnemyAvoidsKill                  the enemy survives without being killed
  4  EnemyAvoidsDamage                the enemy takes no wound at all
  5  BreaksPlayerKill                 prevents a player kill that would otherwise land
  6  BreaksPlayerDamage               prevents any player wound
- 7  BreaksPlayerProtection           breaks armor or exalted without incorrectly simulating a wound through it
+ 7  BreaksPlayerProtection           breaks armor without incorrectly simulating a wound through it
  8  StripsPlayerStamina              causes player to lose all added stamina (hip wound)
  9  BreaksPlayerSpeed                denies player their speed advantage (knee wound)
 10  RemovesPlayerRed                 removes all player red dice (armpits wound)
@@ -105,13 +120,17 @@ candidates are compared left-to-right. first differing gate wins. no floating-po
 17  SpentStamina   (lower is better) same outcome reached with less stamina
 18  TotalOverspend (lower is better) less excess beyond each threshold boundary
 19  ResourceOverspend (lower is better) less unused surplus in already-cleared stats
-20  TargetIndex       (lower is better) prefer lower target as final tiebreaker
+20  TargetIndex       (lower is better) prefer lower target as final tiebreaker, except any non-chest target beats chest here
 ```
 
 ### hard / nightmare draft tie handling
 
 - draft previews still compare the high-level outcome gates first
 - if two draft picks reach the same real preview outcome, the ai now compares the full preview plan before raw progress scores
+- if those real preview gates still tie, lower `BestPlan.SpentStamina` now beats softer denial heuristics so a tiny yellow that only works by burning permanent stamina cannot outrank a die that directly secures the same line
+- if two hard/nightmare candidates are the same die color and the strategic preview still ties, the higher face value now wins immediately
+- after the hard denial flags tie too, self breakpoint completion now beats softer denial heuristics like `DeniesPlayerGoFirst`, `DeniesPlayerTarget`, and `PlayerDenialScore` so a utility die cannot outrank a draft that directly turns on the enemy's hit / defense line
+- broader self-progress and face-value cleanup still beat the softer `PlayerDenialScore` tie-break after those breakpoint checks
 - this prevents "futile parry" drafting where a defensive die that still needs extra stamina can beat a cleaner pyrrhic-hit die that already secures the same damage line
 - planner snapshots also cache the live triggered charm attack bonuses, so mid-turn charm activations do not reuse stale hard/nightmare plans
 
@@ -124,9 +143,9 @@ candidates are compared left-to-right. first differing gate wins. no floating-po
 
 ### easy priority order
 
-1. minimal threshold arithmetic only
-2. readable, predictable behavior that teaches the player the rules
-3. never spend blue or green stamina
+1. use the same hidden threshold planner as normal mode
+2. keep the resulting committed plan visible once drafting is done
+3. preserve readable threshold-exact spending rather than full hard/nightmare search
 
 ---
 
@@ -134,12 +153,10 @@ candidates are compared left-to-right. first differing gate wins. no floating-po
 
 ### easy
 
-- allowed stamina: red (to just beat playerDef) and white (to just beat playerAtt)
-- forbidden stamina: green, blue
-- target choice: highest reachable non-wounded slot from natural aim
-- yellow behavior: no reassignment; yellow always goes to red by default
-- futility check: if `enemyAtt + remainingStamina <= playerDef`, skip red spend
-- futility check: if `playerAtt + remainingStamina <= enemyDef`, skip white spend
+- easy now delegates directly to `BuildNormalPlan()`
+- the plan still stays visible after drafting completes, unlike normal mode
+- threshold spending therefore matches normal mode exactly, including sequential red / blue / white spending when multiple breakpoints can be cleared in one plan
+- green stamina is still forbidden for neck access because easy inherits normal's natural-aim neck rule
 
 ### normal
 
@@ -149,13 +166,13 @@ candidates are compared left-to-right. first differing gate wins. no floating-po
   - blue spend = playerSpd - enemySpd + 1
   - white spend = playerAtt - enemyDef
   - green spend = forbidden in normal mode for neck access
-  - no compound spending (two thresholds simultaneously)
+- normal CAN compound these exact spends sequentially in one plan when earlier spends leave stamina for later breakpoints
 - plan is computed only when the attack begins; it is not shown during draft
 
 ### hard
 
 - full candidate search via BuildAdvancedPlan
-- all yellow dice assigned to any stat; all integer stamina splits enumerated
+- all yellow dice assigned to any stat; stamina search is compressed to relevant breakpoint candidates rather than every integer split
 - all targets 0..maxLegalTarget evaluated for each (yellow, stamina) pair
 - white stamina search now includes the live pre-hit defense threshold plus separate enemy-first parry-reply and enemy-first wound-reply defense thresholds, so an impossible wound-only charm spike cannot hide a reachable parry-only defense spend
 - if a round is still a guaranteed hit trade after spending green stamina, non-fatal aim spending is discarded; in that state green stamina is only justified when it upgrades the line into a fatal target, normally neck
@@ -171,7 +188,10 @@ candidates are compared left-to-right. first differing gate wins. no floating-po
 - no changes to the decision tree
 - the plan is hidden during draft and revealed only when the attack begins
 - reveal order is: stamina pips, then yellow-die moves, then target shifts
-- each reveal step plays `click0`, performs one action, then waits `0.05s`
+- each reveal step plays `click0`, performs one action, then waits `0.15s`
+- if the committed plan does not actually wound the player, the reveal suppresses target-shift steps entirely
+- nightmare also suppresses non-hitting retargets before commit, so if the enemy still cannot wound the player it keeps its current target
+- if the only nightmare change is yellow-die rearrangement and that rearrangement does not change the coarse combat outcome (`EnemyKills`, `EnemyDamagesPlayer`, `EnemyAvoidsKill`, `EnemyAvoidsDamage`), the enemy keeps the current yellow layout instead of shuffling for no practical change
 - environmental difference only (encounter harshness, spawn density, enemy stats)
 
 ---
@@ -195,7 +215,7 @@ candidates are compared left-to-right. first differing gate wins. no floating-po
          |
          v
   for each yellow assignment (green / blue / red / white per die):
-    for each stamina split across green / blue / red / white:
+    for each compressed breakpoint spend set across green / blue / red / white:
       for each targetIndex 0..maxLegalTarget:
         |
         v
@@ -271,7 +291,7 @@ GREEN -- skip if any of:
 easy and hard keep the enemy plan live once drafting is complete.
 normal and nightmare keep the enemy plan hidden until the attack begins.
 
-easy still uses the simple threshold planner. the only visibility change is that once no
+easy now uses the same threshold planner as normal. the only visibility change is that once no
 unattached dice remain, the player can see the enemy's current stamina commitment and target
 while adjusting their own board state.
 
@@ -300,7 +320,7 @@ prefer completing one precisely over exceeding it.
   breakpoint            condition                          significance
   -----------------------------------------------------------------------
   hit enabled           enemyAtt > playerDef               enemy inflicts a wound
-  fatal neck line       enemyAim >= 7 AND hit enabled      planner treats guaranteed bleed-out as fatal
+  neck access           enemyAim >= 7 AND hit enabled      unlocks neck targeting, but current fatal helpers do NOT count bleed-out as immediate fatal
   kill via third wound  playerWoundCount == 2 AND hit      three-wound win
   order flip            enemySpd > playerSpd               acts first; all first-strike value
   aim for armpits       enemyAim >= 6                      removes all player red dice
@@ -349,7 +369,7 @@ what EvaluateAdvancedPlanCandidate computes for every (yellow, stamina, target) 
   +-- wound lands:
          |
          v
-  EnemyWouldKillPlayer?  (fatal line: neck@aim7 OR third wound)
+  EnemyWouldKillPlayer?  (current helper: third wound only)
   |-- YES --> EnemyKills = true
   |
   +-- NO or blocked
@@ -449,9 +469,11 @@ chest is not a default preference. it becomes valid under exactly two conditions
     - StripsPlayerStamina     = false
     - RemovesPlayerBestDie    = false
 
-  rationale: chest forces enemy rerolls on dice >= 3 face value.
-  when a hit is unavoidable and no disabling wound is reachable, chest at least
-  creates the chance that the enemy's high-value dice will be disrupted before combat.
+  runtime chest rescue rerolls PLAYER attached dice with face value >= 3, not enemy dice
+  each die may only be rerolled once; `isRerolled` removes it from both live rescue and planner rescue checks
+  the live rescue chooser prefers: more safe outcomes, then more kill-breaking outcomes, then higher stat priority, then higher die value
+
+  planner chest gambling only becomes valid when a best-case one-time reroll sequence on currently unrerolled player green/red dice could actually shut off the pending player damage line.
 
   chest ranks 13th and 14th in gate ordering:
     - preferred over acting first (gate 15)
@@ -521,7 +543,7 @@ chest is not a default preference. it becomes valid under exactly two conditions
   priority shift:
     - white (defense): closing defense gap is higher return than speed
     - EnemyAvoidsDamage (gate 4) is the new primary goal
-    - once survival is tied, BreaksPlayerProtection (gate 7) rewards spending just enough to break armor / exalted
+    - once survival is tied, BreaksPlayerProtection (gate 7) rewards spending just enough to break armor
     - blue (speed) has low return; the protection absorbs the wound from going first
 ```
 
@@ -669,20 +691,30 @@ chest is not a default preference. it becomes valid under exactly two conditions
 
   comparison (IsBetterDraftChoice):
 
-  [1] IsBetterAdvancedEvaluation(BestPlan)?   gate-compare resulting plans first
-  [2] DeniesPlayerKill?
-  [3] DeniesPlayerDamage?
-  [4] ProgressScore         prefer picks that close unmet enemy attack/defense/speed/aim gaps
-  [5] DeniesPlayerGoFirst?
-  [6] DeniesPlayerTarget?
-  [7] LosesValueToHatchet?  (prefer die that does NOT lose value to hatchet)
-  [8] same-value yellow tie if face values match and hatchet is not active
-  [9] DieValue              (higher wins)
+  [1] IsBetterDraftPlanPreview(BestPlan)?     compare the real post-pick plan gates first
+  [2] IsBetterDraftOutcomePreview(BestPlan)?  then compare the coarse kill / damage / survive result
+  [3] same-color higher face value       if both candidates are yellow / red / blue / green / white, higher face wins
+  [4] DeniesPlayerKill?
+  [5] DeniesPlayerDamage?
+  [6] BestPlan.SpentStamina   lower wins when the same real preview line is reached more cleanly
+  [7] draft breakpoints                  kill / hit / defense / order / armpits / head completions first
+  [8] DeniesPlayerGoFirst?
+  [9] DeniesPlayerTarget?
+  [10] ProgressScore                     prefer broader self-progress only after hard breakpoint wins
+  [11] LosesValueToHatchet?              (prefer die that does NOT lose value to hatchet)
+  [12] same-value yellow tie if face values match and hatchet is not active
+  [13] DieValue                          (higher wins)
+  [14] full BestPlan overspend cleanup
+  [15] PlayerDenialScore                 prefer taking the die the player wants more only after self-benefit ties
+  [16] FallbackScore                     final cleanup only
 
   implementation note:
   - `BestPlan` must be a real post-pick advanced search result
   - it must include the enemy's remaining stamina search after the draft pick
   - a shallow zero-stamina preview is not sufficient for hard/nightmare draft choice
+  - if two picks reach the same real preview gates, a pick that does it with less stamina wins before softer denial scoring
+  - if the enemy settles on yellow / red / blue / green / white as the winning draft color, it must finally take the highest face-value die of that color still on the board
+  - breakpoint completion now resolves ties before softer denial heuristics when the enemy still needs to turn on its own hit / defense line
   - `ProgressScore` is an internal tie-break heuristic used when no immediate gate flips exist yet
   - it rewards progress toward unmet enemy thresholds, especially survival when the enemy has no live hit line
 ```
@@ -766,10 +798,14 @@ chest is not a default preference. it becomes valid under exactly two conditions
     LosesValueToHatchet = true; non-yellow preferred for self-value
     denial value from yellow still applies (DeniesPlayer* gates)
 
-  spear+legendary:
+  spear+legendary or gauntlets:
     player always acts first; EnemyActsFirst gate = false for ALL candidates
     blue has zero gate return; skip blue entirely
     invest in red (attack) and white (defense) only
+
+  plain spear:
+    player always drafts first
+    blue still matters for attack order unless some separate action lock already exists
 ```
 
 ---
@@ -805,33 +841,34 @@ chest is not a default preference. it becomes valid under exactly two conditions
 
 ---
 
-## 14) easy mode micro tree
+## 14) easy mode note
 
 ```
-  1. target = highest reachable non-wounded slot from natural aim (no stamina)
+  easy no longer has its own micro tree.
 
-  2. red futility check:
-     if E.att > P.def           --> skip (hit already confirmed)
-     if E.att + stamina <= P.def --> skip (threshold unreachable)
+  current code path:
+  BuildEasyPlan(s) --> BuildNormalPlan(s)
 
-  3. red spend:
-     needed = P.def - E.att + 1
-     spend  = min(needed, remainingStamina)
-     add to red; update effective E.att
-
-  4. white futility check:
-     if E.def >= P.att          --> skip (defense already confirmed)
-     if P.att > E.def + stamina --> skip (gap uncloseable)
-     if P.aim < 0               --> skip (player cannot hit anyway)
-
-  5. white spend:
-     needed = P.att - E.def
-     spend  = min(needed, remainingStamina)
-     add to white
-
-  6. do NOT spend blue or green
-  7. do NOT reassign yellow; yellow defaults to red
+  practical result:
+  - easy inherits normal's natural-aim neck restriction
+  - easy can use exact blue spending when flipping initiative matters
+  - easy can chain exact red / blue / white spends in one plan
+  - the only easy-specific difference is presentation: once drafting is complete,
+   the committed plan remains visible to the player
 ```
+
+---
+
+## implementation notes
+
+these are deliberate documentation notes for behaviors that currently exist in code.
+
+- runtime enemy attacks still ignore enemy accuracy, even though planner previews use `enemyAim >= 0`
+- advanced-plan target tiebreak treats chest as the worst final target; any non-chest target wins that tie
+- nightmare reveal waits `0.15s` per step, and target-shift reveal is skipped when the committed plan does not actually damage the player
+- live enemy-first chest rescue rerolls player dice, not enemy dice
+- live/player chest-rescue previews and live kill checks also honor the player's second-wound-kill weapon rule when the enemy already has one wound
+- draft choice ordering is currently: best full preview plan, then coarse preview outcome, then same-color highest-value protection, then hard denial flags, then lower preview stamina, then self breakpoint completion, then softer denial / progress cleanup, then hatchet-yellow-value cleanup, then late denied-player value and fallback scores
 
 ---
 
@@ -882,7 +919,7 @@ chest is not a default preference. it becomes valid under exactly two conditions
 
 **chest is a conditional fallback, not a default:**
   UsesChestOnHighValuePlayerDice and UsesChestAsLastDitchGamble are only true under
-  specific conditions. chest ranks below all disabling wounds and below acting first.
+  specific conditions. chest ranks below all guaranteed disable / harm / avoid gates.
   it only wins when no better option exists and the player has dice worth disrupting.
 
 **retroactive replanning handles mid-round disruption:**
@@ -890,7 +927,7 @@ chest is not a default preference. it becomes valid under exactly two conditions
   on easy and hard, the visible plan is rebuilt from actual state, not stale memory.
 
 **difficulty identity is preserved:**
-  - easy:          threshold arithmetic only; teaches the combat rules; live stamina plan once drafting is done
+  - easy:          same threshold planner as normal, but the committed plan stays visible once drafting is done
   - normal:        legacy feel; hidden intent; no stamina-funded neck spike
   - hard:          full gate search; visible live plan during draft
   - nightmare:     full gate search; hidden plan with attack-time reveal animation

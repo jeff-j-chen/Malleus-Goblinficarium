@@ -16,6 +16,7 @@ public class Dice : MonoBehaviour {
     private SpriteRenderer childSpriteRenderer;
     private Scripts s;
     private bool wasClickedRecently = false;
+    private bool suppressPointerReleaseAfterInstantAction = false;
     private bool suspendedEnemyPlanRefreshForDrag = false;
     private bool dragStartedAttachedToPlayer = false;
     private string dragStartedPlayerStat = "";
@@ -41,6 +42,7 @@ public class Dice : MonoBehaviour {
     private bool TryResolvePendingMirrorCopy() {
         if (!Save.game.pendingMirrorCopy || s.turnManager.isMoving || !s.itemManager.IsFightableEncounter()) { return false; }
 
+        suppressPointerReleaseAfterInstantAction = true;
         Save.game.pendingMirrorCopy = false;
         s.diceSummoner.DuplicateDieToPlayer(diceNum, diceType);
         s.statSummoner.SummonStats();
@@ -59,6 +61,7 @@ public class Dice : MonoBehaviour {
             return false;
         }
 
+        suppressPointerReleaseAfterInstantAction = true;
         Save.game.pendingSpellbookTransmute = false;
         s.itemManager.TransmuteDie(this);
         return true;
@@ -101,7 +104,7 @@ public class Dice : MonoBehaviour {
     /// Handle what happens when the player presses down on a dice.
     /// </summary>
     private void DiceDown() { 
-        if (moveable && !s.turnManager.isMoving) {
+        if (moveable && !s.turnManager.isMoving && !s.turnManager.draftInputLocked) {
             // if the dice is still moveable
             dragStartedAttachedToPlayer = isAttached && isOnPlayerOrEnemy == "player";
             dragStartedPlayerStat = dragStartedAttachedToPlayer ? statAddedTo : "";
@@ -151,6 +154,11 @@ public class Dice : MonoBehaviour {
     }
     
     private void OnMouseUp() {
+        if (suppressPointerReleaseAfterInstantAction) {
+            suppressPointerReleaseAfterInstantAction = false;
+            return;
+        }
+
         // self explanatory, tutorial restricts which dice can be picked, else is just normal
         if (s.tutorial != null) { 
             if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13 || s.tutorial.curIndex == 22) {
@@ -165,6 +173,8 @@ public class Dice : MonoBehaviour {
     }
 
     private void OnMouseDrag() {
+        if (suppressPointerReleaseAfterInstantAction) { return; }
+
         if (s.tutorial != null) { 
             if (s.tutorial.isAnimating || s.tutorial.curIndex == 12 || s.tutorial.curIndex == 13 || s.tutorial.curIndex == 22) {
                 if (s.diceSummoner.CountUnattachedDice() == 6 && diceType == "red") { DiceDrag(); }
@@ -182,7 +192,7 @@ public class Dice : MonoBehaviour {
     /// </summary>
     private void DiceDrag() { 
         // when the mouse is dragged
-        if (moveable && !s.turnManager.isMoving) {
+        if (moveable && !s.turnManager.isMoving && !s.turnManager.draftInputLocked) {
             // if the dice can be moved
             spriteRenderer.sortingOrder = 3;
             childSpriteRenderer.sortingOrder = 2;
@@ -200,7 +210,7 @@ public class Dice : MonoBehaviour {
     /// </summary>
     private void DiceUp() {
         // when the mouse is released
-        if (moveable && !s.turnManager.isMoving) {
+        if (moveable && !s.turnManager.isMoving && !s.turnManager.draftInputLocked) {
             // if the dice can be moved
             s.soundManager.PlayClip("click1");
             // play sound clip
@@ -348,6 +358,7 @@ public class Dice : MonoBehaviour {
     /// Coroutine for playing the animation and rerolling the dice.
     /// </summary>
     public IEnumerator RerollAnimation(bool playSound=true) {
+        isRerolled = true;
         // assign the spriterenderer reference
         for (int i = 0; i < 10; i++) {
             // 10 times

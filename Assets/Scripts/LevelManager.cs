@@ -127,6 +127,9 @@ public class LevelManager : MonoBehaviour {
                 if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                     return new[] { 4f, 4f, 4f, 4f };
                 }
+                else if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
+                    return new[] { 3f, 3f, 3f, 3f };
+                }
                 else { 
                     return new[] { 2f, 2f, 2f, 2f };
                 }
@@ -134,6 +137,9 @@ public class LevelManager : MonoBehaviour {
             else if (lichOrDevilOrNormal == "devil") {
                 if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
                     return new[] { 4f, 4f, 4f, 4f };
+                }
+                else if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
+                    return new[] { 3f, 3f, 3f, 3f };
                 }
                 else { 
                     return new[] { 2f, 2f, 2f, 2f };
@@ -157,12 +163,18 @@ public class LevelManager : MonoBehaviour {
             // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
             totalStats[i] = Mathf.Round((stats[i] + baseStats[i] + UnityEngine.Random.Range(0f, stats[4]))/10f);
             if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-                totalStats[i] += UnityEngine.Random.Range(0, s.levelManager.level+1);
+                totalStats[i] += UnityEngine.Random.Range(0, s.levelManager.level);
             }
         }
-        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) && s.levelManager.level == 1 && s.levelManager.sub == 1) {
-            totalStats[1] = 0;
-            // game is slightly playable by settings speed of 1st enemy to 0 always
+        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+            if (s.levelManager.level == 1 && s.levelManager.sub == 1) {
+                totalStats[1] = 0;
+                // game is slightly playable by settings speed of 1st enemy to 0 always
+            }
+            else {
+                // all nightmare enemies get speed boost of 1
+                totalStats[1] += 1;
+            }
         }
         return totalStats;
         // return the total stats
@@ -399,7 +411,7 @@ public class LevelManager : MonoBehaviour {
                 else if (queuedWarpEnemyNum == Enemy.BlacksmithEnemyNum || !hasQueuedWarpDestination && ShouldForceBlacksmithSpawn()) {
                     toSpawn = "blacksmith";
                     s.enemy.SpawnNewEnemy(Enemy.BlacksmithEnemyNum, true);
-                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+                    s.turnManager.RefreshBlackBoxVisibility();
                     levelTransText.text = GetTransferDestinationText(level, sub, Enemy.BlacksmithEnemyNum);
                     levelText.text = $"({GetTransferDestinationText(level, sub, Enemy.BlacksmithEnemyNum)})";
                 }
@@ -407,7 +419,7 @@ public class LevelManager : MonoBehaviour {
                     toSpawn = "merchant";
                     s.enemy.SpawnNewEnemy(Enemy.MerchantEnemyNum, true);
                     // create the trader enemy
-                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+                    s.turnManager.RefreshBlackBoxVisibility();
                     // summon trader if necessary
                     levelTransText.text = GetLevelLabel(level, sub);
                     levelText.text = $"({GetLevelLabel(level, sub)})";
@@ -475,10 +487,10 @@ public class LevelManager : MonoBehaviour {
             else {
                 // not going to the trader or tombstone
                 s.diceSummoner.SummonDice(false, true);
-                s.turnManager.blackBox.transform.localPosition = s.turnManager.offScreen;
+                s.turnManager.RefreshBlackBoxVisibility();
                 // summon die and make sure the enemy's stats can be seen
             }
-            if (toSpawn is "normal" or "devil" or "lich") { s.itemManager.BeginNewEncounterWeaponState(); }
+            if (toSpawn is "normal" or "devil" or "lich") { s.itemManager.BeginNewEncounterWeaponState(rerollLuckyDice:true); }
             else { s.itemManager.EndEncounterWeaponState(); }
             // can spawn the items here because we have a deletion queue rather than just deleting all
             s.player.targetIndex = 0;

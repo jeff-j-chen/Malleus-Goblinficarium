@@ -1,0 +1,5 @@
+/media/jeff/SSD_2/Unity/Malleus-Goblinficarium/.utmp/RelWithDebInfo/3np3c113/arm64-v8a/CMakeFiles/edit_cache.dir
+/media/jeff/SSD_2/Unity/Malleus-Goblinficarium/.utmp/RelWithDebInfo/3np3c113/arm64-v8a/CMakeFiles/rebuild_cache.dir
+/media/jeff/SSD_2/Unity/Malleus-Goblinficarium/.utmp/RelWithDebInfo/3np3c113/arm64-v8a/FramePacing/CMakeFiles/swappywrapper.dir
+/media/jeff/SSD_2/Unity/Malleus-Goblinficarium/.utmp/RelWithDebInfo/3np3c113/arm64-v8a/FramePacing/CMakeFiles/edit_cache.dir
+/media/jeff/SSD_2/Unity/Malleus-Goblinficarium/.utmp/RelWithDebInfo/3np3c113/arm64-v8a/FramePacing/CMakeFiles/rebuild_cache.dir

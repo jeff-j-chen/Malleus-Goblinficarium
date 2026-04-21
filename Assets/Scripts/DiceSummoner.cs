@@ -193,9 +193,9 @@ public class DiceSummoner : MonoBehaviour
             // devil doesn't get to take its starting red and white if its wounded there
         }
 
-        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-            yield return s.delays[0.05f];
-            GenerateSingleDie(Random.Range(1, 7), "yellow", "enemy", "red", initialSix:true);
+        if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty) || DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+            yield return s.delays[0.1f];
+            GenerateSingleDie(Random.Range(1, 3), "yellow", "enemy", "red", initialSix:true);
         }
     }
 

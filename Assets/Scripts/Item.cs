@@ -80,35 +80,29 @@ public class Item : MonoBehaviour {
         if (itemType == "weapon") {
             // if the item is a weapon
             s.itemManager.itemDesc.text = s.itemManager.GetDisplayTextForItem(this);
-            if (s.itemManager.floorItems.Contains(gameObject) && s.player != null) {
-                // if item on the floor and not in character select
-                if (s.itemManager.IsVendorEncounter()) {
-                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
-                }
-                else {
-                    s.enemy.stats = s.itemManager.GetWeaponStatsForPreview(this);
-                    s.statSummoner.SummonStats();
-                    s.statSummoner.SetDebugInformationFor("enemy");
-                    s.turnManager.blackBox.transform.localPosition = s.turnManager.offScreen;
-                }
+            if (s.itemManager.ShouldPreviewWeaponOnRight(gameObject)) {
+                s.enemy.stats = s.itemManager.GetWeaponStatsForPreview(this);
+                s.statSummoner.SummonStats();
+                s.statSummoner.SetDebugInformationFor("enemy");
+                s.turnManager.RefreshBlackBoxVisibility(gameObject);
             }
             else {
-                // if item is in inventory
-                if (s.enemy != null) {
-                    // and not in character select
-                    if (Save.game.enemyIsDead) { s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen; }
-                    // hide the weapon stats if enemy is dead and not clicking on an enemy
+                if (!s.itemManager.IsFightableEncounter()) {
+                    s.itemManager.RestoreCurrentEnemyStatsForDisplay();
                 }
+                if (s.enemy != null) { s.turnManager.RefreshBlackBoxVisibility(gameObject); }
             }
         }
         else {
             if (s.levelManager == null || !s.levelManager.lockActions) {
                 // only allow weapons to be selected when locked
-                if (s.levelManager != null &&
-                    (Save.game.enemyIsDead || s.enemy.enemyName.text == "Tombstone" || s.itemManager.IsVendorEncounter())) {
-                    s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+                // turnmanager might not exist in almanac
+                if (!s.itemManager.IsFightableEncounter()) {
+                    s.itemManager.RestoreCurrentEnemyStatsForDisplay();
                 }
-                // hide the weapon stats if enemy is dead and not clicking on an enemy
+                if (s.turnManager != null) {
+                    s.turnManager.RefreshBlackBoxVisibility(gameObject);
+                }
                 s.itemManager.itemDesc.text = s.itemManager.GetDisplayTextForItem(this);
             }
         }
@@ -209,7 +203,7 @@ public class Item : MonoBehaviour {
         Save.persistent.itemsTraded++;
         s.soundManager.PlayClip("forge");
         s.itemManager.ForgePlayerWeapon(modifier);
-        s.turnManager.SetStatusText($"your {ItemManager.GetWeaponBaseName(s.player.inventory[0].GetComponent<Item>().itemName)} is forged");
+        // s.turnManager.SetStatusText($"your {ItemManager.GetWeaponBaseName(s.player.inventory[0].GetComponent<Item>().itemName)} is forged");
         s.itemManager.RemoveFloorItemAt(idx);
         s.itemManager.UpdateVendorUIForSelection();
     }
@@ -322,8 +316,8 @@ public class Item : MonoBehaviour {
             return;
         }
 
-        if (s.diceSummoner.CountUnattachedDice() > 0) {
-            s.turnManager.SetStatusText("draft your die");
+        if (Save.game.usedSpellbook) {
+            s.turnManager.SetStatusText("it's too dangerous");
             return;
         }
 
@@ -332,10 +326,11 @@ public class Item : MonoBehaviour {
             return;
         }
 
-        s.soundManager.PlayClip("zap");
+        s.soundManager.PlayClip("fwoosh");
         s.turnManager.ChangeStaminaOf("player", -3);
         s.turnManager.SetStatusText("choose a die");
         s.itemManager.MarkItemUsed(this);
+        Save.game.usedSpellbook = true;
         Save.game.pendingSpellbookTransmute = true;
         if (s.tutorial == null) { Save.SaveGame(); }
     }
@@ -349,6 +344,8 @@ public class Item : MonoBehaviour {
         foreach (string stat in s.itemManager.statArr) {
             s.enemy.stats[stat] = Mathf.Max(0, s.enemy.stats[stat] - 1);
         }
+        string randomStat = s.itemManager.statArr[Random.Range(0, s.itemManager.statArr.Length)];
+        s.enemy.stats[randomStat] = Mathf.Max(0, s.enemy.stats[randomStat] - 1);
         Save.game.enemyAcc = s.enemy.stats["green"];
         Save.game.enemySpd = s.enemy.stats["blue"];
         Save.game.enemyDmg = s.enemy.stats["red"];
@@ -508,26 +505,18 @@ public class Item : MonoBehaviour {
                     // notify player
                     switch (modifier) {
                         case "accuracy":
-                            s.statSummoner.ShiftDiceAccordingly("green", 
-                                s.statSummoner.RawSumOfStat("green", "player") == -1 ? 1 : PotionStatBonus);
                             s.player.potionStats["green"] += PotionStatBonus;
                             Save.game.potionAcc = s.player.potionStats["green"];
                             break;
                         case "speed":
-                            s.statSummoner.ShiftDiceAccordingly("blue", 
-                                s.statSummoner.RawSumOfStat("blue", "player") == -1 ? 1 : PotionStatBonus);
                             s.player.potionStats["blue"] += PotionStatBonus;
                             Save.game.potionSpd = s.player.potionStats["blue"];
                             break;
                         case "strength":
-                            s.statSummoner.ShiftDiceAccordingly("red", 
-                                s.statSummoner.RawSumOfStat("red", "player") == -1 ? 1 : PotionStatBonus);
                             s.player.potionStats["red"] += PotionStatBonus;
                             Save.game.potionDmg = s.player.potionStats["red"];
                             break;
                         case "defense":
-                            s.statSummoner.ShiftDiceAccordingly("white", 
-                                s.statSummoner.RawSumOfStat("white", "player") == -1 ? 1 : PotionStatBonus);
                             s.player.potionStats["white"] += PotionStatBonus;
                             Save.game.potionDef = s.player.potionStats["white"];
                             break;
@@ -548,6 +537,7 @@ public class Item : MonoBehaviour {
                     }
                     if (s.tutorial == null) { Save.SaveGame(); }
                     s.statSummoner.SummonStats();
+                    s.statSummoner.RepositionAllDice("player");
                     s.statSummoner.SetCombatDebugInformationFor("player");
                     Remove();
                     s.itemManager.Select(s.player.inventory, 0, true, false);
@@ -638,6 +628,7 @@ public class Item : MonoBehaviour {
                     break;
                 case "ankh":
                     if (!Save.game.usedAnkh) {
+                        bool enemyDraftsFirstAfterAnkh = s.turnManager.EnemyShouldDraftFirstForFreshDraft();
                         s.soundManager.PlayClip("click0");
                         s.itemManager.MarkItemUsed(this);
                         Save.game.usedAnkh = true;
@@ -647,10 +638,10 @@ public class Item : MonoBehaviour {
                             s.statSummoner.addedPlayerStamina[key] = 0;
                             // refund stamina
                         }
-                        s.statSummoner.ResetDiceAndStamina();
+                        s.statSummoner.ResetDiceAndStamina(refundEnemyPlannedStamina:true);
                         s.diceSummoner.SummonDice(false, true);
                         s.statSummoner.SummonStats();
-                        s.turnManager.DetermineMove(true, true);
+                        s.turnManager.DetermineMove(true, true, enemyDraftsFirstAfterAnkh);
                     }
                     else { s.turnManager.SetStatusText("ankh glows with red light"); }
                     break;
@@ -696,10 +687,6 @@ public class Item : MonoBehaviour {
         bool skipFade = dontSave;
         if (armorFade && !skipFade) {
             StartCoroutine(FadeArmor(owningList, selectNew));
-        }
-        else if (itemName == "charm" && !skipFade) {
-            // charm shatters with a short fade rather than an instant destroy
-            StartCoroutine(FadeCharm(owningList, selectNew));
         }
         else if (torchFade && !skipFade) {
             StartCoroutine(FadeTorch(owningList, selectNew));
@@ -785,24 +772,6 @@ public class Item : MonoBehaviour {
         }
         Destroy(gameObject);
         ShiftItems(itemList, selectNew);
-        s.itemManager.SaveInventoryItems();
-    }
-
-    private IEnumerator FadeCharm(List<GameObject> itemList, bool selectNew) {
-        yield return s.delays[0.05f];
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        Color temp = sr.color;
-        temp.a = 1;
-        sr.color = temp;
-        for (int i = 0; i < 5; i++) {
-            yield return s.delays[0.033f];
-            temp.a -= 1f / 5f;
-            sr.color = temp;
-        }
-        Destroy(gameObject);
-        ShiftItems(itemList, selectNew);
-        s.itemManager.RefreshPassiveInventoryEffects();
-        s.itemManager.SyncCharmStateToSave();
         s.itemManager.SaveInventoryItems();
     }
 

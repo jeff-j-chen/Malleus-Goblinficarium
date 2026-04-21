@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 public class TombstoneData : MonoBehaviour {
@@ -287,23 +288,24 @@ public class TombstoneData : MonoBehaviour {
             Save.persistent.tsWeaponDmg - 1,
             Save.persistent.tsWeaponDef - 1);
         // make the item with worse stats
+        List<int> availableItemIndices = new();
         for (int i = 1; i < Save.persistent.tsItemNames.Length; i++) {
-            if (Save.persistent.tsItemNames[i] != null && Save.persistent.tsItemNames[i] != "") { 
-                GameObject created = s.itemManager.CreateItem(Save.persistent.tsItemNames[i].Replace(' ', '_'), Save.persistent.tsItemMods[i]);
-                switch (created.GetComponent<Item>().itemName) { 
-                    case "helm of might":
-                        created.GetComponent<Item>().itemName = "rusted helm"; break;
-                    case "boots of dodge":
-                        created.GetComponent<Item>().itemName = "ruined boots"; break;
-                    case "ankh":
-                        created.GetComponent<Item>().itemName = "shattered ankh"; break;
-                    case "kapala":
-                        created.GetComponent<Item>().itemName = "defiled kapala"; break;
-                    case "steak":
-                        created.GetComponent<Item>().itemName = "rotten steak"; break;
-                    case "cheese":
-                        created.GetComponent<Item>().itemName = "moldy cheese"; break;
-                }
+            if (!string.IsNullOrEmpty(Save.persistent.tsItemNames[i])) {
+                availableItemIndices.Add(i);
+            }
+        }
+
+        int discardCount = availableItemIndices.Count == 0
+            ? 0
+            : Random.Range(0, availableItemIndices.Count / 2 + 1);
+        List<int> randomizedItemIndices = availableItemIndices.OrderBy(_ => Random.value).ToList();
+        int survivorCount = Mathf.Clamp(randomizedItemIndices.Count - discardCount, 0, 7);
+        HashSet<int> keptItemIndices = randomizedItemIndices.Take(survivorCount).ToHashSet();
+
+        for (int i = 1; i < Save.persistent.tsItemNames.Length; i++) {
+            if (keptItemIndices.Contains(i)) {
+                string ruinedItemName = ItemManager.GetRuinedCommonItemName(Save.persistent.tsItemNames[i]);
+                s.itemManager.CreateItem(ruinedItemName.Replace(' ', '_'), Save.persistent.tsItemMods[i]);
             }
             // ruin certain items
         }

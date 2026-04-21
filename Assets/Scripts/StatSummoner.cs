@@ -141,11 +141,7 @@ public class StatSummoner : MonoBehaviour {
         }
         if (playerOrEnemy == "player") {
             // get for player
-            if (stat == "blue") {
-                if (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || !s.player.isDead && s.itemManager.PlayerAlwaysActsFirst()) { return 99; }
-                // return 99 speed if enemy has knee wound (lich not affected by wounds), or the player always acts first
-            }
-                int sum = s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + s.itemManager.GetSacrificialChaliceAppliedBonus() + GetEncounterWeaponStatBonus(stat) + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
+            int sum = s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + s.itemManager.GetSacrificialChaliceAppliedBonus() + GetEncounterWeaponStatBonus(stat) + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
             // get the sum of base stats + potion + stamina + necklet + charm
             foreach (Dice dice in addedPlayerDice[stat]) {
                 // add to the sum all the added die
@@ -156,7 +152,6 @@ public class StatSummoner : MonoBehaviour {
         }
         if (playerOrEnemy == "enemy") {
             // get for enemy, similar process to getting from player
-            if (s.player.woundList.Contains("knee") && stat == "blue") { return 99; }
             int sum = s.enemy.stats[stat] + addedEnemyStamina[stat];
             foreach (Dice dice in addedEnemyDice[stat]) {
                 if (dice != null) { sum += dice.GetComponent<Dice>().diceNum; }
@@ -177,13 +172,28 @@ public class StatSummoner : MonoBehaviour {
             return 0;
         }
         if (playerOrEnemy == "player") {
-              return s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + s.itemManager.GetSacrificialChaliceAppliedBonus() + GetEncounterWeaponStatBonus(stat) + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
+              return GetPlayerDisplayedStatTotal(stat);
         }
         if (playerOrEnemy == "enemy") {
             return s.enemy.stats[stat] + addedEnemyStamina[stat];
         }
         Debug.LogError("Can only get the stats of a player or an enemy");
         return 0;
+    }
+
+    private int GetPlayerStatTotalWithoutAddedStamina(string stat) {
+        return s.player.stats[stat]
+            + s.player.potionStats[stat]
+            + s.itemManager.neckletStats[stat]
+            + s.itemManager.charmPassiveStats[stat]
+            + s.itemManager.charmActiveBonus[stat]
+            + s.itemManager.GetSacrificialChaliceAppliedBonus()
+            + GetEncounterWeaponStatBonus(stat)
+            + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
+    }
+
+    private int GetPlayerDisplayedStatTotal(string stat) {
+        return GetPlayerStatTotalWithoutAddedStamina(stat) + addedPlayerStamina[stat];
     }
 
     /// <summary>
@@ -215,8 +225,8 @@ public class StatSummoner : MonoBehaviour {
         int playerSquareStats = s.player.stats[colorName] + s.player.potionStats[colorName] + encounterWeaponBonus - encounterWeaponDiamondBonus;
         int playerCircleStats = s.itemManager.neckletStats[colorName];
         int playerDiamondStats = s.itemManager.charmPassiveStats[colorName] + s.itemManager.charmActiveBonus[colorName] + s.itemManager.GetSacrificialChaliceAppliedBonus() + encounterWeaponDiamondBonus + s.itemManager.GetLuckyDiceRoundStatBonus(colorName);
-        int playerNonStaminaTotal = playerSquareStats + playerCircleStats + playerDiamondStats;
-        int playerTotal = playerNonStaminaTotal + addedPlayerStamina[colorName];
+        int playerNonStaminaTotal = GetPlayerStatTotalWithoutAddedStamina(colorName);
+        int playerTotal = GetPlayerDisplayedStatTotal(colorName);
         // get the color of the given colorname
         if (playerNonStaminaTotal > 0) {
             // if player's stats are greater than 0
@@ -348,7 +358,21 @@ public class StatSummoner : MonoBehaviour {
     /// <summary>
     /// Remove all attached die and stamina.
     /// </summary>
-    public void ResetDiceAndStamina() {
+    public void ResetDiceAndStamina(bool refundEnemyPlannedStamina = false) {
+        int refundedEnemyStamina = addedEnemyStamina.Values.Sum();
+        bool livingLich = s != null
+            && s.enemy != null
+            && s.enemy.enemyName.text == "Lich"
+            && !Save.game.enemyIsDead;
+
+        if (refundEnemyPlannedStamina && livingLich) {
+            s.enemy.stamina = s.enemy.lichStamina;
+            s.enemy.staminaCounter.text = s.enemy.stamina.ToString();
+        }
+        else if (refundEnemyPlannedStamina && refundedEnemyStamina > 0) {
+            s.enemy.stamina += refundedEnemyStamina;
+            s.enemy.staminaCounter.text = s.enemy.stamina.ToString();
+        }
         foreach (GameObject dice in s.diceSummoner.existingDice) {
             // fade out every die
             StartCoroutine(dice.GetComponent<Dice>().FadeOut());
@@ -448,7 +472,7 @@ public class StatSummoner : MonoBehaviour {
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         optionalDiceOffsetStatToMultiplyBy ??= statType;
         // not setting the optional variable will just default it to the base stat type
-            return xCoord + ((Mathf.Abs(s.player.stats[statType] + s.player.potionStats[statType] + s.itemManager.neckletStats[statType] + s.itemManager.charmPassiveStats[statType] + s.itemManager.charmActiveBonus[statType] + s.itemManager.GetSacrificialChaliceAppliedBonus() + addedPlayerStamina[statType] + GetEncounterWeaponStatBonus(statType) + s.itemManager.GetLuckyDiceRoundStatBonus(statType)) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
+            return xCoord + ((Mathf.Abs(GetPlayerDisplayedStatTotal(statType)) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
     }
 
@@ -475,10 +499,10 @@ public class StatSummoner : MonoBehaviour {
                 float furthest = (new[] { OutermostPlayerX("green"), OutermostPlayerX("blue"), OutermostPlayerX("red"), OutermostPlayerX("white") }).Max();
                 playerDebug.transform.position = furthest >= -3.8 ? new Vector2(furthest + 1.333f, baseDebugPos.y) : new Vector2(baseDebugPos.x, baseDebugPos.y);
                 // if the outermost position to too far, start moving the debug for plaer over
-                playerDebug.text = "("+SumOfStat("green", "player")+")\n("+SumOfStat("blue", "player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";
+                playerDebug.text = "("+SumOfStat("green", "player")+")\n("+GetDebugBlueStat("player")+")\n("+SumOfStat("red", "player")+")\n("+SumOfStat("white", "player")+")";
             }
             else if (playerOrEnemy == "enemy") {
-                enemyDebug.text = "("+SumOfStat("green", "enemy")+")\n("+SumOfStat("blue", "enemy")+")\n("+SumOfStat("red", "enemy")+")\n("+SumOfStat("white", "enemy")+")";
+                enemyDebug.text = "("+SumOfStat("green", "enemy")+")\n("+GetDebugBlueStat("enemy")+")\n("+SumOfStat("red", "enemy")+")\n("+SumOfStat("white", "enemy")+")";
             }
             // ends up looking like
             // (2)
@@ -488,6 +512,21 @@ public class StatSummoner : MonoBehaviour {
             // for example
             else { Debug.Log("error"); }
         }
+    }
+
+    private int GetDebugBlueStat(string playerOrEnemy) {
+        if (playerOrEnemy == "player") {
+            return (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || s.itemManager.PlayerHasWeapon("gauntlets")) ? 99 : SumOfStat("blue", "player");
+        }
+
+        if (playerOrEnemy == "enemy") {
+            return s.player.woundList.Contains("knee")
+                ? 99
+                : SumOfStat("blue", "enemy");
+        }
+
+        Debug.LogError("Can only get debug blue stat of a player or an enemy");
+        return 0;
     }
 
     /// <summary>
@@ -503,10 +542,15 @@ public class StatSummoner : MonoBehaviour {
     /// Shift the dice of a given stat by a given amount.
     /// </summary>    
     public void ShiftDiceAccordingly(string stat, int shiftAmount) {
+        int diceCount = addedPlayerDice[stat].Count;
+        float currentX = xCoord + ((Mathf.Abs(GetPlayerDisplayedStatTotal(stat)) - 1) * xOffset + highlightOffset + diceOffset * diceCount);
+        float nextX = xCoord + ((Mathf.Abs(GetPlayerDisplayedStatTotal(stat) + shiftAmount) - 1) * xOffset + highlightOffset + diceOffset * diceCount);
+        float deltaX = nextX - currentX;
+
         foreach (Dice dice in addedPlayerDice[stat]) {
             // for every die in the specified stat
             Vector3 position = dice.transform.position;
-            position = new Vector2(position.x + xOffset * shiftAmount, position.y);
+            position = new Vector2(position.x + deltaX, position.y);
             dice.transform.position = position;
             // shift the die by the specified amount
             dice.instantiationPos = position;
@@ -598,7 +642,7 @@ public class StatSummoner : MonoBehaviour {
 
     private int GetBaseStatWithoutAddedStamina(string stat, string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            return s.player.stats[stat] + s.player.potionStats[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + GetEncounterWeaponStatBonus(stat);
+            return GetPlayerStatTotalWithoutAddedStamina(stat);
         }
 
         return s.enemy.stats[stat];

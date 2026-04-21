@@ -43,6 +43,7 @@ public class GameData {
     public int enemyNum;
     public bool usedMace;
     public bool usedAnkh;
+    public bool usedSpellbook;
     public bool usedHelm;
     public bool usedBoots;
     public bool isFurious;
@@ -83,6 +84,7 @@ public class GameData {
     public int luckyStatBlue;
     public int luckyStatRed;
     public int luckyStatWhite;
+    public bool hasLuckyDiceRoundStats;
     // charm active bonuses (applied this round, earned last round)
     public int charmActiveBonusGreen;
     public int charmActiveBonusBlue;
@@ -141,6 +143,7 @@ public class GameData {
         enemyNum = 0;
         usedMace = false;
         usedAnkh = false;
+        usedSpellbook = false;
         usedHelm = false;
         usedBoots = false;
         isFurious = false;
@@ -177,6 +180,7 @@ public class GameData {
         pendingSpellbookTransmute = false;
         merchantStealAllowanceRemaining = 0;
         pendingLevelStartStaminaBonus = 0;
+        hasLuckyDiceRoundStats = false;
         charmActiveBonusGreen = 0;
         charmActiveBonusBlue  = 0;
         charmActiveBonusRed   = 0;
@@ -228,6 +232,11 @@ public class GameData {
         if (lastTraderItemDefs == null || lastTraderItemDefs.Length != 9) { lastTraderItemDefs = new int[9]; }
         if (charmActiveProcCounts == null || charmActiveProcCounts.Length != 11) { charmActiveProcCounts = new int[11]; }
         if (charmPendingProcCounts == null || charmPendingProcCounts.Length != 11) { charmPendingProcCounts = new int[11]; }
+
+        if (enemyNum is not Enemy.MerchantEnemyNum and not Enemy.TombstoneEnemyNum and not Enemy.BlacksmithEnemyNum && enemyNum != 2 && enemyWounds.Count >= 3) {
+            enemyIsDead = true;
+            enemyBleedsOutNextRound = false;
+        }
 
         if (enemyNum is Enemy.MerchantEnemyNum or Enemy.TombstoneEnemyNum or Enemy.BlacksmithEnemyNum || enemyIsDead) {
             isFirstCombatRoundOfEncounter = false;

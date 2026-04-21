@@ -257,6 +257,7 @@ public class HighlightCalculator : MonoBehaviour {
         if (!wasAlreadyAttached) {
             s.itemManager.TryUpgradeTakenDieWithTarot(dice, 0.05f);
         }
+        s.statSummoner.RepositionAllDice("player");
         s.turnManager.SetTargetOf("player");
         // update the player's targets
         s.diceSummoner.SaveDiceValues();

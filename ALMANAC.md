@@ -32,7 +32,7 @@ Display order:
           necklet of defense, arcane necklet, necklet of nothing, necklet of victory,
           charm of the unbroken
   Row 3: charm of the relentless, charm of the aether, charm of the ruthless, crystal shard,
-          charm of the exalted, charm of the riposte, charm of the bulwark, charm of the vindictive,
+          charm of the riposte, charm of the bulwark, charm of the vindictive,
           charm of the nothing
   Row 4: tarot of the abyss, tarot of the verdant, tarot of the inferno,
           tarot of the glacier, tarot of the dawn, tarot of the nothing,

@@ -46,8 +46,7 @@ public class CharacterSelector : MonoBehaviour {
         if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)) { s.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
         else { s.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
         // easy has 2nd item
-        if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) { s.itemManager.floorItems[1].GetComponent<Item>().Hide(); }
-        else { s.itemManager.floorItems[1].GetComponent<Item>().UnHide(); }
+        s.itemManager.floorItems[1].GetComponent<Item>().UnHide();
         selectionNum = Mathf.Clamp(selectionToKeep, 0, icons.Length - 1);
         SetSelection(selectionNum);
     }
@@ -196,6 +195,11 @@ public class CharacterSelector : MonoBehaviour {
             s.itemManager.floorItems[0].GetComponent<Item>().modifier = "rusty";
             string itemName = s.itemManager.floorItems[0].GetComponent<Item>().itemName;
             s.itemManager.floorItems[0].GetComponent<Item>().itemName = "rusty " + ItemManager.GetWeaponBaseName(itemName);
+            string nightmareTradeItemName = ItemManager.GetNightmareStarterTradeItemName(selectionNum);
+            s.itemManager.floorItems[1].GetComponent<Item>().itemName = nightmareTradeItemName;
+            s.itemManager.floorItems[1].GetComponent<Item>().modifier = "";
+            s.itemManager.floorItems[1].GetComponent<SpriteRenderer>().sprite = 
+                s.itemManager.GetItemSprite(nightmareTradeItemName.Replace(' ', '_'));
             // print(s.itemManager.floorItems[0].GetComponent<Item>().itemName);
         }
         // give the character items based on their class, even if its not unlocked because it will be hidden regardless

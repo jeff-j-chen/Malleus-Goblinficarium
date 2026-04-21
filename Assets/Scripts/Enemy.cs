@@ -61,7 +61,7 @@ public class Enemy : MonoBehaviour {
         {"31", 4},
         {"32", 4},
         {"33", 5},
-        {"41", 7},
+        {"41", 6},
     };
     private Scripts s;
     public int spawnNum;
@@ -92,9 +92,21 @@ public class Enemy : MonoBehaviour {
             && Save.game.floorItemNames.Any(itemName => !string.IsNullOrEmpty(itemName));
     }
 
+    private void SyncWoundDerivedEnemyState() {
+        if (woundList == null) { woundList = new List<string>(); }
+
+        bool canUseWoundDerivedAbilities = enemyName != null
+            && enemyName.text is not "Merchant" and not "Blacksmith" and not "Tombstone" and not "Lich"
+            && !Save.game.enemyIsDead;
+
+        Save.game.discardableDieCounter = canUseWoundDerivedAbilities && woundList.Contains("head")
+            ? Mathf.Clamp(Save.game.discardableDieCounter, 0, 1)
+            : 0;
+    }
+
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
-        s.turnManager.blackBox.transform.localPosition = s.turnManager.offScreen;
+        s.turnManager.RefreshBlackBoxVisibility();
         // make sure to show the enemy's stats at the start
         if (s.levelManager.level == Save.persistent.tsLevel && s.levelManager.sub == Save.persistent.tsSub) {
             // on the tombstone level
@@ -104,7 +116,7 @@ public class Enemy : MonoBehaviour {
             // indicate that the player can loot
             s.tombstoneData.SpawnSavedTSItems(true);
             // spawn the Saved tombstone items
-            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+            s.turnManager.RefreshBlackBoxVisibility();
             // hide the stats (don't fight tombstones)
         }
         else if (s.levelManager.ShouldForceBlacksmithSpawn()) {
@@ -114,7 +126,7 @@ public class Enemy : MonoBehaviour {
             if (spawnNewBlacksmith) { s.itemManager.SpawnBlacksmithItems(true); }
             else if (HasSavedFloorItems()) { s.tombstoneData.SpawnSavedMerchantItems(true); }
             else { s.itemManager.SpawnBlacksmithItems(true); }
-            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+            s.turnManager.RefreshBlackBoxVisibility();
         }
         else if (s.levelManager.sub == 4) {
             // on a merchant level
@@ -125,7 +137,7 @@ public class Enemy : MonoBehaviour {
             if (HasSavedFloorItems()) { s.tombstoneData.SpawnSavedMerchantItems(true); }
             else { s.itemManager.SpawnMerchantItems(); }
             // spawn the Saved merchant items
-            s.turnManager.blackBox.transform.localPosition = s.turnManager.onScreen;
+            s.turnManager.RefreshBlackBoxVisibility();
             // hide the stats (don't fight merchants)
         }
         else { 
@@ -229,9 +241,11 @@ public class Enemy : MonoBehaviour {
             // set the name, when spawning the cloaked just set it to be "Devil"
             stamina = GetSpawnStamina(enemyNum);
             // assign stamina based on level, sub, and difficulty
-            woundList.Clear();
+            woundList = new List<string>();
+            Save.game.enemyWounds = woundList;
             Save.game.enemyStamina = stamina;
             Save.game.enemyTargetIndex = targetIndex;
+            SyncWoundDerivedEnemyState();
             Save.SaveGame();
         }
         else { 
@@ -271,8 +285,10 @@ public class Enemy : MonoBehaviour {
             if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) { stamina = 0; }
             else if (enemyArr[enemyNum] == "Lich") { stamina = s.enemy.lichStamina; }
             else { stamina = Save.game.enemyStamina; }
-            woundList = Save.game.enemyWounds;
+            woundList = Save.game.enemyWounds != null ? new List<string>(Save.game.enemyWounds) : new List<string>();
+            Save.game.enemyWounds = woundList;
             targetIndex = Mathf.Clamp(Save.game.enemyTargetIndex, 0, 7);
+            SyncWoundDerivedEnemyState();
             // set stamina, show wounds and name
         }
         staminaCounter.text = stamina.ToString();

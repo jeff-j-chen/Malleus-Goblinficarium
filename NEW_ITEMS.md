@@ -34,7 +34,6 @@
 
 - [x] normalize all scalable charm buffs to `+1`
 - [x] update charm descriptions to match the normalized `+1` values
-- [x] keep `exalted` as a non-scaling one-hit shield
 - [x] make crystalline passive/shatter math use the normalized `+1` base
 
 ### charm of the arcane
@@ -43,7 +42,7 @@
 - [x] add description text: `all charms are more effective`
 - [x] make each copy increase every non-arcane scalable charm by `+1`
 - [x] make multiple copies stack
-- [x] keep `arcane`, `exalted`, and `nothing` unaffected by charm-arcane scaling
+- [x] keep `arcane` and `nothing` unaffected by charm-arcane scaling
 
 ### tarot of the arcane
 
@@ -94,7 +93,7 @@
 - [x] attack resolution defers bleed-out / combined fatal presentation to `Kill(..., bleedOut: true)` only, so the same killing attack never runs two `SetStatusText` bleed-out lines (attack paths no longer pre-empt `Kill`)
 - [x] thief's armband now turns the merchant's free take into `you steal ...` and only that free merchant take uses the steal wording
 - [x] sacrificial chalice now stores charge per copy, stacks across multiple chalices, converts paired `+0.5` gains into a live extra point, and drops back correctly when one chalice is removed
-- [x] unstable spellbook can transmute any clicked die during draft or combat (no “finish draft first” gate); enemy chest/head follow-up actions still take priority on eligible enemy dice unless head has no discard quota or the chest die was already rerolled
+- [x] unstable spellbook can transmute any clicked die during draft or combat once activated; enemy chest/head follow-up actions still take priority on eligible enemy dice unless head has no discard quota or the chest die was already rerolled
 - [x] maul keeps the normal wound status text while applying neck-style bleed-out only through `ApplyInjuriesDuringMove(..., neckStyleBleedOut: true)` on a new wound (removed extra `SetBleedOutNextRound` that could double-book bleed state)
 - [x] enemy ai now treats knee wounds as a fully locked initiative state, so blue dice and blue stamina are devalued whenever either side has a knee injury, with double-knee still resolving player-first
 - [x] saved charm active and pending bonuses are restored again after the player finishes rebuilding their saved combat state, preventing load-time startup code from wiping their live effect
@@ -327,7 +326,7 @@ save at `ClearVariablesAfterRound`; restore in `ItemManager.GiveStarterItems` (c
 ```cs
 public string[] charmTypes = {
     "unbroken", "relentless", "aether", "ruthless",
-    "crystalline", "exalted", "riposte", "bulwark", "vindictive"
+    "crystalline", "riposte", "bulwark", "vindictive"
 };
 ```
 
@@ -389,23 +388,6 @@ if (s.itemManager.PlayerHasCharm("riposte")) {
 }
 ```
 
-**in the hit path, BEFORE wound is added (armor/exalted block):**
-```cs
-// CHARM: exalted — behaves like armor but says "your charm shatters" and plays cloak
-bool exalted = !armor && s.itemManager.PlayerHasCharm("exalted");
-if (exalted) {
-    armor = true;  // reuse armor flag to block wound + skip animation
-    SetStatusText($"{s.enemy.enemyName.text.ToLower()} hits you... your charm shatters");
-    // remove ONE exalted charm
-    StartCoroutine(RemoveCharmAfterDelay("exalted"));
-    s.itemManager.Select(s.player.inventory, 0, playAudio: false);
-}
-// existing armor check follows unchanged
-```
-
-**sound plumbing for exalted vs armor:**
-add `string hitSoundOverride = null` as optional parameter on `DoStuffForAttack`. When `exalted=true` but `armor=false-original`, pass `hitSoundOverride: "cloak"` and `armor: true` so animation is suppressed but sound is "cloak" not "armor".
-
 actually simpler: introduce `bool charmShatter = false` alongside `armor`. When charmShatter=true:
 - plays "cloak" in the sound block (instead of "hit")
 - skips hit animation (same as armor)
@@ -413,7 +395,7 @@ actually simpler: introduce `bool charmShatter = false` alongside `armor`. When 
 
 in `DoStuffForAttack` signature: add `bool charmShatter = false`.
 
-**in the wound-add block (after armor/exalted checks, player did take a hit):**
+**in the wound-add block (after armor checks, player did take a hit):**
 ```cs
 // CHARM: crystalline — no wound block, but plays cloak + breaks
 bool crystallineShatters = s.itemManager.PlayerHasCharm("crystalline");
@@ -518,19 +500,11 @@ Save.game.charmActiveBonusWhite = s.itemManager.charmActiveBonus["white"];
 - [x] description: `"shatters if wounded"` (wait: "+2 attack but breaks when wounded")
 - [x] `UpdateCharmPassiveStats()`: `charmPassiveStats["red"] = GetCharmCount("crystalline") * 2`
 - [x] called on pickup and `Remove()`
-- [x] `EnemyAttacks()` hit path: if player has crystalline and wound would be added (not dodgy, not exalted-blocked): play "cloak" sound (via `charmShatter`), call `RemoveCharmAfterDelay("crystalline")`
+- [x] `EnemyAttacks()` hit path: if player has crystalline and wound would be added (not dodgy, not armor-blocked): play "cloak" sound (via `charmShatter`), call `RemoveCharmAfterDelay("crystalline")`
   - wound STILL applies — crystalline only overrides sound and removes itself
   - no status text change
 - [x] `DoStuffForAttack` gets `bool charmShatter` param: if true, play "cloak" not "hit", but still run hit animation
 - [x] `Remove()` will call `UpdateCharmPassiveStats()` which decrements the +2
-
-### charm of the exalted (blocks one hit, "your charm shatters")
-- [x] `charmTypes` entry: `"exalted"`
-- [x] description: `"protects from one hit"`
-- [x] `EnemyAttacks()` hit path: checked AFTER armor, BEFORE wound. If present, set `exalted=true`, status text = `"...your charm shatters"`, call `RemoveCharmAfterDelay("exalted")`, pass `charmShatter=true` to `DoStuffForAttack` so "cloak" plays, wound is BLOCKED (same as armor)
-- [x] sound: "cloak" (not "armor")
-- [x] animation: none (same as armor — skips PlayHitAnimation)
-- [x] `Item.Select()` description
 
 ### charm of riposte (+1 attack on parry)
 - [x] `charmTypes` entry: `"riposte"`
@@ -555,10 +529,10 @@ Save.game.charmActiveBonusWhite = s.itemManager.charmActiveBonus["white"];
 ### charm of the vindictive (+3 attack when wounded)
 - [x] `charmTypes` entry: `"vindictive"`
 - [x] description: `"wound to gain +3 attack"` (or "+3 attack when wounded")
-- [x] `EnemyAttacks()` wound-add path (wound was actually added, not dodgy/armor/exalted):
+- [x] `EnemyAttacks()` wound-add path (wound was actually added, not dodgy/armor):
   - enemy went first (`enemyAttackedFirst=true`) → `charmActiveBonus["red"] += count*3` + `SummonStats()`
   - enemy went second → `charmPendingBonus["red"] += count*3`
-- [x] trigger: only if wound was actually added (not blocked by armor/exalted)
+- [x] trigger: only if wound was actually added (not blocked by armor)
 - [x] `ClearVariablesAfterRound` flush
 - [x] `Item.Select()` description
 - [x] pickup/drop infra
@@ -622,7 +596,7 @@ private static string GetWeaponBaseName(string fullItemName) {
 | `TurnManager.RoundOne` | `.Split(' ')[1]` for weaponUses tracking | `s.itemManager.GetWeaponBaseName(...)` |
 
 ### shattering in `EnemyAttacks()`
-when player is hit (not dodgy, not blocked by armor/exalted) and wound actually added:
+when player is hit (not dodgy, not blocked by armor) and wound actually added:
 ```cs
 // glass sword shatters silently
 if (s.itemManager.PlayerHasWeapon("glass sword") && !Save.game.glassSwordShattered) {
@@ -676,8 +650,6 @@ the `tutorialJson` string in `Save.cs` is a hardcoded JSON literal. the new `Gam
 
 - **lich immunity**: lich is immune to most wound effects. charm of relentless should still trigger if lich is wounded (player inflicted wound), but confirm `s.enemy.spawnNum != 0` check still passes for lich (lich is not spawnNum 0 or 1, so yes).
 - **maul instant kill**: maul kills instantly via `ApplyInjuriesDuringMove`, so `PlayerAttacks()` returns true early. charm of relentless should still fire — both add call sites are sequenced correctly since relentless is added when wound is added (before the return).
-- **exalted vs armor**: if player has both armor and exalted, armor takes priority (checked first). exalted is only checked if `!armor`.
-- **crystalline + exalted**: if exalted blocks the hit, crystalline does NOT shatter (no wound was added).
 - **glass sword + armor**: armor blocks the hit, glass sword does NOT shatter.
 - **glass sword + crystalline**: both trigger on same wound; both sound as "cloak" (one sound played), glass sword shatters, crystalline shatters.
 - **glass sword shard re-shatter**: once shattered (stats 0/1/1/0), `glassSwordShattered=true` prevents re-triggering.
@@ -690,7 +662,6 @@ the `tutorialJson` string in `Save.cs` is a hardcoded JSON literal. the new `Gam
 
 | event | sound |
 |---|---|
-| charm of exalted blocks a hit | "cloak" (replaces "hit") |
 | charm of crystalline shatters on hit | "cloak" (replaces "hit"), wound still plays |
 | glass sword shatters on hit | "cloak" (replaces "hit"), wound still plays |
 | normal player hit | "hit" |
@@ -738,7 +709,7 @@ the `tutorialJson` string in `Save.cs` is a hardcoded JSON literal. the new `Gam
 ### TurnManager.cs checklist
 - [x] add `enemyAttackedFirst` and `playerAttackedFirst` bool fields
 - [x] `RoundOne`: set flags; charm aether trigger (player-first); charm bulwark trigger (enemy-first)
-- [x] `EnemyAttacks()`: parry → unbroken pending, riposte (immediate or pending); hit → exalted (block+shatter), crystalline (shatter+cloak), vindictive (immediate or pending), glass sword (shatter+cloak)
+- [x] `EnemyAttacks()`: parry → unbroken pending, riposte (immediate or pending); hit → crystalline (shatter+cloak), vindictive (immediate or pending), glass sword (shatter+cloak)
 - [x] `PlayerAttacks()`: ruthless (targeting neck), relentless (wound added)
 - [x] `ClearVariablesAfterRound`: flush pending→active, clear pending, call `UpdateCharmPassiveStats`, save to GameData
 - [x] add `RemoveCharmAfterDelay(string modifier)` coroutine
@@ -810,12 +781,14 @@ description: `it thirsts...\n+0`
 - [x] add chalice passive bonus into player stat sums / shapes / preview layout
 
 ### unstable spellbook
-description: `transmute a die`
+description: `pay 3 stamina to transmute a die`
 
 - [x] add description + drop entry
-- [x] only allow use after the draft is complete
+- [x] allow use during draft or combat
 - [x] play `zap` on use
-- [x] consume the item and enter a pending-target state saved in `GameData`
+- [x] keep the item and enter a pending-target state saved in `GameData`
+- [x] limit activation to once per draft, like `ankh`
+- [x] repeated attempts in the same draft show `it's too dangerous`
 - [x] allow clicking either a player die or an enemy die while pending
 - [x] randomize both the selected die's color and its value
 - [x] reattach the die to the correct stat, reflow dice, refresh stats, and rerun enemy planning
@@ -912,3 +885,5 @@ description: `pay 3 stamina to transmute a die`
 - [x] spend stamina when the spellbook is activated
 - [x] keep the pending transmute state save-safe
 - [x] update the description to match the new reusable behavior
+- [x] limit it to one use per draft, like `ankh`
+- [x] repeat use in the same draft shows `it's too dangerous`
