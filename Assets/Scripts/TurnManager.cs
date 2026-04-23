@@ -178,15 +178,9 @@ public class TurnManager : MonoBehaviour {
             return false;
         }
 
-        if (s.itemManager.PlayerAlwaysChoosesFirstDraftDie()) {
-            return false;
-        }
-
-        if (s.itemManager.PlayerAlwaysChoosesLastDraftDie()) {
-            return true;
-        }
-
-        return s.statSummoner.SumOfStat("blue", "player") < s.statSummoner.SumOfStat("blue", "enemy");
+        int playerSpeed = s.statSummoner.SumOfStat("blue", "player");
+        int enemySpeed = s.statSummoner.SumOfStat("blue", "enemy");
+        return !PlayerDraftsFirstThisRound(playerSpeed, enemySpeed);
     }
 
     public bool EnemyShouldDraftFirstForFreshDraft() {
@@ -194,17 +188,9 @@ public class TurnManager : MonoBehaviour {
             return false;
         }
 
-        if (s.itemManager.PlayerAlwaysChoosesFirstDraftDie()) {
-            return false;
-        }
-
-        if (s.itemManager.PlayerAlwaysChoosesLastDraftDie()) {
-            return true;
-        }
-
-        int playerFreshSpeed = s.statSummoner.RawSumOfStat("blue", "player") - s.statSummoner.addedPlayerStamina["blue"];
-        int enemyFreshSpeed = s.statSummoner.RawSumOfStat("blue", "enemy") - s.statSummoner.addedEnemyStamina["blue"];
-        return playerFreshSpeed < enemyFreshSpeed;
+        int playerFreshSpeed = s.statSummoner.SumOfStat("blue", "player");
+        int enemyFreshSpeed = s.statSummoner.SumOfStat("blue", "enemy");
+        return !PlayerDraftsFirstThisRound(playerFreshSpeed, enemyFreshSpeed);
     }
 
     /// <summary>
@@ -214,6 +200,22 @@ public class TurnManager : MonoBehaviour {
     /// <param name="ignoreSavedDraftState">true when starting a fresh dice set that should not reuse saved draft state.</param>
     public void DetermineMove(bool delay = false, bool ignoreSavedDraftState = false, bool? enemyDraftsFirstOverride = null) {
         if (!ignoreSavedDraftState && EnemyAlreadyHasDraftedDie(false)) { return; }
+
+        bool shouldDeferDraftOrderResolution = enemyDraftsFirstOverride == null
+            && (s == null
+                || s.diceSummoner == null
+                || s.diceSummoner.CountUnattachedDice() < 6
+                || !s.diceSummoner.IsDraftSpawnComplete()
+                || s.diceSummoner.DiceIsRolling());
+        if (shouldDeferDraftOrderResolution) {
+            draftInputLocked = true;
+            if (queuedEnemyDraftMove != null) {
+                StopCoroutine(queuedEnemyDraftMove);
+                queuedEnemyDraftMove = null;
+            }
+            queuedEnemyDraftMove = StartCoroutine(DetermineEnemyDraftOrderWhenReady(delay, ignoreSavedDraftState));
+            return;
+        }
 
         bool enemyDraftsFirst = enemyDraftsFirstOverride
             ?? (ignoreSavedDraftState ? EnemyShouldDraftFirstForFreshDraft() : EnemyShouldDraftFirst());
@@ -239,12 +241,42 @@ public class TurnManager : MonoBehaviour {
 
     private IEnumerator EnemyMoveWhenDraftReady(bool delay) {
         try {
-            while (s == null || s.diceSummoner == null || s.diceSummoner.CountUnattachedDice() < 6) {
+            while (s == null
+                || s.diceSummoner == null
+                || s.diceSummoner.CountUnattachedDice() < 6
+                || !s.diceSummoner.IsDraftSpawnComplete()
+                || s.diceSummoner.DiceIsRolling()) {
                 yield return null;
             }
 
             yield return s.delays[0.1f];
 
+            yield return StartCoroutine(EnemyMove(delay));
+        }
+        finally {
+            queuedEnemyDraftMove = null;
+        }
+    }
+
+    private IEnumerator DetermineEnemyDraftOrderWhenReady(bool delay, bool ignoreSavedDraftState) {
+        try {
+            while (s == null
+                || s.diceSummoner == null
+                || s.diceSummoner.CountUnattachedDice() < 6
+                || !s.diceSummoner.IsDraftSpawnComplete()
+                || s.diceSummoner.DiceIsRolling()) {
+                yield return null;
+            }
+
+            bool enemyDraftsFirst = ignoreSavedDraftState
+                ? EnemyShouldDraftFirstForFreshDraft()
+                : EnemyShouldDraftFirst();
+            if (!enemyDraftsFirst) {
+                draftInputLocked = false;
+                yield break;
+            }
+
+            yield return s.delays[0.1f];
             yield return StartCoroutine(EnemyMove(delay));
         }
         finally {
@@ -409,7 +441,7 @@ public class TurnManager : MonoBehaviour {
                     lastNonGuardPlayerTargetIndex = Mathf.Clamp(s.player.targetIndex, 0, targetArr.Length - 1);
                     if (!isMoving) { 
                         // prevents a nasty bug where wounds would not be applied properly due to the * being added
-                        if (s.levelManager.level == 4 && s.levelManager.sub == 1) {
+                        if (LevelManager.IsDevilSub(s.levelManager.level, s.levelManager.sub)) {
                             // if devil
                             if (s.enemy.woundList.Contains(targetArr[s.player.targetIndex])) { s.player.target.text = "*" + targetArr[s.player.targetIndex]; }
                             // add an asterisks if already injured
@@ -536,7 +568,8 @@ public class TurnManager : MonoBehaviour {
     }
 
     public bool CanEscapeToMenu() {
-        return !criticalRoundInProgress;
+        bool isAnyDieRolling = s?.diceSummoner != null && s.diceSummoner.DiceIsRolling();
+        return !criticalRoundInProgress && !isAnyDieRolling;
     }
 
     // easy and hard both keep the committed enemy plan visible once drafting is complete
@@ -620,6 +653,76 @@ public class TurnManager : MonoBehaviour {
 
         ResolveBleedOutAfterRound();
         StartCoroutine(CompleteRoundAfterResolution());
+    }
+
+    public void KillPlayerBySuicide() {
+        if (s == null || s.player == null || s.player.isDead) { return; }
+
+        criticalRoundInProgress = true;
+        isMoving = true;
+        playerBleedOutPendingThisRound = false;
+        enemyBleedOutPendingThisRound = false;
+        queuePlayerKillAsBleedOut = false;
+        queueEnemyKillAsBleedOut = false;
+        s.player.isDead = true;
+        SetBleedOutNextRound("player", false, saveGame:false);
+        Save.game.expendedStamina = 0;
+
+        bool resurrectWithAmulet = s.tombstoneData != null && s.tombstoneData.HasUsableResurrectionAmulet();
+        s.soundManager.PlayClip(resurrectWithAmulet ? "cloak" : "death");
+        ApplyPlayerDeathVisualState();
+        FinalizePlayerDeathState(resurrectWithAmulet);
+
+        if (s.tutorial == null) { Save.SaveGame(); }
+        Save.SavePersistent();
+        criticalRoundInProgress = false;
+        if (!resurrectWithAmulet) {
+            isMoving = false;
+        }
+    }
+
+    private void ApplyPlayerDeathVisualState() {
+        if (s == null || s.player == null) { return; }
+
+        SpriteRenderer spriteRenderer = s.player.GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) {
+            spriteRenderer.color = Color.white;
+            spriteRenderer.sprite = s.player.GetDeathSprite();
+        }
+
+        Animator playerAnimator = s.player.GetComponent<Animator>();
+        if (playerAnimator != null) {
+            playerAnimator.enabled = false;
+        }
+
+        s.player.SetPlayerPositionAfterDeath();
+    }
+
+    private void FinalizePlayerDeathState(bool resurrectWithAmulet) {
+        if (s == null || s.player == null) { return; }
+
+        if (resurrectWithAmulet) {
+            s.tombstoneData.PrepareResurrectionAmulet();
+            s.tombstoneData.BeginPreparedResurrection();
+        }
+        else {
+            s.player.stamina = 3;
+            if (s.player.staminaCounter != null) {
+                s.player.staminaCounter.text = s.player.stamina.ToString();
+            }
+            Save.game.playerStamina = s.player.stamina;
+            s.tombstoneData.SetTombstoneData();
+            Save.persistent.deaths++;
+        }
+
+        foreach (GameObject dice in s.diceSummoner.existingDice) {
+            StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
+        }
+        s.statSummoner.ResetDiceAndStamina(refundEnemyPlannedStamina:resurrectWithAmulet);
+        ClearVariablesAfterRound();
+        s.statSummoner.SetDebugInformationFor("player");
+        RecalculateMaxFor("player");
+        RecalculateMaxFor("enemy");
     }
 
     /// <summary>
@@ -747,6 +850,7 @@ public class TurnManager : MonoBehaviour {
                     // wait
                     if (Save.game.discardableDieCounter == 0 && !s.enemy.woundList.Contains("chest") && !s.itemManager.EnemyHasTemporaryChestInjury()) {
                         // if player has taken the action to reroll/discard and can't take it again, end the time slot early
+                        t -= 1f;
                         break;
                     }
                     if (s.diceSummoner.existingDice.Where(d => d.GetComponent<Dice>().isOnPlayerOrEnemy == "enemy").All(d => d.GetComponent<Dice>().isRerolled)) {
@@ -814,6 +918,9 @@ public class TurnManager : MonoBehaviour {
             // stop moving
             s.statSummoner.ResetDiceAndStamina();
             // reset die and stamina
+            if (s.tutorial != null && s.tutorial.curIndex == 21) {
+                s.tutorial.QueueParryDraftRound();
+            }
             s.diceSummoner.SummonDice(false, true);
             // summon the die again
             s.statSummoner.SummonStats();
@@ -1039,18 +1146,9 @@ public class TurnManager : MonoBehaviour {
         }
         // if player has rapier and the enemy dies, add to their stamina based on whether its legendary or not
         if (playerOrEnemy == "player") {
-            s.player.GetComponent<SpriteRenderer>().sprite = s.player.GetDeathSprite();
-            s.player.SetPlayerPositionAfterDeath();
+            ApplyPlayerDeathVisualState();
             // if player dies, set sprite and proper position
-            if (resurrectWithAmulet) {
-                s.tombstoneData.PrepareResurrectionAmulet();
-                s.tombstoneData.BeginPreparedResurrection();
-            }
-            else {
-                s.tombstoneData.SetTombstoneData();
-            }
-            // allow the player to retry
-            if (!resurrectWithAmulet) { Save.persistent.deaths++; }
+            FinalizePlayerDeathState(resurrectWithAmulet);
         }
         else if (playerOrEnemy == "enemy") {
             if (s.enemy.enemyName.text == "Devil") {
@@ -1070,20 +1168,22 @@ public class TurnManager : MonoBehaviour {
             RefreshBlackBoxVisibility();
             // hide the enemy's stats
             if (s.tutorial != null) { s.tutorial.Increment(); }
+            foreach (GameObject dice in s.diceSummoner.existingDice) {
+                StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
+                // fade out all existing die
+            }
+            s.statSummoner.ResetDiceAndStamina();
+            // clear them
+            ClearVariablesAfterRound();
+            // clear potion stats
+            s.statSummoner.SetDebugInformationFor("player");
+            // set debug (only player needed here)
+            RecalculateMaxFor("player");
+            RecalculateMaxFor("enemy");
+            // reset target for both
+            Save.SavePersistent();
+            yield break;
         }
-        foreach (GameObject dice in s.diceSummoner.existingDice) {
-            StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
-            // fade out all existing die
-        }
-        s.statSummoner.ResetDiceAndStamina();
-        // clear them
-        ClearVariablesAfterRound();
-        // clear potion stats
-        s.statSummoner.SetDebugInformationFor("player");
-        // set debug (only player needed here)
-        RecalculateMaxFor("player");
-        RecalculateMaxFor("enemy");
-        // reset target for both
         Save.SavePersistent();
     }
 
@@ -1299,8 +1399,9 @@ public class TurnManager : MonoBehaviour {
         bool chaliceWillDrink = false;
         bool playerBleedsOutThisRound = PlayerBleedsOutThisRound();
         bool playerWouldAutoHeal = Save.game.curCharNum == 3 && s.player.woundList.Count < 2 && s.player.stamina >= 7;
-        bool enemyHitCountsAsWounded = !Save.game.isDodgy && !s.player.woundList.Contains(s.enemy.target.text);
-        bool enemyHitAddsPersistentWound = enemyHitCountsAsWounded && !playerWouldAutoHeal;
+        bool enemyHitOnExistingWound = s.player.woundList.Contains(s.enemy.target.text);
+        bool enemyHitCountsAsWounded = !Save.game.isDodgy;
+        bool enemyHitAddsPersistentWound = enemyHitCountsAsWounded && !enemyHitOnExistingWound && !playerWouldAutoHeal;
         bool enemyHitIsFatal = enemyHitAddsPersistentWound && s.player.woundList.Count == 2;
         bool phylacteryTriggers = !armor
             && enemyHitAddsPersistentWound
@@ -1364,8 +1465,8 @@ public class TurnManager : MonoBehaviour {
             if (enemyAttackedFirst) {
                 StartCoroutine(TriggerInevitableCharmAfterSound());
             }
-            if (!(s.player.woundList.Contains(s.enemy.target.text) || s.player.woundList.Contains(s.enemy.target.text) || armor || Save.game.isDodgy)) {
-                // if the player hasn't been injured before, doesn't have armor, and didn't dodge:
+            if (!armor && !Save.game.isDodgy) {
+                // if the hit landed without armor/dodge mitigation:
                 if (s.itemManager.PlayerHasCharm("vindictive")) {
                     if (enemyAttackedFirst) {
                         s.itemManager.ActivateCharmTriggerImmediately("vindictive", s.itemManager.GetCharmCount("vindictive"));
@@ -1375,8 +1476,12 @@ public class TurnManager : MonoBehaviour {
                     }
                 }
                 if (crystalShardShatters) {
-                    s.itemManager.MarkItemUsed("crystal shard");
-                    StartCoroutine(RemoveItemAfterDelay("crystal shard"));
+                    int crystalShardCount = s.itemManager.GetPlayerItemCount("crystal shard");
+                    for (int i = 0; i < crystalShardCount; i++) {
+                        s.itemManager.MarkItemUsed("crystal shard");
+                    }
+                    s.itemManager.RegisterCrystalShardShatter(crystalShardCount);
+                    StartCoroutine(RemoveItemsAfterDelay("crystal shard", crystalShardCount));
                 }
                 if (glassSwordShatters) {
                     Save.game.glassSwordShattered = true;
@@ -1395,7 +1500,7 @@ public class TurnManager : MonoBehaviour {
                         ChangeStaminaOf("player", 3);
                         // so merely increment their stamina
                     }
-                    if (!s.player.woundList.Contains(s.enemy.target.text)) {
+                    if (!enemyHitOnExistingWound) {
                         s.player.woundList.Add(s.enemy.target.text);
                         // add the hit, but only if the player did not yet have that wound
                         Save.game.playerWounds = s.player.woundList;
@@ -1423,7 +1528,7 @@ public class TurnManager : MonoBehaviour {
                     }
                 }
                 return false;
-                // return that the player did not ie
+                // return that the player did not die
             }
         }
         else {
@@ -1483,6 +1588,20 @@ public class TurnManager : MonoBehaviour {
 
         GameObject itemObj = s.itemManager.GetPlayerItem(itemName);
         if (itemObj != null) { itemObj.GetComponent<Item>().Remove(); }
+    }
+
+    private IEnumerator RemoveItemsAfterDelay(string itemName, int amount, float delay = 0.45f) {
+        if (amount <= 0) { yield break; }
+        if (delay > 0f) {
+            yield return new WaitForSeconds(delay);
+        }
+
+        for (int i = 0; i < amount; i++) {
+            GameObject itemObj = s.itemManager.GetPlayerItem(itemName);
+            if (itemObj == null) { yield break; }
+            itemObj.GetComponent<Item>().Remove();
+            yield return null;
+        }
     }
 
     /// <summary>
@@ -1599,6 +1718,14 @@ public class TurnManager : MonoBehaviour {
                 }
                 SetPlayerAttackStatusText(FinalizePlayerAttackStatusText(playerAttackStatusText));
                 if (s.statSummoner.SumOfStat("green", "player") >= 0) {
+                    if (s.enemy.spawnNum != 0) {
+                        if (s.itemManager.PlayerHasWeapon("warhammer")) {
+                            s.itemManager.QueueWarhammerStunForNextTurn();
+                        }
+                        if (s.itemManager.PlayerHasCharm("relentless")) {
+                            s.itemManager.QueueCharmTrigger("relentless", s.itemManager.GetCharmCount("relentless"));
+                        }
+                    }
                     if (playerWillLeech) {
                         s.player.woundList.Remove(currentTargetWound);
                         ClearBleedOutForRecoveredWound("player", currentTargetWound);
@@ -1608,19 +1735,13 @@ public class TurnManager : MonoBehaviour {
                     if (!s.enemy.woundList.Contains(s.player.target.text) && !s.player.target.text.Contains("*")) {
                         // if wound was not injured and player has enough accuracy to hit
                         Action onEnemyWoundBlackAfterSound = null;
+                        bool enemyHadNoWoundsBeforeHit = s.enemy.woundList.Count == 0;
                         if (s.enemy.spawnNum != 0) {
                             s.enemy.woundList.Add(s.player.target.text);
                             // add the wound
                             Save.game.enemyWounds = s.enemy.woundList;
                             UpdateSavedEnemyDeathStateFromWounds();
-                            if (s.itemManager.PlayerHasWeapon("warhammer")) {
-                                s.itemManager.QueueWarhammerStunForNextTurn();
-                            }
-                            onEnemyWoundBlackAfterSound = () => s.itemManager.TryApplyKatarFirstWoundEffect();
-                            // CHARM: relentless - wounding enemy grants +2 attack next round
-                            if (s.itemManager.PlayerHasCharm("relentless")) {
-                                s.itemManager.QueueCharmTrigger("relentless", s.itemManager.GetCharmCount("relentless"));
-                            }
+                            onEnemyWoundBlackAfterSound = () => s.itemManager.TryApplyKatarFirstWoundEffect(enemyHadNoWoundsBeforeHit);
                         }
                         if (s.tutorial == null) { Save.SaveGame(); }
                         if (Save.game.curCharNum == 2) {
@@ -1679,7 +1800,6 @@ public class TurnManager : MonoBehaviour {
             SetPlayerAttackStatusText(FinalizePlayerAttackStatusText(playerAttackStatusText));
             // depending on the stats, notify player accordingly
         }
-        if (playerHasLeech && !clearLeechAtBlackout) { ClearPlayerLeechEffect(); }
         return false;
         // enemy has not died, so return false
     }
@@ -1998,6 +2118,15 @@ public class TurnManager : MonoBehaviour {
         if (s != null && s.itemManager != null) {
             if (s.itemManager.PlayerAlwaysActsFirst()) { return true; }
             if (s.itemManager.PlayerAlwaysActsLast()) { return false; }
+        }
+
+        return playerSpd >= enemySpd;
+    }
+
+    private bool PlayerDraftsFirstThisRound(int playerSpd, int enemySpd) {
+        if (s != null && s.itemManager != null) {
+            if (s.itemManager.PlayerAlwaysChoosesFirstDraftDie()) { return true; }
+            if (s.itemManager.PlayerAlwaysChoosesLastDraftDie()) { return false; }
         }
 
         return playerSpd >= enemySpd;

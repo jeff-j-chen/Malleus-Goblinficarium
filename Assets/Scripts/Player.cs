@@ -133,31 +133,7 @@ public class Player : MonoBehaviour {
             else {
                 if (!s.levelManager.lockActions) {
                     // don't let player restart while actions are locked
-                    // player wants to restart
-                    // player death on r is instant, so don't do animation stuff
-                    isDead = true;
-                    // mark player as dead
-                    s.soundManager.PlayClip("death");
-                    // play sound clip
-                    RestoreDefaultVisualState();
-                    foreach (GameObject dice in s.diceSummoner.existingDice) {
-                        StartCoroutine(dice.GetComponent<Dice>().FadeOut(false));
-                        // fade out all existing die
-                    }
-                    s.statSummoner.ResetDiceAndStamina();
-                    // clear them
-                    s.turnManager.ClearPotionStats();
-                    // clear potion stats
-                    s.statSummoner.SummonStats();
-                    // summon stats
-                    s.statSummoner.SetCombatDebugInformationFor("player");
-                    // set debug (only player needed here)
-                    s.turnManager.RecalculateMaxFor("player");
-                    // reset target
-                    s.tombstoneData.SetTombstoneData();
-                    // allow player to retry
-                    Save.persistent.deaths++;
-                    Save.SavePersistent();
+                    s.turnManager.KillPlayerBySuicide();
                 }
             }
         }
@@ -166,32 +142,24 @@ public class Player : MonoBehaviour {
     public void MoveTargetDown() { 
         // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
         // set the available targets to make sure the player can do that
-        bool wasGuarding = targetIndex == TurnManager.PlayerGuardTargetIndex;
-        if (targetIndex < s.turnManager.GetMaxPlayerTargetIndex()) {
+        if (targetIndex < Mathf.Clamp(s.statSummoner.SumOfStat("green", "player"), 0, 7)) {
             // if player can target there
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
             // if there is still time left on the hint timer (for targeting neck or targeting wounded body part)
             targetIndex++;
             // increment target index
             s.turnManager.SetTargetOf("player");
-            if (wasGuarding != (targetIndex == TurnManager.PlayerGuardTargetIndex)) {
-                s.statSummoner.SummonStats();
-            }
             // and set target based off the new target index
             if (s.tutorial != null && targetIndex == 7 && s.tutorial.curIndex == 20) { s.tutorial.Increment(); }
         }
     }
 
     public void MoveTargetUp() {
-        bool wasGuarding = targetIndex == TurnManager.PlayerGuardTargetIndex;
-        if (targetIndex > TurnManager.PlayerGuardTargetIndex) {  
+        if (targetIndex > TurnManager.PlayerGuardTargetIndex) {
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
             if (!(s.tutorial != null && targetIndex == 7)) {
                 targetIndex--;
                 s.turnManager.SetTargetOf("player");
-                if (wasGuarding != (targetIndex == TurnManager.PlayerGuardTargetIndex)) {
-                    s.statSummoner.SummonStats();
-                }
             }
         }
     }
@@ -214,6 +182,9 @@ public class Player : MonoBehaviour {
             }
         }
         if (availableDice.Count == 0) {
+            string normalizedTarget = target.text.TrimStart('*');
+            bool targetingNeck = normalizedTarget == "neck";
+            bool neckAlreadyWounded = s.enemy.woundList.Contains("neck");
             if (hintTimer > 0.05f) {
                 // player hits enter again, so immediately start the round
                 StopCoroutine(coroutine);
@@ -226,15 +197,12 @@ public class Player : MonoBehaviour {
                 s.turnManager.RoundOne();
                 // begin the round
             }
-            else if (s.turnManager.IsPlayerGuarding()) {
-                s.turnManager.RoundOne();
-            }
-            else if (s.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "neck" && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul") && s.statSummoner.SumOfStat("red", "player") > s.statSummoner.SumOfStat("white", "enemy")) {
+            else if (s.statSummoner.SumOfStat("green", "player") >= 7 && !targetingNeck && !neckAlreadyWounded && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul") && s.statSummoner.SumOfStat("red", "player") > s.statSummoner.SumOfStat("white", "enemy")) {
                 // if player wants hints, can aim for the neck, but is not doing so, and doesn't have a maul
                 coroutine = StartCoroutine(HintNeck());
                 // hint the player
             }
-            else if (target.text.StartsWith("*") && s.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
+            else if (s.enemy.woundList.Contains(normalizedTarget) && PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
                 // if body part is already wounded
                 coroutine = StartCoroutine(HintTargetingWounded());
                 // hint the player

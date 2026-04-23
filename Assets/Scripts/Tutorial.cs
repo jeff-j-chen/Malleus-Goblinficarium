@@ -58,7 +58,7 @@ public class Tutorial : MonoBehaviour {
         // ^ 20
         "\n\nNow use your weapon\n(click the \"sword\" icon) to start the\nfight.",
         // ^ 21
-        "\n\nWith a neck wound, he will live to fight one more round, but die regardless of teh outcome.\nThis means he can still mortally wound you, be careful\n\n[attack again] to continue",
+        "\nWith a neck wound, he will live to fight one\nmore round, and bleed out in the next.\nHe can still wound you, be careful!\n\n[attack again] to continue",
         // ^ 22
         "Take the loot now. Use [ctrl]\nor [left_mouse] to access his\ninventory.\n\n[take steak] to continue",
         // ^ 23

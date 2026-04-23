@@ -110,7 +110,7 @@ public class TombstoneData : MonoBehaviour {
             Save.persistent.tsItemMods[i] = item.modifier;
             // Save everything about the current items
         }
-        if (s.levelManager.level == 4 && s.levelManager.sub == 1) { 
+        if (LevelManager.IsDevilSub(s.levelManager.level, s.levelManager.sub)) { 
             Save.persistent.tsLevel = 3;
             Save.persistent.tsSub = 3;
             // game will crash if we go to 4-1*, easy solution here
@@ -205,6 +205,8 @@ public class TombstoneData : MonoBehaviour {
         Save.game.usedBoots = false;
         Save.game.pendingMirrorCopy = false;
         Save.game.enemyHasKatarSpeedPenalty = false;
+        Save.game.enemyKatarSpeedPenaltyAmount = 0;
+        Save.game.enemyKatarBaseSpeedAfterPenalty = 0;
         Save.game.diceNumbers = new();
         Save.game.diceTypes = new();
         Save.game.dicePlayerOrEnemy = new();
@@ -219,12 +221,12 @@ public class TombstoneData : MonoBehaviour {
 
         bool hasSavedTrader = Save.game.lastTraderLevel > 0
             && Save.game.lastTraderSub > 0
-            && Save.game.lastTraderEnemyNum > 0;
+            && Save.game.lastTraderEnemyNum == Enemy.MerchantEnemyNum;
         if (hasSavedTrader) {
             return (Save.game.lastTraderLevel, Save.game.lastTraderSub, Save.game.lastTraderEnemyNum, true);
         }
 
-        return (Mathf.Min(s.levelManager.level, 3), 4, Enemy.MerchantEnemyNum, false);
+        return (Mathf.Max(1, s.levelManager.level), 4, Enemy.MerchantEnemyNum, false);
     }
 
     private void RestoreLastTraderFloorItems() {

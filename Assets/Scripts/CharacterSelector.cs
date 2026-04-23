@@ -77,6 +77,8 @@ public class CharacterSelector : MonoBehaviour {
         // depending on the input, shift the selection in that direction and shows a small animation
         else if (Input.GetKeyDown(KeyCode.Space)) { CycleDifficulty(); }
         // space toggles easy mode
+        else if (Input.GetKeyDown(KeyCode.E)) { ToggleEndlessMode(); }
+        // e toggles endless mode
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) { 
             // enter selects the character
             Select();
@@ -244,6 +246,15 @@ public class CharacterSelector : MonoBehaviour {
         }
     }
 
+    public void ToggleEndlessMode() {
+        if (simpleFadeIn.lockChanges) { return; }
+
+        s.soundManager.PlayClip("click1");
+        Save.persistent.endlessModeEnabled = !Save.persistent.endlessModeEnabled;
+        Save.SavePersistent();
+        UpdatePerkText();
+    }
+
     public void UpdatePerkText() { 
         perkText.text = perks[selectionNum];
         if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)) { 
@@ -258,5 +269,8 @@ public class CharacterSelector : MonoBehaviour {
         else if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
             perkText.text += "\n> Selected Difficulty: NIGHTMARE";
         }
+        perkText.text += Save.persistent.endlessModeEnabled
+            ? "\n> Endless Mode: ENABLED"
+            : "\n> Endless Mode: DISABLED";
     }
 }

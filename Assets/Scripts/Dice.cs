@@ -22,6 +22,9 @@ public class Dice : MonoBehaviour {
     private bool suspendedEnemyPlanRefreshForDrag = false;
     private bool dragStartedAttachedToPlayer = false;
     private string dragStartedPlayerStat = "";
+    private bool detachedForPlayerReflowPreview = false;
+    private string detachedPlayerReflowPreviewStat = "";
+    private int detachedPlayerReflowPreviewIndex = -1;
 
     private readonly WaitForSeconds[] rollTimes = { new(0.01f), new(0.03f), new(0.06f), new(0.09f), new(0.12f), new(0.15f), new(0.18f), new(0.21f), new(0.24f), new(0.3f) };
     // different times for rolling 
@@ -46,6 +49,7 @@ public class Dice : MonoBehaviour {
 
         suppressPointerReleaseAfterInstantAction = true;
         Save.game.pendingMirrorCopy = false;
+        s.soundManager.PlayClip("zap");
         s.diceSummoner.DuplicateDieToPlayer(diceNum, diceType);
         s.statSummoner.SummonStats();
         s.statSummoner.SetCombatDebugInformationFor("player");
@@ -79,12 +83,14 @@ public class Dice : MonoBehaviour {
         }
 
         if (diceType == Save.game.pendingGemTransformColor) {
+            Save.game.pendingGemTransformColor = "";
             return true;
         }
 
         suppressPointerReleaseAfterInstantAction = true;
         string transformColor = Save.game.pendingGemTransformColor;
         Save.game.pendingGemTransformColor = "";
+        s.soundManager.PlayClip("zap");
         s.itemManager.TransformAttachedPlayerDieToColor(this, transformColor);
         return true;
     }
@@ -92,10 +98,9 @@ public class Dice : MonoBehaviour {
     private bool ShouldPrioritizeEnemyDieActionOverSpellbook() {
         if (!isAttached || isOnPlayerOrEnemy != "enemy" || s.enemy.enemyName.text == "Lich") { return false; }
 
-        bool isEnemyHeadWounded = s.enemy.woundList.Contains("head");
         bool isEnemyChestWounded = s.enemy.woundList.Contains("chest") || s.itemManager.EnemyHasTemporaryChestInjury();
 
-        if (isEnemyHeadWounded && Save.game.discardableDieCounter > 0) { return true; }
+        if (Save.game.discardableDieCounter > 0) { return true; }
         if (isEnemyChestWounded && !isRerolled) { return true; }
 
         return false;
@@ -271,6 +276,7 @@ public class Dice : MonoBehaviour {
             spriteRenderer.sortingOrder = 1;
             childSpriteRenderer.sortingOrder = 0;
             // send the die to the background
+            FinalizePlayerReflowPreview();
         }
         if (suspendedEnemyPlanRefreshForDrag) {
             bool isAttachedToPlayerAfterDrop = isAttached && isOnPlayerOrEnemy == "player";
@@ -318,6 +324,64 @@ public class Dice : MonoBehaviour {
             DiscardFromPlayer();
             // do so 
         }
+    }
+
+    public void BeginPlayerReflowPreview() {
+        if (!isAttached || isOnPlayerOrEnemy != "player" || string.IsNullOrEmpty(statAddedTo)) { return; }
+        if (detachedForPlayerReflowPreview) { return; }
+        if (!s.statSummoner.addedPlayerDice.TryGetValue(statAddedTo, out List<Dice> diceList)) { return; }
+
+        int index = diceList.IndexOf(this);
+        if (index < 0) { return; }
+
+        detachedForPlayerReflowPreview = true;
+        detachedPlayerReflowPreviewStat = statAddedTo;
+        detachedPlayerReflowPreviewIndex = index;
+        diceList.RemoveAt(index);
+
+        for (int i = index; i < diceList.Count; i++) {
+            Vector3 position = diceList[i].transform.position;
+            position = new Vector2(position.x - s.statSummoner.diceOffset, position.y);
+            diceList[i].transform.position = position;
+            diceList[i].instantiationPos = position;
+        }
+
+        if (diceList.Count > 0) {
+            instantiationPos = new Vector2(
+                diceList[diceList.Count - 1].transform.position.x + s.statSummoner.diceOffset,
+                diceList[diceList.Count - 1].transform.position.y
+            );
+        }
+    }
+
+    public void FinalizePlayerReflowPreview() {
+        if (!detachedForPlayerReflowPreview) { return; }
+
+        if (!string.IsNullOrEmpty(statAddedTo)
+            && s.statSummoner.addedPlayerDice.TryGetValue(statAddedTo, out List<Dice> currentDice)
+            && currentDice.Contains(this)) {
+            ClearPlayerReflowPreviewState();
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(detachedPlayerReflowPreviewStat)
+            && s.statSummoner.addedPlayerDice.TryGetValue(detachedPlayerReflowPreviewStat, out List<Dice> originalDice)
+            && !originalDice.Contains(this)) {
+            int restoreIndex = Mathf.Clamp(detachedPlayerReflowPreviewIndex, 0, originalDice.Count);
+            originalDice.Insert(restoreIndex, this);
+            statAddedTo = detachedPlayerReflowPreviewStat;
+            isAttached = true;
+            isOnPlayerOrEnemy = "player";
+            s.statSummoner.RepositionDice("player", detachedPlayerReflowPreviewStat);
+        }
+
+        ClearPlayerReflowPreviewState();
+    }
+
+    private void ClearPlayerReflowPreviewState() {
+        detachedForPlayerReflowPreview = false;
+        detachedPlayerReflowPreviewStat = "";
+        detachedPlayerReflowPreviewIndex = -1;
     }
 
     private IEnumerator ClickedTimer() { 

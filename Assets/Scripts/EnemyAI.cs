@@ -79,12 +79,17 @@ public static class EnemyAI {
         public bool CompletesDefenseBreakpoint;
         public bool DeniesPlayerKill;
         public bool DeniesPlayerDamage;
+        public bool DeniesPlayerDefense;
+        public bool ReinforcesPlayerDamage;
+        public bool ReinforcesPlayerDefense;
         public bool DeniesPlayerGoFirst;
         public bool DeniesPlayerTarget;
         public string DieType;
         public bool IsYellow;
         public bool LosesValueToHatchet;
         public int DieValue;
+        public int EffectiveEnemyValue;
+        public int EffectivePlayerValue;
         public float FallbackScore;
         public float ProgressScore;
         public float PlayerDenialScore;
@@ -818,8 +823,9 @@ public static class EnemyAI {
         bool enemyCanHitBefore = state.EnemyAim >= 0 && state.EnemyAtt > playerDefenseAgainstEnemy;
         bool enemyHitConnectsBefore = EnemyHitConnects(state, enemyCanHitBefore, enemyActsFirst);
         bool enemyBreaksProtectionBefore = EnemyHitBreaksProtection(state, enemyHitConnectsBefore);
-        bool enemyDamagesBefore = EnemyHitAppliesWound(s, state, enemyTarget, enemyCanHitBefore, enemyActsFirst);
-        bool enemyKillsBefore = EnemyWouldKillPlayer(s, state, enemyTarget, enemyCanHitBefore) && enemyDamagesBefore;
+        bool enemyDamagesBefore = EnemyHitDamagesPlayer(state, enemyCanHitBefore, enemyActsFirst);
+        bool enemyAppliesNewWoundBefore = EnemyHitAppliesWound(s, state, enemyTarget, enemyCanHitBefore, enemyActsFirst);
+        bool enemyKillsBefore = EnemyWouldKillPlayer(s, state, enemyTarget, enemyCanHitBefore) && enemyAppliesNewWoundBefore;
         bool enemyWasParriedBefore = EnemyAttackTriggersParryResponses(state.EnemyAtt, playerDefenseAgainstEnemy);
 
         evaluation.EnemyActsFirst = enemyActsFirst;
@@ -838,7 +844,7 @@ public static class EnemyAI {
             if (enemyBreaksProtectionBefore) {
                 ConsumePlayerProtection(afterEnemyHit);
             }
-            if (enemyDamagesBefore) {
+            if (enemyAppliesNewWoundBefore) {
                 ApplyWoundToPlayer(afterEnemyHit, enemyTarget, s);
             }
             ApplyImmediatePlayerResponseAfterEnemyActsFirst(afterEnemyHit, s, enemyWasParriedBefore, enemyDamagesBefore);
@@ -847,7 +853,7 @@ public static class EnemyAI {
             bool playerDamagesAfter = PlayerHitDamagesEnemy(s, afterEnemyHit, playerTarget, playerCanHitAfter);
             bool playerKillsAfter = PlayerWouldKillEnemy(s, afterEnemyHit, playerTarget, playerCanHitAfter);
             bool chestRescueCanBreakDamage = enemyTarget == "chest"
-                && enemyDamagesBefore
+                && enemyAppliesNewWoundBefore
                 && playerDamagesAfter
                 && EnemyChestRescueCanBreakPlayerDamage(s, afterEnemyHit, playerTarget);
 
@@ -1015,6 +1021,7 @@ public static class EnemyAI {
         bool enemyKills = EnemyWouldKillPlayer(s, state, enemyTarget, enemyCanHit);
         bool enemyHitConnects = EnemyHitConnects(state, enemyCanHit, enemyActsFirst);
         bool enemyBreaksProtection = EnemyHitBreaksProtection(state, enemyHitConnects);
+        bool enemyDamagesPlayer = EnemyHitDamagesPlayer(state, enemyCanHit, enemyActsFirst);
         bool enemyHitApplies = EnemyHitAppliesWound(s, state, enemyTarget, enemyCanHit, enemyActsFirst);
         bool enemyWasParried = EnemyAttackTriggersParryResponses(state.EnemyAtt, playerDefenseAgainstEnemy);
         bool playerHitApplies = PlayerHitAppliesWound(s, playerTarget, playerCanHit);
@@ -1031,7 +1038,7 @@ public static class EnemyAI {
                 }
                 if (enemyHitApplies) {
                     ApplyWoundToPlayer(afterEnemyHit, enemyTarget, s);
-                    ApplyImmediatePlayerResponseAfterEnemyActsFirst(afterEnemyHit, s, enemyWasParried, true);
+                    ApplyImmediatePlayerResponseAfterEnemyActsFirst(afterEnemyHit, s, enemyWasParried, enemyDamagesPlayer);
                     score += GetTargetUtility(s, enemyTarget, afterEnemyHit, onPlayer:true);
                 }
                 else if (enemyBreaksProtection) {
@@ -1042,7 +1049,7 @@ public static class EnemyAI {
                 }
 
                 if (!enemyHitApplies) {
-                    ApplyImmediatePlayerResponseAfterEnemyActsFirst(afterEnemyHit, s, enemyWasParried, false);
+                    ApplyImmediatePlayerResponseAfterEnemyActsFirst(afterEnemyHit, s, enemyWasParried, enemyDamagesPlayer);
                 }
 
                 bool playerStillHits = afterEnemyHit.PlayerAim >= 0 && afterEnemyHit.PlayerAtt > afterEnemyHit.EnemyDef;
@@ -1581,8 +1588,9 @@ public static class EnemyAI {
 
         bool crystalShardShatters = state.PlayerCrystalShardCopies > 0;
         if (crystalShardShatters) {
-            state.PlayerCrystalShardCopies--;
-            state.PlayerAtt -= state.PlayerCrystalShardLossPerShatter;
+            int shatteredCopies = state.PlayerCrystalShardCopies;
+            state.PlayerCrystalShardCopies = 0;
+            state.PlayerAtt -= state.PlayerCrystalShardLossPerShatter * shatteredCopies;
         }
 
         if (state.PlayerHasGlassSword && !state.PlayerGlassSwordShattered && !crystalShardShatters) {
@@ -2006,11 +2014,14 @@ public static class EnemyAI {
         DraftPreviewContext previewContext
     ) {
         int effectiveEnemyValue = GetEffectiveEnemyDraftValue(s, dice);
+        int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
         DraftChoiceEvaluation evaluation = new() {
             DieType = dice.diceType,
             IsYellow = dice.diceType == "yellow",
             LosesValueToHatchet = dice.diceType == "yellow" && s.itemManager.PlayerHasWeapon("hatchet"),
             DieValue = dice.diceNum,
+            EffectiveEnemyValue = effectiveEnemyValue,
+            EffectivePlayerValue = effectivePlayerValue,
             FallbackScore = EvaluateDraftChoice(s, dice),
             PlayerDenialScore = GetPlayerDieDesireScore(s, dice),
         };
@@ -2027,9 +2038,19 @@ public static class EnemyAI {
 
         evaluation.DeniesPlayerKill = DraftDieDeniesPlayerKill(s, dice);
         evaluation.DeniesPlayerDamage = DraftDieDeniesPlayerDamage(s, dice);
+        evaluation.DeniesPlayerDefense = DraftDieDeniesPlayerDefense(s, dice);
+        evaluation.ReinforcesPlayerDamage = DraftDieReinforcesPlayerDamage(s, dice);
+        evaluation.ReinforcesPlayerDefense = DraftDieReinforcesPlayerDefense(s, dice);
         evaluation.DeniesPlayerGoFirst = DraftDieDeniesPlayerGoFirst(s, dice);
         evaluation.DeniesPlayerTarget = DraftDieDeniesPlayerTarget(s, dice);
-        if (effectiveEnemyValue <= 0 && !evaluation.DeniesPlayerKill && !evaluation.DeniesPlayerDamage && !evaluation.DeniesPlayerGoFirst && !evaluation.DeniesPlayerTarget) {
+        if (effectiveEnemyValue <= 0
+            && !evaluation.DeniesPlayerKill
+            && !evaluation.DeniesPlayerDamage
+            && !evaluation.DeniesPlayerDefense
+            && !evaluation.ReinforcesPlayerDamage
+            && !evaluation.ReinforcesPlayerDefense
+            && !evaluation.DeniesPlayerGoFirst
+            && !evaluation.DeniesPlayerTarget) {
             evaluation.LosesValueToHatchet = true;
         }
         return evaluation;
@@ -2188,8 +2209,8 @@ public static class EnemyAI {
         int nextEnemyAtt = enemyAtt + (stat == "red" ? effectiveEnemyValue : 0);
         int nextEnemyDef = enemyDef + (stat == "white" ? effectiveEnemyValue : 0);
 
-        bool playerSpeedLockedHigh = IsPlayerSpeedLockedHigh(s);
-        bool enemySpeedLockedHigh = IsEnemySpeedLockedHigh(s);
+        bool playerSpeedLockedHigh = IsPlayerDraftSpeedLockedHigh(s);
+        bool enemySpeedLockedHigh = IsEnemyDraftSpeedLockedHigh(s);
         bool enemyActsFirstNow = enemySpeedLockedHigh || (!playerSpeedLockedHigh && enemySpd > playerSpd);
         bool enemyActsFirstAfterPick = enemySpeedLockedHigh || (!playerSpeedLockedHigh && nextEnemySpd > playerSpd);
         bool killEnabledNow = enemyAim >= 7 && enemyAtt > playerDef;
@@ -2673,6 +2694,16 @@ public static class EnemyAI {
         }
         if (candidate.DeniesPlayerKill != current.DeniesPlayerKill) { return candidate.DeniesPlayerKill; }
         if (candidate.DeniesPlayerDamage != current.DeniesPlayerDamage) { return candidate.DeniesPlayerDamage; }
+        if (candidate.DeniesPlayerDefense != current.DeniesPlayerDefense) { return candidate.DeniesPlayerDefense; }
+        if (HaveSameSelfSecuringDraftBreakpointProfile(candidate, current)) {
+            if (candidate.EffectivePlayerValue != current.EffectivePlayerValue) {
+                return candidate.EffectivePlayerValue > current.EffectivePlayerValue;
+            }
+
+            if (candidate.IsYellow != current.IsYellow) {
+                return candidate.IsYellow;
+            }
+        }
         int candidateSpentStamina = candidate.BestPlan?.SpentStamina ?? int.MaxValue;
         int currentSpentStamina = current.BestPlan?.SpentStamina ?? int.MaxValue;
         if (candidateSpentStamina != currentSpentStamina) { return candidateSpentStamina < currentSpentStamina; }
@@ -2682,17 +2713,64 @@ public static class EnemyAI {
         if (candidate.CompletesOrderBreakpoint != current.CompletesOrderBreakpoint) { return candidate.CompletesOrderBreakpoint; }
         if (candidate.CompletesArmpitsBreakpoint != current.CompletesArmpitsBreakpoint) { return candidate.CompletesArmpitsBreakpoint; }
         if (candidate.CompletesHeadBreakpoint != current.CompletesHeadBreakpoint) { return candidate.CompletesHeadBreakpoint; }
+        if (candidate.ReinforcesPlayerDamage != current.ReinforcesPlayerDamage) { return candidate.ReinforcesPlayerDamage; }
+        if (candidate.ReinforcesPlayerDefense != current.ReinforcesPlayerDefense) { return candidate.ReinforcesPlayerDefense; }
+        if (ShouldPreferPlayerDenialBeforeSoftUtility(candidate, current)
+            && !Mathf.Approximately(candidate.PlayerDenialScore, current.PlayerDenialScore)) {
+            return candidate.PlayerDenialScore > current.PlayerDenialScore;
+        }
         if (candidate.DeniesPlayerGoFirst != current.DeniesPlayerGoFirst) { return candidate.DeniesPlayerGoFirst; }
         if (candidate.DeniesPlayerTarget != current.DeniesPlayerTarget) { return candidate.DeniesPlayerTarget; }
         if (!Mathf.Approximately(candidate.ProgressScore, current.ProgressScore)) { return candidate.ProgressScore > current.ProgressScore; }
         if (candidate.LosesValueToHatchet != current.LosesValueToHatchet) { return !candidate.LosesValueToHatchet; }
         if (candidate.DieValue == current.DieValue && candidate.IsYellow != current.IsYellow) { return candidate.IsYellow; }
         if (candidate.DieValue != current.DieValue) { return candidate.DieValue > current.DieValue; }
-        if (IsBetterAdvancedEvaluation(candidate.BestPlan, current.BestPlan)) { return true; }
-        if (IsBetterAdvancedEvaluation(current.BestPlan, candidate.BestPlan)) { return false; }
+        int candidateTotalOverspend = candidate.BestPlan?.TotalOverspend ?? int.MaxValue;
+        int currentTotalOverspend = current.BestPlan?.TotalOverspend ?? int.MaxValue;
+        if (candidateTotalOverspend != currentTotalOverspend) { return candidateTotalOverspend < currentTotalOverspend; }
+        int candidateResourceOverspend = candidate.BestPlan?.ResourceOverspend ?? int.MaxValue;
+        int currentResourceOverspend = current.BestPlan?.ResourceOverspend ?? int.MaxValue;
+        if (candidateResourceOverspend != currentResourceOverspend) { return candidateResourceOverspend < currentResourceOverspend; }
         if (!Mathf.Approximately(candidate.PlayerDenialScore, current.PlayerDenialScore)) { return candidate.PlayerDenialScore > current.PlayerDenialScore; }
         if (!Mathf.Approximately(candidate.FallbackScore, current.FallbackScore)) { return candidate.FallbackScore > current.FallbackScore; }
         return false;
+    }
+
+    private static bool ShouldPreferPlayerDenialBeforeSoftUtility(DraftChoiceEvaluation candidate, DraftChoiceEvaluation current) {
+        return !HasAnySelfSecuringDraftBreakpoint(candidate)
+            && !HasAnySelfSecuringDraftBreakpoint(current)
+            && !HasAnyHardDraftDenial(candidate)
+            && !HasAnyHardDraftDenial(current);
+    }
+
+    private static bool HaveSameSelfSecuringDraftBreakpointProfile(DraftChoiceEvaluation candidate, DraftChoiceEvaluation current) {
+        if (candidate == null || current == null) { return false; }
+
+        return candidate.CompletesKillBreakpoint == current.CompletesKillBreakpoint
+            && candidate.CompletesHitBreakpoint == current.CompletesHitBreakpoint
+            && candidate.CompletesDefenseBreakpoint == current.CompletesDefenseBreakpoint
+            && candidate.CompletesOrderBreakpoint == current.CompletesOrderBreakpoint
+            && candidate.CompletesArmpitsBreakpoint == current.CompletesArmpitsBreakpoint
+            && candidate.CompletesHeadBreakpoint == current.CompletesHeadBreakpoint;
+    }
+
+    private static bool HasAnySelfSecuringDraftBreakpoint(DraftChoiceEvaluation evaluation) {
+        return evaluation != null && (
+            evaluation.CompletesKillBreakpoint
+            || evaluation.CompletesHitBreakpoint
+            || evaluation.CompletesDefenseBreakpoint
+            || evaluation.CompletesOrderBreakpoint
+            || evaluation.CompletesArmpitsBreakpoint
+            || evaluation.CompletesHeadBreakpoint);
+    }
+
+    private static bool HasAnyHardDraftDenial(DraftChoiceEvaluation evaluation) {
+        return evaluation != null && (
+            evaluation.DeniesPlayerKill
+            || evaluation.DeniesPlayerDamage
+            || evaluation.DeniesPlayerDefense
+            || evaluation.ReinforcesPlayerDamage
+            || evaluation.ReinforcesPlayerDefense);
     }
 
     private static bool DraftDieDeniesPlayerKill(Scripts s, Dice dice) {
@@ -2753,12 +2831,64 @@ public static class EnemyAI {
         return false;
     }
 
+    private static bool DraftDieDeniesPlayerDefense(Scripts s, Dice dice) {
+        if (s == null || dice == null) { return false; }
+
+        int playerDef = s.statSummoner.SumOfStat("white", "player");
+        int enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
+        int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
+        if (enemyAtt <= playerDef || effectivePlayerValue <= 0) { return false; }
+
+        if (dice.diceType == "white") {
+            return playerDef + effectivePlayerValue >= enemyAtt;
+        }
+
+        if (dice.diceType == "yellow") {
+            return playerDef + effectivePlayerValue >= enemyAtt;
+        }
+
+        return false;
+    }
+
+    private static bool DraftDieReinforcesPlayerDamage(Scripts s, Dice dice) {
+        if (s == null || dice == null || IsPlayerGuardSelected(s)) { return false; }
+
+        int playerAim = s.statSummoner.SumOfStat("green", "player");
+        int playerAtt = s.statSummoner.SumOfStat("red", "player");
+        int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
+        int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
+        bool currentDamage = playerAim >= 0 && playerAtt > enemyDef;
+        if (!currentDamage || effectivePlayerValue <= 0) { return false; }
+
+        return GetPlayerDraftAssignmentOptions(s, dice).Contains("red");
+    }
+
+    private static bool DraftDieReinforcesPlayerDefense(Scripts s, Dice dice) {
+        if (s == null || dice == null) { return false; }
+
+        int playerDef = s.statSummoner.SumOfStat("white", "player");
+        int enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
+        int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
+        bool currentDefense = playerDef >= enemyAtt;
+        if (!currentDefense || effectivePlayerValue <= 0) { return false; }
+
+        return GetPlayerDraftAssignmentOptions(s, dice).Contains("white");
+    }
+
     private static bool DraftDieDeniesPlayerGoFirst(Scripts s, Dice dice) {
         if (IsDraftInitiativeLocked(s)) { return false; }
         if (PlayerAlwaysActsFirst(s)) { return false; }
         int playerSpd = s.statSummoner.SumOfStat("blue", "player");
         int enemySpd = s.statSummoner.SumOfStat("blue", "enemy");
+        int playerDef = s.statSummoner.SumOfStat("white", "player");
+        int playerAtt = s.statSummoner.SumOfStat("red", "player");
+        int enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
+        int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
         int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
+        bool enemyCanHitNow = enemyAtt > playerDef;
+        bool enemyCanDefendNow = enemyDef >= playerAtt;
+
+        if (!enemyCanHitNow && !enemyCanDefendNow) { return false; }
         if (playerSpd >= enemySpd || effectivePlayerValue <= 0) { return false; }
         return (dice.diceType == "blue" || dice.diceType == "yellow") && playerSpd + effectivePlayerValue >= enemySpd;
     }
@@ -3177,6 +3307,12 @@ public static class EnemyAI {
         return enemyTarget == "neck" || !s.player.woundList.Contains(enemyTarget);
     }
 
+    private static bool EnemyHitDamagesPlayer(SimState state, bool enemyCanHit, bool enemyActsFirst) {
+        if (!EnemyHitConnects(state, enemyCanHit, enemyActsFirst)) { return false; }
+        if (PlayerHasOneShotProtection(state)) { return false; }
+        return true;
+    }
+
     private static bool PlayerHitAppliesWound(Scripts s, string playerTarget, bool playerCanHit) {
         if (!playerCanHit) { return false; }
         return playerTarget == "neck" || !s.enemy.woundList.Contains(playerTarget);
@@ -3261,6 +3397,10 @@ public static class EnemyAI {
         hash.Add(s.itemManager.PlayerHasWeapon("spear"));
         hash.Add(s.itemManager.PlayerHasWeapon("spear"));
         hash.Add(s.itemManager.PlayerHasWeapon("gauntlets"));
+        hash.Add(s.itemManager.PlayerAlwaysChoosesFirstDraftDie());
+        hash.Add(s.itemManager.PlayerAlwaysChoosesLastDraftDie());
+        hash.Add(s.itemManager.PlayerAlwaysActsFirst());
+        hash.Add(s.itemManager.PlayerAlwaysActsLast());
         hash.Add(s.itemManager.PlayerHasWeapon("stave"));
         hash.Add(s.itemManager.PlayerHasWeapon("glass sword"));
         hash.Add(s.itemManager.PlayerHasWeapon("trident"));
@@ -3462,7 +3602,15 @@ public static class EnemyAI {
     }
 
     private static bool IsDraftInitiativeLocked(Scripts s) {
-        return s != null && (IsPlayerSpeedLockedHigh(s) || IsEnemySpeedLockedHigh(s));
+        return s != null && (IsPlayerDraftSpeedLockedHigh(s) || IsEnemyDraftSpeedLockedHigh(s));
+    }
+
+    private static bool IsPlayerDraftSpeedLockedHigh(Scripts s) {
+        return s != null && s.itemManager != null && s.itemManager.PlayerAlwaysChoosesFirstDraftDie();
+    }
+
+    private static bool IsEnemyDraftSpeedLockedHigh(Scripts s) {
+        return s != null && s.itemManager != null && s.itemManager.PlayerAlwaysChoosesLastDraftDie();
     }
 
     /// <summary>
@@ -3823,6 +3971,8 @@ public static class EnemyAI {
         int playerSpd = s.statSummoner.SumOfStat("blue", "player");
         int playerDef = s.statSummoner.SumOfStat("white", "player");
         int playerAtt = s.statSummoner.SumOfStat("red", "player");
+        bool enemyCanHitNow = enemyAtt > playerDef;
+        bool enemyCanDefendNow = enemyDef >= playerAtt;
         int futureStamina = ((!s.enemy.woundList.Contains("hip") && !s.itemManager.EnemyHasTemporaryHipInjury()) || s.enemy.enemyName.text == "Lich")
             ? Mathf.Max(0, s.enemy.stamina)
             : 0;
@@ -3832,14 +3982,21 @@ public static class EnemyAI {
             case "red": {
                 int currentGap = Mathf.Max(0, playerDef + 1 - enemyAtt);
                 int nextGap = Mathf.Max(0, playerDef + 1 - (enemyAtt + effectiveEnemyValue + futureStamina));
-                score += (currentGap - nextGap) * 32f;
+                int gapReduction = currentGap - nextGap;
+                score += gapReduction * 38f;
+                if (!enemyCanHitNow) {
+                    score += gapReduction * 20f;
+                }
                 break;
             }
             case "white": {
                 int currentGap = Mathf.Max(0, playerAtt - enemyDef);
                 int nextGap = Mathf.Max(0, playerAtt - (enemyDef + effectiveEnemyValue + futureStamina));
                 int gapReduction = currentGap - nextGap;
-                score += gapReduction * 36f;
+                score += gapReduction * 42f;
+                if (!enemyCanDefendNow) {
+                    score += gapReduction * 20f;
+                }
                 if (enemyAtt <= playerDef) {
                     score += gapReduction * 14f;
                 }
@@ -3849,10 +4006,13 @@ public static class EnemyAI {
                 if (!PlayerAlwaysActsFirst(s)) {
                     int currentGap = Mathf.Max(0, playerSpd - enemySpd + 1);
                     int nextGap = Mathf.Max(0, playerSpd - (enemySpd + effectiveEnemyValue + futureStamina) + 1);
-                    score += (currentGap - nextGap) * 24f;
+                    score += (currentGap - nextGap) * 16f;
                 }
                 if (PlayerCanBecomeDodgy(s) && !PlayerAlwaysActsFirst(s) && enemySpd <= playerSpd) {
-                    score += effectiveEnemyValue * 28f;
+                    score += effectiveEnemyValue * 14f;
+                }
+                if (!enemyCanHitNow || !enemyCanDefendNow) {
+                    score -= effectiveEnemyValue * 10f;
                 }
                 break;
             }
@@ -3861,7 +4021,10 @@ public static class EnemyAI {
                 if (nextBreakpoint > 0) {
                     int currentGap = Mathf.Max(0, nextBreakpoint - enemyAim);
                     int nextGap = Mathf.Max(0, nextBreakpoint - (enemyAim + effectiveEnemyValue + futureStamina));
-                    score += (currentGap - nextGap) * 18f;
+                    score += (currentGap - nextGap) * 12f;
+                }
+                if (!enemyCanHitNow || !enemyCanDefendNow) {
+                    score -= effectiveEnemyValue * 8f;
                 }
                 break;
             }

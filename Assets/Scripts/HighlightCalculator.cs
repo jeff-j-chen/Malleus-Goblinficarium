@@ -103,27 +103,7 @@ public class HighlightCalculator : MonoBehaviour {
     /// Shift all die attached to a stat after a yellow one is moved.
     /// </summary>
     private void MoveOtherDiceAfterYellow(Dice dice) {
-        if (dice.isAttached) {
-            // if the die is attached to a stat
-            int index = s.statSummoner.addedPlayerDice[dice.statAddedTo].IndexOf(dice);
-            // get the index of the stat of which the die is attached to
-            if (index != -1) {
-                // if the die exists (to prevent errors)
-                s.statSummoner.addedPlayerDice[dice.statAddedTo].Remove(dice);
-                // remove the die from the array
-                for (int i = index; i < s.statSummoner.addedPlayerDice[dice.statAddedTo].Count; i++) {
-                    // for each die after the yellow's place
-                    s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position = new Vector2(s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position.x - s.statSummoner.diceOffset, s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position.y);
-                    // shift over to the correct position
-                    s.statSummoner.addedPlayerDice[dice.statAddedTo][i].GetComponent<Dice>().instantiationPos = s.statSummoner.addedPlayerDice[dice.statAddedTo][i].transform.position;
-                    // adjust the instantiation position of each accordingly
-                }
-                if (s.statSummoner.addedPlayerDice[dice.statAddedTo].Count > 0) {
-                    dice.instantiationPos = new Vector2(s.statSummoner.addedPlayerDice[dice.statAddedTo][s.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.x + s.statSummoner.diceOffset, s.statSummoner.addedPlayerDice[dice.statAddedTo][s.statSummoner.addedPlayerDice[dice.statAddedTo].Count - 1].transform.position.y);
-                    // create an instantiation position at the end of the die stack
-                }
-            }
-        }
+        dice.BeginPlayerReflowPreview();
     }
 
     /// <summary>

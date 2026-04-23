@@ -65,6 +65,10 @@ public class GameData {
     public bool enemyScrollHipActive;
     public bool enemyScrollHandActive;
     public bool enemyScrollArmpitsActive;
+    public int enemyWitchHandPenaltyGreen;
+    public int enemyWitchHandPenaltyBlue;
+    public int enemyWitchHandPenaltyRed;
+    public int enemyWitchHandPenaltyWhite;
     public bool enemyIsDead;
     public int enemyAcc;
     public int enemySpd;
@@ -85,6 +89,8 @@ public class GameData {
     public bool pendingAmuletInventoryCleanup;
     public bool pendingAmuletVisualRestore;
     public bool enemyHasKatarSpeedPenalty;
+    public int enemyKatarSpeedPenaltyAmount;
+    public int enemyKatarBaseSpeedAfterPenalty;
     public bool isFirstCombatRoundOfEncounter;
     public bool pendingMirrorCopy;
     public bool pendingSpellbookTransmute;
@@ -182,6 +188,10 @@ public class GameData {
         enemyScrollHipActive = false;
         enemyScrollHandActive = false;
         enemyScrollArmpitsActive = false;
+        enemyWitchHandPenaltyGreen = 0;
+        enemyWitchHandPenaltyBlue = 0;
+        enemyWitchHandPenaltyRed = 0;
+        enemyWitchHandPenaltyWhite = 0;
         enemyIsDead = false;
         enemyAcc = 0;
         enemySpd = 0;
@@ -202,6 +212,8 @@ public class GameData {
         pendingAmuletInventoryCleanup = false;
         pendingAmuletVisualRestore = false;
         enemyHasKatarSpeedPenalty = false;
+        enemyKatarSpeedPenaltyAmount = 0;
+        enemyKatarBaseSpeedAfterPenalty = 0;
         isFirstCombatRoundOfEncounter = true;
         pendingMirrorCopy = false;
         pendingSpellbookTransmute = false;
@@ -287,12 +299,18 @@ public class GameData {
             pendingGemTransformColor = "";
             pendingDeathcapRestore = false;
             enemyHasKatarSpeedPenalty = false;
+            enemyKatarSpeedPenaltyAmount = 0;
+            enemyKatarBaseSpeedAfterPenalty = 0;
             enemyScrollChestActive = false;
             enemyScrollGutsActive = false;
             enemyScrollKneeActive = false;
             enemyScrollHipActive = false;
             enemyScrollHandActive = false;
             enemyScrollArmpitsActive = false;
+            enemyWitchHandPenaltyGreen = 0;
+            enemyWitchHandPenaltyBlue = 0;
+            enemyWitchHandPenaltyRed = 0;
+            enemyWitchHandPenaltyWhite = 0;
             if (enemyNum != Enemy.MerchantEnemyNum) {
                 merchantStealAllowanceRemaining = 0;
             }

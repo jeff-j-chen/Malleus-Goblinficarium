@@ -1984,3 +1984,584 @@ why the fixed line is correct
 result
 - if Kobold chooses yellow here, it must take `y5`
 - once hard/nightmare commits to a color, it must never leave a higher-value die of that same color behind
+
+---
+
+## case 20 - preserve enemy line by denying player red/white before blue utility
+
+### subcase a - enemy already defends; deny player red kill-line growth
+
+PLAYER: 3 / 3 / 2 / 2
+
+
+accuracy: 3 = (3)
+
+
+speed: 3 = (3)
+
+
+damage: 2 = (2)
+
+
+parry: 2 = (2)
+
+
+targeting: chest
+
+
+available dice: r6, b6
+
+
+ENEMY: 3 / 3 / 6 / 4
+
+
+accuracy: 3 = (3)
+
+
+speed: 3 = (3)
+
+
+damage: 6 = (6)
+
+
+parry: 4 = (4)
+
+
+targeting: knee
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `enemyDef >= playerAtt` -> true
+- enemy already has a live defense line (`4 >= 2`)
+
+if: `DraftDieDeniesPlayerDamage(r6)` -> true
+- player current damage line is off (`2 > 4` is false)
+- taking `r6` would let player cross `enemyDef + 1`
+
+if: `DraftDieDeniesPlayerDamage(b6)` -> false
+- blue does not add player attack
+
+if in comparator: `candidate.DeniesPlayerDamage != current.DeniesPlayerDamage` -> true for `r6`
+- this hard denial gate resolves before soft utility cleanup
+
+result
+- enemy must take `r6`, not `b6`
+
+
+### subcase b - enemy already hits; deny player white defense-line growth
+
+PLAYER: 3 / 3 / 3 / 1
+
+
+accuracy: 3 = (3)
+
+
+speed: 3 = (3)
+
+
+damage: 3 = (3)
+
+
+parry: 1 = (1)
+
+
+targeting: chest
+
+
+available dice: w6, b6
+
+
+ENEMY: 3 / 3 / 5 / 2
+
+
+accuracy: 3 = (3)
+
+
+speed: 3 = (3)
+
+
+damage: 5 = (5)
+
+
+parry: 2 = (2)
+
+
+targeting: head
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `enemyAtt > playerDef` -> true
+- enemy already has a live attack line (`5 > 1`)
+
+if: `DraftDieDeniesPlayerDefense(w6)` -> true
+- player currently cannot defend (`1 >= 5` is false)
+- taking `w6` would let player reach `playerDef >= enemyAtt`
+
+if: `DraftDieDeniesPlayerDefense(b6)` -> false
+- blue does not add player parry
+
+if in comparator: `candidate.DeniesPlayerDefense != current.DeniesPlayerDefense` -> true for `w6`
+- this hard denial gate resolves before stamina/progress/soft denial cleanup
+
+result
+- enemy must take `w6`, not `b6`
+
+---
+
+## case 21 - unstable skeleton state must not let blue denial outrank real line setup
+
+### subcase a - draft should take `w5`, not blue utility denial
+
+PLAYER: 2 / 1 / 6 / 2
+
+
+accuracy: 2 = (2)
+
+
+speed: 1 = (1)
+
+
+damage: 6 = (1 + r5)
+
+
+parry: 2 = (2)
+
+
+stamina: 1 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: y3, g1, w1, w5
+
+
+enemy: Skeleton
+
+
+ENEMY: 2 / 6 / 2 / 2
+
+
+accuracy: 2 = (2)
+
+
+speed: 6 = (0 + b6)
+
+
+damage: 2 = (2)
+
+
+parry: 2 = (2)
+
+
+stamina: 2 remaining
+
+
+wounds: hip
+
+
+targeting: knee
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `enemyCanHitNow = enemyAtt > playerDef` -> false
+- `2 > 2` is false, so no live enemy hit line exists
+
+if: `enemyCanDefendNow = enemyDef >= playerAtt` -> false
+- `2 >= 6` is false, so no live enemy defense line exists
+
+if in `DraftDieDeniesPlayerGoFirst`: `!enemyCanHitNow && !enemyCanDefendNow` -> true
+- soft blue denial is now suppressed in unstable states
+
+if: `DraftDieDeniesPlayerGoFirst(...)` for blue/yellow speed denial path -> false
+- blue nuisance denial no longer short-circuits the comparator here
+
+if: `candidate.CompletesDefenseBreakpoint` on `w5` -> true
+- enemy defense moves from `2` to `7`
+- `7 >= 6` turns on the survive line immediately
+
+if: `candidate.CompletesDefenseBreakpoint` on `w1` -> false
+- defense would only reach `3`, still below player attack `6`
+
+result
+- skeleton should prioritize `w5` setup over blue speed-denial noise in this unstable board
+
+
+### subcase b - no-dice hip+guts board should not drift into meaningless speed pressure
+
+PLAYER: 2 / 1 / 7 / 10
+
+
+accuracy: 2 = (2)
+
+
+speed: 1 = (1)
+
+
+damage: 7 = (1 + y6)
+
+
+parry: 10 = (2 + w6 + w2)
+
+
+stamina: 1 remaining
+
+
+wounds: none
+
+
+targeting: guts
+
+
+available dice: none
+
+
+enemy: Skeleton
+
+
+ENEMY: 2 / 4 / 4 / 2
+
+
+accuracy: 2 = (2)
+
+
+speed: 4 = (0 + b4)
+
+
+damage: 4 = (2 + y2)
+
+
+parry: 2 = (2)
+
+
+stamina: 2 remaining
+
+
+wounds: hip, guts
+
+
+targeting: knee
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `canUseStamina = !enemyHipWound || enemyIsLich` -> false
+- hip wound blocks all stamina use for skeleton
+
+if: `enemyCanHitBefore = EnemyAim >= 0 && EnemyAtt > playerDefenseAgainstEnemy` -> false
+- `4 > 10` is false
+
+if: `enemyCanDefendNow = enemyDef >= playerAtt` -> false
+- `2 >= 7` is false
+
+if: `BuildAdvancedPlan` yellow-only search cannot clear either hit or defense breakpoint -> true
+- no stamina branch exists and the current board lacks enough raw value to force either line
+
+if: `EnemyActsFirst` remains true but no higher gates flip -> true
+- speed lead alone is not a substitute for hit/defense line completion
+
+result
+- this board should not be treated as a valid blue-pressure success state; it remains unstable until a real hit/defense breakpoint is created
+
+---
+
+## case 22 - helper utility must not outrank denying the stronger surviving red line
+
+PLAYER: 2 / 1 / 4 / 7
+
+
+accuracy: 2 = (2)
+
+
+speed: 1 = (1)
+
+
+damage: 4 = (1 + y3)
+
+
+parry: 7 = (2 + w5)
+
+
+stamina: 1 remaining
+
+
+wounds: none
+
+
+targeting: guts
+
+
+available dice: r5, r2
+
+
+enemy: Goblin
+
+
+ENEMY: 2 / 3 / 2 / 5
+
+
+accuracy: 2 = (2)
+
+
+speed: 3 = (0 + b3)
+
+
+damage: 2 = (2)
+
+
+parry: 5 = (2 + y3)
+
+
+stamina: 2 remaining
+
+
+wounds: armpits
+
+
+targeting: knee
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `enemyCanHitNow = enemyAtt > playerDef` -> false
+- `2 > 7` is false
+- the enemy still has no live hit line on this board
+
+if: `enemyCanDefendNow = enemyDef >= playerAtt` -> true
+- `5 >= 4` is true
+- the enemy already survives the current player attack line
+
+if: `DraftDieDeniesPlayerDamage(r5)` -> true
+- player current damage line is off against enemy defense `5`
+- leaving `r5` to the player would raise attack from `4` to `9`
+- `9 > 5` would create a live player wound line
+
+if: `DraftDieDeniesPlayerDamage(r2)` -> true
+- leaving `r2` to the player would still raise attack from `4` to `6`
+- `6 > 5` would also create a live player wound line
+
+if: `r5` and a soft helper draft both fail to create a new enemy hit breakpoint -> possible tie state
+- this is the remaining danger band
+- helper progress can look superficially useful even though it does not secure a real attack line
+
+if in the fixed comparator: `ShouldPreferPlayerDenialBeforeSoftUtility(...)` -> true for helper-only ties
+- no candidate has turned on a real self-securing breakpoint yet
+- no candidate is separated by hard denial flags beyond the binary tie
+- denied player value now resolves the tie before soft go-first / target / progress cleanup
+
+if: `candidate.PlayerDenialScore(r5) > candidate.PlayerDenialScore(helper)` -> must win
+- once the enemy is only comparing helper noise against player-denial strength, the larger surviving red must rank above the softer utility die
+- the enemy should not leave both `r5` and `r2` available to the player after taking a lower-impact helper pick
+
+result
+- goblin must prefer denying the stronger surviving red line over soft helper utility here
+- if it cannot take both reds, it must at least take `r5` before any lower-impact helper die
+
+---
+
+## case 23 - armpits-wounded enemy must still draft red to deny an already-live player attack line
+
+PLAYER: 2 / 7 / 7 / 6
+
+
+accuracy: 2 = (2)
+
+
+speed: 7 = (5 + b2)
+
+
+damage: 7 = (2 + r5)
+
+
+parry: 6 = (0 + w6)
+
+
+stamina: 5 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: none
+
+
+enemy: Kobold
+
+
+ENEMY: 4 / 7 / 4 / 3
+
+
+accuracy: 4 = (3 + g1)
+
+
+speed: 7 = (3 + b4)
+
+
+damage: 4 = (4)
+
+
+parry: 3 = (2 + w1)
+
+
+stamina: 3 remaining
+
+
+wounds: armpits
+
+
+targeting: chest
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `GetEffectiveEnemyDraftValue(r5)` with enemy armpits wound -> `0`
+- red drafted by the enemy would fade out immediately on attach
+- this means the red die gives no direct enemy self-progress
+
+if: `playerCanHitNow = playerAim >= 0 && playerAtt > enemyDef` -> true
+- `2 >= 0` and `7 > 3`
+- the player already has a live attack line before any new draft value is considered
+
+if: `enemyCanDefendNow = enemyDef >= playerAtt` -> false
+- `3 >= 7` is false
+- the enemy is already losing the current damage race on defense
+
+if: `DraftDieDeniesPlayerDamage(r5)` -> false
+- this helper only fires when the player currently cannot hit
+- here the player already damages, so binary damage denial is no longer the right gate
+
+if: `DraftDieReinforcesPlayerDamage(r5)` -> true
+- the player already has a live hit line
+- `r5` is still an effective player red die
+- leaving it available strengthens an already-live player attack line, so the enemy should deny it
+
+if comparing against a helper die with no real self breakpoint: `candidate.ReinforcesPlayerDamage != current.ReinforcesPlayerDamage` -> true for `r5`
+- this now resolves before soft helper cleanup like nuisance progress or soft denial
+- a helper die that does not complete a real enemy line must not beat denying the player's live red attack reinforcement
+
+why the old line was wrong
+- the previous hard denial helpers only covered turning a player line on from false to true
+- once the player was already hitting, the extra red was treated as only a late soft desirability score
+- that let zero-self-value helper drafts survive too long against a red die the enemy still needed to deny
+
+why the fixed line is correct
+- the draft comparator now has an explicit reinforcement-denial gate for already-live player attack lines
+- even if enemy armpits makes the red worthless on the enemy side, taking that red still matters because it stops the player from making an already-live attack line even stronger
+
+result
+- armpits-wounded Kobold should still draft the red die here
+- denying the player's live red attack reinforcement beats any helper die that does not create a real enemy breakpoint
+
+---
+
+## case 24 - kobold must take high-value yellow over `w2` when both secure defense
+
+PLAYER: 2 / 5 / 10 / 2
+
+
+accuracy: 2 = (2)
+
+
+speed: 5 = (1 + b4)
+
+
+damage: 10 = (1 + r3 + y6)
+
+
+parry: 2 = (2)
+
+
+stamina: 3 remaining
+
+
+wounds: armpits
+
+
+targeting: chest
+
+
+available dice at enemy pick: y5, w2
+
+
+enemy: Kobold
+
+
+ENEMY: 2 / 1 / 2 / 7
+
+
+accuracy: 2 = (2)
+
+
+speed: 1 = (0 + b1)
+
+
+damage: 2 = (2)
+
+
+parry: 7 = (2 + y5)
+
+
+stamina: 2 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `IsBetterDraftPlanPreview(BestPlan(y5), BestPlan(w2))` -> false
+- both picks can preserve the same coarse post-pick outcome in this spot
+- neither line gains a unique higher gate before draft tie cleanup
+
+if: `IsBetterDraftPlanPreview(BestPlan(w2), BestPlan(y5))` -> false
+- preview gates remain tied in the opposite comparison as well
+
+if: `candidate.DeniesPlayerKill != current.DeniesPlayerKill` -> false
+- both picks are defensive in this position and do not uniquely flip kill denial
+
+if: `candidate.DeniesPlayerDamage != current.DeniesPlayerDamage` -> false
+- both picks keep the same binary damage-denial state before deeper tie-breaks
+
+if: `candidate.DeniesPlayerDefense != current.DeniesPlayerDefense` -> false
+- both picks can serve the immediate defense purpose, so this hard denial gate ties
+
+if: `HaveSameSelfSecuringDraftBreakpointProfile(candidate, current)` -> true
+- both candidates complete the same self-securing breakpoint profile for this board
+- this unlocks the new stronger denied-player-value tie-break before stamina cleanup
+
+if: `candidate.EffectivePlayerValue != current.EffectivePlayerValue` -> true for `y5` vs `w2`
+- leaving `y5` gives the player a much stronger flexible die than leaving `w2`
+- the comparator now prefers denying the higher effective player value first
+
+if tied again: `candidate.IsYellow != current.IsYellow` -> true for `y5`
+- yellow remains preferred because it is universal and can be reassigned to any stat
+
+if in the old comparator: `candidateSpentStamina < currentSpentStamina` could resolve first -> wrong
+- that allowed a paper-cleaner `w2` preview to beat a stronger yellow denial line
+- this is exactly the failure mode from the observed draft
+
+why the old line was wrong
+- the draft comparator could reach preview stamina cleanup before explicitly resolving same-purpose denial strength
+- that let low-value white survive over high-value yellow even when both served the same immediate defensive purpose
+- it also failed to reliably deny the player the stronger universal die
+
+why the fixed line is correct
+- when self breakpoint profiles are the same, denied-player power now resolves first
+- higher effective player value wins, and yellow wins remaining ties because of universal assignment value
+- only after that may preview stamina/overspend cleanup decide
+
+result
+- Kobold should take `y5`, not `w2`, in this same-purpose defensive tie
+- the enemy now prioritizes denying the stronger universal die before paper-cleaner stamina cleanup

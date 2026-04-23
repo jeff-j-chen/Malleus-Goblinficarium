@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 public class Item : MonoBehaviour {
-    private const int PotionStatBonus = 5;
     [SerializeField] public Scripts s;
     [SerializeField] public string itemName;
     [SerializeField] public string itemType;
@@ -389,6 +388,18 @@ public class Item : MonoBehaviour {
         return count;
     }
 
+    private static bool IsDiceCountingPotionModifier(string potionModifier) {
+        return potionModifier is "rage" or "alacrity" or "force" or "foce" or "lethality" or "resilience";
+    }
+
+    private void AddGuaranteedPotionDie(string dieType) {
+        if (string.IsNullOrWhiteSpace(dieType) || s?.diceSummoner == null) { return; }
+
+        string stat = dieType == "yellow" ? "red" : dieType;
+        int dieValue = Random.Range(3, 7);
+        s.diceSummoner.GenerateSingleDie(dieValue, dieType, "player", stat, isFromMight:true);
+    }
+
     private void ApplyEnemyScrollGutsPenaltyNow() {
         if (s?.diceSummoner?.existingDice == null) { return; }
 
@@ -403,14 +414,56 @@ public class Item : MonoBehaviour {
     private void ApplyEnemyScrollColorSuppressionNow(string diceTypeToSuppress) {
         if (s?.diceSummoner?.existingDice == null || string.IsNullOrWhiteSpace(diceTypeToSuppress)) { return; }
 
+        List<Dice> diceToRemove = new();
         foreach (GameObject dieObject in s.diceSummoner.existingDice.ToList()) {
             if (dieObject == null) { continue; }
             Dice die = dieObject.GetComponent<Dice>();
             if (die == null || !die.isAttached || die.isOnPlayerOrEnemy != "enemy") { continue; }
             if (die.diceType == diceTypeToSuppress) {
-                StartCoroutine(die.FadeOut(false));
+                diceToRemove.Add(die);
             }
         }
+
+        if (diceToRemove.Count == 0) { return; }
+
+        foreach (Dice die in diceToRemove) {
+            if (die == null) { continue; }
+            if (!string.IsNullOrEmpty(die.statAddedTo) && s.statSummoner.addedEnemyDice.TryGetValue(die.statAddedTo, out List<Dice> attachedDice)) {
+                attachedDice.Remove(die);
+            }
+            s.diceSummoner.existingDice.Remove(die.gameObject);
+            Destroy(die.gameObject);
+        }
+
+        foreach (string stat in s.itemManager.statArr) {
+            s.statSummoner.RepositionDice("enemy", stat);
+        }
+        s.statSummoner.SetDebugInformationFor("enemy");
+        s.turnManager.RecalculateMaxFor("enemy");
+        s.turnManager.RefreshEnemyPlanIfNeeded();
+        s.diceSummoner.SaveDiceValues();
+    }
+
+    private void ApplyEnemyScrollHipPenaltyNow() {
+        if (s?.enemy == null || s?.statSummoner == null || s?.turnManager == null) { return; }
+        if (s.enemy.enemyName.text == "Lich") { return; }
+
+        int refundedEnemyStamina = s.statSummoner.addedEnemyStamina.Values.Sum();
+        s.statSummoner.addedEnemyStamina = new Dictionary<string, int> {
+            { "green", 0 },
+            { "blue", 0 },
+            { "red", 0 },
+            { "white", 0 },
+        };
+
+        if (refundedEnemyStamina > 0) {
+            s.turnManager.ChangeStaminaOf("enemy", refundedEnemyStamina);
+        }
+
+        s.statSummoner.SummonStats();
+        s.statSummoner.RepositionAllDice("enemy");
+        s.turnManager.RecalculateMaxFor("enemy");
+        s.turnManager.RefreshEnemyPlanIfNeeded();
     }
 
     private void UseMirror() {
@@ -467,18 +520,11 @@ public class Item : MonoBehaviour {
             return;
         }
 
-        foreach (string stat in s.itemManager.statArr) {
-            s.enemy.stats[stat] = Mathf.Max(0, s.enemy.stats[stat] - 1);
-        }
-        string randomStat = s.itemManager.statArr[Random.Range(0, s.itemManager.statArr.Length)];
-        s.enemy.stats[randomStat] = Mathf.Max(0, s.enemy.stats[randomStat] - 1);
-        Save.game.enemyAcc = s.enemy.stats["green"];
-        Save.game.enemySpd = s.enemy.stats["blue"];
-        Save.game.enemyDmg = s.enemy.stats["red"];
-        Save.game.enemyDef = s.enemy.stats["white"];
+        s.itemManager.ApplyTemporaryEnemyWitchHandCurse(2);
         s.itemManager.MarkItemUsed(this);
         s.soundManager.PlayClip("scream");
         s.statSummoner.SummonStats();
+        s.statSummoner.RepositionAllDice("enemy");
         s.statSummoner.SetCombatDebugInformationFor("enemy");
         s.turnManager.RecalculateMaxFor("enemy");
         ConsumeCommonItemAndReselect();
@@ -634,7 +680,6 @@ public class Item : MonoBehaviour {
                             s.soundManager.PlayClip("fwoosh");
                             Save.game.enemyScrollChestActive = true;
                             s.turnManager.RecalculateEnemyCombatIntent();
-                            s.turnManager.SetStatusText("you read scroll of chest... enemy chest is exposed");
                             Remove();
                             break;
                         case "guts":
@@ -646,7 +691,6 @@ public class Item : MonoBehaviour {
                             Save.game.enemyScrollGutsActive = true;
                             ApplyEnemyScrollGutsPenaltyNow();
                             s.turnManager.RecalculateEnemyCombatIntent();
-                            s.turnManager.SetStatusText("you read scroll of guts... enemy is weakened");
                             Remove();
                             break;
                         case "knee":
@@ -657,7 +701,6 @@ public class Item : MonoBehaviour {
                             s.soundManager.PlayClip("fwoosh");
                             Save.game.enemyScrollKneeActive = true;
                             s.turnManager.RecalculateEnemyCombatIntent();
-                            s.turnManager.SetStatusText("you read scroll of knee... enemy is crippled");
                             Remove();
                             break;
                         case "hip":
@@ -667,8 +710,8 @@ public class Item : MonoBehaviour {
                             }
                             s.soundManager.PlayClip("fwoosh");
                             Save.game.enemyScrollHipActive = true;
+                            ApplyEnemyScrollHipPenaltyNow();
                             s.turnManager.RecalculateEnemyCombatIntent();
-                            s.turnManager.SetStatusText("you read scroll of hip... enemy cannot use stamina");
                             Remove();
                             break;
                         case "hand":
@@ -680,7 +723,6 @@ public class Item : MonoBehaviour {
                             Save.game.enemyScrollHandActive = true;
                             ApplyEnemyScrollColorSuppressionNow("white");
                             s.turnManager.RecalculateEnemyCombatIntent();
-                            s.turnManager.SetStatusText("you read scroll of hand... enemy white dice fail");
                             Remove();
                             break;
                         case "armpits":
@@ -692,7 +734,6 @@ public class Item : MonoBehaviour {
                             Save.game.enemyScrollArmpitsActive = true;
                             ApplyEnemyScrollColorSuppressionNow("red");
                             s.turnManager.RecalculateEnemyCombatIntent();
-                            s.turnManager.SetStatusText("you read scroll of armpits... enemy red dice fail");
                             Remove();
                             break;
                         case "nothing":
@@ -708,6 +749,11 @@ public class Item : MonoBehaviour {
                         break;
                     }
 
+                    if (IsDiceCountingPotionModifier(modifier) && s.diceSummoner.CountUnattachedDice() > 0) {
+                        s.turnManager.SetStatusText("draft your die");
+                        break;
+                    }
+
                     Save.persistent.potionsQuaffed++;
                     s.itemManager.MarkItemUsed(this);
                     s.soundManager.PlayClip("gulp");
@@ -715,20 +761,16 @@ public class Item : MonoBehaviour {
                     // notify player
                     switch (modifier) {
                         case "accuracy":
-                            s.player.potionStats["green"] += PotionStatBonus;
-                            Save.game.potionAcc = s.player.potionStats["green"];
+                            AddGuaranteedPotionDie("green");
                             break;
                         case "speed":
-                            s.player.potionStats["blue"] += PotionStatBonus;
-                            Save.game.potionSpd = s.player.potionStats["blue"];
+                            AddGuaranteedPotionDie("blue");
                             break;
                         case "strength":
-                            s.player.potionStats["red"] += PotionStatBonus;
-                            Save.game.potionDmg = s.player.potionStats["red"];
+                            AddGuaranteedPotionDie("red");
                             break;
                         case "defense":
-                            s.player.potionStats["white"] += PotionStatBonus;
-                            Save.game.potionDef = s.player.potionStats["white"];
+                            AddGuaranteedPotionDie("white");
                             break;
                         // for regular potions, shift the stats by varying amounts depending if the sum without die is -1 or not (or knee injury), making sure the dice stay in the correct position
                         case "might":
@@ -750,32 +792,32 @@ public class Item : MonoBehaviour {
                             break;
                         case "rage": {
                             int staminaGained = CountAttachedPlayerDiceByType("red") * 2;
+                            s.turnManager.StartCoroutine(PlayBlipAfterDelay());
                             s.turnManager.ChangeStaminaOf("player", staminaGained);
-                            s.soundManager.PlayClip("blip1");
                             break;
                         }
                         case "alacrity": {
                             int staminaGained = CountAttachedPlayerDiceByType("blue") * 2;
+                            s.turnManager.StartCoroutine(PlayBlipAfterDelay());
                             s.turnManager.ChangeStaminaOf("player", staminaGained);
-                            s.soundManager.PlayClip("blip1");
                             break;
                         }
                         case "force": {
                             int staminaGained = CountAttachedPlayerDiceByType("white") * 2;
+                            s.turnManager.StartCoroutine(PlayBlipAfterDelay());
                             s.turnManager.ChangeStaminaOf("player", staminaGained);
-                            s.soundManager.PlayClip("blip1");
                             break;
                         }
                         case "lethality": {
                             int staminaGained = CountAttachedPlayerDiceByType("green") * 2;
+                            s.turnManager.StartCoroutine(PlayBlipAfterDelay());
                             s.turnManager.ChangeStaminaOf("player", staminaGained);
-                            s.soundManager.PlayClip("blip1");
                             break;
                         }
                         case "resilience": {
                             int staminaGained = CountAttachedPlayerDiceByType("yellow") * 2;
+                            s.turnManager.StartCoroutine(PlayBlipAfterDelay());
                             s.turnManager.ChangeStaminaOf("player", staminaGained);
-                            s.soundManager.PlayClip("blip1");
                             break;
                         }
                         case "nothing": break;
@@ -806,7 +848,7 @@ public class Item : MonoBehaviour {
                     s.itemManager.Select(s.player.inventory, 0, true, false);
                     break;
                 case "skeleton key":
-                    if (s.levelManager.level == 4 && s.levelManager.sub == 1) {
+                    if (LevelManager.IsDevilSub(s.levelManager.level, s.levelManager.sub)) {
                         // can't use skeleton key on the devil
                         s.soundManager.PlayClip("shuriken");
                         s.turnManager.SetStatusText("the key crumbles to dust");
@@ -885,7 +927,6 @@ public class Item : MonoBehaviour {
                     break;
                 case "ankh":
                     if (!Save.game.usedAnkh) {
-                        bool enemyDraftsFirstAfterAnkh = s.turnManager.EnemyShouldDraftFirstForFreshDraft();
                         s.soundManager.PlayClip("click0");
                         s.itemManager.MarkItemUsed(this);
                         Save.game.usedAnkh = true;
@@ -898,7 +939,7 @@ public class Item : MonoBehaviour {
                         s.statSummoner.ResetDiceAndStamina(refundEnemyPlannedStamina:true);
                         s.diceSummoner.SummonDice(false, true);
                         s.statSummoner.SummonStats();
-                        s.turnManager.DetermineMove(true, true, enemyDraftsFirstAfterAnkh);
+                        s.turnManager.DetermineMove(true, true);
                     }
                     else { s.turnManager.SetStatusText("ankh glows with red light"); }
                     break;
@@ -908,6 +949,11 @@ public class Item : MonoBehaviour {
 
         yield break;
     }
+
+    private IEnumerator PlayBlipAfterDelay() {
+        yield return s.delays[0.3f];
+        s.soundManager.PlayClip("blip1");
+    } 
 
     /// <summary>
     /// Remove an item from the player's inventory.

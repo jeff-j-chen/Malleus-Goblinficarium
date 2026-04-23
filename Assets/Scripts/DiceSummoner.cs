@@ -22,6 +22,9 @@ public class DiceSummoner : MonoBehaviour
     public readonly Vector3 desktopDiceScale = new(1f, 1f, 1f);
     public readonly Vector3 mobileDiceScale = new(1.499f, 1.499f, 1f);
     private Vector3 diceScale;
+    private int pendingDraftSpawnEffects;
+    private bool draftSpawnEffectsInProgress;
+    private bool pendingDraftSaveAfterSpawn;
     // 1.50f causes strange visual bugs on the dice, so 1.499f it is
     
     
@@ -53,11 +56,41 @@ public class DiceSummoner : MonoBehaviour
         StartCoroutine(SummonAfterFade(initialSummon, newSet));
     }
 
+    public bool IsDraftSpawnComplete() {
+        return !draftSpawnEffectsInProgress && pendingDraftSpawnEffects <= 0;
+    }
+
+    private void TrackDraftSpawnEffect(IEnumerator routine) {
+        if (routine == null) { return; }
+        pendingDraftSpawnEffects++;
+        draftSpawnEffectsInProgress = true;
+        StartCoroutine(TrackDraftSpawnEffectCoro(routine));
+    }
+
+    private IEnumerator TrackDraftSpawnEffectCoro(IEnumerator routine) {
+        try {
+            yield return StartCoroutine(routine);
+        }
+        finally {
+            pendingDraftSpawnEffects = Mathf.Max(0, pendingDraftSpawnEffects - 1);
+            if (pendingDraftSpawnEffects == 0) {
+                draftSpawnEffectsInProgress = false;
+                if (pendingDraftSaveAfterSpawn) {
+                    pendingDraftSaveAfterSpawn = false;
+                    SaveDiceValues(0.05f);
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Do not call this coroutine, use SummonDice() instead.
     /// </summary>
     private IEnumerator SummonAfterFade(bool initialSummon, bool newSet) {
         if (newSet) {
+            pendingDraftSaveAfterSpawn = false;
+            pendingDraftSpawnEffects = 0;
+            draftSpawnEffectsInProgress = false;
             if (s.turnManager.dieSavedFromLastRound != null) { 
                 Dice fromLastRound = s.turnManager.dieSavedFromLastRound.GetComponent<Dice>();
                 lastNum = fromLastRound.diceNum;
@@ -88,25 +121,35 @@ public class DiceSummoner : MonoBehaviour
                 }
             }
             if (s.itemManager.PlayerHasWeapon("flail")) {
-                StartCoroutine(SpawnFlailDice());
+                TrackDraftSpawnEffect(SpawnFlailDice());
             }
             if (s.itemManager.ShouldSpawnCursedDiceAtDraftStart()) {
-                StartCoroutine(SpawnCursedDice());
+                TrackDraftSpawnEffect(SpawnCursedDice());
             }
             if (Save.game.curCharNum == 1) {
-                StartCoroutine(SpawnCharOneDice());
+                TrackDraftSpawnEffect(SpawnCharOneDice());
             }
             if (s.itemManager.PlayerHasWeapon("hatchet") && s.itemManager.PlayerHasLegendary()) {
-                StartCoroutine(SpawnHatchetDice());
+                TrackDraftSpawnEffect(SpawnHatchetDice());
             }
-            if (s.levelManager.level == 4 && s.levelManager.sub == 1) {
-                StartCoroutine(SpawnDevilDice());
+            if (s.enemy != null && s.enemy.enemyName.text == "Devil") {
+                TrackDraftSpawnEffect(SpawnDevilDice());
             }
             if (lastNum != -1) {
-                StartCoroutine(SpawnCourageDice());
+                TrackDraftSpawnEffect(SpawnCourageDice());
+            }
+
+            if (IsDraftSpawnComplete()) {
+                SaveDiceValues(0.35f);
+            }
+            else {
+                pendingDraftSaveAfterSpawn = true;
             }
         }
         else { 
+            pendingDraftSaveAfterSpawn = false;
+            pendingDraftSpawnEffects = 0;
+            draftSpawnEffectsInProgress = false;
             existingDice.Clear();
             int initialSpawnCount = 0;
             s.turnManager.BeginEnemyPlanRefreshBatch();
@@ -158,33 +201,33 @@ public class DiceSummoner : MonoBehaviour
             finally {
                 s.turnManager.EndEnemyPlanRefreshBatch();
             }
+            SaveDiceValues(0.35f);
         } 
-        SaveDiceValues(0.35f);
     }
 
     private IEnumerator SpawnFlailDice() {
         yield return s.delays[0.2f];
         if (s.itemManager.PlayerHasLegendary()) {
             // give the player two red die if wielding a legendary flail, else one
-            StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
+            GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true, isFromMight:true);
             yield return s.delays[0.1f];
-            StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
+            GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true, isFromMight:true);
         }
         else {
-            StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true)));
+            GenerateSingleDie(Random.Range(1, 7), "red", "player", "red", initialSix:true, isFromMight:true);
         }
     }
 
     private IEnumerator SpawnCharOneDice() {
         yield return s.delays[0.2f];
         // if player character #2 (maul armor helm), give player yellow die
-        StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true)));
+        GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true, isFromMight:true);
     }
 
     private IEnumerator SpawnHatchetDice() {
         yield return s.delays[0.2f];
         // legendary hatchet lets player start out with yellow die
-        StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true)));
+        GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true, isFromMight:true);
     }
 
     private IEnumerator SpawnCursedDice() {
@@ -192,9 +235,8 @@ public class DiceSummoner : MonoBehaviour
 
         int spawnCount = s.itemManager.GetCursedDiceSpawnCount();
         for (int i = 0; i < spawnCount; i++) {
-            Dice created = GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+            Dice created = GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true, isFromMight:true);
             created.spawnedByCursedDice = true;
-            StartCoroutine(ApplyWoundsToDice(created));
             if (i < spawnCount - 1) {
                 yield return s.delays[0.1f];
             }
@@ -209,43 +251,67 @@ public class DiceSummoner : MonoBehaviour
             yield return s.delays[0.05f];
             Dice created = GenerateSingleDie(Random.Range(1,7), typeToGen, "enemy", typeToGen, initialSix:true);
             // attach it to the devil
-            if (typeToGen == "red" && s.enemy.woundList.Contains("armpits") || typeToGen == "white" && s.enemy.woundList.Contains("hand")) {
+            if (typeToGen == "red" && (s.enemy.woundList.Contains("armpits") || s.itemManager.EnemyHasTemporaryArmpitsInjury())
+                || typeToGen == "white" && (s.enemy.woundList.Contains("hand") || s.itemManager.EnemyHasTemporaryHandInjury())) {
                 StartCoroutine(created.FadeOut(true));
+            }
+            else if ((s.enemy.woundList.Contains("guts") || s.itemManager.EnemyHasTemporaryGutsInjury()) && s.enemy.enemyName.text != "Lich") {
+                StartCoroutine(created.DecreaseDiceValue(false));
             }
             // devil doesn't get to take its starting red and white if its wounded there
         }
 
-        if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty) || DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
+        int yellowDiceCount = (DifficultyHelper.IsHard(Save.persistent.gameDifficulty) || DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) ? 1 : 0;
+        yellowDiceCount += Mathf.Max(0, s.levelManager.level - 4);
+        for (int i = 0; i < yellowDiceCount; i++) {
             yield return s.delays[0.1f];
-            GenerateSingleDie(Random.Range(1, 3), "yellow", "enemy", "red", initialSix:true);
+            if (s.levelManager.level == 4) { 
+                GenerateSingleDie(Random.Range(1, 4), "yellow", "enemy", "red", initialSix:true);
+            }
+            else { 
+                GenerateSingleDie(Random.Range(1, 6), "yellow", "enemy", "red", initialSix:true);
+            }
         }
     }
 
     private IEnumerator SpawnCourageDice() {
         yield return s.delays[0.2f];
         // if there is a die Saved from last round (from scroll of courage)
-        StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(lastNum, lastType, "player", lastStat, initialSix:true)));
+        GenerateSingleDie(lastNum, lastType, "player", lastStat, initialSix:true, isFromMight:true);
         // create the die and add it to the player
     }
 
-    private IEnumerator ApplyWoundsToDice(Dice dice) {
-        yield return s.delays[0.1f];
-        // ensure that if a new die is created from a source like flail, wound effects are applied as expected
+    private void ApplyGrantedPlayerDieWoundEffects(Dice dice) {
+        if (dice == null || s == null || s.player == null || !dice.isAttached || dice.isOnPlayerOrEnemy != "player") {
+            return;
+        }
+
         bool chestReroll = s.player.woundList.Contains("chest") && dice.diceNum >= 4;
-        if (s.player.woundList.Contains("chest") && dice.diceNum >= 4) {
+        if (chestReroll) {
             StartCoroutine(dice.RerollAnimation());
         }
-        if (s.player.woundList.Contains("guts")) { StartCoroutine(dice.DecreaseDiceValue(false)); }
-        if (dice.diceType == "red" && s.player.woundList.Contains("armpits")) { StartCoroutine(dice.FadeOut()); }
-        else if (dice.diceType == "white" && s.player.woundList.Contains("hand")) { StartCoroutine(dice.FadeOut()); }
-        else if (dice.diceType == "white" && Save.game.curCharNum == 2) { dice.SetToOne(); }
+
+        bool shouldDiscardForWound = (dice.diceType == "red" && s.player.woundList.Contains("armpits"))
+            || (dice.diceType == "white" && s.player.woundList.Contains("hand"));
+        if (shouldDiscardForWound) {
+            StartCoroutine(dice.FadeOut());
+            return;
+        }
+
+        if (s.player.woundList.Contains("guts")) {
+            StartCoroutine(dice.DecreaseDiceValue(false));
+        }
+
+        if (dice.diceType == "white" && Save.game.curCharNum == 2) {
+            dice.SetToOne();
+        }
+
         s.itemManager.TryUpgradeTakenDieWithTarot(dice, chestReroll ? 1.5f : 0.05f);
     }
 
     public Dice DuplicateDieToPlayer(int diceNum, string diceType) {
         string statToAttachTo = diceType == "yellow" ? "red" : diceType;
-        Dice createdDie = GenerateSingleDie(diceNum, diceType, "player", statToAttachTo, initialSix:true);
-        StartCoroutine(ApplyWoundsToDice(createdDie));
+        Dice createdDie = GenerateSingleDie(diceNum, diceType, "player", statToAttachTo, initialSix:true, isFromMight:true);
         return createdDie;
     }
     
@@ -306,15 +372,8 @@ public class DiceSummoner : MonoBehaviour
         // set the color of the base
         // fade in the die
         existingDice.Add(number);
-        if (attachToPlayerOrEnemy == "player" && isFromMight)  { 
-            bool chestReroll = s.player.woundList.Contains("chest") && number.GetComponent<Dice>().diceNum >= 4;
-            if (s.player.woundList.Contains("guts")) { 
-                StartCoroutine(number.GetComponent<Dice>().DecreaseDiceValue());
-            }
-            if (s.player.woundList.Contains("chest") && number.GetComponent<Dice>().diceNum >= 4) { 
-                StartCoroutine(number.GetComponent<Dice>().RerollAnimation());
-            }
-            s.itemManager.TryUpgradeTakenDieWithTarot(number.GetComponent<Dice>(), chestReroll ? 1.5f : 0.05f);
+        if (attachToPlayerOrEnemy == "player" && isFromMight)  {
+            ApplyGrantedPlayerDieWoundEffects(number.GetComponent<Dice>());
         }
         // add it to the array of existing dice so that functions can be performed on all die at once
         if (attachToPlayerOrEnemy == "player") { s.statSummoner.SetCombatDebugInformationFor("player"); }

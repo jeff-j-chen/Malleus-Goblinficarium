@@ -18,6 +18,7 @@ public class PersistentData {
     public string[] tsItemMods;
     public int newCharNum;
     public string gameDifficulty;
+    public bool endlessModeEnabled;
     public bool[] unlockedChars;
     public int gamesPlayed;
     public int highestLevel;
@@ -63,6 +64,7 @@ public class PersistentData {
         tsItemMods = new string[9];
         newCharNum = 0;
         gameDifficulty = DifficultyHelper.Normal;
+        endlessModeEnabled = false;
         unlockedChars = new bool[4] { true, false, false, false };
         gamesPlayed = 0;
         highestLevel = 1;

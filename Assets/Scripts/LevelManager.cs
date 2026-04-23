@@ -11,6 +11,7 @@ public class LevelManager : MonoBehaviour {
     [SerializeField] private GameObject loadingCircle;
     [SerializeField] private TextMeshProUGUI levelTransText;
     [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI gameStatus;
     [SerializeField] public int level;
     [SerializeField] public int sub;
     [SerializeField] public bool lockActions = false;
@@ -56,8 +57,37 @@ public class LevelManager : MonoBehaviour {
         return currentSub == MerchantSub || currentSub == BlacksmithSub;
     }
 
+    public static bool IsDevilSub(int currentLevel, int currentSub) {
+        return currentSub == 1 && currentLevel >= 4;
+    }
+
+    private static bool IsEndlessModeEnabled() {
+        return Save.persistent != null && Save.persistent.endlessModeEnabled;
+    }
+
+    private static bool ShouldSpawnDevilEncounter(int currentLevel, int currentSub) {
+        if (!IsDevilSub(currentLevel, currentSub)) { return false; }
+        return currentLevel == 4 || IsEndlessModeEnabled();
+    }
+
+    private static bool ShouldEndRunAfterDevil(int currentLevel, int currentSub) {
+        return currentLevel == 4 && currentSub == 1 && !IsEndlessModeEnabled();
+    }
+
+    private static int GetDevilEncounterBonus(int currentLevel) {
+        return Mathf.Max(0, currentLevel - 4);
+    }
+
     private static string GetLevelLabel(int currentLevel, int currentSub) {
         return $"level {currentLevel}-{currentSub}";
+    }
+
+    private void UpdateGameStatusText() {
+        if (gameStatus == null || Save.persistent == null) { return; }
+
+        string difficulty = DifficultyHelper.Normalize(Save.persistent.gameDifficulty);
+        string endless = Save.persistent.endlessModeEnabled ? "on" : "off";
+        gameStatus.text = $"v1.2.3 - difficulty: {difficulty} - endless: {endless}";
     }
 
     private void QueuePendingArrivalBonuses() {
@@ -103,11 +133,12 @@ public class LevelManager : MonoBehaviour {
             if (IsVendorSub(sub)) { levelText.text = $"({GetLevelLabel(level, sub)})"; }
             else if (sub == Save.persistent.tsSub && level == Save.persistent.tsLevel && !(sub == 1 && level == 1))
             { levelText.text = $"(level {level}-{sub}*)"; }
-            else if (level == 4 && sub == 1) { StartCoroutine(GlitchyDebugText()); }
+            else if (ShouldSpawnDevilEncounter(level, sub) && !IsEndlessModeEnabled()) { debugGlitchCoro = StartCoroutine(GlitchyDebugText()); }
             else if (s.enemy.enemyName.text == "Lich") { levelText.text = "(level ???)"; }
             else { levelText.text = $"(level {level}-{sub})"; }
         }
         else { levelText.text = ""; }
+        UpdateGameStatusText();
         StartCoroutine(ApplyPendingArrivalBonuses());
         
     }
@@ -132,20 +163,25 @@ public class LevelManager : MonoBehaviour {
                 }
             }
             else if (lichOrDevilOrNormal == "devil") {
+                int devilBonus = GetDevilEncounterBonus(level);
                 if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) || DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
-                    return new[] { 3f, 3f, 3f, 3f };
+                    float stat = 3f + devilBonus;
+                    return new[] { stat, stat, stat, stat };
                 }
                 else { 
-                    return new[] { 2f, 2f, 2f, 2f };
+                    float stat = 2f + devilBonus;
+                    return new[] { stat, stat, stat, stat };
                 }
             }
         }
         if (sub >= MerchantSub) { return new[] { 0f, 0f, 0f, 0f }; }
         // given key is not present in the dictionary for sub-4s, instantly return blank
-        float[] stats = levelStats[level + sub.ToString()];
+        int scaledLevel = Mathf.Clamp(level, 1, 3);
+        int scaledSub = Mathf.Clamp(sub, 1, 3);
+        float[] stats = levelStats[$"{scaledLevel}{scaledSub}"];
         // based on the level and sub, get the stats from the level
         float[] totalStats = new float[4];
-        float[] baseStats = level switch {
+        float[] baseStats = scaledLevel switch {
             // create empty arrays of floats to store the stats in
             1 => GenBaseStats(stats, balanced),
             2 => GenBaseStats(stats, damage),
@@ -153,11 +189,13 @@ public class LevelManager : MonoBehaviour {
             _ => null
         };
         // generate the stats for the enemy based on level 
+        float diff = level - scaledLevel;
         for (int i = 0; i < 4; i++) {
             // for every stat, the set the stats to be the combination of level stats (from dictionary), the base stats (from function), and a slight amount of RNG 
             totalStats[i] = Mathf.Round((stats[i] + baseStats[i] + UnityEngine.Random.Range(0f, stats[4]))/10f);
+            totalStats[i] += diff;
             if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-                totalStats[i] += UnityEngine.Random.Range(0, s.levelManager.level);
+                totalStats[i] += UnityEngine.Random.Range(0, scaledLevel);
             }
         }
         if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
@@ -222,6 +260,8 @@ public class LevelManager : MonoBehaviour {
         Save.game.enemyWounds = new();
         Save.game.enemyBleedsOutNextRound = false;
         Save.game.enemyHasKatarSpeedPenalty = false;
+        Save.game.enemyKatarSpeedPenaltyAmount = 0;
+        Save.game.enemyKatarBaseSpeedAfterPenalty = 0;
         Save.game.discardableDieCounter = 0;
         Save.game.enemyIsDead = false;
         Save.game.isFirstCombatRoundOfEncounter = false;
@@ -275,9 +315,14 @@ public class LevelManager : MonoBehaviour {
     private IEnumerator NextLevelCoroutine(bool isLich=false) {
         if (!lockActions) {
             lockActions = true;
-            bool shouldAdvanceTorchCounter = s != null
-                && s.enemy != null
-                && s.enemy.enemyName.text is not "Merchant" and not "Blacksmith" and not "Tombstone";
+            if (transGlitchCoro != null) {
+                StopCoroutine(transGlitchCoro);
+                transGlitchCoro = null;
+            }
+            if (debugGlitchCoro != null) {
+                StopCoroutine(debugGlitchCoro);
+                debugGlitchCoro = null;
+            }
             Color tempColor = boxSR.color;
             tempColor.a = 0f;
             boxSR.color = tempColor;
@@ -287,7 +332,7 @@ public class LevelManager : MonoBehaviour {
             s.soundManager.PlayClip("next");
             // play sound clip
             QueuePendingArrivalBonuses();
-            if (level == 4 && sub == 1 && !hasQueuedWarpDestination) {
+            if (ShouldEndRunAfterDevil(level, sub) && !hasQueuedWarpDestination) {
                 if (debugGlitchCoro != null) { StopCoroutine(debugGlitchCoro); }
                 // going to next level after having defeated devil
                 if (Save.game.curCharNum != 3 && !Save.persistent.unlockedChars[Save.game.curCharNum + 1]) { 
@@ -316,7 +361,7 @@ public class LevelManager : MonoBehaviour {
             }
             // fade out all die (die are only faded out upon kill normally)
             // yield return s.delays[1.5f]; // uncomment for tombstone tests
-            if (isLich || level == 3 && sub == BlacksmithSub) { 
+            if (isLich || sub == BlacksmithSub && level >= 3) { 
                 s.music.FadeVolume("LaBossa");
                 // if spawning lich or devil, fade to boss music
             }
@@ -419,12 +464,17 @@ public class LevelManager : MonoBehaviour {
                     levelText.text = $"({GetLevelLabel(level, sub)})";
                     // set the correct level loading text
                 }
-                else if (level == 4 && sub == 1) { 
+                else if (ShouldSpawnDevilEncounter(level, sub)) { 
                     toSpawn = "devil";
                     // spawn the devil if on the correct level
                     transGlitchCoro = StartCoroutine(GlitchyLevelText());
                     s.enemy.SpawnNewEnemy(0, true); 
-                    debugGlitchCoro = StartCoroutine(GlitchyDebugText());
+                    if (!IsEndlessModeEnabled()) {
+                        debugGlitchCoro = StartCoroutine(GlitchyDebugText());
+                    }
+                    else {
+                        levelText.text = $"({GetLevelLabel(level, sub)})";
+                    }
                 }
                 else { 
                     toSpawn = "normal";
@@ -452,7 +502,10 @@ public class LevelManager : MonoBehaviour {
             s.terrain.Rebind();
             s.terrain.Update(0f);
             yield return s.delays[1.5f];
-            if (transGlitchCoro != null) { StopCoroutine(transGlitchCoro); }
+            if (transGlitchCoro != null) {
+                StopCoroutine(transGlitchCoro);
+                transGlitchCoro = null;
+            }
             // wait 1.5s
             s.statSummoner.SummonStats();
             s.statSummoner.SetDebugInformationFor("enemy");
@@ -504,7 +557,7 @@ public class LevelManager : MonoBehaviour {
             else if (toSpawn == "devil") { s.turnManager.SetStatusText("dice of slain heroes rattle around his neck", true); }
             else if (toSpawn == "blacksmith") { s.turnManager.SetStatusText("forge one stat", true); }
             // fade the level box back out
-            s.itemManager.AttemptFadeTorches(shouldAdvanceTorchCounter);
+            s.itemManager.AttemptFadeTorches(toSpawn is "normal" or "devil" or "lich");
             StartCoroutine(ApplyPendingArrivalBonuses());
             // try to remove torches
             // spawn the items so the player can interact with them, after the items are destroyed

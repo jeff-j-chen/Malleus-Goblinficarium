@@ -78,13 +78,33 @@ public class Enemy : MonoBehaviour {
     }
 
     private int GetSpawnStamina(int enemyNum) {
-        if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) { return 0; }
-        if (enemyArr[enemyNum] == "Lich") { return lichStamina; }
 
         bool useHardStamina = DifficultyHelper.IsHard(Save.persistent.gameDifficulty)
             || DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty);
         Dictionary<string, int> staminaTable = useHardStamina ? givenStaminaHard : givenStamina;
-        return staminaTable[$"{s.levelManager.level}{s.levelManager.sub}"];
+
+        if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
+            int devilBonus = s.levelManager.level - 4;
+            if (devilBonus < 0) { devilBonus = 0; }
+            return staminaTable["41"] + Mathf.FloorToInt(devilBonus * 1.5f);
+        }
+        if (enemyArr[enemyNum] == "Tombstone" || IsVendor(enemyNum)) { return 0; }
+        if (enemyArr[enemyNum] == "Lich") { return lichStamina; }
+
+        string staminaKey = $"{s.levelManager.level}{s.levelManager.sub}";
+        if (staminaTable.ContainsKey(staminaKey)) {
+            return staminaTable[staminaKey];
+        }
+
+        string fallbackKey = $"3{s.levelManager.sub}";
+        int fallbackStamina = staminaTable["33"];
+        if (staminaTable.ContainsKey(fallbackKey)) {
+            fallbackStamina = staminaTable[fallbackKey];
+        }
+
+        int levelBonus = s.levelManager.level - 3;
+        if (levelBonus < 0) { levelBonus = 0; }
+        return fallbackStamina + levelBonus;
     }
 
     private bool HasSavedFloorItems() {
