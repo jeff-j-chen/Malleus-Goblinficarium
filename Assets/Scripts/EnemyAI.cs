@@ -12,6 +12,7 @@ public static class EnemyAI {
     private static readonly int[] PreferredTargetSearchOrder = { 7, 6, 4, 5, 3, 2, 1, 0 };
     private const int AdvancedPlanProfileLogInterval = 10;
     private const double AdvancedPlanSlowLogThresholdMs = 8d;
+    private const int MaxLikelyPlayerReplyDice = 5;
     private static readonly string[][] YellowSearchOrders = {
         new[] { "green", "blue", "red", "white" },
         new[] { "blue", "green", "red", "white" },
@@ -99,10 +100,19 @@ public static class EnemyAI {
         public int DieValue;
     }
 
+    private sealed class DraftPreviewContext {
+        public PlannerSnapshot BaseSnapshot;
+        public List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> PlayerYellowReassignmentOptions = new();
+        public Dictionary<YellowAssignmentStateKey, PlannerSnapshot> PlayerSnapshotCache = new();
+        public Dictionary<Dice, List<(Dictionary<string, int> totals, Dictionary<string, int> counts)>> ReplyStatesByExcludedDie = new();
+        public Dictionary<DraftPreviewCacheKey, AdvancedPlanEvaluation> PreviewEvaluationCache = new();
+    }
+
     private sealed class SimAttachedDie {
         public string Stat;
         public int Value;
         public bool IsRerolled;
+        public bool IsYellow;
 
         public SimAttachedDie Clone() {
             return (SimAttachedDie)MemberwiseClone();
@@ -114,6 +124,8 @@ public static class EnemyAI {
         public int PlayerSpd;
         public int PlayerAtt;
         public int PlayerDef;
+        public bool PlayerGuardSelected;
+        public int PlayerPendingGuardParryBonus;
         public int EnemyBaseAim;
         public int EnemyBaseSpd;
         public int EnemyBaseAtt;
@@ -144,6 +156,7 @@ public static class EnemyAI {
         public int EnemyAttachedDiceCount;
         public bool PlayerHasArmor;
         public bool PlayerHasDodgy;
+        public bool PlayerCanBecomeDodgy;
         public bool PlayerHasMaul;
         public int PlayerCrystalShardCopies;
         public int PlayerCrystalShardLossPerShatter;
@@ -151,6 +164,7 @@ public static class EnemyAI {
         public int PlayerInevitableImmediateBonus;
         public int PlayerRiposteImmediateBonus;
         public int PlayervindictiveImmediateBonus;
+        public int PlayerTridentImmediateBonus;
         public int PlayerScimitarDiscardCount;
         public bool PlayerHasGlassSword;
         public bool PlayerGlassSwordShattered;
@@ -162,10 +176,12 @@ public static class EnemyAI {
         public bool PlayerSpeedLockedHigh;
         public bool EnemySpeedLockedHigh;
         public List<SimAttachedDie> PlayerAttachedDice = new();
+        public List<SimAttachedDie> EnemyAttachedDice = new();
 
         public PlannerSnapshot Clone() {
             PlannerSnapshot clone = (PlannerSnapshot)MemberwiseClone();
             clone.PlayerAttachedDice = PlayerAttachedDice.Select(die => die.Clone()).ToList();
+            clone.EnemyAttachedDice = EnemyAttachedDice.Select(die => die.Clone()).ToList();
             return clone;
         }
     }
@@ -220,6 +236,37 @@ public static class EnemyAI {
         }
     }
 
+    private readonly struct DraftPreviewCacheKey : IEquatable<DraftPreviewCacheKey> {
+        private readonly YellowAssignmentStateKey playerState;
+        private readonly YellowAssignmentStateKey previewState;
+
+        public DraftPreviewCacheKey(
+            Dictionary<string, int> playerTotals,
+            Dictionary<string, int> playerCounts,
+            Dictionary<string, int> previewTotals,
+            Dictionary<string, int> previewCounts
+        ) {
+            playerState = new YellowAssignmentStateKey(playerTotals, playerCounts);
+            previewState = new YellowAssignmentStateKey(previewTotals, previewCounts);
+        }
+
+        public bool Equals(DraftPreviewCacheKey other) {
+            return playerState.Equals(other.playerState)
+                && previewState.Equals(other.previewState);
+        }
+
+        public override bool Equals(object obj) {
+            return obj is DraftPreviewCacheKey other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            HashCode hash = new();
+            hash.Add(playerState);
+            hash.Add(previewState);
+            return hash.ToHashCode();
+        }
+    }
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     public static string LastAdvancedPlanProfileSummary { get; private set; } = "advanced plan profiler idle";
     private static int advancedPlanProfileRuns;
@@ -248,6 +295,8 @@ public static class EnemyAI {
         public int PlayerSpd;
         public int PlayerAtt;
         public int PlayerDef;
+        public bool PlayerGuardSelected;
+        public int PlayerPendingGuardParryBonus;
         public int EnemyAim;
         public int EnemySpd;
         public int EnemyAtt;
@@ -281,6 +330,7 @@ public static class EnemyAI {
         public int EnemyWhiteDiceSum;
         public bool PlayerHasArmor;
         public bool PlayerHasDodgy;
+        public bool PlayerCanBecomeDodgy;
         public bool PlayerHasMaul;
         public int PlayerCrystalShardCopies;
         public int PlayerCrystalShardLossPerShatter;
@@ -288,6 +338,7 @@ public static class EnemyAI {
         public int PlayerInevitableImmediateBonus;
         public int PlayerRiposteImmediateBonus;
         public int PlayervindictiveImmediateBonus;
+        public int PlayerTridentImmediateBonus;
         public int PlayerScimitarDiscardCount;
         public bool PlayerHasGlassSword;
         public bool PlayerGlassSwordShattered;
@@ -301,10 +352,12 @@ public static class EnemyAI {
         public bool PlayerImmuneToWounds;
         public float Bonus;
         public List<SimAttachedDie> PlayerAttachedDice = new();
+        public List<SimAttachedDie> EnemyAttachedDice = new();
 
         public SimState Clone() {
             SimState clone = (SimState)MemberwiseClone();
             clone.PlayerAttachedDice = PlayerAttachedDice.Select(die => die.Clone()).ToList();
+            clone.EnemyAttachedDice = EnemyAttachedDice.Select(die => die.Clone()).ToList();
             return clone;
         }
     }
@@ -537,7 +590,7 @@ public static class EnemyAI {
     /// </summary>
     private static Plan BuildNormalPlan(Scripts s) {
         Plan plan = CreateBaselinePlan(s);
-        bool canUseStamina = !s.enemy.woundList.Contains("hip") || s.enemy.enemyName.text == "Lich";
+        bool canUseStamina = (!s.enemy.woundList.Contains("hip") && !s.itemManager.EnemyHasTemporaryHipInjury()) || s.enemy.enemyName.text == "Lich";
         int remainingStamina = canUseStamina
             ? s.enemy.stamina + s.statSummoner.addedEnemyStamina.Values.Sum()
             : 0;
@@ -597,7 +650,7 @@ public static class EnemyAI {
             Dictionary<string, int> staminaPlan = NewStatDictionary();
             Dictionary<string, int> bestStaminaPlan = NewStatDictionary();
             AdvancedPlanEvaluation bestEvaluation = null;
-            bool canUseStamina = !s.enemy.woundList.Contains("hip") || snapshot.EnemyIsLich;
+            bool canUseStamina = (!s.enemy.woundList.Contains("hip") && !s.itemManager.EnemyHasTemporaryHipInjury()) || snapshot.EnemyIsLich;
             int totalAvailableStamina = s.enemy.stamina + s.statSummoner.addedEnemyStamina.Values.Sum();
             int yellowLeavesVisited = 0;
             int candidatesEvaluated = 0;
@@ -656,7 +709,7 @@ public static class EnemyAI {
                             ? GetPostPlayerWoundAttackSpendNeeded(s, snapshot, yellowTotals, yellowCounts, blueSpend, whiteSpend)
                             : 0;
                         List<int> redOptions = canUseStamina
-                            ? BuildSpendOptions(remainingAfterWhite, 0, GetExactAttackSpendNeeded(snapshot.PlayerDef, baseAtt), postPlayerRedSpend)
+                            ? BuildSpendOptions(remainingAfterWhite, 0, GetExactAttackSpendNeeded(GetProjectedPlayerDefenseForEnemyAttack(snapshot, baseSpd + blueSpend), baseAtt), postPlayerRedSpend)
                             : BuildSpendOptions(0, 0);
 
                         foreach (int redSpend in redOptions) {
@@ -755,11 +808,11 @@ public static class EnemyAI {
             SpentStamina = staminaPlan.Values.Sum(),
             TargetIndex = targetIndex,
         };
-        string playerTarget = Targets[Mathf.Clamp(snapshot.PlayerTargetIndex, 0, Targets.Length - 1)];
+        string playerTarget = GetPlayerTargetName(snapshot.PlayerTargetIndex, snapshot.PlayerGuardSelected);
         string enemyTarget = Targets[targetIndex];
         bool enemyActsFirst = state.EnemySpeedLockedHigh || (!state.PlayerSpeedLockedHigh && state.EnemySpd > state.PlayerSpd);
         int playerDefenseAgainstEnemy = GetEffectivePlayerDefenseForEnemyAttack(state, enemyActsFirst);
-        bool playerCanHitBefore = state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
+        bool playerCanHitBefore = !state.PlayerGuardSelected && state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
         bool playerDamagesBefore = PlayerHitDamagesEnemy(s, state, playerTarget, playerCanHitBefore);
         bool playerKillsBefore = PlayerWouldKillEnemy(s, state, playerTarget, playerCanHitBefore);
         bool enemyCanHitBefore = state.EnemyAim >= 0 && state.EnemyAtt > playerDefenseAgainstEnemy;
@@ -790,7 +843,7 @@ public static class EnemyAI {
             }
             ApplyImmediatePlayerResponseAfterEnemyActsFirst(afterEnemyHit, s, enemyWasParriedBefore, enemyDamagesBefore);
 
-            bool playerCanHitAfter = afterEnemyHit.PlayerAim >= 0 && afterEnemyHit.PlayerAtt > afterEnemyHit.EnemyDef;
+            bool playerCanHitAfter = !afterEnemyHit.PlayerGuardSelected && afterEnemyHit.PlayerAim >= 0 && afterEnemyHit.PlayerAtt > afterEnemyHit.EnemyDef;
             bool playerDamagesAfter = PlayerHitDamagesEnemy(s, afterEnemyHit, playerTarget, playerCanHitAfter);
             bool playerKillsAfter = PlayerWouldKillEnemy(s, afterEnemyHit, playerTarget, playerCanHitAfter);
             bool chestRescueCanBreakDamage = enemyTarget == "chest"
@@ -808,7 +861,10 @@ public static class EnemyAI {
             // enemy acts first means player has no speed advantage; a knee lock adds
             // no gate value this round even if it permanently locks future rounds
             evaluation.BreaksPlayerSpeed = !enemyActsFirst && afterEnemyHit.EnemySpeedLockedHigh;
-            evaluation.BreaksPlayerTarget = state.PlayerAim >= snapshot.PlayerTargetIndex && afterEnemyHit.PlayerAim < snapshot.PlayerTargetIndex;
+            evaluation.BreaksPlayerTarget = !state.PlayerGuardSelected
+                && snapshot.PlayerTargetIndex >= 0
+                && state.PlayerAim >= snapshot.PlayerTargetIndex
+                && afterEnemyHit.PlayerAim < snapshot.PlayerTargetIndex;
             evaluation.StripsPlayerStamina = state.PlayerAddedGreen + state.PlayerAddedBlue + state.PlayerAddedRed + state.PlayerAddedWhite > 0
                 && afterEnemyHit.PlayerAddedGreen + afterEnemyHit.PlayerAddedBlue + afterEnemyHit.PlayerAddedRed + afterEnemyHit.PlayerAddedWhite == 0;
             evaluation.RemovesPlayerRed = state.PlayerRedDiceSum > 0 && afterEnemyHit.PlayerRedDiceSum == 0;
@@ -947,13 +1003,13 @@ public static class EnemyAI {
     ) {
         SimState state = CreateSimulationState(s, yellowTotals, yellowCounts, staminaPlan);
         state.EnemyTargetIndex = targetIndex;
-        string playerTarget = Targets[Mathf.Clamp(s.player.targetIndex, 0, Targets.Length - 1)];
+        string playerTarget = GetPlayerTargetName(s.player.targetIndex, IsPlayerGuardSelected(s));
         string enemyTarget = Targets[targetIndex];
         int spentStamina = staminaPlan.Values.Sum();
         bool enemyActsFirst = state.EnemySpeedLockedHigh || (!state.PlayerSpeedLockedHigh && state.EnemySpd > state.PlayerSpd);
         bool playerActsFirst = state.PlayerSpeedLockedHigh || (!state.EnemySpeedLockedHigh && state.PlayerSpd >= state.EnemySpd);
         int playerDefenseAgainstEnemy = GetEffectivePlayerDefenseForEnemyAttack(state, enemyActsFirst);
-        bool playerCanHit = state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
+        bool playerCanHit = !state.PlayerGuardSelected && state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
         bool enemyCanHit = state.EnemyAim >= 0 && state.EnemyAtt > playerDefenseAgainstEnemy;
         bool playerKills = PlayerWouldKillEnemy(s, state, playerTarget, playerCanHit);
         bool enemyKills = EnemyWouldKillPlayer(s, state, enemyTarget, enemyCanHit);
@@ -1069,6 +1125,10 @@ public static class EnemyAI {
     private static PlannerSnapshot BuildPlannerSnapshot(Scripts s) {
         bool playerHasArmor = s.itemManager.PlayerHas("armor");
         bool playerHasDodgy = Save.game.isDodgy;
+        bool playerCanBecomeDodgy = !playerHasDodgy
+            && !Save.game.usedBoots
+            && s.player.stamina >= 1
+            && s.itemManager.PlayerHas("boots of dodge");
         bool playerHasMaul = s.itemManager.PlayerHasWeapon("maul");
         bool playerHasGlassSword = s.itemManager.PlayerHasWeapon("glass sword");
         bool playerHasLegendaryWeapon = s.itemManager.PlayerHasLegendary();
@@ -1095,31 +1155,61 @@ public static class EnemyAI {
         int enemyBaseBlueDiceCount = GetFixedEnemyDiceCount(s, "blue");
         int enemyBaseRedDiceCount = GetFixedEnemyDiceCount(s, "red");
         int enemyBaseWhiteDiceCount = GetFixedEnemyDiceCount(s, "white");
+        int playerAddedGreen = s.statSummoner.addedPlayerStamina["green"];
+        int playerAddedBlue = s.statSummoner.addedPlayerStamina["blue"];
+        int playerAddedRed = s.statSummoner.addedPlayerStamina["red"];
+        int playerAddedWhite = s.statSummoner.addedPlayerStamina["white"];
+        int playerGreenDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["green"]);
+        int playerBlueDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["blue"]);
+        int playerRedDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["red"]);
+        int playerWhiteDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["white"]);
+        int playerGreenDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["green"]);
+        int playerBlueDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["blue"]);
+        int playerRedDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["red"]);
+        int playerWhiteDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["white"]);
+
+        if (Save.game.isDestructive) {
+            playerAddedRed = playerAddedGreen;
+            playerRedDiceCount = playerGreenDiceCount;
+            playerRedDiceSum = playerGreenDiceSum;
+        }
+        if (Save.game.isEmpowered) {
+            playerAddedRed = playerAddedWhite;
+            playerRedDiceCount = playerWhiteDiceCount;
+            playerRedDiceSum = playerWhiteDiceSum;
+        }
+        if (Save.game.isFortified) {
+            playerAddedWhite = playerAddedBlue;
+            playerWhiteDiceCount = playerBlueDiceCount;
+            playerWhiteDiceSum = playerBlueDiceSum;
+        }
 
         return new PlannerSnapshot {
             PlayerAim = s.statSummoner.SumOfStat("green", "player"),
             PlayerSpd = s.statSummoner.SumOfStat("blue", "player"),
             PlayerAtt = s.statSummoner.SumOfStat("red", "player"),
             PlayerDef = s.statSummoner.SumOfStat("white", "player"),
+            PlayerGuardSelected = IsPlayerGuardSelected(s),
+            PlayerPendingGuardParryBonus = s.turnManager != null ? s.turnManager.GetPlayerGuardParryBonus(includePendingSelection: true) : 0,
             EnemyBaseAim = s.enemy.stats["green"] + enemyBaseGreenDiceSum,
             EnemyBaseSpd = s.enemy.stats["blue"] + enemyBaseBlueDiceSum,
             EnemyBaseAtt = s.enemy.stats["red"] + enemyBaseRedDiceSum,
             EnemyBaseDef = s.enemy.stats["white"] + enemyBaseWhiteDiceSum,
-            PlayerTargetIndex = s.player.targetIndex,
+            PlayerTargetIndex = IsPlayerGuardSelected(s) ? s.player.targetIndex : GetPlayerDraftReferenceTargetIndex(s),
             PlayerWoundCount = s.player.woundList.Count,
             EnemyWoundCount = s.enemy.woundList.Count,
-            PlayerAddedGreen = s.statSummoner.addedPlayerStamina["green"],
-            PlayerAddedBlue = s.statSummoner.addedPlayerStamina["blue"],
-            PlayerAddedRed = s.statSummoner.addedPlayerStamina["red"],
-            PlayerAddedWhite = s.statSummoner.addedPlayerStamina["white"],
-            PlayerGreenDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["green"]),
-            PlayerBlueDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["blue"]),
-            PlayerRedDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["red"]),
-            PlayerWhiteDiceCount = GetDiceCount(s.statSummoner.addedPlayerDice["white"]),
-            PlayerGreenDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["green"]),
-            PlayerBlueDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["blue"]),
-            PlayerRedDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["red"]),
-            PlayerWhiteDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["white"]),
+            PlayerAddedGreen = playerAddedGreen,
+            PlayerAddedBlue = playerAddedBlue,
+            PlayerAddedRed = playerAddedRed,
+            PlayerAddedWhite = playerAddedWhite,
+            PlayerGreenDiceCount = playerGreenDiceCount,
+            PlayerBlueDiceCount = playerBlueDiceCount,
+            PlayerRedDiceCount = playerRedDiceCount,
+            PlayerWhiteDiceCount = playerWhiteDiceCount,
+            PlayerGreenDiceSum = playerGreenDiceSum,
+            PlayerBlueDiceSum = playerBlueDiceSum,
+            PlayerRedDiceSum = playerRedDiceSum,
+            PlayerWhiteDiceSum = playerWhiteDiceSum,
             EnemyBaseGreenDiceCount = enemyBaseGreenDiceCount,
             EnemyBaseBlueDiceCount = enemyBaseBlueDiceCount,
             EnemyBaseRedDiceCount = enemyBaseRedDiceCount,
@@ -1131,6 +1221,7 @@ public static class EnemyAI {
             EnemyAttachedDiceCount = s.statSummoner.addedEnemyDice.Sum(pair => pair.Value.Count),
             PlayerHasArmor = playerHasArmor,
             PlayerHasDodgy = playerHasDodgy,
+            PlayerCanBecomeDodgy = playerCanBecomeDodgy,
             PlayerHasMaul = playerHasMaul,
             PlayerCrystalShardCopies = s.itemManager.GetPlayerItemCount("crystal shard"),
             PlayerCrystalShardLossPerShatter = 2,
@@ -1138,6 +1229,7 @@ public static class EnemyAI {
             PlayerInevitableImmediateBonus = GetEffectiveTriggeredPlayerCharmBonus(s, "inevitable"),
             PlayerRiposteImmediateBonus = GetEffectiveTriggeredPlayerCharmBonus(s, "riposte"),
             PlayervindictiveImmediateBonus = GetEffectiveTriggeredPlayerCharmBonus(s, "vindictive", 2),
+            PlayerTridentImmediateBonus = s.itemManager.PlayerHasWeapon("trident") ? 1 : 0,
             PlayerScimitarDiscardCount = s.itemManager.PlayerHasWeapon("scimitar") ? (playerHasLegendaryWeapon ? 2 : 1) : 0,
             PlayerHasGlassSword = playerHasGlassSword,
             PlayerGlassSwordShattered = Save.game.glassSwordShattered,
@@ -1149,6 +1241,7 @@ public static class EnemyAI {
             PlayerSpeedLockedHigh = playerSpeedLockedHigh,
             EnemySpeedLockedHigh = enemySpeedLockedHigh,
             PlayerAttachedDice = GetPlayerAttachedDiceSnapshot(s),
+            EnemyAttachedDice = GetEnemyAttachedDiceSnapshot(s),
         };
     }
 
@@ -1163,6 +1256,29 @@ public static class EnemyAI {
                     Stat = stat,
                     Value = attachedDie.diceNum,
                     IsRerolled = attachedDie.isRerolled,
+                    IsYellow = attachedDie.diceType == "yellow",
+                });
+            }
+        }
+
+        return dice;
+    }
+
+    private static List<SimAttachedDie> GetEnemyAttachedDiceSnapshot(Scripts s) {
+        List<SimAttachedDie> dice = new();
+        if (s?.statSummoner?.addedEnemyDice == null) { return dice; }
+
+        foreach (string stat in Stats) {
+            foreach (Dice attachedDie in s.statSummoner.addedEnemyDice[stat]) {
+                if (attachedDie == null || !attachedDie.isAttached || attachedDie.isOnPlayerOrEnemy != "enemy" || attachedDie.diceType == "yellow") {
+                    continue;
+                }
+
+                dice.Add(new SimAttachedDie {
+                    Stat = stat,
+                    Value = attachedDie.diceNum,
+                    IsRerolled = attachedDie.isRerolled,
+                    IsYellow = false,
                 });
             }
         }
@@ -1196,6 +1312,8 @@ public static class EnemyAI {
             PlayerSpd = snapshot.PlayerSpd,
             PlayerAtt = snapshot.PlayerAtt,
             PlayerDef = snapshot.PlayerDef,
+            PlayerGuardSelected = snapshot.PlayerGuardSelected,
+            PlayerPendingGuardParryBonus = snapshot.PlayerPendingGuardParryBonus,
             EnemyAim = snapshot.EnemyBaseAim + yellowTotals["green"] + staminaPlan["green"],
             EnemySpd = snapshot.EnemyBaseSpd + yellowTotals["blue"] + staminaPlan["blue"],
             EnemyAtt = snapshot.EnemyBaseAtt + yellowTotals["red"] + staminaPlan["red"],
@@ -1228,6 +1346,7 @@ public static class EnemyAI {
             EnemyWhiteDiceSum = snapshot.EnemyBaseWhiteDiceSum + yellowTotals["white"],
             PlayerHasArmor = snapshot.PlayerHasArmor,
             PlayerHasDodgy = snapshot.PlayerHasDodgy,
+            PlayerCanBecomeDodgy = snapshot.PlayerCanBecomeDodgy,
             PlayerHasMaul = snapshot.PlayerHasMaul,
             PlayerCrystalShardCopies = snapshot.PlayerCrystalShardCopies,
             PlayerCrystalShardLossPerShatter = snapshot.PlayerCrystalShardLossPerShatter,
@@ -1235,6 +1354,7 @@ public static class EnemyAI {
             PlayerInevitableImmediateBonus = snapshot.PlayerInevitableImmediateBonus,
             PlayerRiposteImmediateBonus = snapshot.PlayerRiposteImmediateBonus,
             PlayervindictiveImmediateBonus = snapshot.PlayervindictiveImmediateBonus,
+            PlayerTridentImmediateBonus = snapshot.PlayerTridentImmediateBonus,
             PlayerScimitarDiscardCount = snapshot.PlayerScimitarDiscardCount,
             PlayerHasGlassSword = snapshot.PlayerHasGlassSword,
             PlayerGlassSwordShattered = snapshot.PlayerGlassSwordShattered,
@@ -1246,23 +1366,61 @@ public static class EnemyAI {
             PlayerSpeedLockedHigh = snapshot.PlayerSpeedLockedHigh,
             EnemySpeedLockedHigh = snapshot.EnemySpeedLockedHigh,
             PlayerAttachedDice = snapshot.PlayerAttachedDice.Select(die => die.Clone()).ToList(),
+            EnemyAttachedDice = snapshot.EnemyAttachedDice.Select(die => die.Clone()).ToList(),
         };
 
+        AppendEstimatedEnemyYellowDice(state.EnemyAttachedDice, yellowTotals, yellowCounts);
+
+        bool playerActsFirst = state.PlayerSpeedLockedHigh || (!state.EnemySpeedLockedHigh && state.PlayerSpd >= state.EnemySpd);
+        if (!state.PlayerGuardSelected && playerActsFirst && state.PlayerTridentImmediateBonus > 0) {
+            state.PlayerAtt += state.PlayerTridentImmediateBonus;
+        }
+
         if (PlayerHasOneShotProtection(state)) { state.Bonus -= 150f; }
-        if (snapshot.PlayerTargetIndex == 6 && state.PlayerRedDiceSum > 0) { state.Bonus -= state.PlayerRedDiceSum * 12f; }
-        if (snapshot.PlayerTargetIndex == 4 && snapshot.EnemyAttachedDiceCount > 0) { state.Bonus -= 180f; }
+        if (!snapshot.PlayerGuardSelected && snapshot.PlayerTargetIndex == 6 && state.PlayerRedDiceSum > 0) { state.Bonus -= state.PlayerRedDiceSum * 12f; }
+        if (!snapshot.PlayerGuardSelected && snapshot.PlayerTargetIndex == 4 && snapshot.EnemyAttachedDiceCount > 0) { state.Bonus -= 180f; }
         return state;
+    }
+
+    private static void AppendEstimatedEnemyYellowDice(List<SimAttachedDie> attachedDice, Dictionary<string, int> yellowTotals, Dictionary<string, int> yellowCounts) {
+        if (attachedDice == null || yellowTotals == null || yellowCounts == null) { return; }
+
+        foreach (string stat in Stats) {
+            foreach (int value in BuildEstimatedDieValues(yellowTotals[stat], yellowCounts[stat])) {
+                attachedDice.Add(new SimAttachedDie {
+                    Stat = stat,
+                    Value = value,
+                    IsRerolled = false,
+                    IsYellow = true,
+                });
+            }
+        }
+    }
+
+    private static IEnumerable<int> BuildEstimatedDieValues(int total, int count) {
+        if (total <= 0 || count <= 0) { yield break; }
+
+        int remainingTotal = total;
+        int remainingCount = count;
+        while (remainingCount > 0) {
+            int nextValue = Mathf.Clamp(remainingTotal - (remainingCount - 1), 1, 6);
+            yield return nextValue;
+            remainingTotal -= nextValue;
+            remainingCount--;
+        }
     }
 
     // planner shorthand: this models an immediate fatal line
     private static bool PlayerWouldKillEnemy(Scripts s, SimState state, string playerTarget, bool playerCanHit) {
         if (!playerCanHit) { return false; }
+        if (string.IsNullOrEmpty(playerTarget) || playerTarget == "guard") { return false; }
         if (state.PlayerHasMaul) { return true; }
         return !s.enemy.woundList.Contains(playerTarget) && state.EnemyWoundCount >= 2;
     }
 
     private static bool PlayerHitDamagesEnemy(Scripts s, SimState state, string playerTarget, bool playerCanHit) {
         if (!playerCanHit) { return false; }
+        if (string.IsNullOrEmpty(playerTarget) || playerTarget == "guard") { return false; }
         if (state.PlayerHasMaul) { return true; }
         return PlayerHitAppliesWound(s, playerTarget, true);
     }
@@ -1368,13 +1526,19 @@ public static class EnemyAI {
     }
 
     private static int GetEffectivePlayerDefenseForEnemyAttack(SimState state, bool enemyActsFirst) {
-        return state.PlayerDef + (enemyActsFirst ? state.PlayerBulwarkImmediateParryBonus : 0);
+        return state.PlayerDef
+            + state.PlayerPendingGuardParryBonus
+            + (enemyActsFirst ? state.PlayerBulwarkImmediateParryBonus : 0);
     }
 
     private static bool EnemyHitConnects(SimState state, bool enemyCanHit, bool enemyActsFirst) {
         if (!enemyCanHit) { return false; }
-        if (!enemyActsFirst && state.PlayerHasDodgy) { return false; }
+        if (!enemyActsFirst && PlayerCanBecomeDodgy(state)) { return false; }
         return true;
+    }
+
+    private static bool PlayerCanBecomeDodgy(SimState state) {
+        return state != null && (state.PlayerHasDodgy || state.PlayerCanBecomeDodgy);
     }
 
     private static bool EnemyHitBreaksProtection(SimState state, bool enemyHitConnects) {
@@ -1441,29 +1605,41 @@ public static class EnemyAI {
     }
 
     private static void ApplyBestPlayerDiscard(SimState state, Scripts s) {
-        List<(string stat, int value, float weight)> options = new() {
-            ("red", state.PlayerRedDiceSum > 0 ? GetLargestPlayerDie(s, "red") : 0, 6f),
-            ("white", state.PlayerWhiteDiceSum > 0 ? GetLargestPlayerDie(s, "white") : 0, 3f),
-            ("blue", state.PlayerBlueDiceSum > 0 ? GetLargestPlayerDie(s, "blue") : 0, 4f),
-            ("green", state.PlayerGreenDiceSum > 0 ? GetLargestPlayerDie(s, "green") : 0, 4.5f),
-        };
-        (string stat, int value, float weight) best = options
-            .OrderByDescending(option => GetPlayerDiscardImpactScore(s, state, option.stat, option.value, option.weight))
-            .First();
-        RemoveValueFromPlayerState(state, best.stat, best.value);
+        if (state?.PlayerAttachedDice == null || state.PlayerAttachedDice.Count == 0) { return; }
+
+        string playerTarget = GetPlayerTargetName(s.player.targetIndex, IsPlayerGuardSelected(s));
+        SimAttachedDie bestDie = null;
+        LiveDiscardEvaluation bestEvaluation = null;
+        foreach (SimAttachedDie die in state.PlayerAttachedDice) {
+            LiveDiscardEvaluation evaluation = EvaluatePlayerDiscardChoice(s, state, playerTarget, die, enemyAlreadyActed:true);
+            if (IsBetterLiveDiscardChoice(evaluation, bestEvaluation)) {
+                bestEvaluation = evaluation;
+                bestDie = die;
+            }
+        }
+
+        if (bestDie != null) {
+            RemoveDieFromPlayerState(state, bestDie);
+        }
     }
 
     private static void ApplyBestEnemyDiscard(SimState state, Scripts s) {
-        List<(string stat, int value, float weight)> options = new() {
-            ("red", state.EnemyRedDiceSum > 0 ? Mathf.CeilToInt((float)state.EnemyRedDiceSum / Mathf.Max(1, state.EnemyRedDiceCount)) : 0, 6f),
-            ("white", state.EnemyWhiteDiceSum > 0 ? Mathf.CeilToInt((float)state.EnemyWhiteDiceSum / Mathf.Max(1, state.EnemyWhiteDiceCount)) : 0, 4f),
-            ("blue", state.EnemyBlueDiceSum > 0 ? Mathf.CeilToInt((float)state.EnemyBlueDiceSum / Mathf.Max(1, state.EnemyBlueDiceCount)) : 0, 5f),
-            ("green", state.EnemyGreenDiceSum > 0 ? Mathf.CeilToInt((float)state.EnemyGreenDiceSum / Mathf.Max(1, state.EnemyGreenDiceCount)) : 0, 4.5f),
-        };
-        (string stat, int value, float weight) best = options
-            .OrderByDescending(option => GetEnemyDiscardImpactScore(s, state, option.stat, option.value, option.weight))
-            .First();
-        RemoveValueFromEnemyState(state, best.stat, best.value);
+        if (state?.EnemyAttachedDice == null || state.EnemyAttachedDice.Count == 0) { return; }
+
+        string playerTarget = GetPlayerTargetName(s.player.targetIndex, IsPlayerGuardSelected(s));
+        SimAttachedDie bestDie = null;
+        float bestScore = float.NegativeInfinity;
+        foreach (SimAttachedDie die in state.EnemyAttachedDice) {
+            float score = GetEnemyDiscardImpactScore(s, state, playerTarget, die);
+            if (score > bestScore) {
+                bestScore = score;
+                bestDie = die;
+            }
+        }
+
+        if (bestDie != null) {
+            RemoveDieFromEnemyState(state, bestDie);
+        }
     }
 
     private static void RemoveValueFromPlayerState(SimState state, string stat, int value) {
@@ -1479,6 +1655,11 @@ public static class EnemyAI {
         if (dieIndex >= 0) {
             state.PlayerAttachedDice.RemoveAt(dieIndex);
         }
+    }
+
+    private static void RemoveDieFromPlayerState(SimState state, SimAttachedDie die) {
+        if (state == null || die == null) { return; }
+        RemoveValueFromPlayerState(state, die.Stat, die.Value);
     }
 
     private static bool EnemyChestRescueCanBreakPlayerDamage(Scripts s, SimState state, string playerTarget) {
@@ -1527,12 +1708,22 @@ public static class EnemyAI {
             case "red": state.EnemyAtt -= value; state.EnemyRedDiceSum -= value; state.EnemyRedDiceCount = Mathf.Max(0, state.EnemyRedDiceCount - 1); break;
             case "white": state.EnemyDef -= value; state.EnemyWhiteDiceSum -= value; state.EnemyWhiteDiceCount = Mathf.Max(0, state.EnemyWhiteDiceCount - 1); break;
         }
+
+        int dieIndex = state.EnemyAttachedDice.FindIndex(die => die.Stat == stat && die.Value == value);
+        if (dieIndex >= 0) {
+            state.EnemyAttachedDice.RemoveAt(dieIndex);
+        }
+    }
+
+    private static void RemoveDieFromEnemyState(SimState state, SimAttachedDie die) {
+        if (state == null || die == null) { return; }
+        RemoveValueFromEnemyState(state, die.Stat, die.Value);
     }
 
     private static float GetTargetUtility(Scripts s, string target, SimState state, bool onPlayer) {
         return target switch {
             "guts" => onPlayer ? 800f + state.PlayerRedDiceCount * 160f : -600f,
-            "knee" => onPlayer ? 1100f : -700f,
+            "knee" => onPlayer ? GetEnemyKneeTargetUtility(state) : -700f,
             "hip" => onPlayer ? 950f + (s.player.stamina * 20f) : -900f,
             "head" => onPlayer ? 1000f : -950f,
             "hand" => onPlayer ? 650f + state.PlayerWhiteDiceSum * 30f : -700f,
@@ -1541,6 +1732,14 @@ public static class EnemyAI {
             "neck" => onPlayer ? 100000f : -100000f,
             _ => 0f,
         };
+    }
+
+    private static float GetEnemyKneeTargetUtility(SimState state) {
+        if (state != null && state.PlayerScimitarDiscardCount > 0) {
+            return 220f;
+        }
+
+        return 1100f;
     }
 
     private static float GetPlayerThreatUtility(string playerTarget, SimState state) {
@@ -1730,10 +1929,16 @@ public static class EnemyAI {
     }
 
     private static Dice ChooseAdvancedDraftDie(Scripts s, List<Dice> availableDice) {
+        PlannerSnapshot snapshot = BuildPlannerSnapshot(s);
+        DraftPreviewContext previewContext = new() {
+            BaseSnapshot = snapshot,
+            PlayerYellowReassignmentOptions = GetPlayerYellowReassignmentPreviewOptions(s)
+        };
+
         Dice bestDie = null;
         DraftChoiceEvaluation bestEvaluation = null;
         foreach (Dice dice in availableDice) {
-            DraftChoiceEvaluation evaluation = EvaluateAdvancedDraftChoice(s, dice, availableDice);
+            DraftChoiceEvaluation evaluation = EvaluateAdvancedDraftChoice(s, snapshot, dice, availableDice, previewContext);
             if (IsBetterDraftChoice(evaluation, bestEvaluation)) {
                 bestEvaluation = evaluation;
                 bestDie = dice;
@@ -1793,9 +1998,14 @@ public static class EnemyAI {
         return bestOutcome + baseScore + denyScore;
     }
 
-    private static DraftChoiceEvaluation EvaluateAdvancedDraftChoice(Scripts s, Dice dice, List<Dice> availableDice) {
+    private static DraftChoiceEvaluation EvaluateAdvancedDraftChoice(
+        Scripts s,
+        PlannerSnapshot snapshot,
+        Dice dice,
+        List<Dice> availableDice,
+        DraftPreviewContext previewContext
+    ) {
         int effectiveEnemyValue = GetEffectiveEnemyDraftValue(s, dice);
-        PlannerSnapshot snapshot = BuildPlannerSnapshot(s);
         DraftChoiceEvaluation evaluation = new() {
             DieType = dice.diceType,
             IsYellow = dice.diceType == "yellow",
@@ -1806,7 +2016,7 @@ public static class EnemyAI {
         };
 
         foreach (string stat in GetDraftAssignmentOptions(s, dice)) {
-            AdvancedPlanEvaluation preview = GetDraftPreviewEvaluation(s, snapshot, dice, stat, availableDice);
+            AdvancedPlanEvaluation preview = GetDraftPreviewEvaluation(s, snapshot, dice, stat, availableDice, previewContext);
             if (IsBetterAdvancedEvaluation(preview, evaluation.BestPlan)) {
                 evaluation.BestPlan = preview;
             }
@@ -1830,11 +2040,19 @@ public static class EnemyAI {
         PlannerSnapshot snapshot,
         Dice dice,
         string stat,
-        List<Dice> availableDice
+        List<Dice> availableDice,
+        DraftPreviewContext previewContext
     ) {
         int effectiveEnemyValue = GetEffectiveEnemyDraftValue(s, dice);
         if (effectiveEnemyValue <= 0) {
-            return GetWorstCaseDraftPreviewEvaluation(s, snapshot, dice, availableDice, NewStatDictionary(), NewStatDictionary());
+            return GetWorstCaseDraftPreviewEvaluation(
+                s,
+                snapshot,
+                dice,
+                availableDice,
+                NewStatDictionary(),
+                NewStatDictionary(),
+                previewContext);
         }
 
         Dictionary<string, int> previewTotals = NewStatDictionary();
@@ -1842,7 +2060,7 @@ public static class EnemyAI {
         previewTotals[stat] = effectiveEnemyValue;
         previewCounts[stat] = 1;
 
-        return GetWorstCaseDraftPreviewEvaluation(s, snapshot, dice, availableDice, previewTotals, previewCounts) ?? new AdvancedPlanEvaluation();
+        return GetWorstCaseDraftPreviewEvaluation(s, snapshot, dice, availableDice, previewTotals, previewCounts, previewContext) ?? new AdvancedPlanEvaluation();
     }
 
     private static AdvancedPlanEvaluation GetWorstCaseDraftPreviewEvaluation(
@@ -1851,50 +2069,68 @@ public static class EnemyAI {
         Dice chosenDie,
         List<Dice> availableDice,
         Dictionary<string, int> previewTotals,
-        Dictionary<string, int> previewCounts
+        Dictionary<string, int> previewCounts,
+        DraftPreviewContext previewContext
     ) {
-        AdvancedPlanEvaluation baseline = GetBestDraftPreviewEvaluation(s, snapshot, previewTotals, previewCounts) ?? new AdvancedPlanEvaluation();
+        Dictionary<string, int> zeroTotals = NewStatDictionary();
+        Dictionary<string, int> zeroCounts = NewStatDictionary();
+        AdvancedPlanEvaluation baseline = GetCachedDraftPreviewEvaluation(
+            s,
+            snapshot,
+            previewContext,
+            zeroTotals,
+            zeroCounts,
+            previewTotals,
+            previewCounts);
         AdvancedPlanEvaluation worstReply = baseline;
-        List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> yellowReassignments = GetPlayerYellowReassignmentPreviewOptions(s);
-        List<Dice> playerReplyDice = availableDice == null
-            ? new List<Dice>()
-            : availableDice.Where(replyDie => replyDie != null && replyDie != chosenDie).ToList();
-
-        if (playerReplyDice.Count == 0) {
-            playerReplyDice.Add(null);
-        }
-
-        foreach (Dice replyDie in playerReplyDice) {
-            AdvancedPlanEvaluation bestPlayerReply = baseline;
-            int effectivePlayerValue = replyDie == null ? 0 : GetEffectivePlayerDraftValue(s, replyDie);
-            IEnumerable<string> playerStats = replyDie == null
-                ? new[] { string.Empty }
-                : GetPlayerDraftAssignmentOptions(s, replyDie);
-
-            foreach (string playerStat in playerStats) {
-                foreach ((Dictionary<string, int> totals, Dictionary<string, int> counts) yellowReassignment in yellowReassignments) {
-                    Dictionary<string, int> playerTotals = CopyStatDictionary(yellowReassignment.totals);
-                    Dictionary<string, int> playerCounts = CopyStatDictionary(yellowReassignment.counts);
-
-                    if (effectivePlayerValue > 0 && !string.IsNullOrEmpty(playerStat)) {
-                        playerTotals[playerStat] += effectivePlayerValue;
-                        playerCounts[playerStat] += 1;
-                    }
-
-                    PlannerSnapshot replySnapshot = CreateDraftPreviewSnapshot(snapshot, playerTotals, playerCounts);
-                    AdvancedPlanEvaluation replyEvaluation = GetBestDraftPreviewEvaluation(s, replySnapshot, previewTotals, previewCounts) ?? new AdvancedPlanEvaluation();
-                    if (IsWorseAdvancedEvaluation(replyEvaluation, bestPlayerReply)) {
-                        bestPlayerReply = replyEvaluation;
-                    }
-                }
-            }
-
-            if (IsWorseAdvancedEvaluation(bestPlayerReply, worstReply)) {
-                worstReply = bestPlayerReply;
+        foreach ((Dictionary<string, int> totals, Dictionary<string, int> counts) playerReplyState
+            in GetPlayerReplyPreviewStates(s, availableDice, chosenDie, previewContext)) {
+            AdvancedPlanEvaluation replyEvaluation = GetCachedDraftPreviewEvaluation(
+                s,
+                snapshot,
+                previewContext,
+                playerReplyState.totals,
+                playerReplyState.counts,
+                previewTotals,
+                previewCounts);
+            if (IsWorseAdvancedEvaluation(replyEvaluation, worstReply)) {
+                worstReply = replyEvaluation;
             }
         }
 
         return worstReply;
+    }
+
+    private static AdvancedPlanEvaluation GetCachedDraftPreviewEvaluation(
+        Scripts s,
+        PlannerSnapshot baseSnapshot,
+        DraftPreviewContext previewContext,
+        Dictionary<string, int> playerTotals,
+        Dictionary<string, int> playerCounts,
+        Dictionary<string, int> previewTotals,
+        Dictionary<string, int> previewCounts
+    ) {
+        if (previewContext == null) {
+            PlannerSnapshot replySnapshot = CreateDraftPreviewSnapshot(baseSnapshot, playerTotals, playerCounts);
+            return GetBestDraftPreviewEvaluation(s, replySnapshot, previewTotals, previewCounts) ?? new AdvancedPlanEvaluation();
+        }
+
+        DraftPreviewCacheKey cacheKey = new(playerTotals, playerCounts, previewTotals, previewCounts);
+        if (previewContext.PreviewEvaluationCache.TryGetValue(cacheKey, out AdvancedPlanEvaluation cachedEvaluation)) {
+            return cachedEvaluation;
+        }
+
+        YellowAssignmentStateKey playerStateKey = new(playerTotals, playerCounts);
+        PlannerSnapshot snapshot;
+        if (!previewContext.PlayerSnapshotCache.TryGetValue(playerStateKey, out snapshot)) {
+            PlannerSnapshot snapshotSource = previewContext.BaseSnapshot ?? baseSnapshot;
+            snapshot = CreateDraftPreviewSnapshot(snapshotSource, playerTotals, playerCounts);
+            previewContext.PlayerSnapshotCache[playerStateKey] = snapshot;
+        }
+
+        AdvancedPlanEvaluation computedEvaluation = GetBestDraftPreviewEvaluation(s, snapshot, previewTotals, previewCounts) ?? new AdvancedPlanEvaluation();
+        previewContext.PreviewEvaluationCache[cacheKey] = computedEvaluation;
+        return computedEvaluation;
     }
 
     /// <summary>
@@ -1904,12 +2140,18 @@ public static class EnemyAI {
         if (s == null || dice == null || s.enemy == null) { return 0; }
         if (dice.diceType == "blue" && IsDraftInitiativeLocked(s)) { return 0; }
         if (dice.diceType == "yellow" && s.itemManager.PlayerHasWeapon("hatchet")) { return 0; }
+
+        int value = dice.diceNum;
         if (s.enemy.enemyName.text != "Lich") {
-            if (dice.diceType == "red" && s.enemy.woundList.Contains("armpits")) { return 0; }
-            if (dice.diceType == "white" && s.enemy.woundList.Contains("hand")) { return 0; }
-            if (s.enemy.woundList.Contains("guts")) { return Mathf.Max(0, dice.diceNum - 1); }
+            if (dice.diceType == "red" && (s.enemy.woundList.Contains("armpits") || s.itemManager.EnemyHasTemporaryArmpitsInjury())) { return 0; }
+            if (dice.diceType == "white" && (s.enemy.woundList.Contains("hand") || s.itemManager.EnemyHasTemporaryHandInjury())) { return 0; }
+            if (s.enemy.woundList.Contains("guts") || s.itemManager.EnemyHasTemporaryGutsInjury()) {
+                value = Mathf.Max(0, value - 1);
+            }
         }
-        return dice.diceNum;
+
+        value = Mathf.Max(0, value - s.itemManager.GetEnemyTarotPenaltyForDieType(dice.diceType));
+        return value;
     }
 
     private static int GetEffectivePlayerDraftValue(Scripts s, Dice dice) {
@@ -1996,53 +2238,318 @@ public static class EnemyAI {
 
     private static List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> GetPlayerYellowReassignmentPreviewOptions(Scripts s) {
         List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> results = new();
-        if (s?.statSummoner?.addedPlayerDice == null) {
-            results.Add((NewStatDictionary(), NewStatDictionary()));
-            return results;
-        }
-
-        List<Dice> playerYellowDice = s.statSummoner.addedPlayerDice
-            .SelectMany(pair => pair.Value)
-            .Where(dice => dice != null && dice.isAttached && dice.isOnPlayerOrEnemy == "player" && dice.diceType == "yellow")
-            .Distinct()
-            .ToList();
-
-        if (playerYellowDice.Count == 0) {
-            results.Add((NewStatDictionary(), NewStatDictionary()));
-            return results;
-        }
-
         HashSet<YellowAssignmentStateKey> visited = new();
+        AddPreviewState(results, visited, NewStatDictionary(), NewStatDictionary());
+
+        if (s?.statSummoner?.addedPlayerDice == null) {
+            return results;
+        }
+
+        List<Dice> playerYellowDice = GetPlayerYellowDice(s).ToList();
+        if (playerYellowDice.Count == 0) {
+            return results;
+        }
+
+        Dictionary<string, int> currentTotals = NewStatDictionary();
+        Dictionary<string, int> currentCounts = NewStatDictionary();
+        foreach (Dice yellowDie in playerYellowDice) {
+            string currentStat = string.IsNullOrEmpty(yellowDie.statAddedTo) ? "red" : yellowDie.statAddedTo;
+            currentTotals[currentStat] += yellowDie.diceNum;
+            currentCounts[currentStat] += 1;
+        }
+
+        if (IsPlayerGuardSelected(s)) {
+            AddPreviewState(results, visited, currentTotals, currentCounts);
+
+            Dictionary<string, int> guardTotals = NewStatDictionary();
+            Dictionary<string, int> guardCounts = NewStatDictionary();
+            foreach (Dice yellowDie in playerYellowDice) {
+                guardTotals["white"] += yellowDie.diceNum;
+                guardCounts["white"] += 1;
+            }
+
+            AddPreviewState(results, visited, guardTotals, guardCounts);
+            return results;
+        }
+
+        int playerAim = s.statSummoner.SumOfStat("green", "player");
+        int playerSpd = s.statSummoner.SumOfStat("blue", "player");
+        int playerAtt = s.statSummoner.SumOfStat("red", "player");
+        int playerDef = s.statSummoner.SumOfStat("white", "player");
+        int enemySpd = s.statSummoner.SumOfStat("blue", "enemy");
+        int enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
+        int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
+        int nonYellowAim = playerAim - currentTotals["green"];
+        int nonYellowSpd = playerSpd - currentTotals["blue"];
+        int nonYellowAtt = playerAtt - currentTotals["red"];
+        int nonYellowDef = playerDef - currentTotals["white"];
+        int targetAim = GetPlayerDraftReferenceTargetIndex(s);
+        bool playerSpeedLockedHigh = IsPlayerSpeedLockedHigh(s);
+        bool enemySpeedLockedHigh = IsEnemySpeedLockedHigh(s);
+        bool playerActsFirst = playerSpeedLockedHigh || (!enemySpeedLockedHigh && playerSpd >= enemySpd);
+        bool enemyThreatens = enemyAtt > playerDef;
+        bool playerCanHit = playerAim >= 0 && playerAtt > enemyDef;
+        int neededGreenForTarget = Mathf.Max(0, targetAim - nonYellowAim);
+        int neededGreenToHit = Mathf.Max(0, 0 - nonYellowAim);
+        int neededGreen = Mathf.Max(neededGreenForTarget, neededGreenToHit);
+        int neededRed = Mathf.Max(0, enemyDef + 1 - nonYellowAtt);
+        int neededBlue = playerSpeedLockedHigh || enemySpeedLockedHigh
+            ? 0
+            : Mathf.Max(0, enemySpd - nonYellowSpd);
+        int neededWhite = Mathf.Max(0, enemyAtt - nonYellowDef);
+
+        AddPreviewState(
+            results,
+            visited,
+            BuildPlayerYellowHeuristicDelta(
+                playerYellowDice,
+                currentTotals,
+                currentCounts,
+                CreateRequiredStatTotals(neededRed, 0, neededGreen, 0),
+                new[] { "red", "green" },
+                !playerActsFirst ? "blue" : (enemyThreatens ? "white" : "red")));
+
+        if (!playerActsFirst) {
+            AddPreviewState(
+                results,
+                visited,
+                BuildPlayerYellowHeuristicDelta(
+                    playerYellowDice,
+                    currentTotals,
+                    currentCounts,
+                    CreateRequiredStatTotals(neededRed, neededBlue, neededGreen, 0),
+                    new[] { "blue", "red", "green" },
+                    playerCanHit ? "white" : "red"));
+        }
+
+        if (enemyThreatens || !playerCanHit) {
+            AddPreviewState(
+                results,
+                visited,
+                BuildPlayerYellowHeuristicDelta(
+                    playerYellowDice,
+                    currentTotals,
+                    currentCounts,
+                    CreateRequiredStatTotals(playerCanHit ? neededRed : 0, 0, playerCanHit ? neededGreen : 0, neededWhite),
+                    new[] { "white", "red", "green" },
+                    "white"));
+        }
+
+        if (neededGreen > 0) {
+            AddPreviewState(
+                results,
+                visited,
+                BuildPlayerYellowHeuristicDelta(
+                    playerYellowDice,
+                    currentTotals,
+                    currentCounts,
+                    CreateRequiredStatTotals(neededRed, 0, neededGreen, 0),
+                    new[] { "green", "red" },
+                    !playerActsFirst ? "blue" : (enemyThreatens ? "white" : "red")));
+        }
+
+        return results;
+    }
+
+    private static List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> GetPlayerReplyPreviewStates(
+        Scripts s,
+        List<Dice> availableDice,
+        Dice excludedDie,
+        DraftPreviewContext previewContext
+    ) {
+        if (previewContext == null) {
+            return BuildPlayerReplyPreviewStates(s, availableDice, excludedDie, GetPlayerYellowReassignmentPreviewOptions(s));
+        }
+
+        if (previewContext.ReplyStatesByExcludedDie.TryGetValue(excludedDie, out List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> cachedStates)) {
+            return cachedStates;
+        }
+
+        List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> replyStates = BuildPlayerReplyPreviewStates(
+            s,
+            availableDice,
+            excludedDie,
+            previewContext.PlayerYellowReassignmentOptions);
+        previewContext.ReplyStatesByExcludedDie[excludedDie] = replyStates;
+        return replyStates;
+    }
+
+    private static List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> BuildPlayerReplyPreviewStates(
+        Scripts s,
+        List<Dice> availableDice,
+        Dice excludedDie,
+        List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> yellowReassignments
+    ) {
+        List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> replyStates = new();
+        HashSet<YellowAssignmentStateKey> visited = new();
+
+        void AddReplyState(Dictionary<string, int> totals, Dictionary<string, int> counts) {
+            YellowAssignmentStateKey stateKey = new(totals, counts);
+            if (!visited.Add(stateKey)) { return; }
+            replyStates.Add((totals, counts));
+        }
+
+        AddReplyState(NewStatDictionary(), NewStatDictionary());
+
+        List<Dice> playerReplyDice = GetLikelyPlayerReplyDice(s, availableDice, excludedDie).ToList();
+
+        foreach (Dice replyDie in playerReplyDice) {
+            int effectivePlayerValue = GetEffectivePlayerDraftValue(s, replyDie);
+            if (effectivePlayerValue <= 0) { continue; }
+
+            IEnumerable<string> playerStats = GetHeuristicPlayerDraftAssignmentOptions(s, replyDie);
+
+            foreach (string playerStat in playerStats) {
+                foreach ((Dictionary<string, int> totals, Dictionary<string, int> counts) yellowReassignment in yellowReassignments) {
+                    Dictionary<string, int> playerTotals = CopyStatDictionary(yellowReassignment.totals);
+                    Dictionary<string, int> playerCounts = CopyStatDictionary(yellowReassignment.counts);
+
+                    if (effectivePlayerValue > 0 && !string.IsNullOrEmpty(playerStat)) {
+                        playerTotals[playerStat] += effectivePlayerValue;
+                        playerCounts[playerStat] += 1;
+                    }
+
+                    AddReplyState(playerTotals, playerCounts);
+                }
+            }
+        }
+
+        return replyStates;
+    }
+
+    private static Dictionary<string, int> CreateRequiredStatTotals(int red, int blue, int green, int white) {
+        Dictionary<string, int> required = NewStatDictionary();
+        required["red"] = Mathf.Max(0, red);
+        required["blue"] = Mathf.Max(0, blue);
+        required["green"] = Mathf.Max(0, green);
+        required["white"] = Mathf.Max(0, white);
+        return required;
+    }
+
+    private static void AddPreviewState(
+        List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> results,
+        HashSet<YellowAssignmentStateKey> visited,
+        Dictionary<string, int> totals,
+        Dictionary<string, int> counts
+    ) {
+        YellowAssignmentStateKey stateKey = new(totals, counts);
+        if (!visited.Add(stateKey)) { return; }
+        results.Add((totals, counts));
+    }
+
+    private static void AddPreviewState(
+        List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> results,
+        HashSet<YellowAssignmentStateKey> visited,
+        (Dictionary<string, int> totals, Dictionary<string, int> counts) state
+    ) {
+        AddPreviewState(results, visited, state.totals, state.counts);
+    }
+
+    private static (Dictionary<string, int> totals, Dictionary<string, int> counts) BuildPlayerYellowHeuristicDelta(
+        List<Dice> playerYellowDice,
+        Dictionary<string, int> currentTotals,
+        Dictionary<string, int> currentCounts,
+        Dictionary<string, int> requiredTotals,
+        string[] needPriorityOrder,
+        string fallbackStat
+    ) {
+        Dictionary<string, int> desiredTotals = NewStatDictionary();
+        Dictionary<string, int> desiredCounts = NewStatDictionary();
+        Dictionary<string, int> remaining = CopyStatDictionary(requiredTotals);
+        string safeFallbackStat = StatIndexByName.ContainsKey(fallbackStat) ? fallbackStat : "red";
+
+        foreach (Dice yellowDie in playerYellowDice.OrderByDescending(die => die.diceNum)) {
+            string targetStat = null;
+            foreach (string stat in needPriorityOrder) {
+                if (StatIndexByName.ContainsKey(stat) && remaining[stat] > 0) {
+                    targetStat = stat;
+                    break;
+                }
+            }
+
+            targetStat ??= safeFallbackStat;
+            desiredTotals[targetStat] += yellowDie.diceNum;
+            desiredCounts[targetStat] += 1;
+            remaining[targetStat] = Mathf.Max(0, remaining[targetStat] - yellowDie.diceNum);
+        }
+
         Dictionary<string, int> deltaTotals = NewStatDictionary();
         Dictionary<string, int> deltaCounts = NewStatDictionary();
+        foreach (string stat in Stats) {
+            deltaTotals[stat] = desiredTotals[stat] - currentTotals[stat];
+            deltaCounts[stat] = desiredCounts[stat] - currentCounts[stat];
+        }
 
-        void Search(int index) {
-            if (index >= playerYellowDice.Count) {
-                YellowAssignmentStateKey stateKey = new(deltaTotals, deltaCounts);
-                if (!visited.Add(stateKey)) { return; }
-                results.Add((CopyStatDictionary(deltaTotals), CopyStatDictionary(deltaCounts)));
-                return;
-            }
+        return (deltaTotals, deltaCounts);
+    }
 
-            Dice yellowDie = playerYellowDice[index];
-            string currentStat = string.IsNullOrEmpty(yellowDie.statAddedTo) ? "red" : yellowDie.statAddedTo;
-            foreach (string targetStat in GetPlayerDraftAssignmentOptions(s, yellowDie)) {
-                deltaTotals[currentStat] -= yellowDie.diceNum;
-                deltaCounts[currentStat] -= 1;
-                deltaTotals[targetStat] += yellowDie.diceNum;
-                deltaCounts[targetStat] += 1;
+    private static IEnumerable<Dice> GetLikelyPlayerReplyDice(Scripts s, List<Dice> availableDice, Dice excludedDie) {
+        List<Dice> remainingDice = availableDice == null
+            ? new List<Dice>()
+            : availableDice.Where(dice => dice != null && dice != excludedDie).ToList();
+        if (remainingDice.Count == 0) {
+            return Array.Empty<Dice>();
+        }
 
-                Search(index + 1);
+        List<Dice> likelyDice = new();
 
-                deltaTotals[targetStat] -= yellowDie.diceNum;
-                deltaCounts[targetStat] -= 1;
-                deltaTotals[currentStat] += yellowDie.diceNum;
-                deltaCounts[currentStat] += 1;
+        void AddLikelyDie(Dice dice) {
+            if (dice != null && !likelyDice.Contains(dice)) {
+                likelyDice.Add(dice);
             }
         }
 
-        Search(0);
-        return results;
+        AddLikelyDie(remainingDice
+            .OrderByDescending(dice => GetPlayerDieDesireScore(s, dice))
+            .ThenByDescending(dice => dice.diceNum)
+            .FirstOrDefault());
+
+        foreach (string diceType in new[] { "yellow", "red", "blue", "green", "white" }) {
+            AddLikelyDie(remainingDice
+                .Where(dice => dice.diceType == diceType)
+                .OrderByDescending(dice => GetPlayerDieDesireScore(s, dice))
+                .ThenByDescending(dice => dice.diceNum)
+                .FirstOrDefault());
+        }
+
+        return likelyDice.Take(MaxLikelyPlayerReplyDice);
+    }
+
+    private static IEnumerable<string> GetHeuristicPlayerDraftAssignmentOptions(Scripts s, Dice dice) {
+        IEnumerable<string> fullOptions = GetPlayerDraftAssignmentOptions(s, dice);
+        if (dice == null || (dice.diceType != "yellow" && !Save.game.isFurious)) {
+            return fullOptions;
+        }
+
+        if (IsPlayerGuardSelected(s)) {
+            return fullOptions.Where(stat => stat == "white").DefaultIfEmpty(fullOptions.First());
+        }
+
+        List<string> options = new();
+        int playerAim = s.statSummoner.SumOfStat("green", "player");
+        int playerSpd = s.statSummoner.SumOfStat("blue", "player");
+        int playerAtt = s.statSummoner.SumOfStat("red", "player");
+        int playerDef = s.statSummoner.SumOfStat("white", "player");
+        int enemySpd = s.statSummoner.SumOfStat("blue", "enemy");
+        int enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
+        int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
+        bool playerSpeedLockedHigh = IsPlayerSpeedLockedHigh(s);
+        bool enemySpeedLockedHigh = IsEnemySpeedLockedHigh(s);
+        bool playerActsFirst = playerSpeedLockedHigh || (!enemySpeedLockedHigh && playerSpd >= enemySpd);
+        bool playerCanHit = playerAim >= 0 && playerAtt > enemyDef;
+        bool enemyThreatens = enemyAtt > playerDef;
+
+        if (!playerActsFirst) { options.Add("blue"); }
+        if (playerAim < GetPlayerDraftReferenceTargetIndex(s) || playerAim < 0) { options.Add("green"); }
+        if (!playerCanHit || playerAtt <= enemyDef) { options.Add("red"); }
+        if (!playerCanHit || enemyThreatens) { options.Add("white"); }
+        if (options.Count == 0) { options.Add("red"); }
+
+        return options
+            .Where(stat => fullOptions.Contains(stat))
+            .Distinct()
+            .Take(3)
+            .DefaultIfEmpty(fullOptions.First());
     }
 
     private static bool IsWorseAdvancedEvaluation(AdvancedPlanEvaluation candidate, AdvancedPlanEvaluation current) {
@@ -2065,7 +2572,7 @@ public static class EnemyAI {
         Dictionary<string, int> staminaPlan = NewStatDictionary();
         AdvancedPlanEvaluation best = null;
         int totalAvailableStamina = Mathf.Max(0, s.enemy.stamina);
-        bool canUseStamina = !s.enemy.woundList.Contains("hip") || s.enemy.enemyName.text == "Lich";
+        bool canUseStamina = (!s.enemy.woundList.Contains("hip") && !s.itemManager.EnemyHasTemporaryHipInjury()) || s.enemy.enemyName.text == "Lich";
         int baseAim = snapshot.EnemyBaseAim + previewTotals["green"];
         int baseSpd = snapshot.EnemyBaseSpd + previewTotals["blue"];
         int baseAtt = snapshot.EnemyBaseAtt + previewTotals["red"];
@@ -2084,7 +2591,7 @@ public static class EnemyAI {
                     ? GetPostPlayerWoundAttackSpendNeeded(s, snapshot, previewTotals, previewCounts, blueSpend, whiteSpend)
                     : 0;
                 List<int> redOptions = canUseStamina
-                    ? BuildSpendOptions(remainingAfterWhite, 0, GetExactAttackSpendNeeded(snapshot.PlayerDef, baseAtt), postPlayerRedSpend)
+                    ? BuildSpendOptions(remainingAfterWhite, 0, GetExactAttackSpendNeeded(GetProjectedPlayerDefenseForEnemyAttack(snapshot, baseSpd + blueSpend), baseAtt), postPlayerRedSpend)
                     : BuildSpendOptions(0, 0);
 
                 foreach (int redSpend in redOptions) {
@@ -2189,11 +2696,13 @@ public static class EnemyAI {
     }
 
     private static bool DraftDieDeniesPlayerKill(Scripts s, Dice dice) {
+        if (IsPlayerGuardSelected(s)) { return false; }
+
         int playerAim = s.statSummoner.SumOfStat("green", "player");
         int playerAtt = s.statSummoner.SumOfStat("red", "player");
         int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
         int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
-        string playerTarget = Targets[Mathf.Clamp(s.player.targetIndex, 0, Targets.Length - 1)];
+        string playerTarget = Targets[GetPlayerDraftReferenceTargetIndex(s)];
         bool currentKill = PlayerWouldKillEnemy(
             s,
             new SimState {
@@ -2223,6 +2732,8 @@ public static class EnemyAI {
     }
 
     private static bool DraftDieDeniesPlayerDamage(Scripts s, Dice dice) {
+        if (IsPlayerGuardSelected(s)) { return false; }
+
         int playerAim = s.statSummoner.SumOfStat("green", "player");
         int playerAtt = s.statSummoner.SumOfStat("red", "player");
         int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
@@ -2253,8 +2764,10 @@ public static class EnemyAI {
     }
 
     private static bool DraftDieDeniesPlayerTarget(Scripts s, Dice dice) {
+        if (IsPlayerGuardSelected(s)) { return false; }
+
         int playerAim = s.statSummoner.SumOfStat("green", "player");
-        int neededAim = Mathf.Clamp(s.player.targetIndex, 0, 7);
+        int neededAim = GetPlayerDraftReferenceTargetIndex(s);
         int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
         if (playerAim >= neededAim || effectivePlayerValue <= 0) { return false; }
         return (dice.diceType == "green" || dice.diceType == "yellow") && playerAim + effectivePlayerValue >= neededAim;
@@ -2293,6 +2806,22 @@ public static class EnemyAI {
         if (s != null && dice != null && dice.diceType == "blue" && IsDraftInitiativeLocked(s)) { return 0f; }
 
         int effectivePlayerValue = GetEffectivePlayerDraftValue(s, dice);
+        if (IsPlayerGuardSelected(s)) {
+            int playerDef = s.statSummoner.SumOfStat("white", "player");
+            int enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
+            float guardScore = effectivePlayerValue * 7f;
+
+            if (dice.diceType == "yellow") { guardScore += 70f; }
+            if (dice.diceType == "white" || dice.diceType == "yellow") {
+                guardScore += Mathf.Max(0, enemyAtt + 1 - playerDef) * 22f;
+            }
+            if (dice.diceType == "blue") {
+                guardScore += 10f;
+            }
+
+            return guardScore;
+        }
+
         int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
         int playerAtt = s.statSummoner.SumOfStat("red", "player");
         int enemySpd = s.statSummoner.SumOfStat("blue", "enemy");
@@ -2308,7 +2837,7 @@ public static class EnemyAI {
             score += Mathf.Max(0, enemySpd + 1 - playerSpd) * 18f;
         }
         if (dice.diceType == "green") {
-            score += Mathf.Max(0, s.player.targetIndex - playerAim) * 22f;
+            score += Mathf.Max(0, GetPlayerDraftReferenceTargetIndex(s) - playerAim) * 22f;
         }
         if (dice.diceType == "white") {
             score += Mathf.Max(0, s.statSummoner.SumOfStat("red", "enemy") - s.statSummoner.SumOfStat("white", "player")) * 14f;
@@ -2321,7 +2850,7 @@ public static class EnemyAI {
     }
 
     private static void AttachChosenDie(Scripts s, Dice chosenDie) {
-        if (s.enemy.woundList.Contains("guts") && s.enemy.enemyName.text != "Lich") {
+        if ((s.enemy.woundList.Contains("guts") || s.itemManager.EnemyHasTemporaryGutsInjury()) && s.enemy.enemyName.text != "Lich") {
             s.enemy.StartCoroutine(chosenDie.DecreaseDiceValue(false));
         }
 
@@ -2335,9 +2864,11 @@ public static class EnemyAI {
 
         chosenDie.statAddedTo = attachStat;
         s.statSummoner.AddDiceToEnemy(attachStat, chosenDie);
+        s.itemManager.TryWeakenEnemyTakenDieWithTarot(chosenDie, 0.05f);
         RepositionEnemyDice(s);
 
-        if (chosenDie.diceType == "red" && s.enemy.woundList.Contains("armpits") || chosenDie.diceType == "white" && s.enemy.woundList.Contains("hand")) {
+        if (chosenDie.diceType == "red" && (s.enemy.woundList.Contains("armpits") || s.itemManager.EnemyHasTemporaryArmpitsInjury())
+            || chosenDie.diceType == "white" && (s.enemy.woundList.Contains("hand") || s.itemManager.EnemyHasTemporaryHandInjury())) {
             if (s.enemy.enemyName.text != "Lich") { s.enemy.StartCoroutine(chosenDie.FadeOut(false)); }
         }
         else if (chosenDie.diceType == "yellow" && s.itemManager.PlayerHasWeapon("hatchet")) {
@@ -2364,7 +2895,7 @@ public static class EnemyAI {
             .Where(dice => dice != null && !dice.isAttached)
             .ToList();
         foreach (string stat in Stats) {
-            AdvancedPlanEvaluation evaluation = GetDraftPreviewEvaluation(s, snapshot, yellowDie, stat, remainingDice);
+            AdvancedPlanEvaluation evaluation = GetDraftPreviewEvaluation(s, snapshot, yellowDie, stat, remainingDice, null);
             if (IsBetterAdvancedEvaluation(evaluation, bestEvaluation)) {
                 bestEvaluation = evaluation;
                 bestStat = stat;
@@ -2448,6 +2979,13 @@ public static class EnemyAI {
             .Distinct();
     }
 
+    private static IEnumerable<Dice> GetPlayerYellowDice(Scripts s) {
+        return s.statSummoner.addedPlayerDice
+            .SelectMany(pair => pair.Value)
+            .Where(dice => dice != null && dice.isAttached && dice.isOnPlayerOrEnemy == "player" && dice.diceType == "yellow")
+            .Distinct();
+    }
+
     private static int GetFixedEnemyDiceSum(Scripts s, string stat) {
         return s.statSummoner.addedEnemyDice[stat]
             .Where(dice => dice != null && dice.diceType != "yellow")
@@ -2500,7 +3038,7 @@ public static class EnemyAI {
                 EnemyWoundCount = s.enemy.woundList.Count,
                 PlayerHasMaul = s.itemManager.PlayerHasWeapon("maul"),
             },
-            Targets[Mathf.Clamp(s.player.targetIndex, 0, Targets.Length - 1)],
+            GetPlayerTargetName(s.player.targetIndex, IsPlayerGuardSelected(s)),
             beforeCanHit
         );
         bool afterKills = PlayerWouldKillEnemy(
@@ -2512,7 +3050,7 @@ public static class EnemyAI {
                 EnemyWoundCount = s.enemy.woundList.Count,
                 PlayerHasMaul = s.itemManager.PlayerHasWeapon("maul"),
             },
-            Targets[Mathf.Clamp(s.player.targetIndex, 0, Targets.Length - 1)],
+            GetPlayerTargetName(s.player.targetIndex, IsPlayerGuardSelected(s)),
             afterCanHit
         );
 
@@ -2526,7 +3064,7 @@ public static class EnemyAI {
         }
         if (dice.statAddedTo == "green") {
             score += 55f;
-            score += Mathf.Max(0, s.player.targetIndex - s.statSummoner.SumOfStat("green", "player") + 1) * 25f;
+            score += IsPlayerGuardSelected(s) ? 0f : Mathf.Max(0, s.player.targetIndex - s.statSummoner.SumOfStat("green", "player") + 1) * 25f;
         }
         if (dice.statAddedTo == "white") {
             score += 30f;
@@ -2535,7 +3073,7 @@ public static class EnemyAI {
         if (dice.diceType == "yellow") { score += 50f; }
         if (beforeCanHit && !afterCanHit) { score += 500f; }
         if (playerSpd >= enemySpd && afterSpd < enemySpd) { score += 320f; }
-        if (playerAim >= s.player.targetIndex && afterAim < s.player.targetIndex) { score += 360f; }
+        if (!IsPlayerGuardSelected(s) && playerAim >= s.player.targetIndex && afterAim < s.player.targetIndex) { score += 360f; }
         if (s.statSummoner.SumOfStat("red", "enemy") > s.statSummoner.SumOfStat("white", "player")
             && s.statSummoner.SumOfStat("red", "enemy") <= afterDef) {
             score += 220f;
@@ -2545,57 +3083,79 @@ public static class EnemyAI {
     }
 
     private static LiveDiscardEvaluation EvaluateLiveDiscardChoice(Scripts s, Dice dice) {
-        int enemyDef = s.statSummoner.SumOfStat("white", "enemy");
-        int enemyAtt = s.statSummoner.SumOfStat("red", "enemy");
-        int enemySpd = s.statSummoner.SumOfStat("blue", "enemy");
-        int playerAim = s.statSummoner.SumOfStat("green", "player");
-        int playerAtt = s.statSummoner.SumOfStat("red", "player");
-        int playerSpd = s.statSummoner.SumOfStat("blue", "player");
-        int playerDef = s.statSummoner.SumOfStat("white", "player");
-        string playerTarget = Targets[Mathf.Clamp(s.player.targetIndex, 0, Targets.Length - 1)];
+        SimState state = BuildLiveDiscardState(s);
         string stat = string.IsNullOrEmpty(dice.statAddedTo)
             ? (dice.diceType == "yellow" ? "red" : dice.diceType)
             : dice.statAddedTo;
-        int afterAim = playerAim - (stat == "green" ? dice.diceNum : 0);
-        int afterSpd = playerSpd - (stat == "blue" ? dice.diceNum : 0);
-        int afterAtt = playerAtt - (stat == "red" ? dice.diceNum : 0);
-        int afterDef = playerDef - (stat == "white" ? dice.diceNum : 0);
-        bool beforeCanHit = playerAim >= 0 && playerAtt > enemyDef;
-        bool afterCanHit = afterAim >= 0 && afterAtt > enemyDef;
-        bool beforeKills = PlayerWouldKillEnemy(
-            s,
-            new SimState {
-                PlayerAim = playerAim,
-                PlayerAtt = playerAtt,
-                EnemyDef = enemyDef,
-                EnemyWoundCount = s.enemy.woundList.Count,
-                PlayerHasMaul = s.itemManager.PlayerHasWeapon("maul"),
-            },
-            playerTarget,
-            beforeCanHit
-        );
-        bool afterKills = PlayerWouldKillEnemy(
-            s,
-            new SimState {
-                PlayerAim = afterAim,
-                PlayerAtt = afterAtt,
-                EnemyDef = enemyDef,
-                EnemyWoundCount = s.enemy.woundList.Count,
-                PlayerHasMaul = s.itemManager.PlayerHasWeapon("maul"),
-            },
-            playerTarget,
-            afterCanHit
-        );
+        SimAttachedDie attachedDie = new() {
+            Stat = stat,
+            Value = dice.diceNum,
+            IsRerolled = dice.isRerolled,
+            IsYellow = dice.diceType == "yellow",
+        };
+        string playerTarget = GetPlayerTargetName(s.player.targetIndex, IsPlayerGuardSelected(s));
+        return EvaluatePlayerDiscardChoice(s, state, playerTarget, attachedDie, enemyAlreadyActed:true);
+    }
+
+    private static SimState BuildLiveDiscardState(Scripts s) {
+        return new SimState {
+            PlayerAim = s.statSummoner.SumOfStat("green", "player"),
+            PlayerSpd = s.statSummoner.SumOfStat("blue", "player"),
+            PlayerAtt = s.statSummoner.SumOfStat("red", "player"),
+            PlayerDef = s.statSummoner.SumOfStat("white", "player"),
+            PlayerGuardSelected = IsPlayerGuardSelected(s),
+            PlayerPendingGuardParryBonus = s.turnManager != null ? s.turnManager.GetPlayerGuardParryBonus(includePendingSelection: true) : 0,
+            EnemyAim = s.statSummoner.SumOfStat("green", "enemy"),
+            EnemySpd = s.statSummoner.SumOfStat("blue", "enemy"),
+            EnemyAtt = s.statSummoner.SumOfStat("red", "enemy"),
+            EnemyDef = s.statSummoner.SumOfStat("white", "enemy"),
+            EnemyWoundCount = s.enemy.woundList.Count,
+            PlayerHasMaul = s.itemManager.PlayerHasWeapon("maul"),
+            PlayerSpeedLockedHigh = IsPlayerSpeedLockedHigh(s),
+            EnemySpeedLockedHigh = IsEnemySpeedLockedHigh(s),
+        };
+    }
+
+    private static LiveDiscardEvaluation EvaluatePlayerDiscardChoice(Scripts s, SimState state, string playerTarget, SimAttachedDie die, bool enemyAlreadyActed) {
+        int afterAim = state.PlayerAim - (die.Stat == "green" ? die.Value : 0);
+        int afterSpd = state.PlayerSpd - (die.Stat == "blue" ? die.Value : 0);
+        int afterAtt = state.PlayerAtt - (die.Stat == "red" ? die.Value : 0);
+        int afterDef = state.PlayerDef - (die.Stat == "white" ? die.Value : 0);
+        bool beforeCanHit = !state.PlayerGuardSelected && state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
+        bool afterCanHit = !state.PlayerGuardSelected && afterAim >= 0 && afterAtt > state.EnemyDef;
+        bool beforeKills = PlayerWouldKillEnemy(s, state, playerTarget, beforeCanHit);
+
+        SimState afterState = state.Clone();
+        afterState.PlayerAim = afterAim;
+        afterState.PlayerSpd = afterSpd;
+        afterState.PlayerAtt = afterAtt;
+        afterState.PlayerDef = afterDef;
+        bool afterKills = PlayerWouldKillEnemy(s, afterState, playerTarget, afterCanHit);
+        bool beforeActsFirst = !enemyAlreadyActed && PlayerActsFirstInState(state);
+        bool afterActsFirst = !enemyAlreadyActed && PlayerActsFirstInState(afterState);
 
         return new LiveDiscardEvaluation {
             BreaksKill = beforeKills && !afterKills,
             BreaksDamage = beforeCanHit && !afterCanHit,
-            BreaksGoFirst = playerSpd >= enemySpd && afterSpd < enemySpd,
-            BreaksTarget = playerAim >= s.player.targetIndex && afterAim < s.player.targetIndex,
-            RestoresDefense = enemyAtt > playerDef && enemyAtt <= afterDef,
-            IsYellow = dice.diceType == "yellow",
-            DieValue = dice.diceNum,
+            BreaksGoFirst = beforeActsFirst && !afterActsFirst,
+            BreaksTarget = !IsPlayerGuardSelected(s) && state.PlayerAim >= s.player.targetIndex && afterAim < s.player.targetIndex,
+            RestoresDefense = state.EnemyAtt > state.PlayerDef && state.EnemyAtt <= afterDef,
+            IsYellow = die.IsYellow,
+            DieValue = GetDiscardTieBreakValue(die, state, enemyAlreadyActed),
         };
+    }
+
+    private static bool PlayerActsFirstInState(SimState state) {
+        return state != null && (state.PlayerSpeedLockedHigh || (!state.EnemySpeedLockedHigh && state.PlayerSpd >= state.EnemySpd));
+    }
+
+    private static int GetDiscardTieBreakValue(SimAttachedDie die, SimState state, bool enemyAlreadyActed) {
+        if (die == null) { return 0; }
+        if (die.Stat == "blue" && (enemyAlreadyActed || state?.PlayerSpeedLockedHigh == true || state?.EnemySpeedLockedHigh == true)) {
+            return 0;
+        }
+
+        return die.Value;
     }
 
     private static bool IsBetterLiveDiscardChoice(LiveDiscardEvaluation candidate, LiveDiscardEvaluation current) {
@@ -2663,7 +3223,13 @@ public static class EnemyAI {
         hash.Add(s.player.isDead);
         hash.Add(Save.game.enemyIsDead);
         hash.Add(Save.game.isDodgy);
+        hash.Add(Save.game.isDestructive);
+        hash.Add(Save.game.isFortified);
+        hash.Add(Save.game.isEmpowered);
         hash.Add(s.itemManager.PlayerHas("armor"));
+        hash.Add(s.itemManager.PlayerHas("boots of dodge"));
+        hash.Add(s.itemManager.PlayerHas("goggles"));
+        hash.Add(Save.game.usedBoots);
         hash.Add(s.itemManager.GetPlayerItemCount("crystal shard"));
         hash.Add(s.itemManager.GetCharmCount("riposte"));
         hash.Add(s.itemManager.GetCharmCount("bulwark"));
@@ -2679,19 +3245,27 @@ public static class EnemyAI {
         hash.Add(s.itemManager.GetTarotCount("inferno"));
         hash.Add(s.itemManager.GetTarotCount("glacier"));
         hash.Add(s.itemManager.GetTarotCount("dawn"));
+        hash.Add(s.itemManager.GetTarotCount("leviathan"));
+        hash.Add(s.itemManager.GetTarotCount("viper"));
+        hash.Add(s.itemManager.GetTarotCount("dragon"));
+        hash.Add(s.itemManager.GetTarotCount("wyvern"));
+        hash.Add(s.itemManager.GetTarotCount("phoenix"));
         hash.Add(s.itemManager.GetTarotCount("arcane"));
         hash.Add(s.itemManager.GetLuckyDiceRoundStatBonus("green"));
         hash.Add(s.itemManager.GetLuckyDiceRoundStatBonus("blue"));
         hash.Add(s.itemManager.GetLuckyDiceRoundStatBonus("red"));
         hash.Add(s.itemManager.GetLuckyDiceRoundStatBonus("white"));
         hash.Add(s.itemManager.PlayerHasWeapon("maul"));
+        hash.Add(s.itemManager.PlayerHasWeapon("gladius"));
         hash.Add(s.itemManager.PlayerHasWeapon("scimitar"));
         hash.Add(s.itemManager.PlayerHasWeapon("spear"));
         hash.Add(s.itemManager.PlayerHasWeapon("spear"));
         hash.Add(s.itemManager.PlayerHasWeapon("gauntlets"));
         hash.Add(s.itemManager.PlayerHasWeapon("stave"));
         hash.Add(s.itemManager.PlayerHasWeapon("glass sword"));
+        hash.Add(s.itemManager.PlayerHasWeapon("trident"));
         hash.Add(s.itemManager.PlayerHasLegendary());
+        hash.Add(Save.game.isFirstCombatRoundOfEncounter);
         hash.Add(Save.game.glassSwordShattered);
 
         AddWoundsToHash(ref hash, s.player.woundList);
@@ -2742,6 +3316,17 @@ public static class EnemyAI {
         return s != null && s.itemManager != null && s.itemManager.PlayerAlwaysActsFirst();
     }
 
+    private static bool PlayerCanBecomeDodgy(Scripts s) {
+        return s != null
+            && s.itemManager != null
+            && (Save.game.isDodgy || (!Save.game.usedBoots && s.player.stamina >= 1 && s.itemManager.PlayerHas("boots of dodge")));
+    }
+
+    private static int GetPlayerScimitarDiscardCount(Scripts s) {
+        if (s == null || s.itemManager == null || !s.itemManager.PlayerHasWeapon("scimitar")) { return 0; }
+        return s.itemManager.PlayerHasLegendary() ? 2 : 1;
+    }
+
     private static int GetDiceTypeIndex(string diceType) {
         return diceType switch {
             "green" => 0,
@@ -2779,7 +3364,7 @@ public static class EnemyAI {
         if (options.Count <= 1) { return options; }
 
         return options
-            .Where(blueSpend => blueSpend == 0 || baseAtt + Mathf.Max(0, totalAvailableStamina - blueSpend) > snapshot.PlayerDef)
+            .Where(blueSpend => blueSpend == 0 || baseAtt + Mathf.Max(0, totalAvailableStamina - blueSpend) > GetProjectedPlayerDefenseForEnemyAttack(snapshot, baseSpd + blueSpend))
             .ToList();
     }
 
@@ -2898,19 +3483,46 @@ public static class EnemyAI {
         SimState previewState = CreateSimulationState(snapshot, yellowTotals, yellowCounts, previewStamina);
         bool enemyActsFirst = previewState.EnemySpeedLockedHigh || (!previewState.PlayerSpeedLockedHigh && previewState.EnemySpd > previewState.PlayerSpd);
         if (enemyActsFirst) {
-            return GetExactAttackSpendNeeded(previewState.PlayerDef, previewState.EnemyAtt);
+            return GetExactAttackSpendNeeded(GetEffectivePlayerDefenseForEnemyAttack(previewState, true), previewState.EnemyAtt);
         }
 
-        string playerTarget = Targets[Mathf.Clamp(snapshot.PlayerTargetIndex, 0, Targets.Length - 1)];
-        bool playerCanHit = previewState.PlayerAim >= 0 && previewState.PlayerAtt > previewState.EnemyDef;
+        string playerTarget = GetPlayerTargetName(snapshot.PlayerTargetIndex, snapshot.PlayerGuardSelected);
+        bool playerCanHit = !previewState.PlayerGuardSelected && previewState.PlayerAim >= 0 && previewState.PlayerAtt > previewState.EnemyDef;
         bool playerDamages = PlayerHitDamagesEnemy(s, previewState, playerTarget, playerCanHit);
         if (!playerDamages || previewState.EnemyIsLich) {
-            return GetExactAttackSpendNeeded(previewState.PlayerDef, previewState.EnemyAtt);
+            return GetExactAttackSpendNeeded(GetEffectivePlayerDefenseForEnemyAttack(previewState, false), previewState.EnemyAtt);
         }
 
         SimState afterPlayerHit = previewState.Clone();
         ApplyWoundToEnemy(afterPlayerHit, playerTarget, s);
-        return GetExactAttackSpendNeeded(afterPlayerHit.PlayerDef, afterPlayerHit.EnemyAtt);
+        return GetExactAttackSpendNeeded(GetEffectivePlayerDefenseForEnemyAttack(afterPlayerHit, false), afterPlayerHit.EnemyAtt);
+    }
+
+    private static bool IsPlayerGuardSelected(Scripts s) {
+        return s != null
+            && s.turnManager != null
+            && s.diceSummoner != null
+            && s.diceSummoner.CountUnattachedDice() == 0
+            && s.turnManager.IsPlayerGuarding();
+    }
+
+    private static int GetPlayerDraftReferenceTargetIndex(Scripts s) {
+        if (s?.turnManager == null) { return 0; }
+        return s.turnManager.GetPlayerDraftReferenceTargetIndex();
+    }
+
+    private static string GetPlayerTargetName(int targetIndex, bool playerGuardSelected) {
+        if (playerGuardSelected || targetIndex < 0) { return null; }
+        return Targets[Mathf.Clamp(targetIndex, 0, Targets.Length - 1)];
+    }
+
+    private static int GetProjectedPlayerDefenseForEnemyAttack(PlannerSnapshot snapshot, int projectedEnemySpd) {
+        if (snapshot == null) { return 0; }
+
+        bool enemyActsFirst = snapshot.EnemySpeedLockedHigh || (!snapshot.PlayerSpeedLockedHigh && projectedEnemySpd > snapshot.PlayerSpd);
+        return snapshot.PlayerDef
+            + snapshot.PlayerPendingGuardParryBonus
+            + (enemyActsFirst ? snapshot.PlayerBulwarkImmediateParryBonus : 0);
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -2944,7 +3556,7 @@ public static class EnemyAI {
     ) {
         plan = null;
         candidatesEvaluated = 0;
-        bool canUseStamina = !s.enemy.woundList.Contains("hip") || snapshot.EnemyIsLich;
+        bool canUseStamina = (!s.enemy.woundList.Contains("hip") && !s.itemManager.EnemyHasTemporaryHipInjury()) || snapshot.EnemyIsLich;
         int totalAvailableStamina = s.enemy.stamina + s.statSummoner.addedEnemyStamina.Values.Sum();
         if (yellowDice.Count > 0 || (canUseStamina && totalAvailableStamina > 0)) { return false; }
 
@@ -3028,6 +3640,12 @@ public static class EnemyAI {
         int enemyDefBefore = state.EnemyDef - staminaPlan["white"];
         int enemySpdBefore = state.EnemySpd - staminaPlan["blue"];
         int enemyAimBefore = state.EnemyAim - staminaPlan["green"];
+        bool enemyActsFirstAfterSpend = state.EnemySpeedLockedHigh || (!state.PlayerSpeedLockedHigh && state.EnemySpd > state.PlayerSpd);
+
+        if (!enemyActsFirstAfterSpend && PlayerCanBecomeDodgy(state)) {
+            penalty += staminaPlan["red"] * 140f;
+            penalty += staminaPlan["green"] * 110f;
+        }
 
         if (staminaPlan["red"] > 0) {
             if (enemyAttBefore > state.PlayerDef) {
@@ -3104,9 +3722,11 @@ public static class EnemyAI {
         int afterSpd = state.PlayerSpd - (stat == "blue" ? value : 0);
         int afterAtt = state.PlayerAtt - (stat == "red" ? value : 0);
         int afterDef = state.PlayerDef - (stat == "white" ? value : 0);
-        bool beforeCanHit = state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
-        bool afterCanHit = afterAim >= 0 && afterAtt > state.EnemyDef;
-        bool beforeKills = PlayerWouldKillEnemy(s, state, Targets[Mathf.Clamp(s.player.targetIndex, 0, Targets.Length - 1)], beforeCanHit);
+        bool playerGuardSelected = IsPlayerGuardSelected(s);
+        string playerTarget = GetPlayerTargetName(s.player.targetIndex, playerGuardSelected);
+        bool beforeCanHit = !playerGuardSelected && state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
+        bool afterCanHit = !playerGuardSelected && afterAim >= 0 && afterAtt > state.EnemyDef;
+        bool beforeKills = PlayerWouldKillEnemy(s, state, playerTarget, beforeCanHit);
 
         SimState afterState = state.Clone();
         afterState.PlayerAim = afterAim;
@@ -3114,44 +3734,35 @@ public static class EnemyAI {
         afterState.PlayerAtt = afterAtt;
         afterState.PlayerDef = afterDef;
 
-        bool afterKills = PlayerWouldKillEnemy(s, afterState, Targets[Mathf.Clamp(s.player.targetIndex, 0, Targets.Length - 1)], afterCanHit);
+        bool afterKills = PlayerWouldKillEnemy(s, afterState, playerTarget, afterCanHit);
         float score = value * weight * 10f;
 
         if (beforeCanHit && !afterCanHit) { score += 500f; }
         if (state.PlayerSpd >= state.EnemySpd && afterSpd < state.EnemySpd) { score += 320f; }
-        if (state.PlayerAim >= s.player.targetIndex && afterAim < s.player.targetIndex) { score += 360f; }
+        if (!playerGuardSelected && state.PlayerAim >= s.player.targetIndex && afterAim < s.player.targetIndex) { score += 360f; }
         if (state.EnemyAtt > state.PlayerDef && state.EnemyAtt <= afterDef) { score += 220f; }
         if (beforeKills && !afterKills) { score += 800f; }
 
         return score;
     }
 
-    private static float GetEnemyDiscardImpactScore(Scripts s, SimState state, string stat, int value, float weight) {
-        if (value <= 0) { return float.NegativeInfinity; }
+    private static float GetEnemyDiscardImpactScore(Scripts s, SimState state, string playerTarget, SimAttachedDie die) {
+        if (state == null || die == null || die.Value <= 0) { return float.NegativeInfinity; }
 
-        int afterAim = state.EnemyAim - (stat == "green" ? value : 0);
-        int afterSpd = state.EnemySpd - (stat == "blue" ? value : 0);
-        int afterAtt = state.EnemyAtt - (stat == "red" ? value : 0);
-        int afterDef = state.EnemyDef - (stat == "white" ? value : 0);
-        bool beforeCanHit = state.EnemyAim >= 0 && state.EnemyAtt > state.PlayerDef;
-        bool afterCanHit = afterAim >= 0 && afterAtt > state.PlayerDef;
-        bool beforeKills = EnemyWouldKillPlayer(s, state, Targets[Mathf.Clamp(state.EnemyTargetIndex, 0, Targets.Length - 1)], beforeCanHit);
+        int afterDef = state.EnemyDef - (die.Stat == "white" ? die.Value : 0);
+        bool beforeCanHit = state.PlayerAim >= 0 && state.PlayerAtt > state.EnemyDef;
+        bool afterCanHit = state.PlayerAim >= 0 && state.PlayerAtt > afterDef;
+        bool beforeKills = PlayerWouldKillEnemy(s, state, playerTarget, beforeCanHit);
 
         SimState afterState = state.Clone();
-        afterState.EnemyAim = afterAim;
-        afterState.EnemySpd = afterSpd;
-        afterState.EnemyAtt = afterAtt;
         afterState.EnemyDef = afterDef;
+        bool afterKills = PlayerWouldKillEnemy(s, afterState, playerTarget, afterCanHit);
 
-        bool afterKills = EnemyWouldKillPlayer(s, afterState, Targets[Mathf.Clamp(state.EnemyTargetIndex, 0, Targets.Length - 1)], afterCanHit);
-        float score = value * weight * 10f;
-
-        if (beforeCanHit && !afterCanHit) { score += 500f; }
-        if (state.EnemySpd > state.PlayerSpd && afterSpd <= state.PlayerSpd) { score += 320f; }
-        if (state.EnemyAim >= state.EnemyTargetIndex && afterAim < state.EnemyTargetIndex) { score += 360f; }
-        if (state.EnemyDef >= state.PlayerAtt && afterDef < state.PlayerAtt) { score += 220f; }
-        if (beforeKills && !afterKills) { score += 800f; }
-
+        float score = die.Value * 10f;
+        if (!beforeCanHit && afterCanHit) { score += 900f; }
+        if (!beforeKills && afterKills) { score += 1400f; }
+        if (die.Stat == "white") { score += 280f; }
+        if (die.IsYellow) { score += 60f; }
         return score;
     }
 
@@ -3181,13 +3792,16 @@ public static class EnemyAI {
                 else if (enemySpd > playerSpd) {
                     score -= 100f;
                 }
+                if (PlayerCanBecomeDodgy(s) && !PlayerAlwaysActsFirst(s) && enemySpd <= playerSpd && enemySpd + effectiveEnemyValue > playerSpd) {
+                    score += 320f;
+                }
                 if (PlayerHasOneShotProtection(s)) { score -= 45f; }
                 break;
             case "green":
                 if (enemyAim < 6 && enemyAim + effectiveEnemyValue >= 6) { score += 220f; }
                 else if (enemyAim < 4 && enemyAim + effectiveEnemyValue >= 4) { score += 180f; }
                 else if (enemyAim < 3 && enemyAim + effectiveEnemyValue >= 3) { score += 140f; }
-                else if (enemyAim >= Mathf.Clamp(s.player.targetIndex, 0, 7)) { score -= 70f; }
+                else if (!IsPlayerGuardSelected(s) && enemyAim >= Mathf.Clamp(s.player.targetIndex, 0, 7)) { score -= 70f; }
                 break;
             case "white":
                 if (enemyDef < playerAtt && enemyDef + effectiveEnemyValue >= playerAtt) { score += 200f; }
@@ -3209,7 +3823,7 @@ public static class EnemyAI {
         int playerSpd = s.statSummoner.SumOfStat("blue", "player");
         int playerDef = s.statSummoner.SumOfStat("white", "player");
         int playerAtt = s.statSummoner.SumOfStat("red", "player");
-        int futureStamina = (!s.enemy.woundList.Contains("hip") || s.enemy.enemyName.text == "Lich")
+        int futureStamina = ((!s.enemy.woundList.Contains("hip") && !s.itemManager.EnemyHasTemporaryHipInjury()) || s.enemy.enemyName.text == "Lich")
             ? Mathf.Max(0, s.enemy.stamina)
             : 0;
         float score = 0f;
@@ -3236,6 +3850,9 @@ public static class EnemyAI {
                     int currentGap = Mathf.Max(0, playerSpd - enemySpd + 1);
                     int nextGap = Mathf.Max(0, playerSpd - (enemySpd + effectiveEnemyValue + futureStamina) + 1);
                     score += (currentGap - nextGap) * 24f;
+                }
+                if (PlayerCanBecomeDodgy(s) && !PlayerAlwaysActsFirst(s) && enemySpd <= playerSpd) {
+                    score += effectiveEnemyValue * 28f;
                 }
                 break;
             }
@@ -3273,7 +3890,10 @@ public static class EnemyAI {
         if (stat == "blue" && (enemySpd > playerSpd || PlayerAlwaysActsFirst(s))) {
             penalty += 130f;
         }
-        if (stat == "green" && enemyAim >= Mathf.Clamp(s.player.targetIndex, 0, 7)) {
+        if ((stat == "red" || stat == "green") && PlayerCanBecomeDodgy(s) && !PlayerAlwaysActsFirst(s) && enemySpd <= playerSpd) {
+            penalty += 220f;
+        }
+        if (stat == "green" && !IsPlayerGuardSelected(s) && enemyAim >= Mathf.Clamp(s.player.targetIndex, 0, 7)) {
             penalty += 80f;
         }
 

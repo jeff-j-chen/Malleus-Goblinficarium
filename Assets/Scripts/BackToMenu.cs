@@ -15,6 +15,10 @@ public class BackToMenu : MonoBehaviour {
     }
     public void GoBack() {
         // on escape pressed
+        if (s != null && s.turnManager != null && !s.turnManager.CanEscapeToMenu()) {
+            return;
+        }
+
         if (s != null && s.player != null && s.turnManager != null && !s.turnManager.isMoving) {
             // if in game and not moving
             if (s.tutorial == null) { Save.SaveGame(); }

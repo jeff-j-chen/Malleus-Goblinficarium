@@ -16,8 +16,17 @@ public class Player : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI identifier;
     [SerializeField] private GameObject statusEffectIcon;
     [SerializeField] public GameObject iconGameobject;
-    [SerializeField] public string[] statusEffectNames = { "dodge", "leech", "fury", "haste", "courage" };
-    [SerializeField] public string[] statusEffectDescs = { "if you strike first, ignore all damage", "cure the same wound as inflicted", "all picked die turn yellow", "pick 3 dice, enemy gets the rest", "keep 1 of your die till next round" };
+    [SerializeField] public string[] statusEffectNames = { "dodge", "leech", "fury", "haste", "courage", "destructive", "fortified", "empowered" };
+    [SerializeField] public string[] statusEffectDescs = {
+        "if you strike first, ignore all damage",
+        "cure the same wound as inflicted",
+        "all picked die turn yellow",
+        "pick 3 dice, enemy gets the rest",
+        "keep 1 of your die till next round",
+        "your attack is equal to accuracy this turn",
+        "your parry is equal to speed this turn",
+        "your attack is equal to parry this turn"
+    };
     [SerializeField] public Sprite[] statusEffectSprites;
     private readonly List<GameObject> statusEffectList = new();
     public List<string> woundList = new();
@@ -70,6 +79,9 @@ public class Player : MonoBehaviour {
         SetPlayerStatusEffect("haste", Save.game.isHasty);
         SetPlayerStatusEffect("leech", Save.game.isBloodthirsty);
         SetPlayerStatusEffect("courage", Save.game.isCourageous);
+        SetPlayerStatusEffect("destructive", Save.game.isDestructive);
+        SetPlayerStatusEffect("fortified", Save.game.isFortified);
+        SetPlayerStatusEffect("empowered", Save.game.isEmpowered);
         potionStats["green"] = Save.game.potionAcc;
         potionStats["blue"] = Save.game.potionSpd;
         potionStats["red"] = Save.game.potionDmg;
@@ -154,24 +166,32 @@ public class Player : MonoBehaviour {
     public void MoveTargetDown() { 
         // if player is trying to change the target (w/s or up/down arrow or scroll wheel)
         // set the available targets to make sure the player can do that
-        if (targetIndex < Mathf.Clamp(s.statSummoner.SumOfStat("green", "player"), 0, 7)) {
+        bool wasGuarding = targetIndex == TurnManager.PlayerGuardTargetIndex;
+        if (targetIndex < s.turnManager.GetMaxPlayerTargetIndex()) {
             // if player can target there
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
             // if there is still time left on the hint timer (for targeting neck or targeting wounded body part)
             targetIndex++;
             // increment target index
             s.turnManager.SetTargetOf("player");
+            if (wasGuarding != (targetIndex == TurnManager.PlayerGuardTargetIndex)) {
+                s.statSummoner.SummonStats();
+            }
             // and set target based off the new target index
             if (s.tutorial != null && targetIndex == 7 && s.tutorial.curIndex == 20) { s.tutorial.Increment(); }
         }
     }
 
     public void MoveTargetUp() {
-        if (targetIndex > 0) {  
+        bool wasGuarding = targetIndex == TurnManager.PlayerGuardTargetIndex;
+        if (targetIndex > TurnManager.PlayerGuardTargetIndex) {  
             if (hintTimer > 0.05f) { hintTimer += 0.1f; }
             if (!(s.tutorial != null && targetIndex == 7)) {
                 targetIndex--;
                 s.turnManager.SetTargetOf("player");
+                if (wasGuarding != (targetIndex == TurnManager.PlayerGuardTargetIndex)) {
+                    s.statSummoner.SummonStats();
+                }
             }
         }
     }
@@ -180,6 +200,10 @@ public class Player : MonoBehaviour {
     /// Use the player's weapon, attacking the enemy.
     /// </summary>
     public void UseWeapon() {
+        if (s?.diceSummoner != null && s.diceSummoner.DiceIsRolling()) {
+            return;
+        }
+
         List<Dice> availableDice = new();
         // create an empty list to hold die in
         foreach (GameObject dice in s.diceSummoner.existingDice) {
@@ -202,12 +226,15 @@ public class Player : MonoBehaviour {
                 s.turnManager.RoundOne();
                 // begin the round
             }
+            else if (s.turnManager.IsPlayerGuarding()) {
+                s.turnManager.RoundOne();
+            }
             else if (s.statSummoner.SumOfStat("green", "player") >= 7 && target.text != "neck" && hintTimer <= 0.05f && PlayerPrefs.GetString(s.HINTS_KEY) == "on" && s.enemy.enemyName.text != "Devil" && s.enemy.enemyName.text != "Lich" && !s.itemManager.PlayerHasWeapon("maul") && s.statSummoner.SumOfStat("red", "player") > s.statSummoner.SumOfStat("white", "enemy")) {
                 // if player wants hints, can aim for the neck, but is not doing so, and doesn't have a maul
                 coroutine = StartCoroutine(HintNeck());
                 // hint the player
             }
-            else if (s.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
+            else if (target.text.StartsWith("*") && s.enemy.woundList.Contains(target.text.Substring(1)) && PlayerPrefs.GetString(s.HINTS_KEY) == "on") {
                 // if body part is already wounded
                 coroutine = StartCoroutine(HintTargetingWounded());
                 // hint the player
@@ -324,11 +351,17 @@ public class Player : MonoBehaviour {
     }
 
     private void AddStatusEffectIcon(string statusEffect) {
+        print($"adding status effect icon for {statusEffect}");
         if (HasStatusEffectIcon(statusEffect)) { return; }
+
+        int statusIndex = Array.IndexOf(statusEffectNames, statusEffect);
+        if (statusIndex < 0 || statusEffectSprites == null || statusIndex >= statusEffectSprites.Length || statusEffectSprites[statusIndex] == null) {
+            return;
+        }
 
         identifier.text = ":";
         GameObject icon = Instantiate(statusEffectIcon, new Vector2(-10.25f + 1f * statusEffectList.Count, 3.333f), Quaternion.identity);
-        icon.GetComponent<SpriteRenderer>().sprite = statusEffectSprites[Array.IndexOf(statusEffectNames, statusEffect)];
+        icon.GetComponent<SpriteRenderer>().sprite = statusEffectSprites[statusIndex];
         statusEffectList.Add(icon);
     }
     
@@ -342,6 +375,9 @@ public class Player : MonoBehaviour {
             "haste" => Save.game.isHasty,
             "leech" => Save.game.isBloodthirsty,
             "courage" => Save.game.isCourageous,
+            "destructive" => Save.game.isDestructive,
+            "fortified" => Save.game.isFortified,
+            "empowered" => Save.game.isEmpowered,
             _ => false,
         };
 
@@ -364,6 +400,18 @@ public class Player : MonoBehaviour {
         else if (statusEffect == "courage") {
             if (onOrOff && Save.game.isCourageous && HasStatusEffectIcon(statusEffect)) { return false; } 
             else { Save.game.isCourageous = onOrOff; }
+        }
+        else if (statusEffect == "destructive") {
+            if (onOrOff && Save.game.isDestructive && HasStatusEffectIcon(statusEffect)) { return false; }
+            else { Save.game.isDestructive = onOrOff; }
+        }
+        else if (statusEffect == "fortified") {
+            if (onOrOff && Save.game.isFortified && HasStatusEffectIcon(statusEffect)) { return false; }
+            else { Save.game.isFortified = onOrOff; }
+        }
+        else if (statusEffect == "empowered") {
+            if (onOrOff && Save.game.isEmpowered && HasStatusEffectIcon(statusEffect)) { return false; }
+            else { Save.game.isEmpowered = onOrOff; }
         }
         if (onOrOff) {
             // if turning on

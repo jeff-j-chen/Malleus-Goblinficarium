@@ -3,11 +3,13 @@ using UnityEngine;
 using TMPro; 
 
 public class MenuIcon : MonoBehaviour {
+    [SerializeField] public GameObject resolution;
     [SerializeField] public GameObject debug;
     [SerializeField] public GameObject hints;
     [SerializeField] public GameObject sound;
     [SerializeField] public GameObject music;
     [SerializeField] public GameObject buttons;
+    [SerializeField] public GameObject resolutionText;
     [SerializeField] public GameObject debugText;
     [SerializeField] public GameObject soundsText;
     [SerializeField] public GameObject hintsText;
@@ -15,6 +17,7 @@ public class MenuIcon : MonoBehaviour {
     [SerializeField] public GameObject buttonsText;
     [SerializeField] private AudioSource musicPlayer;
     [SerializeField] private AudioSource sfxPlayer;
+    private SpriteRenderer resolutionSR;
     private SpriteRenderer debugSR;
     private SpriteRenderer soundsSR;
     private SpriteRenderer hintsSR;
@@ -26,12 +29,14 @@ public class MenuIcon : MonoBehaviour {
     
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
+        resolutionSR = resolution.GetComponent<SpriteRenderer>();
         debugSR = debug.GetComponent<SpriteRenderer>();
         hintsSR = hints.GetComponent<SpriteRenderer>();
         soundsSR = sound.GetComponent<SpriteRenderer>();
         musicSR = music.GetComponent<SpriteRenderer>();
         buttonsSR = buttons.GetComponent<SpriteRenderer>();
         // get the necessary components and colors
+        if(!PlayerPrefs.HasKey(s.RESOLUTION_KEY)) PlayerPrefs.SetInt(s.RESOLUTION_KEY, 0);
         if(!PlayerPrefs.HasKey(s.DEBUG_KEY)) PlayerPrefs.SetString(s.DEBUG_KEY, "on");
         if(!PlayerPrefs.HasKey(s.HINTS_KEY)) PlayerPrefs.SetString(s.HINTS_KEY, "on");
         if(!PlayerPrefs.HasKey(s.SOUNDS_KEY)) PlayerPrefs.SetString(s.SOUNDS_KEY, "on");
@@ -49,6 +54,7 @@ public class MenuIcon : MonoBehaviour {
             PlayerPrefSetter(s.BUTTONS_KEY, buttonsSR, false);
             // mobile devices always have buttons
         }
+        RefreshResolutionIconState();
         // set the default preferences
         StartCoroutine(FindMusicLate());
     }
@@ -59,7 +65,8 @@ public class MenuIcon : MonoBehaviour {
     }
 
     private void Update() {
-        if (Input.GetKeyDown("d")) { PlayerPrefSetter(s.DEBUG_KEY, debugSR); }
+        if (Input.GetKeyDown("r")) { CycleResolution(); }
+        else if (Input.GetKeyDown("d")) { PlayerPrefSetter(s.DEBUG_KEY, debugSR); }
         else if (Input.GetKeyDown("h")) { PlayerPrefSetter(s.HINTS_KEY, hintsSR); }
         else if (Input.GetKeyDown("s")) { PlayerPrefSetter(s.SOUNDS_KEY, soundsSR); }
         else if (Input.GetKeyDown("m")) { PlayerPrefSetter(s.MUSIC_KEY, musicSR); }
@@ -71,6 +78,10 @@ public class MenuIcon : MonoBehaviour {
     /// Set the player preference (setting) for the given key.
     /// </summary>
     public void PlayerPrefSetter(string key, SpriteRenderer spriteRenderer, bool isSwap = true) {
+        if (key == s.RESOLUTION_KEY) {
+            CycleResolution();
+            return;
+        }
         if (PlayerPrefs.GetString(key) == "on") {
             // on
             if (isSwap) {
@@ -93,6 +104,15 @@ public class MenuIcon : MonoBehaviour {
         }
     }
 
+    public void CycleResolution() {
+        if (PlayerPrefs.GetString(s.BUTTONS_KEY) == "on") {
+            RefreshResolutionIconState();
+            return;
+        }
+        s.CycleResolution();
+        RefreshResolutionIconState();
+    }
+
     /// <summary>
     /// Turn on the player preference with the associated key.
     /// </summary>
@@ -104,6 +124,7 @@ public class MenuIcon : MonoBehaviour {
         else if (key == s.BUTTONS_KEY) { 
             s.mobileResizer.FlipMenuIconMode();
             s.arrow = FindFirstObjectByType<Arrow>();
+            RefreshResolutionIconState();
         }
     }
 
@@ -118,6 +139,16 @@ public class MenuIcon : MonoBehaviour {
         else if (key == s.BUTTONS_KEY) { 
             s.mobileResizer.FlipMenuIconMode();
             s.arrow = FindFirstObjectByType<Arrow>();
+            RefreshResolutionIconState();
+        }
+    }
+
+    private void RefreshResolutionIconState() {
+        bool showResolution = PlayerPrefs.GetString(s.BUTTONS_KEY) != "on";
+        resolution.SetActive(showResolution);
+        resolutionText.SetActive(showResolution);
+        if (showResolution) {
+            resolutionSR.color = Color.white;
         }
     }
 }

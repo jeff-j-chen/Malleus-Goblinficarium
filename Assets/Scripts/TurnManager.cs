@@ -8,6 +8,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 public class TurnManager : MonoBehaviour {
+    public const int PlayerGuardTargetIndex = -1;
+    private const int BaseGuardParryBonus = 2;
+    private const int BucklerGuardParryBonus = 2;
     [SerializeField] public GameObject blackBox;
     private readonly Vector3 mobileScale = new(1.45f, 0.65f, 1f);
     private readonly Vector2 mobileOnScreen = new(2.29f, 10.29f);
@@ -38,12 +41,55 @@ public class TurnManager : MonoBehaviour {
     private bool playerBleedOutPendingThisRound = false;
     private bool enemyBleedOutPendingThisRound = false;
     private bool enemyAttackedFirst = false;   // set at the start of RoundOne
+    public bool playerHasAttackedThisRound = false;
     private bool queuePlayerKillAsBleedOut;
     private bool queueEnemyKillAsBleedOut;
     private bool playerAttackStatusSetThisRound;
     private bool enemyAttackStatusSetThisRound;
     private bool pendingEnemyHeadCounterDiscard;
+    private bool playerGuardActive;
+    private int lastNonGuardPlayerTargetIndex;
     private bool softKillInProgress;
+    private bool criticalRoundInProgress;
+
+    public bool IsPlayerGuarding() {
+        return s != null
+            && s.player != null
+            && s.itemManager != null
+            && Save.game != null
+            && s.itemManager.IsFightableEncounter()
+            && !s.player.isDead
+            && !Save.game.enemyIsDead
+            && s.player.targetIndex == PlayerGuardTargetIndex;
+    }
+
+    public bool IsPlayerGuardActive() {
+        return playerGuardActive && IsPlayerGuarding();
+    }
+
+    public int GetPlayerGuardParryBonus(bool includePendingSelection = false) {
+        bool shouldApplyGuardBonus = includePendingSelection ? IsPlayerGuarding() : IsPlayerGuardActive();
+        if (!shouldApplyGuardBonus) { return 0; }
+
+        return BaseGuardParryBonus + (s.itemManager.PlayerHasWeapon("buckler") ? BucklerGuardParryBonus : 0);
+    }
+
+    public int GetMaxPlayerTargetIndex() {
+        if (s == null || s.statSummoner == null) { return 0; }
+
+        int playerAim = s.statSummoner.SumOfStat("green", "player");
+        if (playerAim < 0) { return PlayerGuardTargetIndex; }
+        return Mathf.Clamp(playerAim, 0, targetArr.Length - 1);
+    }
+
+    public int GetPlayerDraftReferenceTargetIndex() {
+        if (s?.player == null) { return 0; }
+        if (s.player.targetIndex >= 0) {
+            return Mathf.Clamp(s.player.targetIndex, 0, targetArr.Length - 1);
+        }
+
+        return Mathf.Clamp(lastNonGuardPlayerTargetIndex, 0, targetArr.Length - 1);
+    }
 
     private void Awake() { 
         s = FindFirstObjectByType<Scripts>();
@@ -236,8 +282,12 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     public void RecalculateMaxFor(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            if (s.player.targetIndex > s.statSummoner.SumOfStat("green", "player")) {
-                s.player.targetIndex = s.statSummoner.SumOfStat("green", "player");
+            int maxPlayerTargetIndex = GetMaxPlayerTargetIndex();
+            if (s.player.targetIndex > maxPlayerTargetIndex) {
+                s.player.targetIndex = maxPlayerTargetIndex;
+            }
+            if (s.player.targetIndex < PlayerGuardTargetIndex) {
+                s.player.targetIndex = PlayerGuardTargetIndex;
             }
             // check the available targets
             SetTargetOf("player");
@@ -346,23 +396,17 @@ public class TurnManager : MonoBehaviour {
             }
             else {
                 // normal setting
-                if (s.statSummoner.SumOfStat("green", "player") < 0) { s.player.targetIndex = -1; }
+                if (s.player.targetIndex < PlayerGuardTargetIndex) {
+                    s.player.targetIndex = PlayerGuardTargetIndex;
+                }
+                if (s.statSummoner.SumOfStat("green", "player") < 0) { s.player.targetIndex = PlayerGuardTargetIndex; }
                 // check in case they swapped to a new weapon and are aiming at an old wound
-                if (s.player.targetIndex < 0) {
-                    // aiming at none currently
-                    if (s.statSummoner.SumOfStat("green", "player") < 0) {
-                        // if they are supposed to be aiming at none, the usual
-                        s.player.target.text = "none";
-                        s.player.targetInfo.text = "not enough accuracy to inflict any wound";
-                    }
-                    else {
-                        // not supposed to be aiming at none, bump it up
-                        s.player.targetIndex = 0;
-                        s.player.target.text = !s.enemy.woundList.Contains("chest") ? targetArr[0] : "*" + targetArr[0];
-                        s.player.targetInfo.text = targetInfoArr[0];
-                    }
+                if (s.player.targetIndex == PlayerGuardTargetIndex) {
+                    s.player.target.text = "guard";
+                    s.player.targetInfo.text = "+2 parry\ndo not attack";
                 }
                 else {
+                    lastNonGuardPlayerTargetIndex = Mathf.Clamp(s.player.targetIndex, 0, targetArr.Length - 1);
                     if (!isMoving) { 
                         // prevents a nasty bug where wounds would not be applied properly due to the * being added
                         if (s.levelManager.level == 4 && s.levelManager.sub == 1) {
@@ -463,6 +507,11 @@ public class TurnManager : MonoBehaviour {
     /// Start the first round of attack.
     /// </summary>
     public void RoundOne() {
+        criticalRoundInProgress = true;
+        playerHasAttackedThisRound = false;
+        if (s.itemManager.PlayerHas("rabadon's deathcap") && s.player.stamina < 3) {
+            Save.game.pendingDeathcapRestore = true;
+        }
         scimitarParryCount = 0;
         queuePlayerKillAsBleedOut = false;
         queueEnemyKillAsBleedOut = false;
@@ -486,6 +535,10 @@ public class TurnManager : MonoBehaviour {
         ExecuteRoundOneLogic();
     }
 
+    public bool CanEscapeToMenu() {
+        return !criticalRoundInProgress;
+    }
+
     // easy and hard both keep the committed enemy plan visible once drafting is complete
     private static bool ShouldRevealPlanDuringDraft() {
         return DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)
@@ -497,11 +550,20 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     private void ExecuteRoundOneLogic() {
         Save.persistent.turnsTaken++;
+        s.itemManager.ClearRoundAttackWeaponBonuses(refreshCombatUI:false);
+        if (IsPlayerGuarding()) {
+            ExecuteGuardRoundLogic();
+            RecordEquippedWeaponUse();
+            Save.SavePersistent();
+            return;
+        }
+
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         // get all the stats so we can use them
         bool playerActsFirst = PlayerActsFirstThisRound(playerSpd, enemySpd);
         enemyAttackedFirst = !playerActsFirst;
         if (playerActsFirst) {
+            s.itemManager.ActivatePlayerActsFirstWeaponBonuses(refreshCombatUI:true);
             // make player go first
             // CHARM: aether — player is faster → +1 speed next round
             if (s.itemManager.PlayerHasCharm("aether")) {
@@ -545,6 +607,21 @@ public class TurnManager : MonoBehaviour {
         Save.SavePersistent();
     }
 
+    private void ExecuteGuardRoundLogic() {
+        playerGuardActive = true;
+        s.statSummoner.SummonStats();
+        s.statSummoner.RepositionDice("player", "white");
+        enemyAttackedFirst = false;
+        s.player.SetPlayerStatusEffect("dodge", false);
+
+        if (EnemyAttacks()) {
+            StartCoroutine(Kill("player", ConsumeQueuedKillAsBleedOut("player"), false));
+        }
+
+        ResolveBleedOutAfterRound();
+        StartCoroutine(CompleteRoundAfterResolution());
+    }
+
     /// <summary>
     /// Animate the nightmare plan reveal, then execute the round once the animation finishes.
     /// </summary>
@@ -582,12 +659,27 @@ public class TurnManager : MonoBehaviour {
     }
 
     private IEnumerator AttemptRegenStaminaAfterDelay() {
+        int staminaToRestore = 0;
+        bool deathcapRestorePending = Save.game.pendingDeathcapRestore;
+        Save.game.pendingDeathcapRestore = false;
+
         if (s.itemManager.PlayerHasWeapon("dagger") && s.itemManager.PlayerHasLegendary()) {
-            // only legendary dagger has stamina regen
-            yield return s.delays[0.34f];
-            ChangeStaminaOf("player", 1);
-            s.soundManager.PlayClip("blip0");
+            staminaToRestore += 1;
         }
+
+        if (deathcapRestorePending && s.itemManager.PlayerHas("rabadon's deathcap")) {
+            staminaToRestore += s.itemManager.GetPlayerItemCount("rabadon's deathcap");
+        }
+
+        staminaToRestore += s.itemManager.GetCursedMaskRegenAmount();
+
+        if (staminaToRestore <= 0) {
+            yield break;
+        }
+
+        yield return s.delays[0.3f];
+        ChangeStaminaOf("player", staminaToRestore);
+        s.soundManager.PlayClip("blip0");
     }
 
     /// <summary>
@@ -595,6 +687,13 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     private IEnumerator RoundTwo(string toMove) {
         isMoving = true;
+        while (s?.diceSummoner != null && s.diceSummoner.DiceIsRolling()) {
+            yield return null;
+        }
+
+        if (s.itemManager.PlayerHas("rabadon's deathcap") && s.player.stamina < 3) {
+            Save.game.pendingDeathcapRestore = true;
+        }
         // make the player ready to move
         yield return s.delays[2f];
         // wait 2 seconds for animation/status text from previous round to finish
@@ -628,10 +727,10 @@ public class TurnManager : MonoBehaviour {
         }
         else if (toMove == "enemy") {
             // enemy is the one attacking
-            if (s.enemy.woundList.Contains("chest") && Rerollable() && s.enemy.enemyName.text != "Lich" || Save.game.discardableDieCounter > 0 && s.enemy.enemyName.text != "Lich") {
+            if ((s.enemy.woundList.Contains("chest") || s.itemManager.EnemyHasTemporaryChestInjury()) && Rerollable() && s.enemy.enemyName.text != "Lich" || Save.game.discardableDieCounter > 0 && s.enemy.enemyName.text != "Lich") {
                 // if player can reroll or discard enemy's die and hints are on
                 if (Save.game.discardableDieCounter > 0) { SetStatusText("note: you can discard enemy's die"); }
-                else if (s.enemy.woundList.Contains("chest")) { SetStatusText("note: you can reroll enemy's dice"); }
+                else if (s.enemy.woundList.Contains("chest") || s.itemManager.EnemyHasTemporaryChestInjury()) { SetStatusText("note: you can reroll enemy's dice"); }
                 // notify the player
                 actionsAvailable = true;
                 // allow actions
@@ -646,13 +745,15 @@ public class TurnManager : MonoBehaviour {
                     }
                     yield return s.delays[0.1f];
                     // wait
-                    if (Save.game.discardableDieCounter == 0 && !s.enemy.woundList.Contains("chest")) {
+                    if (Save.game.discardableDieCounter == 0 && !s.enemy.woundList.Contains("chest") && !s.itemManager.EnemyHasTemporaryChestInjury()) {
                         // if player has taken the action to reroll/discard and can't take it again, end the time slot early
                         break;
                     }
                     if (s.diceSummoner.existingDice.Where(d => d.GetComponent<Dice>().isOnPlayerOrEnemy == "enemy").All(d => d.GetComponent<Dice>().isRerolled)) {
                         // check every dice on the enemy; if all of them contain property isRerolled, break as well
-                        t = 0.5f;
+                        if (t > 1.5f) { 
+                            t = 1.4f;
+                        }
                     }
                 }
                 actionsAvailable = false;
@@ -667,6 +768,10 @@ public class TurnManager : MonoBehaviour {
 
         ResolveBleedOutAfterRound();
 
+        yield return StartCoroutine(CompleteRoundAfterResolution());
+    }
+
+    private IEnumerator CompleteRoundAfterResolution() {
         if (!s.player.isDead && !Save.game.enemyIsDead) {
             // if neither player or enemy is dead
             yield return s.delays[2f];
@@ -725,6 +830,7 @@ public class TurnManager : MonoBehaviour {
         }
         if (s.tutorial == null) { Save.SaveGame(); }
         Save.SavePersistent();
+        criticalRoundInProgress = false;
     }
 
     /// <summary>
@@ -732,9 +838,14 @@ public class TurnManager : MonoBehaviour {
     /// </summary>
     public void ClearVariablesAfterRound(bool rerollLuckyDice = false) {
         s.itemManager.EndEncounterWeaponState(rerollLuckyDice);
+        s.itemManager.AdvanceWarhammerStunTurnState();
+        playerGuardActive = false;
         ClearPotionStats();
         s.player.SetPlayerStatusEffect("fury", false);
         s.player.SetPlayerStatusEffect("dodge", false);
+        s.player.SetPlayerStatusEffect("destructive", false);
+        s.player.SetPlayerStatusEffect("fortified", false);
+        s.player.SetPlayerStatusEffect("empowered", false);
         if (!dontRemoveLeechYet) {
             // if we don't want to remove the leech yet (from phylactery, don't do so)
             s.player.SetPlayerStatusEffect("leech", false);
@@ -745,6 +856,9 @@ public class TurnManager : MonoBehaviour {
         Save.game.usedSpellbook = false;
         Save.game.usedBoots = false;
         Save.game.usedHelm = false;
+        Save.game.pendingGemTransformColor = "";
+        s.itemManager.ClearTemporaryEnemyInjuryScrollEffects();
+        playerHasAttackedThisRound = false;
         s.diceSummoner.breakOutOfScimitarParryLoop = false;
         scimitarParryCount = 0;
         pendingEnemyHeadCounterDiscard = false;
@@ -832,6 +946,7 @@ public class TurnManager : MonoBehaviour {
         Save.game.expendedStamina = 0;
         Save.SavePersistent();
         if (s.tutorial == null) { Save.SaveGame(); }
+        criticalRoundInProgress = false;
         yield return s.delays[1.4f];  
         isMoving = false;
     }
@@ -1339,7 +1454,9 @@ public class TurnManager : MonoBehaviour {
                         s.itemManager.QueueCharmTrigger("riposte", s.itemManager.GetCharmCount("riposte"));
                     }
                 }
-                enemyAttackStatusText = $"{s.enemy.enemyName.text.ToLower()} hits you... you parry";
+                enemyAttackStatusText = IsPlayerGuardActive() && !playerBleedsOutThisRound
+                    ? $"{s.enemy.enemyName.text.ToLower()} hits you... you guard"
+                    : $"{s.enemy.enemyName.text.ToLower()} hits you... you parry";
                 Save.persistent.attacksParried++;
                 Save.SavePersistent();
             }
@@ -1411,6 +1528,7 @@ public class TurnManager : MonoBehaviour {
     /// Handles the player's attack, returns true if it was a killing blow.
     /// </summary>
     private bool PlayerAttacks() {
+        playerHasAttackedThisRound = true;
         InitializeVariables(out int playerAim, out int enemyAim, out int playerSpd, out int enemySpd, out int playerAtt, out int enemyAtt, out int playerDef, out int enemyDef);
         bool enemyBleedsOutThisRound = EnemyBleedsOutThisRound();
         string playerAttackStatusText = null;
@@ -1495,6 +1613,9 @@ public class TurnManager : MonoBehaviour {
                             // add the wound
                             Save.game.enemyWounds = s.enemy.woundList;
                             UpdateSavedEnemyDeathStateFromWounds();
+                            if (s.itemManager.PlayerHasWeapon("warhammer")) {
+                                s.itemManager.QueueWarhammerStunForNextTurn();
+                            }
                             onEnemyWoundBlackAfterSound = () => s.itemManager.TryApplyKatarFirstWoundEffect();
                             // CHARM: relentless - wounding enemy grants +2 attack next round
                             if (s.itemManager.PlayerHasCharm("relentless")) {
@@ -1841,6 +1962,7 @@ public class TurnManager : MonoBehaviour {
     /// Make the enemy use stamina on a given stat.
     /// </summary>
     private void UseEnemyStaminaOn(string stat, int amount) {
+        if (s.itemManager != null && s.itemManager.EnemyHasTemporaryHipInjury() && s.enemy.enemyName.text != "Lich") { return; }
         if (s.enemy.stamina >= amount) {
             s.statSummoner.addedEnemyStamina[stat] += amount;
             // incrase stat

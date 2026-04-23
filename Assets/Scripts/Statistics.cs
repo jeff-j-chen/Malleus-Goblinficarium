@@ -11,7 +11,7 @@ public class Statistics : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI rightGray;
     [SerializeField] private TextMeshProUGUI bottomText;
     private readonly string[] weaponNames = 
-        { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword", "katar", "buckler", "ham", "gladius", "glass sword", "stave", "gauntlets", "glaive", "claymore", "crossbow" };
+        { "dagger", "flail", "hatchet", "mace", "maul", "montante", "rapier", "scimitar", "spear", "sword", "katar", "buckler", "ham", "gladius", "glass sword", "stave", "gauntlets", "glaive", "claymore", "crossbow", "trident", "warhammer" };
     private readonly WaitForSeconds tenthSecond = new(0.1f);
     private readonly WaitForSeconds oneSecond = new(1f);
     private readonly string baseText = "hold [space] to delete all data - this action is irrecoverable";

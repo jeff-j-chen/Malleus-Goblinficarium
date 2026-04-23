@@ -42,6 +42,8 @@ pulled from TurnManager.cs. these are the only rules the AI reasons about.
 - a defense holds when `defender_defense >= attacker_attack`
 - player attacks require `playerAim >= 0` to land; current runtime enemy attacks do NOT check enemy accuracy
 - accuracy must be >= 7 to target neck
+- the player may always target `guard`; while guarding, the player skips their attack and gains `+2 parry` immediately
+- buckler adds another `+2 parry` to guard, so enemy hit math must clear that higher live defense too
 
 **kill conditions:**
 - neck hit causes bleed out next round (Lich is immune to neck bleed-out)
@@ -74,6 +76,7 @@ pulled from TurnManager.cs. these are the only rules the AI reasons about.
 **items that affect planning:**
 - armor: absorbs one hit; the hit produces no wound; armor then breaks
 - dodgy: if the player is still dodgy when the enemy attack resolves, the hit is dodged; if enemy goes first, dodgy is cleared before that hit
+- boots of dodge: if the player has unused boots, at least 1 stamina, and the enemy would attack second, hard/nightmare should assume the player becomes dodgy before that hit resolves
 - maul: any successful player hit = kill; changes threat calculation entirely
 - hatchet: enemy yellow dice fade out on attach (yellow self-value becomes zero)
 - spear: player always drafts first
@@ -85,7 +88,7 @@ pulled from TurnManager.cs. these are the only rules the AI reasons about.
 - glass sword: when the player takes a real wound, an unshattered glass sword immediately becomes 0 / 1 / 1 / 0 before any same-round counterattack
 - riposte: if the enemy goes first and is parried, the player's round-two counterattack gets +1 red per riposte immediately, scaled by charm-of-the-arcane / stave effectiveness
 - vindictive / charm of the vindictive: if the enemy goes first and inflicts a real wound, the player's round-two counterattack gets +2 red per effective copy immediately, scaled by charm-of-the-arcane / stave effectiveness
-- scimitar: if the enemy goes first and is parried, the player may discard enemy die value before their counterattack; the planner models this as immediate enemy-die loss before the reply
+- scimitar: if the enemy goes first and is parried, the player may discard enemy die value before their counterattack; the planner must model this as improving the player's immediate reply, mainly by stripping enemy defense that blocks the counterattack
 - charm of the arcane: every non-arcane scalable charm copy is multiplied by the shared arcane effectiveness; `stave` adds one extra charm-arcane layer in the same way it already boosts necklets
 - tarot of the arcane: every non-arcane tarot copy adds an extra +1 upgrade layer to matching drafted dice, still capped at 6
 - lucky dice: lucky-dice bonuses only exist in live fightable combat; merchant / blacksmith / dead-enemy states clear them so the planner and the player both see true weapon stats outside combat
@@ -643,7 +646,7 @@ chest is not a default preference. it becomes valid under exactly two conditions
   BreaksTarget?     removing this die causes P.aim < playerTargetIndex
   RestoresDefense?  removing this die causes P.att <= E.def
   IsYellow?         die type is yellow (flexible; loss hurts multiple future options)
-  DieValue          face value of the die
+  DieValue          effective face value of the die; blue is worth 0 here when current-round initiative is already locked or already spent
 
   comparison order (IsBetterLiveDiscardChoice):
 

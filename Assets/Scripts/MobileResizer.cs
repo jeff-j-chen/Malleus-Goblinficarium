@@ -11,6 +11,7 @@ public class MobileResizer : MonoBehaviour {
     private readonly int mobileFontSize = 48;
     private readonly Vector3 menuIconDesktopScale = new(0.35f, 0.35f, 1f);
     private readonly Vector2[] menuIconDesktopPos = { 
+        new(0f, 1.76f), 
         new(0f, 0.76f), 
         new(0f, -0.24f), 
         new(0f, -1.24f), 
@@ -19,6 +20,7 @@ public class MobileResizer : MonoBehaviour {
         new(0f, -4.24f),
     };
     private readonly Vector2[] menuIconTextDesktopPos = { 
+        new(-253.7f, -127.1f), 
         new(-253.7f, -157.1f), 
         new(-253.7f, -186.6f), 
         new(-253.7f, -216.6f), 
@@ -84,25 +86,35 @@ public class MobileResizer : MonoBehaviour {
         mobileMode = PlayerPrefs.GetString(s.BUTTONS_KEY) == "on";
         if (!mobileMode) {
             // desktop mode
-            SetMenuIcons(menuIconDesktopScale, menuIconDesktopPos, desktopFontSize, menuIconTextDesktopPos);
+            SetMenuIcons(menuIconDesktopScale, menuIconDesktopPos, desktopFontSize, menuIconTextDesktopPos, false);
             SetMenuButtons(menuButtonDesktopScale, menuButtonDesktopPos);
             SetTitlePosition(titleTextDesktopScale, titleTextDesktopPos, subtitleTextDesktopPos);
         }
         else {
             // mobile mode
-            SetMenuIcons(menuIconMobileScale, menuIconMobilePos, mobileFontSize, menuIconTextMobilePos);
+            SetMenuIcons(menuIconMobileScale, menuIconMobilePos, mobileFontSize, menuIconTextMobilePos, true);
             SetMenuButtons(menuButtonMobileScale, menuButtonMobilePos);
             SetTitlePosition(titleTextMobileScale, titleTextMobilePos, subtitleTextMobilePos);
         }
         SetArrowPos();
     }
     
-    private void SetMenuIcons(Vector3 iconScale, IReadOnlyList<Vector2> iconPositionArr, float fontSize, IReadOnlyList<Vector2> textPositionArr) {
-        for (int i = 0; i < 5; i++) {
-            s.menuIcon.menuIconOrdering[i].transform.localScale = iconScale;
-            s.menuIcon.menuIconOrdering[i].transform.localPosition = iconPositionArr[i];
-            s.menuIcon.menuIconTextOrdering[i].GetComponent<TextMeshProUGUI>().fontSize = fontSize;
-            s.menuIcon.menuIconTextOrdering[i].transform.localPosition = textPositionArr[i];
+    private void SetMenuIcons(Vector3 iconScale, IReadOnlyList<Vector2> iconPositionArr, float fontSize, IReadOnlyList<Vector2> textPositionArr, bool hideResolution) {
+        int positionIndex = 0;
+        for (int i = 0; i < s.menuIcon.menuIconOrdering.Length && i < s.menuIcon.menuIconTextOrdering.Length; i++) {
+            GameObject icon = s.menuIcon.menuIconOrdering[i];
+            GameObject iconText = s.menuIcon.menuIconTextOrdering[i];
+            bool isResolutionEntry = icon == s.menuIcon.resolution || iconText == s.menuIcon.resolutionText;
+            bool shouldShow = !hideResolution || !isResolutionEntry;
+            icon.SetActive(shouldShow);
+            iconText.SetActive(shouldShow);
+            if (!shouldShow) { continue; }
+            if (positionIndex >= iconPositionArr.Count || positionIndex >= textPositionArr.Count) { break; }
+            icon.transform.localScale = iconScale;
+            icon.transform.localPosition = iconPositionArr[positionIndex];
+            iconText.GetComponent<TextMeshProUGUI>().fontSize = fontSize;
+            iconText.transform.localPosition = textPositionArr[positionIndex];
+            positionIndex++;
         }
     }
 

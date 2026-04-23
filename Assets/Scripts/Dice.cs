@@ -9,7 +9,9 @@ public class Dice : MonoBehaviour {
     public bool moveable = true;
     public bool isAttached = false;
     public bool isRerolled = false;
+    public bool isRolling = false;
     public bool tarotUpgradeApplied = false;
+    public bool spawnedByCursedDice = false;
     public string isOnPlayerOrEnemy = "none";
     public Vector3 instantiationPos;
     private SpriteRenderer spriteRenderer;
@@ -67,11 +69,31 @@ public class Dice : MonoBehaviour {
         return true;
     }
 
+    private bool TryResolvePendingGemTransform() {
+        if (string.IsNullOrWhiteSpace(Save.game.pendingGemTransformColor) || s.turnManager.isMoving) {
+            return false;
+        }
+
+        if (!isAttached || isOnPlayerOrEnemy != "player") {
+            return false;
+        }
+
+        if (diceType == Save.game.pendingGemTransformColor) {
+            return true;
+        }
+
+        suppressPointerReleaseAfterInstantAction = true;
+        string transformColor = Save.game.pendingGemTransformColor;
+        Save.game.pendingGemTransformColor = "";
+        s.itemManager.TransformAttachedPlayerDieToColor(this, transformColor);
+        return true;
+    }
+
     private bool ShouldPrioritizeEnemyDieActionOverSpellbook() {
         if (!isAttached || isOnPlayerOrEnemy != "enemy" || s.enemy.enemyName.text == "Lich") { return false; }
 
         bool isEnemyHeadWounded = s.enemy.woundList.Contains("head");
-        bool isEnemyChestWounded = s.enemy.woundList.Contains("chest");
+        bool isEnemyChestWounded = s.enemy.woundList.Contains("chest") || s.itemManager.EnemyHasTemporaryChestInjury();
 
         if (isEnemyHeadWounded && Save.game.discardableDieCounter > 0) { return true; }
         if (isEnemyChestWounded && !isRerolled) { return true; }
@@ -80,7 +102,7 @@ public class Dice : MonoBehaviour {
     }
 
     private void OnMouseDown() {
-        if (TryResolvePendingMirrorCopy() || TryResolvePendingSpellbookTransmute()) { return; }
+        if (TryResolvePendingMirrorCopy() || TryResolvePendingSpellbookTransmute() || TryResolvePendingGemTransform()) { return; }
         // as soon as the mouse button is pressed down
         if (s.tutorial != null) { 
             // if within the tutorial, make sure player can only do certain actions (so that they win)
@@ -280,11 +302,11 @@ public class Dice : MonoBehaviour {
                     }
                     DiscardFromEnemy();
                     // discard from the enemy
-                    Save.game.discardableDieCounter--;
+                    Save.game.discardableDieCounter = Mathf.Max(0, Save.game.discardableDieCounter - 1);
                     // decrease the counter for the number of die able to be discarded
                     // if source is from scimitarParry, break out of the waiting loop
                 }
-                else if (s.enemy.woundList.Contains("chest") || s.itemManager.PlayerHasWeapon("mace") && s.itemManager.PlayerHasLegendary()) {
+                else if (s.enemy.woundList.Contains("chest") || s.itemManager.EnemyHasTemporaryChestInjury() || s.itemManager.PlayerHasWeapon("mace") && s.itemManager.PlayerHasLegendary()) {
                     // if enemy is wounded in the chest or player has legendary mace
                     Reroll();
                     // reroll the die
@@ -310,6 +332,8 @@ public class Dice : MonoBehaviour {
     /// Discard this dice from the enemy.
     /// </summary>
     private void DiscardFromEnemy() {
+        if (!isAttached || isOnPlayerOrEnemy != "enemy") { return; }
+
         s.soundManager.PlayClip("click1");
         // play sound clip
         s.turnManager.alterationDuringMove = true;
@@ -345,6 +369,8 @@ public class Dice : MonoBehaviour {
     /// (Player only) Reroll an enemy's dice.
     /// </summary>
     private void Reroll() {
+        if (!isAttached || isOnPlayerOrEnemy != "enemy") { return; }
+
         // pretty self explanatory self explanatory
         Save.persistent.diceRerolled++;
         s.turnManager.alterationDuringMove = true;
@@ -358,6 +384,9 @@ public class Dice : MonoBehaviour {
     /// Coroutine for playing the animation and rerolling the dice.
     /// </summary>
     public IEnumerator RerollAnimation(bool playSound=true) {
+        if (isRolling) { yield break; }
+
+        isRolling = true;
         isRerolled = true;
         // assign the spriterenderer reference
         for (int i = 0; i < 10; i++) {
@@ -380,6 +409,7 @@ public class Dice : MonoBehaviour {
         s.turnManager.RecalculateMaxFor("enemy");
         // set debug information and make sure that the player/enemy isn't aiming at something that they shouldn't be able to hit
         s.diceSummoner.SaveDiceValues();
+        isRolling = false;
     }
 
     /// <summary>

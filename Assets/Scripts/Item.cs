@@ -218,7 +218,8 @@ public class Item : MonoBehaviour {
         }
 
         if (itemName is "steak" or "cheese" or "retry" or "arrow" or "campfire" or "tincture"
-            || itemName == "potion" && modifier == "life") {
+            || itemName == "potion" && modifier == "life"
+            || itemName == "scroll" && modifier == "challenge") {
             // only these specific items can be used at a merchant/tombstone, otherwise it doesn't make sense or is a waste
             StartCoroutine(UseCommonCoro());
         }
@@ -285,6 +286,131 @@ public class Item : MonoBehaviour {
         if (s == null || s.itemManager == null) { return; }
 
         s.itemManager.RefreshPlayerCombatStatsAndDice();
+        s.itemManager.RemoveCursedDiceIfPlayerHealedBeforeAttacking();
+    }
+
+    private void UseGem() {
+        if (!IsInFightableCombat()) {
+            s.turnManager.SetStatusText("nothing to transform");
+            return;
+        }
+
+        if (s.diceSummoner.CountUnattachedDice() > 0) {
+            s.turnManager.SetStatusText("draft your die");
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(Save.game.pendingGemTransformColor)) {
+            s.turnManager.SetStatusText("choose a die");
+            return;
+        }
+
+        string requestedColor = modifier switch {
+            "emerald" => "green",
+            "sapphire" => "blue",
+            "ruby" => "red",
+            "topaz" => "white",
+            "citrine" => "yellow",
+            _ => "",
+        };
+
+        if (!string.IsNullOrEmpty(requestedColor)) {
+            int attachedPlayerDiceCount = 0;
+            int matchingAttachedPlayerDiceCount = 0;
+
+            foreach (GameObject dieObject in s.diceSummoner.existingDice) {
+                if (dieObject == null) { continue; }
+                Dice die = dieObject.GetComponent<Dice>();
+                if (die == null || !die.isAttached || die.isOnPlayerOrEnemy != "player") { continue; }
+                attachedPlayerDiceCount++;
+                if (die.diceType == requestedColor) {
+                    matchingAttachedPlayerDiceCount++;
+                }
+            }
+
+            if (attachedPlayerDiceCount > 0 && matchingAttachedPlayerDiceCount == attachedPlayerDiceCount) {
+                s.turnManager.SetStatusText("it's useless");
+                return;
+            }
+        }
+
+        Save.game.pendingGemTransformColor = requestedColor;
+
+        if (string.IsNullOrEmpty(Save.game.pendingGemTransformColor)) {
+            s.turnManager.SetStatusText("nothing happens");
+            return;
+        }
+
+        s.soundManager.PlayClip("shuriken");
+        s.turnManager.SetStatusText("choose a die");
+        s.itemManager.MarkItemUsed(this);
+        ConsumeCommonItemAndReselect();
+    }
+
+    private void UseExclusiveStatusScroll(string statusEffect, string appliedStatusText, string alreadyStatusText) {
+        if (statusEffect == "destructive") {
+            s.player.SetPlayerStatusEffect("empowered", false);
+        }
+        else if (statusEffect == "empowered") {
+            s.player.SetPlayerStatusEffect("destructive", false);
+        }
+
+        if (!s.player.SetPlayerStatusEffect(statusEffect, true)) {
+            s.turnManager.SetStatusText(alreadyStatusText);
+            return;
+        }
+
+        s.soundManager.PlayClip("fwoosh");
+        s.turnManager.SetStatusText(appliedStatusText);
+        Remove();
+    }
+
+    private void AddRandomPotionDice(int count, bool forceSixes) {
+        string[] randomTypes = { "green", "blue", "red", "white", "yellow" };
+        for (int i = 0; i < count; i++) {
+            string randomType = randomTypes[Random.Range(0, randomTypes.Length)];
+            int dieValue = forceSixes ? 6 : Random.Range(2, 7);
+            string stat = randomType == "yellow" ? "red" : randomType;
+            s.diceSummoner.GenerateSingleDie(dieValue, randomType, "player", stat, isFromMight:true);
+        }
+    }
+
+    private int CountAttachedPlayerDiceByType(string diceType) {
+        if (s?.diceSummoner?.existingDice == null || string.IsNullOrWhiteSpace(diceType)) { return 0; }
+
+        int count = 0;
+        foreach (GameObject dieObject in s.diceSummoner.existingDice) {
+            if (dieObject == null) { continue; }
+            Dice die = dieObject.GetComponent<Dice>();
+            if (die == null || !die.isAttached || die.isOnPlayerOrEnemy != "player") { continue; }
+            if (die.diceType == diceType) { count++; }
+        }
+
+        return count;
+    }
+
+    private void ApplyEnemyScrollGutsPenaltyNow() {
+        if (s?.diceSummoner?.existingDice == null) { return; }
+
+        foreach (GameObject dieObject in s.diceSummoner.existingDice.ToList()) {
+            if (dieObject == null) { continue; }
+            Dice die = dieObject.GetComponent<Dice>();
+            if (die == null || !die.isAttached || die.isOnPlayerOrEnemy != "enemy") { continue; }
+            StartCoroutine(die.DecreaseDiceValue(false));
+        }
+    }
+
+    private void ApplyEnemyScrollColorSuppressionNow(string diceTypeToSuppress) {
+        if (s?.diceSummoner?.existingDice == null || string.IsNullOrWhiteSpace(diceTypeToSuppress)) { return; }
+
+        foreach (GameObject dieObject in s.diceSummoner.existingDice.ToList()) {
+            if (dieObject == null) { continue; }
+            Dice die = dieObject.GetComponent<Dice>();
+            if (die == null || !die.isAttached || die.isOnPlayerOrEnemy != "enemy") { continue; }
+            if (die.diceType == diceTypeToSuppress) {
+                StartCoroutine(die.FadeOut(false));
+            }
+        }
     }
 
     private void UseMirror() {
@@ -321,13 +447,13 @@ public class Item : MonoBehaviour {
             return;
         }
 
-        if (s.player.stamina < 3) {
+        if (s.player.stamina < 2) {
             s.turnManager.SetStatusText("not enough stamina");
             return;
         }
 
         s.soundManager.PlayClip("fwoosh");
-        s.turnManager.ChangeStaminaOf("player", -3);
+        s.turnManager.ChangeStaminaOf("player", -2);
         s.turnManager.SetStatusText("choose a die");
         s.itemManager.MarkItemUsed(this);
         Save.game.usedSpellbook = true;
@@ -472,6 +598,21 @@ public class Item : MonoBehaviour {
                                 // consume and notify player
                             }
                             break;
+                        case "destruction":
+                            UseExclusiveStatusScroll("destructive", "you feel unfettered", "you are already unfettered");
+                            break;
+                        case "fortification":
+                            if (Save.game.isFortified) { s.turnManager.SetStatusText("you are already unbreakable"); }
+                            else {
+                                s.soundManager.PlayClip("fwoosh");
+                                s.player.SetPlayerStatusEffect("fortified", true);
+                                s.turnManager.SetStatusText("you feel unbreakable");
+                                Remove();
+                            }
+                            break;
+                        case "duality":
+                            UseExclusiveStatusScroll("empowered", "you feel powerful", "you are already powerful");
+                            break;
                         case "challenge" when s.levelManager.level == 4:
                             // dont let scroll of challenge be used on devil!
                             s.soundManager.PlayClip("shuriken");
@@ -483,6 +624,75 @@ public class Item : MonoBehaviour {
                             s.levelManager.NextLevel(true);
                             // load lich level
                             s.itemManager.Select(s.player.inventory, 0, true, false);
+                            Remove();
+                            break;
+                        case "chest":
+                            if (Save.game.enemyScrollChestActive) {
+                                s.turnManager.SetStatusText("enemy chest is already exposed");
+                                break;
+                            }
+                            s.soundManager.PlayClip("fwoosh");
+                            Save.game.enemyScrollChestActive = true;
+                            s.turnManager.RecalculateEnemyCombatIntent();
+                            s.turnManager.SetStatusText("you read scroll of chest... enemy chest is exposed");
+                            Remove();
+                            break;
+                        case "guts":
+                            if (Save.game.enemyScrollGutsActive) {
+                                s.turnManager.SetStatusText("enemy is already weakened");
+                                break;
+                            }
+                            s.soundManager.PlayClip("fwoosh");
+                            Save.game.enemyScrollGutsActive = true;
+                            ApplyEnemyScrollGutsPenaltyNow();
+                            s.turnManager.RecalculateEnemyCombatIntent();
+                            s.turnManager.SetStatusText("you read scroll of guts... enemy is weakened");
+                            Remove();
+                            break;
+                        case "knee":
+                            if (Save.game.enemyScrollKneeActive) {
+                                s.turnManager.SetStatusText("enemy is already limping");
+                                break;
+                            }
+                            s.soundManager.PlayClip("fwoosh");
+                            Save.game.enemyScrollKneeActive = true;
+                            s.turnManager.RecalculateEnemyCombatIntent();
+                            s.turnManager.SetStatusText("you read scroll of knee... enemy is crippled");
+                            Remove();
+                            break;
+                        case "hip":
+                            if (Save.game.enemyScrollHipActive) {
+                                s.turnManager.SetStatusText("enemy is already drained");
+                                break;
+                            }
+                            s.soundManager.PlayClip("fwoosh");
+                            Save.game.enemyScrollHipActive = true;
+                            s.turnManager.RecalculateEnemyCombatIntent();
+                            s.turnManager.SetStatusText("you read scroll of hip... enemy cannot use stamina");
+                            Remove();
+                            break;
+                        case "hand":
+                            if (Save.game.enemyScrollHandActive) {
+                                s.turnManager.SetStatusText("enemy hand is already disabled");
+                                break;
+                            }
+                            s.soundManager.PlayClip("fwoosh");
+                            Save.game.enemyScrollHandActive = true;
+                            ApplyEnemyScrollColorSuppressionNow("white");
+                            s.turnManager.RecalculateEnemyCombatIntent();
+                            s.turnManager.SetStatusText("you read scroll of hand... enemy white dice fail");
+                            Remove();
+                            break;
+                        case "armpits":
+                            if (Save.game.enemyScrollArmpitsActive) {
+                                s.turnManager.SetStatusText("enemy armpits are already exposed");
+                                break;
+                            }
+                            s.soundManager.PlayClip("fwoosh");
+                            Save.game.enemyScrollArmpitsActive = true;
+                            ApplyEnemyScrollColorSuppressionNow("red");
+                            s.turnManager.RecalculateEnemyCombatIntent();
+                            s.turnManager.SetStatusText("you read scroll of armpits... enemy red dice fail");
                             Remove();
                             break;
                         case "nothing":
@@ -532,6 +742,42 @@ public class Item : MonoBehaviour {
                                 RefreshPlayerAfterHealingWounds();
                             });
                             break;
+                        case "chaos":
+                            AddRandomPotionDice(3, false);
+                            break;
+                        case "pandemonium":
+                            AddRandomPotionDice(3, true);
+                            break;
+                        case "rage": {
+                            int staminaGained = CountAttachedPlayerDiceByType("red") * 2;
+                            s.turnManager.ChangeStaminaOf("player", staminaGained);
+                            s.soundManager.PlayClip("blip1");
+                            break;
+                        }
+                        case "alacrity": {
+                            int staminaGained = CountAttachedPlayerDiceByType("blue") * 2;
+                            s.turnManager.ChangeStaminaOf("player", staminaGained);
+                            s.soundManager.PlayClip("blip1");
+                            break;
+                        }
+                        case "force": {
+                            int staminaGained = CountAttachedPlayerDiceByType("white") * 2;
+                            s.turnManager.ChangeStaminaOf("player", staminaGained);
+                            s.soundManager.PlayClip("blip1");
+                            break;
+                        }
+                        case "lethality": {
+                            int staminaGained = CountAttachedPlayerDiceByType("green") * 2;
+                            s.turnManager.ChangeStaminaOf("player", staminaGained);
+                            s.soundManager.PlayClip("blip1");
+                            break;
+                        }
+                        case "resilience": {
+                            int staminaGained = CountAttachedPlayerDiceByType("yellow") * 2;
+                            s.turnManager.ChangeStaminaOf("player", staminaGained);
+                            s.soundManager.PlayClip("blip1");
+                            break;
+                        }
                         case "nothing": break;
                         // default: print("invalid potion modifier detected"); break;
                     }
@@ -582,6 +828,17 @@ public class Item : MonoBehaviour {
                     break;
                 case "unstable spellbook":
                     UseUnstableSpellbook();
+                    break;
+                case "holy water":
+                    s.itemManager.MarkItemUsed(this);
+                    s.soundManager.PlayClip("gulp");
+                    s.turnManager.ChangeStaminaOf("player", s.itemManager.GetHolyWaterStaminaAmount());
+                    s.turnManager.SetStatusText("you drink holy water");
+                    Remove();
+                    s.itemManager.Select(s.player.inventory, 0, true, false);
+                    break;
+                case "gem":
+                    UseGem();
                     break;
                 case "witch hand":
                     UseWitchHand();
@@ -672,7 +929,9 @@ public class Item : MonoBehaviour {
                 }
             }
             else {
-                if (s.itemManager.IsVendorEncounter()) { Save.game.numItemsDroppedForTrade++; }
+                if (s.itemManager.IsVendorEncounter()) {
+                    Save.game.numItemsDroppedForTrade += (itemName == "holy water") ? 2 : 1;
+                }
                 if (s.tutorial == null) { Save.SaveGame(); }
                 s.turnManager.SetStatusText(s.itemManager.GetActionTextForItem(this, s.itemManager.IsVendorEncounter() ? "you offer" : "you drop"));
                 if (s.itemManager.IsVendorEncounter()) { s.itemManager.UpdateVendorUIForSelection(); }

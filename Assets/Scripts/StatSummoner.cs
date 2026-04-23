@@ -140,8 +140,13 @@ public class StatSummoner : MonoBehaviour {
             return 0;
         }
         if (playerOrEnemy == "player") {
+            string mirroredStat = GetPlayerMirroredStat(stat);
+            if (mirroredStat != stat) {
+                return SumOfStat(mirroredStat, playerOrEnemy);
+            }
+
             // get for player
-            int sum = s.player.stats[stat] + s.player.potionStats[stat] + addedPlayerStamina[stat] + s.itemManager.neckletStats[stat] + s.itemManager.charmPassiveStats[stat] + s.itemManager.charmActiveBonus[stat] + s.itemManager.GetSacrificialChaliceAppliedBonus() + GetEncounterWeaponStatBonus(stat) + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
+            int sum = GetPlayerStatTotalWithoutAddedStamina(stat) + addedPlayerStamina[stat];
             // get the sum of base stats + potion + stamina + necklet + charm
             foreach (Dice dice in addedPlayerDice[stat]) {
                 // add to the sum all the added die
@@ -182,6 +187,15 @@ public class StatSummoner : MonoBehaviour {
     }
 
     private int GetPlayerStatTotalWithoutAddedStamina(string stat) {
+        string mirroredStat = GetPlayerMirroredStat(stat);
+        if (mirroredStat != stat) {
+            return GetPlayerStatTotalWithoutAddedStamina(mirroredStat);
+        }
+
+        int guardParryBonus = stat == "white" && s?.turnManager != null
+            ? s.turnManager.GetPlayerGuardParryBonus()
+            : 0;
+
         return s.player.stats[stat]
             + s.player.potionStats[stat]
             + s.itemManager.neckletStats[stat]
@@ -189,11 +203,60 @@ public class StatSummoner : MonoBehaviour {
             + s.itemManager.charmActiveBonus[stat]
             + s.itemManager.GetSacrificialChaliceAppliedBonus()
             + GetEncounterWeaponStatBonus(stat)
+            + guardParryBonus
             + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
     }
 
     private int GetPlayerDisplayedStatTotal(string stat) {
+        string mirroredStat = GetPlayerMirroredStat(stat);
+        if (mirroredStat != stat) {
+            return GetPlayerDisplayedStatTotal(mirroredStat);
+        }
+
         return GetPlayerStatTotalWithoutAddedStamina(stat) + addedPlayerStamina[stat];
+    }
+
+    private int GetPlayerVisualStatTotalWithoutAddedStamina(string stat) {
+        int guardParryBonus = stat == "white" && s?.turnManager != null
+            ? s.turnManager.GetPlayerGuardParryBonus()
+            : 0;
+
+        return s.player.stats[stat]
+            + s.player.potionStats[stat]
+            + s.itemManager.neckletStats[stat]
+            + s.itemManager.charmPassiveStats[stat]
+            + s.itemManager.charmActiveBonus[stat]
+            + s.itemManager.GetSacrificialChaliceAppliedBonus()
+            + GetEncounterWeaponStatBonus(stat)
+            + guardParryBonus
+            + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
+    }
+
+    private int GetPlayerVisualDisplayedStatTotal(string stat) {
+        return GetPlayerVisualStatTotalWithoutAddedStamina(stat) + addedPlayerStamina[stat];
+    }
+
+    private string GetPlayerMirroredStat(string stat) {
+        if (stat == "red") {
+            if (Save.game.isEmpowered) { return "white"; }
+            if (Save.game.isDestructive) { return "green"; }
+        }
+
+        if (stat == "white" && Save.game.isFortified) {
+            return "blue";
+        }
+
+        return stat;
+    }
+
+    private string GetStatLabel(string stat) {
+        return stat switch {
+            "green" => "accuracy",
+            "blue" => "speed",
+            "red" => "attack",
+            "white" => "parry",
+            _ => stat,
+        };
     }
 
     /// <summary>
@@ -222,11 +285,14 @@ public class StatSummoner : MonoBehaviour {
         Color statColor = Colors.colorArr[Array.IndexOf(Colors.colorNameArr, colorName)];
         int encounterWeaponBonus = GetEncounterWeaponStatBonus(colorName);
         int encounterWeaponDiamondBonus = s.itemManager.GetCurrentPlayerWeaponDiamondBonus(colorName);
+        int guardDiamondBonus = colorName == "white" && s?.turnManager != null
+            ? s.turnManager.GetPlayerGuardParryBonus()
+            : 0;
         int playerSquareStats = s.player.stats[colorName] + s.player.potionStats[colorName] + encounterWeaponBonus - encounterWeaponDiamondBonus;
         int playerCircleStats = s.itemManager.neckletStats[colorName];
-        int playerDiamondStats = s.itemManager.charmPassiveStats[colorName] + s.itemManager.charmActiveBonus[colorName] + s.itemManager.GetSacrificialChaliceAppliedBonus() + encounterWeaponDiamondBonus + s.itemManager.GetLuckyDiceRoundStatBonus(colorName);
-        int playerNonStaminaTotal = GetPlayerStatTotalWithoutAddedStamina(colorName);
-        int playerTotal = GetPlayerDisplayedStatTotal(colorName);
+        int playerDiamondStats = s.itemManager.charmPassiveStats[colorName] + s.itemManager.charmActiveBonus[colorName] + s.itemManager.GetSacrificialChaliceAppliedBonus() + encounterWeaponDiamondBonus + guardDiamondBonus + s.itemManager.GetLuckyDiceRoundStatBonus(colorName);
+        int playerNonStaminaTotal = GetPlayerVisualStatTotalWithoutAddedStamina(colorName);
+        int playerTotal = GetPlayerVisualDisplayedStatTotal(colorName);
         // get the color of the given colorname
         if (playerNonStaminaTotal > 0) {
             // if player's stats are greater than 0
@@ -472,7 +538,7 @@ public class StatSummoner : MonoBehaviour {
     public float OutermostPlayerX(string statType, string optionalDiceOffsetStatToMultiplyBy = null) {
         optionalDiceOffsetStatToMultiplyBy ??= statType;
         // not setting the optional variable will just default it to the base stat type
-            return xCoord + ((Mathf.Abs(GetPlayerDisplayedStatTotal(statType)) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
+            return xCoord + ((Mathf.Abs(GetPlayerVisualDisplayedStatTotal(statType)) - 1) * xOffset + highlightOffset + diceOffset * addedPlayerDice[optionalDiceOffsetStatToMultiplyBy].Count);
         // sum everything to get the offset
     }
 
@@ -516,7 +582,7 @@ public class StatSummoner : MonoBehaviour {
 
     private int GetDebugBlueStat(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
-            return (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || s.itemManager.PlayerHasWeapon("gauntlets")) ? 99 : SumOfStat("blue", "player");
+            return (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || s.itemManager.PlayerAlwaysActsFirst() || s.itemManager.PlayerHasWarhammerStunActive()) ? 99 : SumOfStat("blue", "player");
         }
 
         if (playerOrEnemy == "enemy") {
@@ -543,8 +609,8 @@ public class StatSummoner : MonoBehaviour {
     /// </summary>    
     public void ShiftDiceAccordingly(string stat, int shiftAmount) {
         int diceCount = addedPlayerDice[stat].Count;
-        float currentX = xCoord + ((Mathf.Abs(GetPlayerDisplayedStatTotal(stat)) - 1) * xOffset + highlightOffset + diceOffset * diceCount);
-        float nextX = xCoord + ((Mathf.Abs(GetPlayerDisplayedStatTotal(stat) + shiftAmount) - 1) * xOffset + highlightOffset + diceOffset * diceCount);
+        float currentX = xCoord + ((Mathf.Abs(GetPlayerVisualDisplayedStatTotal(stat)) - 1) * xOffset + highlightOffset + diceOffset * diceCount);
+        float nextX = xCoord + ((Mathf.Abs(GetPlayerVisualDisplayedStatTotal(stat) + shiftAmount) - 1) * xOffset + highlightOffset + diceOffset * diceCount);
         float deltaX = nextX - currentX;
 
         foreach (Dice dice in addedPlayerDice[stat]) {
@@ -625,6 +691,13 @@ public class StatSummoner : MonoBehaviour {
     private string BuildStatBreakdown(string stat, string playerOrEnemy) {
         if (stat == "blue" && SumOfStat(stat, playerOrEnemy) == 99) {
             return "(always higher)";
+        }
+
+        if (playerOrEnemy == "player") {
+            string mirroredStat = GetPlayerMirroredStat(stat);
+            if (mirroredStat != stat) {
+                return $"(mirrors {GetStatLabel(mirroredStat)} {BuildStatBreakdown(mirroredStat, playerOrEnemy)})";
+            }
         }
 
         List<string> parts = new();

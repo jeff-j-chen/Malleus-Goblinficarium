@@ -90,6 +90,9 @@ public class DiceSummoner : MonoBehaviour
             if (s.itemManager.PlayerHasWeapon("flail")) {
                 StartCoroutine(SpawnFlailDice());
             }
+            if (s.itemManager.ShouldSpawnCursedDiceAtDraftStart()) {
+                StartCoroutine(SpawnCursedDice());
+            }
             if (Save.game.curCharNum == 1) {
                 StartCoroutine(SpawnCharOneDice());
             }
@@ -114,6 +117,9 @@ public class DiceSummoner : MonoBehaviour
                     bool tarotUpgradeAlreadyApplied = Save.game.diceTarotUpgraded != null
                         && i < Save.game.diceTarotUpgraded.Count
                         && Save.game.diceTarotUpgraded[i];
+                    bool cursedDiceSpawned = Save.game.diceCursedSpawned != null
+                        && i < Save.game.diceCursedSpawned.Count
+                        && Save.game.diceCursedSpawned[i];
                     if (Save.game.dicePlayerOrEnemy[i] == "none") {
                         // if its not attached, its part of the 6 pickup-able
                         Dice createdDie = GenerateSingleDie(
@@ -125,6 +131,7 @@ public class DiceSummoner : MonoBehaviour
                             initialSix:true
                         );
                         createdDie.tarotUpgradeApplied = tarotUpgradeAlreadyApplied;
+                        createdDie.spawnedByCursedDice = cursedDiceSpawned;
                         // create the die
                         initialSpawnCount++;
                         // increment the counter (used in generation to calculate offset)
@@ -140,6 +147,7 @@ public class DiceSummoner : MonoBehaviour
                             initialSix:true
                         );
                         createdDie.tarotUpgradeApplied = tarotUpgradeAlreadyApplied;
+                        createdDie.spawnedByCursedDice = cursedDiceSpawned;
                         if (createdDie.isAttached && createdDie.isOnPlayerOrEnemy == "player" && !createdDie.tarotUpgradeApplied) {
                             s.itemManager.TryUpgradeTakenDieWithTarot(createdDie, 0.05f);
                         }
@@ -177,6 +185,20 @@ public class DiceSummoner : MonoBehaviour
         yield return s.delays[0.2f];
         // legendary hatchet lets player start out with yellow die
         StartCoroutine(ApplyWoundsToDice(GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true)));
+    }
+
+    private IEnumerator SpawnCursedDice() {
+        yield return s.delays[0.2f];
+
+        int spawnCount = s.itemManager.GetCursedDiceSpawnCount();
+        for (int i = 0; i < spawnCount; i++) {
+            Dice created = GenerateSingleDie(Random.Range(1, 7), "yellow", "player", "red", initialSix:true);
+            created.spawnedByCursedDice = true;
+            StartCoroutine(ApplyWoundsToDice(created));
+            if (i < spawnCount - 1) {
+                yield return s.delays[0.1f];
+            }
+        }
     }
 
     private IEnumerator SpawnDevilDice() {
@@ -321,6 +343,7 @@ public class DiceSummoner : MonoBehaviour
         Save.game.dicePlayerOrEnemy.Clear();
         Save.game.diceRerolled.Clear();
         Save.game.diceTarotUpgraded.Clear();
+        Save.game.diceCursedSpawned.Clear();
         // make sure to clear everything before saving new data
         foreach (GameObject g in existingDice) {
             // for every existing dice
@@ -331,6 +354,7 @@ public class DiceSummoner : MonoBehaviour
             Save.game.dicePlayerOrEnemy.Add(dice.isOnPlayerOrEnemy);
             Save.game.diceRerolled.Add(dice.isRerolled);
             Save.game.diceTarotUpgraded.Add(dice.tarotUpgradeApplied);
+            Save.game.diceCursedSpawned.Add(dice.spawnedByCursedDice);
             // add its info to the info 
         }
         if (s.tutorial == null) { Save.SaveGame(); }
@@ -387,5 +411,17 @@ public class DiceSummoner : MonoBehaviour
     /// </summary>
     public int CountUnattachedDice() {
         return existingDice.Count(curObject => curObject.GetComponent<Dice>().isAttached == false);
+    }
+
+    public bool DiceIsRolling() {
+        foreach (GameObject dieObject in existingDice) {
+            if (dieObject == null) { continue; }
+            Dice die = dieObject.GetComponent<Dice>();
+            if (die != null && die.isRolling) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

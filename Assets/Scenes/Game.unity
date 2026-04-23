@@ -2150,18 +2150,27 @@ MonoBehaviour:
   - fury
   - haste
   - courage
+  - destructive
+  - fortified
+  - empowered
   statusEffectDescs:
   - if you strike first, ignore all damage
   - cure the same wound as inflicted
   - all picked die turn yellow
   - pick 3 dice, enemy gets the rest
   - keep 1 of your die till next round
+  - your attack is equal to accuracy this turn
+  - your parry is equal to speed this turn
+  - your attack is equal to parry this turn
   statusEffectSprites:
   - {fileID: 21300000, guid: 784c483221237304d99af624f9c96b3a, type: 3}
   - {fileID: 21300000, guid: 2db243b18d09f4046b6234e08a17db45, type: 3}
   - {fileID: 21300000, guid: 5a9a59896b057c346978dd96851fa39d, type: 3}
   - {fileID: 21300000, guid: f66450bf6b2fd3d49993f2462bc6f3a9, type: 3}
   - {fileID: 21300000, guid: 02be88e36b66e3e48ab0213142fa9da4, type: 3}
+  - {fileID: 21300000, guid: 02beb1242e8b2a785af009cd823523ee, type: 3}
+  - {fileID: 21300000, guid: 83852bdd82dc8bde082b46f3223a2dc2, type: 3}
+  - {fileID: 21300000, guid: 527ede372142a11e3b4fdadbdfb5a71c, type: 3}
   woundList: []
   isDead: 0
   hintTimer: 0
@@ -4459,6 +4468,8 @@ MonoBehaviour:
   dieSavedFromLastRound: {fileID: 0}
   discardDieBecauseCourage: 0
   dontRemoveLeechYet: 0
+  draftInputLocked: 0
+  playerHasAttackedThisRound: 0
 --- !u!1 &1585409375
 GameObject:
   m_ObjectHideFlags: 0

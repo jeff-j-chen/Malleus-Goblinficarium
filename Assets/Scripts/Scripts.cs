@@ -32,13 +32,20 @@ public class Scripts : MonoBehaviour {
     public readonly string SOUNDS_KEY = "sounds";
     public readonly string MUSIC_KEY = "music";
     public readonly string BUTTONS_KEY = "button";
+    public readonly string RESOLUTION_KEY = "resolution";
     public bool mobileMode; // only for use in-game, don't use this for menu screen!
+    private readonly Vector2Int[] availableResolutions = {
+        new(800, 600),
+        new(1200, 900),
+        new(1600, 1200),
+    };
 
     private void Start() {
         tutorial = FindFirstObjectByType<Tutorial>();
         if (tutorial == null) { Save.LoadGame(); }
         else { Save.LoadTutorial(); }
         Save.LoadPersistent();
+        ApplySavedResolution();
         EnemyAI.InvalidateCachedPlan();
         mobileMode = PlayerPrefs.GetString(BUTTONS_KEY) == "on";
         dice = FindFirstObjectByType<Dice>();
@@ -81,5 +88,29 @@ public class Scripts : MonoBehaviour {
             if (tutorial == null) { Save.SaveGame(); } 
             Save.SavePersistent(); 
         }
+    }
+
+    public void ApplySavedResolution() {
+        if (!PlayerPrefs.HasKey(RESOLUTION_KEY)) {
+            PlayerPrefs.SetInt(RESOLUTION_KEY, 0);
+        }
+        ApplyResolutionIndex(GetResolutionIndex());
+    }
+
+    public void CycleResolution() {
+        int nextIndex = (GetResolutionIndex() + 1) % availableResolutions.Length;
+        PlayerPrefs.SetInt(RESOLUTION_KEY, nextIndex);
+        ApplyResolutionIndex(nextIndex);
+        PlayerPrefs.Save();
+    }
+
+    public int GetResolutionIndex() {
+        return Mathf.Clamp(PlayerPrefs.GetInt(RESOLUTION_KEY, 0), 0, availableResolutions.Length - 1);
+    }
+
+    private void ApplyResolutionIndex(int index) {
+        print($"setting resolution to index {index}");
+        Vector2Int resolution = availableResolutions[Mathf.Clamp(index, 0, availableResolutions.Length - 1)];
+        Screen.SetResolution(resolution.x, resolution.y, false);
     }
 }

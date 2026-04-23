@@ -2,7 +2,7 @@ using System;
 
 [Serializable]
 public class PersistentData {
-    public const int WeaponStatCount = 20;
+    public const int WeaponStatCount = 22;
     public const int DifficultyRunCount = 4;
     private static readonly int AlmanacWeaponCount = ItemManager.AlmanacWeaponOrder.Length;
     private static readonly int AlmanacItemCount = ItemManager.AlmanacItemOrder.Length;

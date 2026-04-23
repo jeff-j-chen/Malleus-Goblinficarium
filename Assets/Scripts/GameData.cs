@@ -36,6 +36,7 @@ public class GameData {
     public List<string> diceAttachedToStat;
     public List<bool> diceRerolled;
     public List<bool> diceTarotUpgraded;
+    public List<bool> diceCursedSpawned;
     public List<string> playerWounds;
     public List<string> enemyWounds;
     public bool playerBleedsOutNextRound;
@@ -51,10 +52,19 @@ public class GameData {
     public bool isHasty;
     public bool isBloodthirsty;
     public bool isCourageous;
+    public bool isDestructive;
+    public bool isFortified;
+    public bool isEmpowered;
     public int expendedStamina;
     public int numItemsDroppedForTrade;
     public bool blacksmithHasForged;
     public int discardableDieCounter;
+    public bool enemyScrollChestActive;
+    public bool enemyScrollGutsActive;
+    public bool enemyScrollKneeActive;
+    public bool enemyScrollHipActive;
+    public bool enemyScrollHandActive;
+    public bool enemyScrollArmpitsActive;
     public bool enemyIsDead;
     public int enemyAcc;
     public int enemySpd;
@@ -78,6 +88,13 @@ public class GameData {
     public bool isFirstCombatRoundOfEncounter;
     public bool pendingMirrorCopy;
     public bool pendingSpellbookTransmute;
+    public string pendingGemTransformColor;
+    public bool pendingDeathcapRestore;
+    public int itemsFoundThisFloor;
+    public int itemsFoundThisFloorLevel;
+    public int itemsFoundThisFloorSub;
+    public bool warhammerStunActive;
+    public bool warhammerStunNextTurn;
     public int merchantStealAllowanceRemaining;
     public int pendingLevelStartStaminaBonus;
     public int luckyStatGreen;
@@ -136,6 +153,7 @@ public class GameData {
         diceAttachedToStat = new List<string>();
         diceRerolled = new List<bool>();
         diceTarotUpgraded = new List<bool>();
+        diceCursedSpawned = new List<bool>();
         playerWounds = new List<string>();
         enemyWounds = new List<string>();
         playerBleedsOutNextRound = false;
@@ -151,10 +169,19 @@ public class GameData {
         isHasty = false;
         isBloodthirsty = false;
         isCourageous = false;
+        isDestructive = false;
+        isFortified = false;
+        isEmpowered = false;
         expendedStamina = 0;
         numItemsDroppedForTrade = 0;
         blacksmithHasForged = false;
         discardableDieCounter = 0;
+        enemyScrollChestActive = false;
+        enemyScrollGutsActive = false;
+        enemyScrollKneeActive = false;
+        enemyScrollHipActive = false;
+        enemyScrollHandActive = false;
+        enemyScrollArmpitsActive = false;
         enemyIsDead = false;
         enemyAcc = 0;
         enemySpd = 0;
@@ -178,6 +205,13 @@ public class GameData {
         isFirstCombatRoundOfEncounter = true;
         pendingMirrorCopy = false;
         pendingSpellbookTransmute = false;
+        pendingGemTransformColor = "";
+        pendingDeathcapRestore = false;
+        itemsFoundThisFloor = 0;
+        itemsFoundThisFloorLevel = 0;
+        itemsFoundThisFloorSub = 0;
+        warhammerStunActive = false;
+        warhammerStunNextTurn = false;
         merchantStealAllowanceRemaining = 0;
         pendingLevelStartStaminaBonus = 0;
         hasLuckyDiceRoundStats = false;
@@ -202,6 +236,7 @@ public class GameData {
         diceAttachedToStat ??= new List<string>();
         diceRerolled ??= new List<bool>();
         diceTarotUpgraded ??= new List<bool>();
+        diceCursedSpawned ??= new List<bool>();
         playerWounds ??= new List<string>();
         enemyWounds ??= new List<string>();
 
@@ -217,6 +252,13 @@ public class GameData {
         }
         if (diceTarotUpgraded.Count > diceNumbers.Count) {
             diceTarotUpgraded.RemoveRange(diceNumbers.Count, diceTarotUpgraded.Count - diceNumbers.Count);
+        }
+
+        while (diceCursedSpawned.Count < diceNumbers.Count) {
+            diceCursedSpawned.Add(false);
+        }
+        if (diceCursedSpawned.Count > diceNumbers.Count) {
+            diceCursedSpawned.RemoveRange(diceNumbers.Count, diceCursedSpawned.Count - diceNumbers.Count);
         }
 
         if (floorItemAccs == null || floorItemAccs.Length != 9) { floorItemAccs = new int[9]; }
@@ -242,7 +284,15 @@ public class GameData {
             isFirstCombatRoundOfEncounter = false;
             pendingMirrorCopy = false;
             pendingSpellbookTransmute = false;
+            pendingGemTransformColor = "";
+            pendingDeathcapRestore = false;
             enemyHasKatarSpeedPenalty = false;
+            enemyScrollChestActive = false;
+            enemyScrollGutsActive = false;
+            enemyScrollKneeActive = false;
+            enemyScrollHipActive = false;
+            enemyScrollHandActive = false;
+            enemyScrollArmpitsActive = false;
             if (enemyNum != Enemy.MerchantEnemyNum) {
                 merchantStealAllowanceRemaining = 0;
             }

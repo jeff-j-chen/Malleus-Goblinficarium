@@ -124,10 +124,7 @@ public class LevelManager : MonoBehaviour {
     public float[] GenStats(string lichOrDevilOrNormal = "normal") {
         if (lichOrDevilOrNormal != "normal") {
             if (lichOrDevilOrNormal == "lich") {
-                if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-                    return new[] { 4f, 4f, 4f, 4f };
-                }
-                else if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
+                if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) || DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
                     return new[] { 3f, 3f, 3f, 3f };
                 }
                 else { 
@@ -135,10 +132,7 @@ public class LevelManager : MonoBehaviour {
                 }
             }
             else if (lichOrDevilOrNormal == "devil") {
-                if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-                    return new[] { 4f, 4f, 4f, 4f };
-                }
-                else if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
+                if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty) || DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
                     return new[] { 3f, 3f, 3f, 3f };
                 }
                 else { 

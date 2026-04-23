@@ -1,6 +1,7 @@
 # new items planning
+When implementing new items, be sure to understand the logic of the game. Most item implementations will require the reading/modification of: ItemManager.cs, Item.cs, TurnManager.cs, DiceSummoner.cs, and ENEMY_AI.md.
+For each item specified: create a comprehensive checklist of the implementation details. Then, implement and add an entry here.
 
-## april 2026 follow-up checklist
 
 ### crystal shard
 
@@ -193,7 +194,7 @@ description: `does nothing`
 - [x] leave all gameplay hooks as a no-op
 
 ### tarot of the abyss
-description: `blue dice are more effective`
+description: `blue die are more effective`
 
 - [x] add tarot modifier entry: `abyss`
 - [x] upgrade taken blue dice by +1 per matching tarot, up to 6
@@ -201,7 +202,7 @@ description: `blue dice are more effective`
 - [x] apply to player-generated blue dice too
 
 ### tarot of the verdant
-description: `green dice are more effective`
+description: `green die are more effective`
 
 - [x] add tarot modifier entry: `verdant`
 - [x] upgrade taken green dice by +1 per matching tarot, up to 6
@@ -209,7 +210,7 @@ description: `green dice are more effective`
 - [x] apply to player-generated green dice too
 
 ### tarot of the inferno
-description: `red dice are more effective`
+description: `red die are more effective`
 
 - [x] add tarot modifier entry: `inferno`
 - [x] upgrade taken red dice by +1 per matching tarot, up to 6
@@ -217,7 +218,7 @@ description: `red dice are more effective`
 - [x] apply to player-generated red dice too
 
 ### tarot of the glacier
-description: `white dice are more effective`
+description: `white die are more effective`
 
 - [x] add tarot modifier entry: `glacier`
 - [x] upgrade taken white dice by +1 per matching tarot, up to 6
@@ -225,7 +226,7 @@ description: `white dice are more effective`
 - [x] apply to player-generated white dice too
 
 ### tarot of the dawn
-description: `yellow dice are more effective`
+description: `yellow die are more effective`
 
 - [x] add tarot modifier entry: `dawn`
 - [x] upgrade taken yellow dice by +1 per matching tarot, up to 6
@@ -887,3 +888,207 @@ description: `pay 3 stamina to transmute a die`
 - [x] update the description to match the new reusable behavior
 - [x] limit it to one use per draft, like `ankh`
 - [x] repeat use in the same draft shows `it's too dangerous`
+
+---
+
+## april 2026 new item pass
+
+### implementation map additions
+
+| file | what changes |
+|---|---|
+| `GameData.cs` | save new destructive / fortified / empowered state, cursed-dice metadata, gem targeting, deathcap pending restore |
+| `ItemManager.cs` | register deathcap / salt shaker / new cornucopia / goggles / cursed mask / cursed dice / holy water / gems, add enemy-debuff tarots, add gem + almanac sprite normalization, add salt-shaker food logic, goggles / gladius opening bonuses, cursed item helpers, holy-water values |
+| `Item.cs` | add scrolls of destruction / fortification / duality, potion of chaos / pandemonium, holy water, gem targeting flow, spellbook cost reduction, heal-time cursed-dice cleanup |
+| `Dice.cs` | resolve pending gem clicks on attached player dice |
+| `DiceSummoner.cs` | spawn and persist cursed-dice yellow dice |
+| `StatSummoner.cs` | mirror attack/parry totals and debug text for destructive / fortified / empowered |
+| `TurnManager.cs` | track deathcap turn eligibility from RoundOne / RoundTwo starts, restore deathcap + cursed-mask stamina after round resolution, clear new one-turn statuses |
+| `EnemyAI.cs` | respect destructive / fortified / empowered in planner snapshots and cache keys, value enemy draft dice with enemy-tarot penalties, weaken attached enemy dice immediately |
+
+### rabadon's deathcap
+description: `restore 1 stamina per turn if less than 3 stamina`
+
+- [x] add drop-table entry at rate `2`
+- [x] use the requested sprite key `rabadons`
+- [x] add description + almanac tracking entry
+- [x] mark the player as eligible at the start of both `RoundOne()` and `RoundTwo()` when stamina is below `3`
+- [x] restore stamina after round resolution, not immediately when the check is made
+- [x] keep the pending restore save-safe mid-combat
+
+### salt shaker
+description: `food and holy water are more effective`
+
+- [x] rename the old `cornucopia` item to `salt shaker`
+- [x] use sprite key `salt_shaker`
+- [x] move the old food bonus logic from `cornucopia` to `salt shaker`
+- [x] make `holy water` gain the same `+2` effectiveness from `salt shaker`
+- [x] add `salt shaker` to drop tables and almanac order in place of the old item
+
+### cornucopia
+description: `+1 stamina per item found`
+
+- [x] add new standalone `cornucopia` item at drop rate `2`
+- [x] add description + almanac entry
+- [x] grant `+1 stamina` per owned copy whenever the player picks up a real floor item
+- [x] exclude the next-level `arrow`
+- [x] exclude merchant and blacksmith items
+- [x] allow tombstone floor items to count
+- [x] include the gained stamina in pickup text so the effect is visible
+
+### enemy-debuff tarots
+
+#### tarot of the leviathan
+description: `enemy blue die are less effective`
+
+#### tarot of the viper
+description: `enemy green die are less effective`
+
+#### tarot of the dragon
+description: `enemy red die are less effective`
+
+#### tarot of the wyvern
+description: `enemy white die are less effective`
+
+#### tarot of the phoenix
+description: `enemy yellow die are less effective`
+
+- [x] add all five tarot modifiers to roll tables and almanac order
+- [x] add description text for all five entries
+- [x] reduce matching enemy dice by `1` per effective tarot level
+- [x] fade the die out entirely when the reduction would take it to `0`
+- [x] apply the reduction to drafted enemy dice as they attach
+- [x] apply the reduction to enemy dice changed by transmute effects too
+- [x] make `tarot of the arcane` scale the penalty amount
+- [x] make `stave` act as one extra `tarot of the arcane`
+- [x] teach enemy draft evaluation to value already-penalized dice correctly
+
+### stave follow-up
+description: `charms, necklets, and tarots are more effective`
+
+- [x] update the stave description text
+- [x] keep the existing necklet + charm scaling behavior
+- [x] also make `stave` count as one extra `tarot of the arcane`
+
+### potion of chaos
+description: `gain 3 random die`
+
+- [x] add modifier to potion tables, descriptions, and almanac tracking
+- [x] grant three random dice to the player immediately
+- [x] route yellow dice to red by default
+- [x] enforce the requested minimum rolled value of `2`
+
+### potion of pandemonium
+description: `gain 3 random 6 die`
+
+- [x] add modifier to potion tables, descriptions, and almanac tracking
+- [x] grant three random dice immediately
+- [x] lock all three generated dice to value `6`
+- [x] route yellow dice to red by default
+
+### scroll of destruction
+description: `your attack is equal to accuracy this turn`
+
+- [x] add modifier to scroll tables, descriptions, and almanac tracking
+- [x] play `fwoosh` on use
+- [x] use the requested status text `you feel unfettered`
+- [x] add save-backed destructive state
+- [x] fully mirror the player's red total from green, including base stats, dice, stamina, and debug output
+- [x] teach the enemy planner to reason about the mirrored attack total
+
+### scroll of fortification
+description: `your parry is equal to speed this turn`
+
+- [x] add modifier to scroll tables, descriptions, and almanac tracking
+- [x] play `fwoosh` on use
+- [x] use the requested status text `you feel unbreakable`
+- [x] add save-backed fortified state
+- [x] fully mirror the player's white total from blue, including base stats, dice, stamina, and debug output
+- [x] teach the enemy planner to reason about the mirrored parry total
+
+### scroll of duality
+description: `your attack is equal to parry this turn`
+
+- [x] add modifier to scroll tables, descriptions, and almanac tracking
+- [x] play `fwoosh` on use
+- [x] use the requested status text `you feel powerful`
+- [x] add save-backed empowered state
+- [x] fully mirror the player's red total from white, including base stats, dice, stamina, and debug output
+- [x] teach the enemy planner to reason about the mirrored attack total
+
+### goggles
+description: `start combat with +3 accuracy and +2 attack`
+
+- [x] add item entry at drop rate `4`
+- [x] add description + almanac entry
+- [x] grant the opening `+3` green and `+2` red bonuses only on the first combat round of the encounter
+- [x] include the opening bonus in live stat / preview logic
+
+### gladius follow-up
+
+- [x] buff normal `gladius` opening attack from `+2` to `+3`
+- [x] buff legendary `gladius` opening attack from `+4` to `+5`
+- [x] update description text to match
+
+### cursed mask
+description: `+3 stamina regen while wounded`
+
+- [x] add item entry at drop rate `2`
+- [x] add description + almanac entry
+- [x] restore `+3` stamina after the round if the player has one wound at regen time
+- [x] restore `+6` stamina after the round if the player has two or more wounds at regen time
+- [x] stack correctly per copy
+
+### cursed dice
+description: `start with yellow dice while wounded`
+
+- [x] add item entry at drop rate `2`
+- [x] add description + almanac entry
+- [x] spawn one yellow die at draft start while the player has one wound
+- [x] spawn two yellow dice at draft start while the player has two or more wounds
+- [x] persist which dice came from cursed dice in save data
+- [x] remove those spawned dice if the player heals before attacking that round
+
+### gems
+
+#### emerald gem
+description: `turn an attached dice green`
+
+#### ruby gem
+description: `turn an attached dice red`
+
+#### sapphire gem
+description: `turn an attached dice blue`
+
+#### topaz gem
+description: `turn an attached dice white`
+
+- [x] add new `gem` item type with shared roll-table entry at drop rate `16`
+- [x] make all gem variants share the same `gem` sprite in-game and in the almanac
+- [x] add canonical display names, descriptions, and almanac tracking for each gem color
+- [x] block gem use until the player finishes drafting
+- [x] use mirror / spellbook-style pending targeting on attached player dice
+- [x] play `zap` when the chosen die is transformed
+- [x] immediately move the die to its new stat lane and refresh combat calculations
+
+### unstable spellbook follow-up
+
+- [x] reduce the stamina activation cost from `3` to `2`
+- [x] update the description text to match the new cost
+
+### holy water
+description: `+10 stamina or trade for 2 items`
+
+- [x] add item entry, description, and almanac tracking
+- [x] restore `+10` stamina on use
+- [x] add the character `0` passive bonus to the restore amount
+- [x] add the new `salt shaker` bonus to the restore amount
+- [x] count as `2` dropped items when offered to a merchant
+
+### bloodletter's curse
+description: `find more loot when wounded`
+
+- [x] add item drop-table entry, description, and almanac tracking
+- [x] use sprite key `bloodletters`
+- [x] treat each copy as `2` extra torches with `1` wound and `3` extra torches with `2+` wounds when `SpawnItems()` rolls loot
+- [x] keep the effect fully passive with no fade timer and no dynamic description text
