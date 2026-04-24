@@ -109,7 +109,6 @@ public class Scripts : MonoBehaviour {
     }
 
     private void ApplyResolutionIndex(int index) {
-        print($"setting resolution to index {index}");
         Vector2Int resolution = availableResolutions[Mathf.Clamp(index, 0, availableResolutions.Length - 1)];
         Screen.SetResolution(resolution.x, resolution.y, false);
     }

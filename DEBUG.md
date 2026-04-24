@@ -2565,3 +2565,192 @@ why the fixed line is correct
 result
 - Kobold should take `y5`, not `w2`, in this same-purpose defensive tie
 - the enemy now prioritizes denying the stronger universal die before paper-cleaner stamina cleanup
+
+---
+
+## case 25 - near-futile gog draft must prefer the strongest power die over soft cleanup
+
+PLAYER: 2 / 7 / 20 / 8
+
+
+accuracy: 2 = (2)
+
+
+speed: 7 = (7)
+
+
+damage: 20 = (13 + y1 + r6)
+
+
+parry: 8 = (2 + w6)
+
+
+stamina: 35 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: g4, w4
+
+
+enemy: Gog
+
+
+ENEMY: 4 / 12 / 2 / 4
+
+
+accuracy: 4 = (4)
+
+
+speed: 12 = (7 + y3 + b2)
+
+
+damage: 2 = (2)
+
+
+parry: 4 = (4)
+
+
+stamina: 4 remaining
+
+
+wounds: none
+
+
+targeting: head
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `enemyCanHitBefore = EnemyAim >= 0 && EnemyAtt > PlayerDef` -> false
+- `4 >= 0` is true, but `2 > 8` is false
+- Gog has no live wound line on this board
+
+if: `playerCanHitBefore = PlayerAim >= 0 && PlayerAtt > EnemyDef` -> true
+- `2 >= 0` and `20 > 4`
+- the player has an overwhelming live hit line
+
+if: `GetDraftPreviewEvaluation(...)` for utility-like picks keeps `BestPlan.EnemyDamagesPlayer = false` and `BestPlan.EnemyAvoidsDamage = false` -> true
+- this is the near-futile band where the enemy neither wounds nor safely parries in preview
+
+if: `ShouldPreferNearFutilePowerDie(candidate, current)` -> true in tied near-futile comparisons
+- no self-securing breakpoint is completed
+- no hard denial gate separates the picks
+- both preview plans are in `!EnemyDamagesPlayer && !EnemyAvoidsDamage`
+
+if: `candidate.EffectiveEnemyValue != current.EffectiveEnemyValue` -> stronger effective die wins
+- in this tie band, the comparator now chooses the pick that gives Gog the most real enemy-side value
+- this resolves before soft utility cleanup and late denied-player desirability scoring
+
+if tied on effective value: `candidate.DieValue != current.DieValue` -> higher face wins
+- keeps larger power dice above paper-cleaner low-impact alternatives
+
+why the old line was wrong
+- in near-futile tied previews, the comparator could drift into soft cleanup instead of prioritizing raw enemy-side power
+- that made already-bad boards become fully hopeless by passing on the only pick that moved Gog toward a real line
+
+why the fixed line is correct
+- the near-futile tie-break now activates only in the narrow band where both picks fail to wound and fail to avoid damage
+- in that band, higher effective enemy value is prioritized first
+- this preserves stronger comeback potential and avoids low-impact cleanup picks
+
+result
+- in near-futile Gog draft ties, the enemy now prefers the strongest power die
+- this specifically protects the class of misses where a stronger die like `r6` was previously left behind while soft cleanup won the tie
+
+---
+
+## case 26 - guaranteed-hit tied outcomes should pick the highest wound target
+
+PLAYER: 2 / 7 / 20 / 8
+
+
+accuracy: 2 = (2)
+
+
+speed: 7 = (7)
+
+
+damage: 20 = (13 + y1 + r6)
+
+
+parry: 8 = (2 + w6)
+
+
+stamina: 35 remaining
+
+
+wounds: none
+
+
+targeting: chest
+
+
+available dice: g4, w4
+
+
+enemy: Gog
+
+
+ENEMY: 4 / 12 / 2 / 4
+
+
+accuracy: 4 = (4)
+
+
+speed: 12 = (7 + y3 + b2)
+
+
+damage: 2 = (2)
+
+
+parry: 4 = (4)
+
+
+stamina: 4 remaining
+
+
+wounds: none
+
+
+targeting: head
+
+
+`EnemyAI.cs TRACE RESULT:`
+
+if: `enemyCanHitBefore = EnemyAim >= 0 && EnemyAtt > PlayerDef` -> false
+- `4 >= 0` is true, but `2 > 8` is false
+- Gog has no immediate hit line before spending
+
+if: `GetTargetSearchOrder(maxTarget)` -> includes higher wound indices first
+- target candidates are searched in aggressive order (`neck`, `armpits`, `head`, `hand`, ...)
+
+if comparing two candidates where all gates 1..19 are tied and both have `EnemyDamagesPlayer = true` -> true
+- this is the "guaranteed-hit tied outcome" band
+- no kill/survival/disable gate separates the targets
+
+if in `IsBetterAdvancedEvaluation`: `candidate.TargetIndex != current.TargetIndex` -> true
+- target tie-break is reached only after the stronger gates and spend cleanup are tied
+
+if: `candidate.EnemyDamagesPlayer && current.EnemyDamagesPlayer` -> true
+- new aggressive tie-break path is used
+
+if: `return candidate.TargetIndex > current.TargetIndex` -> higher target wins
+- neck beats armpits, armpits beats hand, hand beats head, and chest loses
+
+why the old line was wrong
+- final target cleanup preferred lower non-chest target index
+- in guaranteed-hit ties, this could settle on lower wounds even though no strategic gate was improved by doing so
+
+why the fixed line is correct
+- in guaranteed-hit tied outcomes, target selection is now intentionally aggressive
+- when no stronger gate differs, the enemy pushes to the highest legal wound target
+- outside this narrow band, legacy chest-worst/lower-index cleanup still applies
+
+result
+- when the enemy is already guaranteed to damage and target choice does not change higher gates,
+  it now aims for the highest legal target

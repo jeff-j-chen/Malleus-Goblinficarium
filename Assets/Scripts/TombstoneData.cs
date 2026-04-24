@@ -11,22 +11,22 @@ public class TombstoneData : MonoBehaviour {
 
     public bool HasUsableResurrectionAmulet() {
         s = FindFirstObjectByType<Scripts>();
-        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet of resurrection");
+        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet_of_resurrection");
         if (amuletObject == null) { return false; }
 
         Item amulet = amuletObject.GetComponent<Item>();
-        return amulet != null && amulet.itemName != "broken amulet";
+        return amulet != null && amulet.itemName != "broken_amulet";
     }
 
     public bool PrepareResurrectionAmulet() {
         s = FindFirstObjectByType<Scripts>();
-        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet of resurrection");
+        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet_of_resurrection");
         if (amuletObject == null) { return false; }
 
         Item amulet = amuletObject.GetComponent<Item>();
-        if (amulet == null || amulet.itemName == "broken amulet") { return false; }
+        if (amulet == null || amulet.itemName == "broken_amulet") { return false; }
 
-        s.itemManager.MarkItemUsed("amulet of resurrection");
+        s.itemManager.MarkItemUsed("amulet_of_resurrection");
         BreakResurrectionAmulet(amulet);
         PrepareResurrectionDestination();
         Save.game.showAmuletSurvivalStatusText = true;
@@ -41,13 +41,13 @@ public class TombstoneData : MonoBehaviour {
 
     public bool ConsumeResurrectionAmulet() {
         s = FindFirstObjectByType<Scripts>();
-        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet of resurrection");
+        GameObject amuletObject = s.itemManager.GetPlayerItem("amulet_of_resurrection");
         if (amuletObject == null) { return false; }
 
         Item amulet = amuletObject.GetComponent<Item>();
-        if (amulet == null || amulet.itemName == "broken amulet") { return false; }
+        if (amulet == null || amulet.itemName == "broken_amulet") { return false; }
 
-        s.itemManager.MarkItemUsed("amulet of resurrection");
+        s.itemManager.MarkItemUsed("amulet_of_resurrection");
         BreakResurrectionAmulet(amulet);
         Save.game.showAmuletSurvivalStatusText = true;
         Save.game.pendingAmuletInventoryCleanup = true;
@@ -159,7 +159,7 @@ public class TombstoneData : MonoBehaviour {
     }
 
     private void BreakResurrectionAmulet(Item amulet) {
-        amulet.itemName = "broken amulet";
+        amulet.itemName = "broken_amulet";
         amulet.modifier = "";
         amulet.gameObject.name = amulet.itemName;
     }

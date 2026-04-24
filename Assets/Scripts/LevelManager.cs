@@ -49,10 +49,6 @@ public class LevelManager : MonoBehaviour {
     private int queuedWarpEnemyNum;
     private bool queuedWarpUseSavedTrader;
 
-    public bool ShouldForceBlacksmithSpawn() {
-        return sub == BlacksmithSub;
-    }
-
     private static bool IsVendorSub(int currentSub) {
         return currentSub == MerchantSub || currentSub == BlacksmithSub;
     }
@@ -444,10 +440,10 @@ public class LevelManager : MonoBehaviour {
                     levelTransText.text = $"level {level}-{sub}*";
                     levelText.text = $"(level {level}-{sub}*)";
                     // decrement sub (because we went up 1 level but aren't going to fight anything)
-                    s.enemy.SpawnNewEnemy(8, true);
+                    s.enemy.SpawnNewEnemy(Enemy.TombstoneEnemyNum, true);
                     // spawn the tombstone
                 }
-                else if (queuedWarpEnemyNum == Enemy.BlacksmithEnemyNum || !hasQueuedWarpDestination && ShouldForceBlacksmithSpawn()) {
+                else if (queuedWarpEnemyNum == Enemy.BlacksmithEnemyNum || !hasQueuedWarpDestination && s.levelManager.sub == BlacksmithSub) {
                     toSpawn = "blacksmith";
                     s.enemy.SpawnNewEnemy(Enemy.BlacksmithEnemyNum, true);
                     s.turnManager.RefreshBlackBoxVisibility();
@@ -478,7 +474,7 @@ public class LevelManager : MonoBehaviour {
                 }
                 else { 
                     toSpawn = "normal";
-                    s.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 7), true); 
+                    s.enemy.SpawnNewEnemy(UnityEngine.Random.Range(3, 8), true); 
                     levelTransText.text = $"level {level}-{sub}";
                     levelText.text = $"(level {level}-{sub})";
                 }

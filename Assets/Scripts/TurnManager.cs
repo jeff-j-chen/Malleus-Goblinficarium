@@ -541,7 +541,7 @@ public class TurnManager : MonoBehaviour {
     public void RoundOne() {
         criticalRoundInProgress = true;
         playerHasAttackedThisRound = false;
-        if (s.itemManager.PlayerHas("rabadon's deathcap") && s.player.stamina < 3) {
+        if (s.itemManager.PlayerHas("rabadons_deathcap") && s.player.stamina < 3) {
             Save.game.pendingDeathcapRestore = true;
         }
         scimitarParryCount = 0;
@@ -770,8 +770,8 @@ public class TurnManager : MonoBehaviour {
             staminaToRestore += 1;
         }
 
-        if (deathcapRestorePending && s.itemManager.PlayerHas("rabadon's deathcap")) {
-            staminaToRestore += s.itemManager.GetPlayerItemCount("rabadon's deathcap");
+        if (deathcapRestorePending && s.itemManager.PlayerHas("rabadons_deathcap")) {
+            staminaToRestore += s.itemManager.GetPlayerItemCount("rabadons_deathcap");
         }
 
         staminaToRestore += s.itemManager.GetCursedMaskRegenAmount();
@@ -794,7 +794,7 @@ public class TurnManager : MonoBehaviour {
             yield return null;
         }
 
-        if (s.itemManager.PlayerHas("rabadon's deathcap") && s.player.stamina < 3) {
+        if (s.itemManager.PlayerHas("rabadons_deathcap") && s.player.stamina < 3) {
             Save.game.pendingDeathcapRestore = true;
         }
         // make the player ready to move
@@ -1439,7 +1439,7 @@ public class TurnManager : MonoBehaviour {
                 }
                 else if (!enemyHitIsFatal) {
                     // if player won't die immediately
-                    chaliceWillDrink = enemyHitCountsAsWounded && s.itemManager.PlayerHas("sacrificial chalice");
+                    chaliceWillDrink = enemyHitCountsAsWounded && s.itemManager.PlayerHas("sacrificial_chalice");
                     enemyAttackStatusText = chaliceWillDrink
                         ? $"{s.enemy.enemyName.text.ToLower()} hits you... the chalice drinks your blood!"
                         : $"{s.enemy.enemyName.text.ToLower()} hits you, damaging {s.enemy.target.text}!";
@@ -1450,7 +1450,7 @@ public class TurnManager : MonoBehaviour {
             SetEnemyAttackStatusText(enemyAttackStatusText);
             // determine whether this hit should use cloak because something shatters
             bool woundCountsForTriggers = !armor && enemyHitCountsAsWounded;
-            bool crystalShardShatters = woundCountsForTriggers && s.itemManager.PlayerHas("crystal shard");
+            bool crystalShardShatters = woundCountsForTriggers && s.itemManager.PlayerHas("crystal_shard");
             bool glassSwordShatters = woundCountsForTriggers
                 && s.itemManager.PlayerHasWeapon("glass sword")
                 && !Save.game.glassSwordShattered
@@ -1476,12 +1476,12 @@ public class TurnManager : MonoBehaviour {
                     }
                 }
                 if (crystalShardShatters) {
-                    int crystalShardCount = s.itemManager.GetPlayerItemCount("crystal shard");
+                    int crystalShardCount = s.itemManager.GetPlayerItemCount("crystal_shard");
                     for (int i = 0; i < crystalShardCount; i++) {
-                        s.itemManager.MarkItemUsed("crystal shard");
+                        s.itemManager.MarkItemUsed("crystal_shard");
                     }
                     s.itemManager.RegisterCrystalShardShatter(crystalShardCount);
-                    StartCoroutine(RemoveItemsAfterDelay("crystal shard", crystalShardCount));
+                    StartCoroutine(RemoveItemsAfterDelay("crystal_shard", crystalShardCount));
                 }
                 if (glassSwordShatters) {
                     Save.game.glassSwordShattered = true;

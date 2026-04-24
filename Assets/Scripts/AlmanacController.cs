@@ -11,6 +11,8 @@ public class AlmanacController : MonoBehaviour {
     [SerializeField] private GameObject leftButton;
     [SerializeField] private GameObject rightButton;
     [SerializeField] private TextMeshProUGUI bottomText;
+    [SerializeField] private float keyRepeatDelay = 0.35f;
+    [SerializeField] private float keyRepeatInterval = 0.08f;
     // world-space layout config; tune these in the inspector after placing the scene
     [SerializeField] public float xStart   = -4f;
     [SerializeField] public float yStart   =  4f;
@@ -30,6 +32,8 @@ public class AlmanacController : MonoBehaviour {
     private int lastPreviewPage = -1;
     private List<string> curPageEntries = new();
     private bool preventPlayingFX = true;
+    private KeyCode heldNavKey = KeyCode.None;
+    private float nextRepeatAt = 0f;
 
     private int TotalRows => Mathf.CeilToInt((float)curPageEntries.Count / ItemsPerRow);
 
@@ -56,10 +60,42 @@ public class AlmanacController : MonoBehaviour {
         // keep internal row/col in sync if the user clicked something with the mouse
         SyncSelectionFromHighlight();
 
-        if      (Input.GetKeyDown(KeyCode.LeftArrow))  { MoveCol(-1); }
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) { MoveCol(1);  }
-        else if (Input.GetKeyDown(KeyCode.UpArrow))    { MoveRow(-1); }
-        else if (Input.GetKeyDown(KeyCode.DownArrow))  { MoveRow(1);  }
+        HandleNavigationInput();
+    }
+
+    private void HandleNavigationInput() {
+        KeyCode currentKey = GetCurrentNavKey();
+        if (currentKey == KeyCode.None) {
+            heldNavKey = KeyCode.None;
+            return;
+        }
+
+        if (Input.GetKeyDown(currentKey) || currentKey != heldNavKey) {
+            heldNavKey = currentKey;
+            nextRepeatAt = Time.unscaledTime + keyRepeatDelay;
+            ApplyNavKey(currentKey);
+            return;
+        }
+
+        if (Time.unscaledTime >= nextRepeatAt) {
+            nextRepeatAt = Time.unscaledTime + keyRepeatInterval;
+            ApplyNavKey(currentKey);
+        }
+    }
+
+    private KeyCode GetCurrentNavKey() {
+        if (Input.GetKey(KeyCode.LeftArrow)) { return KeyCode.LeftArrow; }
+        if (Input.GetKey(KeyCode.RightArrow)) { return KeyCode.RightArrow; }
+        if (Input.GetKey(KeyCode.UpArrow)) { return KeyCode.UpArrow; }
+        if (Input.GetKey(KeyCode.DownArrow)) { return KeyCode.DownArrow; }
+        return KeyCode.None;
+    }
+
+    private void ApplyNavKey(KeyCode key) {
+        if (key == KeyCode.LeftArrow) { MoveCol(-1); return; }
+        if (key == KeyCode.RightArrow) { MoveCol(1); return; }
+        if (key == KeyCode.UpArrow) { MoveRow(-1); return; }
+        if (key == KeyCode.DownArrow) { MoveRow(1); }
     }
 
     // called by left/right arrow keys; wraps across rows

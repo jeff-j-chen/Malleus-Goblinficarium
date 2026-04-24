@@ -123,7 +123,10 @@ candidates are compared left-to-right. first differing gate wins. no floating-po
 17  SpentStamina   (lower is better) same outcome reached with less stamina
 18  TotalOverspend (lower is better) less excess beyond each threshold boundary
 19  ResourceOverspend (lower is better) less unused surplus in already-cleared stats
-20  TargetIndex       (lower is better) prefer lower target as final tiebreaker, except any non-chest target beats chest here
+20  TargetIndex       final target tiebreak
+                     - if both tied candidates still guarantee enemy damage and no higher gate differs,
+                       prefer higher target (neck > armpits > hand > head > hip > knee > guts > chest)
+                     - otherwise keep legacy cleanup: any non-chest beats chest, then lower target index wins
 ```
 
 ### hard / nightmare draft tie handling
@@ -509,7 +512,10 @@ chest is not a default preference. it becomes valid under exactly two conditions
   [17] SpentStamina    candidate wins if candidate.SpentStamina < current.SpentStamina
   [18] TotalOverspend  candidate wins if candidate.TotalOverspend < current.TotalOverspend
   [19] ResourceOverspend candidate wins if candidate.ResourceOverspend < current.ResourceOverspend
-  [20] TargetIndex      candidate wins if candidate.TargetIndex < current.TargetIndex
+  [20] TargetIndex      final target tiebreak:
+                        - when both candidates still guarantee enemy damage and all higher gates tie,
+                          higher target index wins
+                        - otherwise any non-chest beats chest, then lower target index wins
 
   if all 20 gates match: neither is better; keep current.
 
@@ -867,7 +873,7 @@ chest is not a default preference. it becomes valid under exactly two conditions
 these are deliberate documentation notes for behaviors that currently exist in code.
 
 - runtime enemy attacks still ignore enemy accuracy, even though planner previews use `enemyAim >= 0`
-- advanced-plan target tiebreak treats chest as the worst final target; any non-chest target wins that tie
+- advanced-plan target tiebreak is now aggressive in guaranteed-hit ties: when higher gates are tied and both plans still damage, higher target index wins; outside that band, chest remains the worst cleanup target and lower non-chest index wins
 - nightmare reveal waits `0.15s` per step, and target-shift reveal is skipped when the committed plan does not actually damage the player
 - live enemy-first chest rescue rerolls player dice, not enemy dice
 - live/player chest-rescue previews and live kill checks also honor the player's second-wound-kill weapon rule when the enemy already has one wound

@@ -549,11 +549,11 @@ public class Item : MonoBehaviour {
                     Remove();
                     // remove from player inventory
                     break;
-                case "rotten steak":
+                case "rotten_steak":
                     Save.persistent.foodEaten++;
                     s.itemManager.MarkItemUsed(this);
                     s.soundManager.PlayClip("eat");
-                    s.turnManager.ChangeStaminaOf("player", s.itemManager.GetFoodStaminaAmount("rotten steak", includeCharacterBonus:false));
+                    s.turnManager.ChangeStaminaOf("player", s.itemManager.GetFoodStaminaAmount("rotten_steak", includeCharacterBonus:false));
                     s.turnManager.SetStatusText("you swallow rotten steak");
                     Remove();
                     break;
@@ -565,11 +565,11 @@ public class Item : MonoBehaviour {
                     s.turnManager.SetStatusText("you swallow cheese");
                     Remove();
                     break;
-                case "moldy cheese":
+                case "moldy_cheese":
                     Save.persistent.foodEaten++;
                     s.itemManager.MarkItemUsed(this);
                     s.soundManager.PlayClip("eat");
-                    s.turnManager.ChangeStaminaOf("player", s.itemManager.GetFoodStaminaAmount("moldy cheese", includeCharacterBonus:false));
+                    s.turnManager.ChangeStaminaOf("player", s.itemManager.GetFoodStaminaAmount("moldy_cheese", includeCharacterBonus:false));
                     s.turnManager.SetStatusText("you swallow moldy cheese");
                     Remove();
                     break;
@@ -847,7 +847,7 @@ public class Item : MonoBehaviour {
                     Remove();
                     s.itemManager.Select(s.player.inventory, 0, true, false);
                     break;
-                case "skeleton key":
+                case "skeleton_key":
                     if (LevelManager.IsDevilSub(s.levelManager.level, s.levelManager.sub)) {
                         // can't use skeleton key on the devil
                         s.soundManager.PlayClip("shuriken");
@@ -868,10 +868,10 @@ public class Item : MonoBehaviour {
                 case "mirror":
                     UseMirror();
                     break;
-                case "unstable spellbook":
+                case "unstable_spellbook":
                     UseUnstableSpellbook();
                     break;
-                case "holy water":
+                case "holy_water":
                     s.itemManager.MarkItemUsed(this);
                     s.soundManager.PlayClip("gulp");
                     s.turnManager.ChangeStaminaOf("player", s.itemManager.GetHolyWaterStaminaAmount());
@@ -882,10 +882,10 @@ public class Item : MonoBehaviour {
                 case "gem":
                     UseGem();
                     break;
-                case "witch hand":
+                case "witch_hand":
                     UseWitchHand();
                     break;
-                case "helm of might":
+                case "helm_of_might":
                     if (!Save.game.usedHelm) {
                         if (s.player.stamina >= 3) {
                             s.soundManager.PlayClip("fwoosh");
@@ -910,7 +910,7 @@ public class Item : MonoBehaviour {
                 case "kapala":
                     s.turnManager.SetStatusText("offer an item to become furious");
                     break;
-                case "boots of dodge":
+                case "boots_of_dodge":
                     if (!Save.game.usedBoots) {
                         if (s.player.stamina >= 1) {
                             s.soundManager.PlayClip("fwoosh");
@@ -976,7 +976,7 @@ public class Item : MonoBehaviour {
             }
             else {
                 if (s.itemManager.IsVendorEncounter()) {
-                    Save.game.numItemsDroppedForTrade += (itemName == "holy water") ? 2 : 1;
+                    Save.game.numItemsDroppedForTrade += (itemName == "holy_water") ? 2 : 1;
                 }
                 if (s.tutorial == null) { Save.SaveGame(); }
                 s.turnManager.SetStatusText(s.itemManager.GetActionTextForItem(this, s.itemManager.IsVendorEncounter() ? "you offer" : "you drop"));

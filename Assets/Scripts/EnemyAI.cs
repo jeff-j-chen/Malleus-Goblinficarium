@@ -967,8 +967,15 @@ public static class EnemyAI {
         if (candidate.TotalOverspend != current.TotalOverspend) { return candidate.TotalOverspend < current.TotalOverspend; }
         if (candidate.ResourceOverspend != current.ResourceOverspend) { return candidate.ResourceOverspend < current.ResourceOverspend; }
         if (candidate.TargetIndex != current.TargetIndex) {
-            // chest is not a default preference; non-chest beats chest here
-            // among non-chest targets, lower index is preferred
+            bool guaranteedHitTradeoff = candidate.EnemyDamagesPlayer && current.EnemyDamagesPlayer;
+            if (guaranteedHitTradeoff) {
+                // when both tied plans still guarantee enemy damage and no higher gates differ,
+                // prefer the highest legal wound target (neck > armpits > hand ... > chest)
+                return candidate.TargetIndex > current.TargetIndex;
+            }
+
+            // otherwise keep the legacy cleanup ordering:
+            // chest is worst, then lower non-chest target index wins
             bool candidateIsChest = candidate.TargetIndex == 0;
             bool currentIsChest = current.TargetIndex == 0;
             if (candidateIsChest != currentIsChest) { return currentIsChest; }
@@ -2695,6 +2702,15 @@ public static class EnemyAI {
         if (candidate.DeniesPlayerKill != current.DeniesPlayerKill) { return candidate.DeniesPlayerKill; }
         if (candidate.DeniesPlayerDamage != current.DeniesPlayerDamage) { return candidate.DeniesPlayerDamage; }
         if (candidate.DeniesPlayerDefense != current.DeniesPlayerDefense) { return candidate.DeniesPlayerDefense; }
+        if (ShouldPreferNearFutilePowerDie(candidate, current)) {
+            if (candidate.EffectiveEnemyValue != current.EffectiveEnemyValue) {
+                return candidate.EffectiveEnemyValue > current.EffectiveEnemyValue;
+            }
+
+            if (candidate.DieValue != current.DieValue) {
+                return candidate.DieValue > current.DieValue;
+            }
+        }
         if (HaveSameSelfSecuringDraftBreakpointProfile(candidate, current)) {
             if (candidate.EffectivePlayerValue != current.EffectivePlayerValue) {
                 return candidate.EffectivePlayerValue > current.EffectivePlayerValue;
@@ -2741,6 +2757,26 @@ public static class EnemyAI {
             && !HasAnySelfSecuringDraftBreakpoint(current)
             && !HasAnyHardDraftDenial(candidate)
             && !HasAnyHardDraftDenial(current);
+    }
+
+    private static bool ShouldPreferNearFutilePowerDie(DraftChoiceEvaluation candidate, DraftChoiceEvaluation current) {
+        if (candidate == null || current == null) { return false; }
+
+        if (HasAnySelfSecuringDraftBreakpoint(candidate) || HasAnySelfSecuringDraftBreakpoint(current)) {
+            return false;
+        }
+
+        if (HasAnyHardDraftDenial(candidate) || HasAnyHardDraftDenial(current)) {
+            return false;
+        }
+
+        AdvancedPlanEvaluation candidatePlan = candidate.BestPlan;
+        AdvancedPlanEvaluation currentPlan = current.BestPlan;
+        if (candidatePlan == null || currentPlan == null) { return false; }
+
+        bool candidateNearFutile = !candidatePlan.EnemyDamagesPlayer && !candidatePlan.EnemyAvoidsDamage;
+        bool currentNearFutile = !currentPlan.EnemyDamagesPlayer && !currentPlan.EnemyAvoidsDamage;
+        return candidateNearFutile && currentNearFutile;
     }
 
     private static bool HaveSameSelfSecuringDraftBreakpointProfile(DraftChoiceEvaluation candidate, DraftChoiceEvaluation current) {

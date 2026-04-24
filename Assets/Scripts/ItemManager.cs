@@ -32,6 +32,46 @@ public class ItemManager : MonoBehaviour {
         { "sacrificial chalice", "desecrated chalice" },
         { "unstable spellbook", "ravaged book" },
     };
+    private static readonly Dictionary<string, string> LegacyCommonItemKeyAliases = new() {
+        { "holy water", "holy_water" },
+        { "witch hand", "witch_hand" },
+        { "skeleton key", "skeleton_key" },
+        { "crystal shard", "crystal_shard" },
+        { "salt shaker", "salt_shaker" },
+        { "cursed mask", "cursed_mask" },
+        { "cursed dice", "cursed_dice" },
+        { "sacrificial chalice", "sacrificial_chalice" },
+        { "unstable spellbook", "unstable_spellbook" },
+        { "lucky dice", "lucky_dice" },
+        { "boots of dodge", "boots_of_dodge" },
+        { "helm of might", "helm_of_might" },
+        { "amulet of resurrection", "amulet_of_resurrection" },
+        { "broken amulet", "broken_amulet" },
+        { "thief's armband", "thiefs_armband" },
+        { "thiefs armband", "thiefs_armband" },
+        { "thiefs_armband", "thiefs_armband" },
+        { "bloodletter's curse", "bloodletters_curse" },
+        { "bloodletters", "bloodletters_curse" },
+        { "rabadon's deathcap", "rabadons_deathcap" },
+        { "rabadons deathcap", "rabadons_deathcap" },
+        { "rabadons", "rabadons_deathcap" },
+        { "rotten steak", "rotten_steak" },
+        { "moldy cheese", "moldy_cheese" },
+        { "rusted helm", "rusted_helm" },
+        { "ruined boots", "ruined_boots" },
+        { "defiled kapala", "defiled_kapala" },
+        { "shattered ankh", "shattered_ankh" },
+        { "rotting mask", "rotting_mask" },
+        { "ruined cap", "ruined_cap" },
+        { "shattered mask", "shattered_mask" },
+        { "broken goggles", "broken_goggles" },
+        { "empty shaker", "empty_shaker" },
+        { "broken horn", "broken_horn" },
+        { "torn armband", "torn_armband" },
+        { "desecrated chalice", "desecrated_chalice" },
+        { "ravaged book", "ravaged_book" },
+        { "rotten ham", "rotten_ham" },
+    };
     private static readonly HashSet<string> WeaponNamePrefixes = new() {
         "common", "legendary", "forged", "accurate", "brisk", "blunt", "heavy", "nimble", "precise", "ruthless",
         "stable", "sharp", "harsh", "quick", "rotten", "rusty", "shattered"
@@ -187,40 +227,40 @@ public class ItemManager : MonoBehaviour {
             // +1g +1r
     };  
     private readonly Dictionary<string, int> itemDropDict = new() {
-        { "potion",         16 },
-        { "scroll",         16 },
-        { "cheese",         16 },
-        { "shuriken",       16 },
-        { "gem",            16 },
-        { "necklet",        12 },
-        { "tarot",          12 },
-        { "charm",          12 },
-        { "tincture",       12 },
-        { "torch",          12 },
-        { "steak",          8 },
-        { "mirror",         8 },
-        { "witch_hand",     8 },
-        { "skeleton_key",   4 },
-        { "crystal_shard",  4 },
-        { "lucky_dice",     4 },
-        { "campfire",       2 },
-        { "kapala",         2 },
-        { "boots_of_dodge", 2 },
-        { "helm_of_might",  2 },
-        { "sacrificial_chalice", 2 },
-        { "unstable_spellbook", 2 },
-        { "thief's armband", 2 },
-        { "bloodletters",    2 },
-        { "salt_shaker",    2 },
-        { "cornucopia",     2 },
-        { "rabadons",      2 },
-        { "cursed_mask",    2 },
-        { "cursed_dice",    2 },
-        { "holy_water",     1 },
-        { "goggles",        4 },
+        { "potion",                 16 },
+        { "scroll",                 16 },
+        { "shuriken",               16 },
+        { "gem",                    16 },
+        { "necklet",                12 },
+        { "tarot",                  12 },
+        { "charm",                  12 },
+        { "tincture",               12 },
+        { "torch",                  12 },
+        { "cheese",                 12 },
+        { "steak",                  8 },
+        { "mirror",                 8 },
+        { "witch_hand",             8 },
+        { "skeleton_key",           4 },
+        { "crystal_shard",          4 },
+        { "lucky_dice",             4 },
+        { "goggles",                4 },
+        { "campfire",               2 },
+        { "kapala",                 2 },
+        { "boots_of_dodge",         2 },
+        { "helm_of_might",          2 },
+        { "sacrificial_chalice",    2 },
+        { "unstable_spellbook",     2 },
+        { "thiefs_armband",         2 },
+        { "bloodletters_curse",     2 },
+        { "salt_shaker",            2 },
+        { "cornucopia",             2 },
+        { "rabadons_deathcap",      2 },
+        { "cursed_mask",            2 },
+        { "cursed_dice",            2 },
+        { "holy_water",             1 },
         { "amulet_of_resurrection", 1 },
-        { "ankh",           1 },
-        { "armor",          1 },
+        { "ankh",                   1 },
+        { "armor",                  1 },
     };
     [SerializeField] private List<string> itemDropTable;
 
@@ -323,6 +363,8 @@ public class ItemManager : MonoBehaviour {
             { "green", 1 }, { "blue", 0 }, { "red", 0 }, { "white", 0 } } },
         { "quick0",    new Dictionary<string, int> { 
             { "green", 0 }, { "blue", 1 }, { "red", 0 }, { "white", 0 } } },
+        { "lame0",    new Dictionary<string, int> { 
+            { "green", 0 }, { "blue", 0 }, { "red", -1 }, { "white", -1 } } },
     };
 
     private readonly Dictionary<string, int> modifierDropDict = new() {
@@ -348,6 +390,7 @@ public class ItemManager : MonoBehaviour {
         { "sharp1",    5 },
         { "harsh0",    5 },
         { "quick0",    5 },
+        { "lame0",    5 },
     };
 
     private List<string> modifierDropTable = new();
@@ -355,8 +398,8 @@ public class ItemManager : MonoBehaviour {
     public readonly Dictionary<string, string> descriptionDict = new() {
         {"armor",              "protects from one hit"}, 
         {"arrow",              "proceed to the next level"}, 
-        { "ankh",               "force new draft"}, 
-        { "amulet of resurrection", ""},
+        {"ankh",               "force new draft"}, 
+        {"amulet of resurrection", ""},
         {"boots of dodge",     "pay 1 stamina to become dodgy"}, 
         {"rusted helm",        ""}, 
         {"rotting mask",       ""},
@@ -477,7 +520,7 @@ public class ItemManager : MonoBehaviour {
         {"crystal shard",          "+2 attack\nshatters if wounded"},
         {"rabadon's deathcap",     "restore 1 stamina per turn if less than 3 stamina"},
         {"goggles",                "start combat with +3 accuracy and +2 attack"},
-        {"cursed mask",            "+3 stamina regen while wounded"},
+        {"cursed mask",            "+2 stamina regen per wound"},
         {"cursed dice",            "start with yellow dice while wounded"},
         {"holy water",             "+10 stamina or trade for 2 items"},
         {"salt shaker",            "food tastes better"},
@@ -584,6 +627,25 @@ public class ItemManager : MonoBehaviour {
         return System.Array.IndexOf(CanonicalWeaponNames, NormalizeWeaponSaveName(weaponName));
     }
 
+    public static string NormalizeCommonItemKey(string itemName) {
+        if (string.IsNullOrWhiteSpace(itemName)) { return ""; }
+
+        string key = itemName.Trim().ToLowerInvariant().Replace('-', '_');
+        if (LegacyCommonItemKeyAliases.TryGetValue(key, out string aliasedKey)) {
+            return aliasedKey;
+        }
+
+        key = key.Replace("'", "");
+        key = key.Replace(' ', '_');
+        while (key.Contains("__")) {
+            key = key.Replace("__", "_");
+        }
+
+        return LegacyCommonItemKeyAliases.TryGetValue(key, out aliasedKey)
+            ? aliasedKey
+            : key;
+    }
+
     private void BuildSpriteCatalogs() {
         spriteLookup.Clear();
         weaponSpriteByBaseName.Clear();
@@ -687,8 +749,16 @@ public class ItemManager : MonoBehaviour {
             if (itemScript == null) { continue; }
 
             if (!string.IsNullOrEmpty(itemScript.itemName)) {
-                inventoryItemCounts[itemScript.itemName] = GetDictionaryCount(inventoryItemCounts, itemScript.itemName) + 1;
-                firstInventoryItemByName.TryAdd(itemScript.itemName, inventoryObject);
+                string normalizedItemName = itemScript.itemType == "weapon"
+                    ? itemScript.itemName
+                    : NormalizeCommonItemKey(itemScript.itemName);
+                if (itemScript.itemType != "weapon") {
+                    itemScript.itemName = normalizedItemName;
+                    itemScript.gameObject.name = normalizedItemName;
+                }
+
+                inventoryItemCounts[normalizedItemName] = GetDictionaryCount(inventoryItemCounts, normalizedItemName) + 1;
+                firstInventoryItemByName.TryAdd(normalizedItemName, inventoryObject);
             }
 
             if (itemScript.itemName == "charm" && !string.IsNullOrEmpty(itemScript.modifier)) {
@@ -714,7 +784,10 @@ public class ItemManager : MonoBehaviour {
 
     private int GetInventoryItemCount(string itemName) {
         EnsureInventoryCache();
-        return string.IsNullOrEmpty(itemName) ? 0 : GetDictionaryCount(inventoryItemCounts, itemName);
+        if (string.IsNullOrEmpty(itemName)) { return 0; }
+
+        string normalizedName = NormalizeCommonItemKey(itemName);
+        return GetDictionaryCount(inventoryItemCounts, normalizedName);
     }
 
     public bool IsMerchantEncounter() {
@@ -774,7 +847,7 @@ public class ItemManager : MonoBehaviour {
     public int GetHamLevelStartBonus() {
         if (!PlayerHasWeapon("ham")) { return 0; }
         Item equippedWeapon = GetEquippedWeapon();
-        int saltShakerBonus = PlayerHas("salt shaker") ? 1 : 0;
+        int saltShakerBonus = PlayerHas("salt_shaker") ? 1 : 0;
         if (equippedWeapon != null && equippedWeapon.modifier == "rotten") { return saltShakerBonus; }
         return (PlayerHasLegendary() ? 4 : 2) + saltShakerBonus;
     }
@@ -1025,11 +1098,12 @@ public class ItemManager : MonoBehaviour {
     }
 
     public int GetFoodStaminaAmount(string itemName, bool includeCharacterBonus = true) {
+        itemName = NormalizeCommonItemKey(itemName);
         int staminaAmount = itemName switch {
             "steak" => 5,
             "cheese" => 3,
-            "rotten steak" => 0,
-            "moldy cheese" => 0,
+            "rotten_steak" => 0,
+            "moldy_cheese" => 0,
             _ => 0,
         };
 
@@ -1037,10 +1111,10 @@ public class ItemManager : MonoBehaviour {
             staminaAmount += 2;
         }
 
-        if (PlayerHas("salt shaker")) {
+        if (PlayerHas("salt_shaker")) {
             staminaAmount += itemName switch {
                 "steak" or "cheese" => 2,
-                "rotten steak" or "moldy cheese" => 1,
+                "rotten_steak" or "moldy_cheese" => 1,
                 _ => 0,
             };
         }
@@ -1053,22 +1127,22 @@ public class ItemManager : MonoBehaviour {
         if (Save.game.curCharNum == 0) {
             staminaAmount += 2;
         }
-        if (PlayerHas("salt shaker")) {
+        if (PlayerHas("salt_shaker")) {
             staminaAmount += 2;
         }
         return staminaAmount;
     }
 
     public int GetCursedMaskRegenAmount() {
-        int cursedMaskCount = GetPlayerItemCount("cursed mask");
+        int cursedMaskCount = GetPlayerItemCount("cursed_mask");
         if (cursedMaskCount <= 0 || s?.player == null) { return 0; }
 
         int woundCount = Mathf.Min(2, s.player.woundList.Count);
-        return woundCount <= 0 ? 0 : cursedMaskCount * (woundCount >= 2 ? 6 : 3);
+        return woundCount <= 0 ? 0 : cursedMaskCount * (woundCount >= 2 ? 4 : 2);
     }
 
     public int GetCursedDiceSpawnCount() {
-        int cursedDiceCount = GetPlayerItemCount("cursed dice");
+        int cursedDiceCount = GetPlayerItemCount("cursed_dice");
         if (cursedDiceCount <= 0 || s?.player == null) { return 0; }
 
         int woundCount = Mathf.Min(2, s.player.woundList.Count);
@@ -1115,7 +1189,7 @@ public class ItemManager : MonoBehaviour {
         return s.player.inventory
             .Where(inventoryItem => inventoryItem != null)
             .Select(inventoryItem => inventoryItem.GetComponent<Item>())
-            .Where(itemScript => itemScript != null && itemScript.itemName == "sacrificial chalice")
+            .Where(itemScript => itemScript != null && itemScript.itemName == "sacrificial_chalice")
             .ToList();
     }
 
@@ -1173,14 +1247,14 @@ public class ItemManager : MonoBehaviour {
     }
 
     public int GetSacrificialChaliceAppliedBonus() {
-        if (!PlayerHas("sacrificial chalice")) { return 0; }
+        if (!PlayerHas("sacrificial_chalice")) { return 0; }
         // Whole stat bonus is floor(total charge across chalices): two at 1.5 → +3, not +1+1.
         float combined = GetSacrificialChaliceCombinedCharge();
         return Mathf.FloorToInt(combined + 0.0001f);
     }
 
     public bool TryAdvanceSacrificialChalice(bool refreshCombatUI = true) {
-        if (!PlayerHas("sacrificial chalice")) { return false; }
+        if (!PlayerHas("sacrificial_chalice")) { return false; }
 
         EnsureSacrificialChaliceModifierData();
         List<Item> chalices = GetSacrificialChaliceItemsInInventory();
@@ -1226,7 +1300,7 @@ public class ItemManager : MonoBehaviour {
     }
 
     public int GetVendorTakeAllowance() {
-        return IsMerchantEncounter() && PlayerHas("thief's armband") ? 1 : 0;
+        return IsMerchantEncounter() && PlayerHas("thiefs_armband") ? 2 : 0;
     }
 
     public bool TryConsumeMerchantStealAllowance() {
@@ -1496,7 +1570,7 @@ public class ItemManager : MonoBehaviour {
             return;
         }
 
-        int luckyDiceCount = GetInventoryItemCount("lucky dice");
+        int luckyDiceCount = GetInventoryItemCount("lucky_dice");
         bool shouldApplyLuckyDice = luckyDiceCount > 0 && ShouldApplyLuckyDiceRoundStats();
 
         if (!shouldApplyLuckyDice) {
@@ -1550,7 +1624,7 @@ public class ItemManager : MonoBehaviour {
         luckyDiceRoundStats["blue"] = 0;
         luckyDiceRoundStats["red"] = 0;
         luckyDiceRoundStats["white"] = 0;
-        int luckyDiceCount = GetInventoryItemCount("lucky dice");
+        int luckyDiceCount = GetInventoryItemCount("lucky_dice");
 
         if (luckyDiceCount <= 0 || !ShouldApplyLuckyDiceRoundStats()) {
             luckyDiceRoundStatsInitialized = false;
@@ -1785,17 +1859,17 @@ public class ItemManager : MonoBehaviour {
             // need to implement a check if continuing or new game
         }
         // assign variables based on the Save, preventing cheating
-        StringBuilder builder = new();
-        builder.AppendLine("[startup debug loot printer] 50 random weapons");
-        for (int i = 0; i < 50; i++) {
-            builder.AppendLine($"{i + 1}. {DebugRollRandomWeaponName()}");
-        }
+        // StringBuilder builder = new();
+        // builder.AppendLine("[startup debug loot printer] 50 random weapons");
+        // for (int i = 0; i < 50; i++) {
+        //     builder.AppendLine($"{i + 1}. {DebugRollRandomWeaponName()}");
+        // }
 
-        builder.AppendLine("[startup debug loot printer] 100 random items");
-        for (int i = 0; i < 100; i++) {
-            builder.AppendLine($"{i + 1}. {DebugRollRandomItemName()}");
-        }
-        Debug.Log(builder.ToString());
+        // builder.AppendLine("[startup debug loot printer] 100 random items");
+        // for (int i = 0; i < 100; i++) {
+        //     builder.AppendLine($"{i + 1}. {DebugRollRandomItemName()}");
+        // }
+        // Debug.Log(builder.ToString());
     }
 
     private void Update() {
@@ -1863,14 +1937,18 @@ public class ItemManager : MonoBehaviour {
     }
 
     public static string GetCanonicalItemDisplayName(string itemName, string modifier) {
-        return itemName switch {
+        string normalizedItemName = NormalizeCommonItemKey(itemName);
+        return normalizedItemName switch {
             "scroll" => $"scroll of {modifier}",
             "potion" => $"potion of {modifier}",
             "gem" => $"{modifier} gem",
             "necklet" => modifier == "arcane" ? "arcane necklet" : $"necklet of {modifier}",
             "charm" => $"charm of the {modifier}",
             "tarot" => $"tarot of the {modifier}",
-            _ => itemName,
+            "rabadons_deathcap" => "rabadon's deathcap",
+            "bloodletters_curse" => "bloodletter's curse",
+            "thiefs_armband" => "thief's armband",
+            _ => normalizedItemName.Replace('_', ' '),
         };
     }
 
@@ -1943,6 +2021,7 @@ public class ItemManager : MonoBehaviour {
     }
 
     public string GetDisplayTextForItem(string itemName, string itemType, string modifier, bool useDynamicValues = true, string displayNameOverride = null) {
+        itemName = itemType == "weapon" ? itemName : NormalizeCommonItemKey(itemName);
         if (itemName is "???" or "hint") { return "???\nnot yet discovered"; }
 
         if (itemType == "weapon") {
@@ -1981,14 +2060,14 @@ public class ItemManager : MonoBehaviour {
                 int staminaRestored = useDynamicValues
                     ? GetFoodStaminaAmount(itemName)
                     : int.Parse(descriptionDict[itemName]);
-                return $"{itemName}\n+{staminaRestored} stamina";
+                return $"{displayNameForItem}\n+{staminaRestored} stamina";
             }
-            case "sacrificial chalice":
+            case "sacrificial_chalice":
                 return useDynamicValues ? GetSacrificialChaliceDescription(modifier) : "sacrificial chalice\nit thirsts...  +0";
-            case "moldy cheese":
-            case "rotten steak":
-                return $"{itemName}\n+{GetFoodStaminaAmount(itemName, includeCharacterBonus:false)} stamina";
-            case "holy water": {
+            case "moldy_cheese":
+            case "rotten_steak":
+                return $"{displayNameForItem}\n+{GetFoodStaminaAmount(itemName, includeCharacterBonus:false)} stamina";
+            case "holy_water": {
                 int staminaRestored = useDynamicValues ? GetHolyWaterStaminaAmount() : 10;
                 int tradeValue = 2;
                 return $"holy water\n+{staminaRestored} stamina\nor trade for {tradeValue} items";
@@ -2003,9 +2082,9 @@ public class ItemManager : MonoBehaviour {
                     : descriptionDict[itemName];
             case "retry":
                 return descriptionDict[itemName];
-            case "amulet of resurrection":
-            case "broken amulet":
-                return itemName;
+            case "amulet_of_resurrection":
+            case "broken_amulet":
+                return displayNameForItem;
         }
 
         if (!descriptionDict.TryGetValue(displayNameForItem, out string description) || string.IsNullOrEmpty(description)) {
@@ -2034,7 +2113,7 @@ public class ItemManager : MonoBehaviour {
                     }
                     // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
-                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(0).Replace(' ', '_') : "steak");
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(0) : "steak");
                     MoveToInventory(0, true, false, false);
                     // CreateItem("scroll", "leech");
                     // MoveToInventory(0, true, false, false);
@@ -2064,7 +2143,7 @@ public class ItemManager : MonoBehaviour {
                         CreateWeaponWithStats("maul", "common", -1, -1, 4, 1);
                     }
                     MoveToInventory(0, true, false, false);
-                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(1).Replace(' ', '_') : "armor");
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(1) : "armor");
                     MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("helm_of_might");
@@ -2080,7 +2159,7 @@ public class ItemManager : MonoBehaviour {
                         CreateWeaponWithStats("dagger", "common", 3, 6, 0, 0);
                     }
                     MoveToInventory(0, true, false, false);
-                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(2).Replace(' ', '_') : "boots_of_dodge");
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(2) : "boots_of_dodge");
                     MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("ankh");
@@ -2096,7 +2175,7 @@ public class ItemManager : MonoBehaviour {
                         CreateWeaponWithStats("mace", "ruthless", 3, 3, 2, 1);
                     }
                     MoveToInventory(0, true, false, false);
-                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(3).Replace(' ', '_') : "cheese");
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(3) : "cheese");
                     MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("kapala");
@@ -2183,10 +2262,10 @@ public class ItemManager : MonoBehaviour {
         }
 
         Item itemScript = instantiatedItem.GetComponent<Item>();
-        itemScript.itemName = itemName;
+        itemScript.itemName = itemType == "weapon" ? itemName : NormalizeCommonItemKey(itemName);
         itemScript.itemType = itemType;
         itemScript.modifier = string.IsNullOrEmpty(modifier) ? "" : modifier;
-        if (itemScript.itemName == "sacrificial chalice" && string.IsNullOrWhiteSpace(itemScript.modifier)) {
+        if (itemScript.itemName == "sacrificial_chalice" && string.IsNullOrWhiteSpace(itemScript.modifier)) {
             itemScript.modifier = "0";
         }
         itemScript.weaponStats = weaponStats != null
@@ -2220,7 +2299,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     private void CreateRandomItem(int negativeOffset = 0) {
         string itemKey = itemDropTable[Random.Range(0, itemDropTable.Count)];
-        string createdItemName = GetCanonicalCreatedItemName(itemKey.Replace("_", " "));
+        string createdItemName = GetCanonicalCreatedItemName(itemKey);
         CreateFloorItem(createdItemName, "common", GetItemSprite(itemKey), negativeOffset:negativeOffset, postProcess:SetItemStatsImmediately);
     }
 
@@ -2230,7 +2309,7 @@ public class ItemManager : MonoBehaviour {
     public GameObject CreateItem(string itemName, int negativeOffset=0) {
         string modifier = "";
         NormalizeLegacyCommonItem(ref itemName, ref modifier);
-        string createdItemName = GetCanonicalCreatedItemName(itemName.Replace("_", " "));
+        string createdItemName = GetCanonicalCreatedItemName(itemName);
         return CreateFloorItem(createdItemName, "common", GetItemSprite(itemName), negativeOffset:negativeOffset, postProcess:SetItemStatsImmediately);
     }
 
@@ -2239,7 +2318,7 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     public GameObject CreateItem(string itemName, string modifier, int negativeOffset=0) {
         NormalizeLegacyCommonItem(ref itemName, ref modifier);
-        string createdItemName = GetCanonicalCreatedItemName(itemName.Replace("_", " "));
+        string createdItemName = GetCanonicalCreatedItemName(itemName);
         return CreateFloorItem(createdItemName, "common", GetItemSprite(itemName), modifier, negativeOffset);
     }
 
@@ -2325,7 +2404,7 @@ public class ItemManager : MonoBehaviour {
         EnsureDropTablesBuilt();
 
         string itemKey = itemDropTable[Random.Range(0, itemDropTable.Count)];
-        string itemName = GetCanonicalCreatedItemName(itemKey.Replace("_", " "));
+        string itemName = GetCanonicalCreatedItemName(itemKey);
         string modifier = "";
 
         switch (itemName) {
@@ -2433,7 +2512,7 @@ public class ItemManager : MonoBehaviour {
             return CreateSmithUpgradeArrow(modifier);
         }
 
-        return CreateItem(itemName.Replace(' ', '_'), modifier);
+        return CreateItem(itemName, modifier);
     }
 
     public void RemoveFloorItemAt(int index, bool saveData = true) {
@@ -2718,7 +2797,7 @@ public class ItemManager : MonoBehaviour {
 
     private GameObject CreateRandomItemForTrader(int negativeOffset = 0) {
         string itemKey = itemDropTable[Random.Range(0, itemDropTable.Count)];
-        string createdItemName = GetCanonicalCreatedItemName(itemKey.Replace("_", " "));
+        string createdItemName = GetCanonicalCreatedItemName(itemKey);
         return CreateFloorItem(createdItemName, "common", GetItemSprite(itemKey), negativeOffset:negativeOffset, postProcess:SetItemStatsImmediately);
     }
 
@@ -2783,13 +2862,13 @@ public class ItemManager : MonoBehaviour {
     private int GetTorchBonusDropCount(int torchCount) {
         int bonusCount = 0;
         for (int i = 0; i < torchCount; i++) {
-            bonusCount += Random.Range(0, 2);
+            bonusCount += Random.Range(0, 3);
         }
         return bonusCount;
     }
 
     private int GetBloodlettersCurseEffectiveTorchCount() {
-        int curseCount = GetInventoryItemCount("bloodletter's curse");
+        int curseCount = GetInventoryItemCount("bloodletters_curse");
         if (curseCount <= 0 || s == null || s.player == null || s.player.woundList == null) { return 0; }
 
         int torchEquivalent = s.player.woundList.Count switch {
@@ -2937,15 +3016,15 @@ public class ItemManager : MonoBehaviour {
             availableWeapons.RemoveAt(rand);
         }
         int forgeSlotCount = 0;
-        // forge slot count: easy/normal: 75% 2, 25%3. hard: 50% 1, 50% 2. nightmare: 75% 1, 25% 2.
+        // forge slot count: easy/normal: 75% 3, 25%4. hard: 50% 2, 50% 3. nightmare: 75% 2, 25% 3.
         if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty) || DifficultyHelper.IsNormal(Save.persistent.gameDifficulty)) {
-            forgeSlotCount = Random.Range(0, 4) == 0 ? 3 : 2;
+            forgeSlotCount = Random.Range(0, 4) == 0 ? 4 : 3;
         }
         else if (DifficultyHelper.IsHard(Save.persistent.gameDifficulty)) {
-            forgeSlotCount = Random.Range(0, 2) + 1;
+            forgeSlotCount = Random.Range(0, 2) + 2;
         }
         else if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-            forgeSlotCount = Random.Range(0, 4) == 0 ? 2 : 1;
+            forgeSlotCount = Random.Range(0, 4) == 0 ? 3 : 2;
         }
         foreach (string stat in GetRandomForgeStats(forgeSlotCount)) {
             CreateSmithUpgradeArrow(stat);
@@ -2982,18 +3061,18 @@ public class ItemManager : MonoBehaviour {
     public static string GetRuinedCommonItemName(string itemName) {
         if (string.IsNullOrWhiteSpace(itemName)) { return itemName; }
 
-        string normalizedItemName = itemName.Replace('_', ' ');
+        string normalizedItemName = NormalizeCommonItemKey(itemName).Replace('_', ' ');
         return RuinedCommonItemNames.TryGetValue(normalizedItemName, out string ruinedItemName)
-            ? ruinedItemName
-            : normalizedItemName;
+            ? NormalizeCommonItemKey(ruinedItemName)
+            : NormalizeCommonItemKey(normalizedItemName);
     }
 
     public static string GetNightmareStarterTradeItemName(int characterNum) {
         return characterNum switch {
-            0 => "rotten steak",
-            1 => "rusted helm",
-            2 => "ruined boots",
-            3 => "moldy cheese",
+            0 => "rotten_steak",
+            1 => "rusted_helm",
+            2 => "ruined_boots",
+            3 => "moldy_cheese",
             _ => ""
         };
     }
@@ -3175,7 +3254,7 @@ public class ItemManager : MonoBehaviour {
 
     // recalculate always-on charm stat bonuses from inventory
     public void UpdateCharmPassiveStats() {
-        int crystalShardCount = GetInventoryItemCount("crystal shard");
+        int crystalShardCount = GetInventoryItemCount("crystal_shard");
         pendingShatteredCrystalShards = Mathf.Clamp(pendingShatteredCrystalShards, 0, crystalShardCount);
         int activeCrystalShardCount = Mathf.Max(0, crystalShardCount - pendingShatteredCrystalShards);
         charmPassiveStats["green"] = 0;
@@ -3424,7 +3503,8 @@ public class ItemManager : MonoBehaviour {
     /// </summary>
     public GameObject GetPlayerItem(string itemName) {
         EnsureInventoryCache();
-        return firstInventoryItemByName.TryGetValue(itemName, out GameObject itemObject) ? itemObject : null;
+        string normalizedItemName = NormalizeCommonItemKey(itemName);
+        return firstInventoryItemByName.TryGetValue(normalizedItemName, out GameObject itemObject) ? itemObject : null;
     }
 
     /// <summary>
@@ -3502,7 +3582,7 @@ public class ItemManager : MonoBehaviour {
             int saveIndex = 1;
             for (int i = 1; i < s.player.inventory.Count; i++) {
                 Item curItem = s.player.inventory[i].GetComponent<Item>();
-                Save.game.resumeItemNames[saveIndex] = curItem.itemName;
+                Save.game.resumeItemNames[saveIndex] = NormalizeCommonItemKey(curItem.itemName);
                 Save.game.resumeItemTypes[saveIndex] = curItem.itemType;
                 Save.game.resumeItemMods[saveIndex] = curItem.modifier;
                 saveIndex++;
@@ -3527,7 +3607,7 @@ public class ItemManager : MonoBehaviour {
             }
 
             Item itemScript = inventoryItem.GetComponent<Item>();
-            if (itemScript != null && itemScript.itemName == "broken amulet") { continue; }
+            if (itemScript != null && itemScript.itemName == "broken_amulet") { continue; }
 
             Destroy(inventoryItem);
             s.player.inventory.RemoveAt(i);
@@ -3593,24 +3673,16 @@ public class ItemManager : MonoBehaviour {
             string baseName = GetWeaponBaseName(item.itemName);
             return item.modifier == "legendary" ? $"legendary {baseName}" : baseName;
         }
-        return item.itemName switch {
-            "scroll" => $"scroll of {item.modifier}",
-            "potion" => $"potion of {item.modifier}",
-            "gem" => $"{item.modifier} gem",
-            "necklet" => item.modifier == "arcane" ? "arcane necklet" : $"necklet of {item.modifier}",
-            "charm"  => $"charm of the {item.modifier}",
-            "tarot"  => $"tarot of the {item.modifier}",
-            _ => item.itemName,
-        };
+        return GetCanonicalItemDisplayName(item.itemName, item.modifier);
     }
 
     private static string GetTrackedItemUseName(Item item) {
         if (item == null) { return ""; }
 
         return item.itemName switch {
-            "rotten steak" => "steak",
-            "moldy cheese" => "cheese",
-            "broken amulet" => "amulet of resurrection",
+            "rotten_steak" => "steak",
+            "moldy_cheese" => "cheese",
+            "broken_amulet" => "amulet of resurrection",
             _ => GetAlmanacFullName(item),
         };
     }
@@ -3698,121 +3770,45 @@ public class ItemManager : MonoBehaviour {
     }
 
     private string NormalizeItemSpriteName(string itemName) {
-        return itemName switch {
-            "broken_amulet"  => "amulet_of_resurrection",
-            "broken amulet"  => "amulet_of_resurrection",
-            "broken_helm"    => "helm_of_might",
-            "broken helm"    => "helm_of_might",
-            "rusted_helm"    => "helm_of_might",
-            "crystal shard"  => "crystal_shard",
-            "rusted helm"    => "helm_of_might",
-            "rotting_mask"   => "bloodletters",
-            "rotting mask"   => "bloodletters",
-            "ruined_cap"     => "rabadons",
-            "ruined cap"     => "rabadons",
+        string normalizedItemName = NormalizeCommonItemKey(itemName);
+        return normalizedItemName switch {
+            "broken_amulet" => "amulet_of_resurrection",
+            "broken_helm" => "helm_of_might",
+            "rusted_helm" => "helm_of_might",
+            "bloodletters_curse" => "bloodletters_curse",
+            "rotting_mask" => "bloodletters_curse",
+            "rabadons_deathcap" => "rabadons_deathcap",
+            "ruined_cap" => "rabadons_deathcap",
             "shattered_mask" => "cursed_mask",
-            "shattered mask" => "cursed_mask",
             "broken_goggles" => "goggles",
-            "broken goggles" => "goggles",
-            "empty_shaker"   => "salt_shaker",
-            "empty shaker"   => "salt_shaker",
-            "broken_horn"    => "cornucopia",
-            "broken horn"    => "cornucopia",
-            "torn_armband"   => "thiefs_armband",
-            "torn armband"   => "thiefs_armband",
+            "empty_shaker" => "salt_shaker",
+            "broken_horn" => "cornucopia",
+            "torn_armband" => "thiefs_armband",
             "desecrated_chalice" => "sacrificial_chalice",
-            "desecrated chalice" => "sacrificial_chalice",
-            "ravaged_book"   => "unstable_spellbook",
-            "ravaged book"   => "unstable_spellbook",
-            "witch hand"   => "witch_hand",
-            "glass sword"    => "glass_sword",
-            "rotten_steak"   => "steak",
-            "rotten steak"   => "steak",
-            "moldy_cheese"   => "cheese",
-            "moldy cheese"   => "cheese",
-            "ruined_boots"   => "boots_of_dodge",
-            "ruined boots"   => "boots_of_dodge",
-            "sacrificial chalice" => "sacrificial_chalice",
-            "salt shaker"    => "salt_shaker",
-            "rabadon's deathcap" => "rabadons",
-            "rabadons deathcap" => "rabadons",
-            "rabadons_deathcap" => "rabadons",
-            "rabadons"       => "rabadons",
-            "bloodletter's curse" => "bloodletters",
-            "bloodletter's_curse" => "bloodletters",
-            "bloodletters"   => "bloodletters",
-            "emerald gem"    => "gem",
-            "ruby gem"       => "gem",
-            "sapphire gem"   => "gem",
-            "topaz gem"      => "gem",
-            "citrine gem"    => "gem",
-            "holy water"     => "holy_water",
-            "cursed mask"    => "cursed_mask",
-            "cursed dice"    => "cursed_dice",
+            "ravaged_book" => "unstable_spellbook",
+            "rotten_steak" => "steak",
+            "moldy_cheese" => "cheese",
+            "ruined_boots" => "boots_of_dodge",
             "shattered_ankh" => "ankh",
-            "shattered ankh" => "ankh",
-            "unstable spellbook" => "unstable_spellbook",
-            "lucky dice" => "lucky_dice",
             "defiled_kapala" => "kapala",
-            "defiled kapala" => "kapala",
-            "thief's armband" => "thiefs_armband",
-            "thief's_armband" => "thiefs_armband",
-            "thiefs armband" => "thiefs_armband",
-            "rotten ham"     => "ham",
-            "rotten_ham"     => "ham",
-            "shattered glass sword" => "glass_sword_shattered",
+            "rotten_ham" => "ham",
+            "emerald_gem" => "gem",
+            "ruby_gem" => "gem",
+            "sapphire_gem" => "gem",
+            "topaz_gem" => "gem",
+            "citrine_gem" => "gem",
+            "shattered_glass_sword" => "glass_sword_shattered",
             "glass_sword_shattered" => "glass_sword_shattered",
-            _                => itemName
+            _ => normalizedItemName
         };
     }
 
     private static string GetCanonicalCreatedItemName(string itemName) {
-        return itemName switch {
-            "holy_water" => "holy water",
-            "witch_hand" => "witch hand",
-            "crystal_shard" => "witch hand",
-            "rabadons" => "rabadon's deathcap",
-            "broken_helm" => "broken helm",
-            "defiled_kapala" => "defiled kapala",
-            "moldy_cheese" => "moldy cheese",
-            "rabadons_deathcap" => "rabadon's deathcap",
-            "bloodletters" => "bloodletter's curse",
-            "bloodletter's curse" => "bloodletter's curse",
-            "rotten_steak" => "rotten steak",
-            "ruined_boots" => "ruined boots",
-            "rusted_helm" => "rusted helm",
-            "rotting_mask" => "rotting mask",
-            "ruined_cap" => "ruined cap",
-            "shattered_mask" => "shattered mask",
-            "broken_goggles" => "broken goggles",
-            "empty_shaker" => "empty shaker",
-            "broken_horn" => "broken horn",
-            "torn_armband" => "torn armband",
-            "desecrated_chalice" => "desecrated chalice",
-            "ravaged_book" => "ravaged book",
-            "salt_shaker" => "salt shaker",
-            "shattered_ankh" => "shattered ankh",
-            "thiefs armband" => "thief's armband",
-            "thief's armband" => "thief's armband",
-            _ => itemName,
-        };
+        return NormalizeCommonItemKey(itemName);
     }
 
     private static void NormalizeLegacyCommonItem(ref string itemName, ref string modifier) {
-
-        if (itemName == "rabadons deathcap") {
-            itemName = "rabadon's deathcap";
-        }
-
-        if (itemName == "rabadons") {
-            itemName = "rabadon's deathcap";
-        }
-
-        if (itemName == "bloodletters") {
-            itemName = "bloodletter's curse";
-        }
-
-        itemName = GetCanonicalCreatedItemName(itemName.Replace('_', ' '));
+        itemName = GetCanonicalCreatedItemName(itemName);
     }
 
     private string GetSafeResumeWeaponName() {
@@ -3847,7 +3843,7 @@ public class ItemManager : MonoBehaviour {
         for (int i = 1; i < 9; i++) {
             if (string.IsNullOrEmpty(Save.game.resumeItemNames[i])) { break; }
 
-            string savedItemName = Save.game.resumeItemNames[i].Replace(' ', '_');
+            string savedItemName = NormalizeCommonItemKey(Save.game.resumeItemNames[i]);
             if (!HasItemSprite(savedItemName)) { continue; }
 
             CreateCommonItemInInventory(savedItemName, Save.game.resumeItemMods[i]);
@@ -3880,11 +3876,13 @@ public class ItemManager : MonoBehaviour {
 
     private void CreateCommonItemInInventory(string itemName, string modifier) {
         NormalizeLegacyCommonItem(ref itemName, ref modifier);
-        CreateInventoryItem(itemName.Replace("_", " "), "common", GetItemSprite(itemName), modifier);
+        CreateInventoryItem(itemName, "common", GetItemSprite(itemName), modifier);
     }
 
     public string GetActionTextForItem(Item item, string verb) {
         if (item == null) { return verb; }
+
+        string displayName = GetCanonicalItemDisplayName(item.itemName, item.modifier);
 
         if (item.itemName == "necklet") {
             return item.modifier == "arcane"
@@ -3904,7 +3902,7 @@ public class ItemManager : MonoBehaviour {
             return $"{verb} {item.itemName} of {item.modifier}";
         }
 
-        return $"{verb} {item.itemName}";
+        return $"{verb} {displayName}";
     }
 
     /// <summary>
@@ -3928,7 +3926,7 @@ public class ItemManager : MonoBehaviour {
                 Save.game.floorItemDmgs[i] = curItem.weaponStats["red"];
                 Save.game.floorItemDefs[i] = curItem.weaponStats["white"];
             }
-            else { Save.game.floorItemNames[i] = curItem.itemName; }
+            else { Save.game.floorItemNames[i] = NormalizeCommonItemKey(curItem.itemName); }
 
             Save.game.floorItemTypes[i] = curItem.itemType;
             Save.game.floorItemMods[i] = curItem.modifier;
@@ -3961,7 +3959,7 @@ public class ItemManager : MonoBehaviour {
                 Save.game.lastTraderItemDefs[i] = curItem.weaponStats["white"];
             }
             else {
-                Save.game.lastTraderItemNames[i] = curItem.itemName;
+                Save.game.lastTraderItemNames[i] = NormalizeCommonItemKey(curItem.itemName);
             }
 
             Save.game.lastTraderItemTypes[i] = curItem.itemType;

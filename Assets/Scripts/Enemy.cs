@@ -6,9 +6,9 @@ using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 public class Enemy : MonoBehaviour {
-    public const int MerchantEnemyNum = 7;
-    public const int TombstoneEnemyNum = 8;
+    public const int MerchantEnemyNum = 8;
     public const int BlacksmithEnemyNum = 9;
+    public const int TombstoneEnemyNum = 10;
     [SerializeField] public RuntimeAnimatorController[] controllers;
     [SerializeField] public RuntimeAnimatorController lichDeathController;
     [SerializeField] private Sprite[] icons;
@@ -21,7 +21,7 @@ public class Enemy : MonoBehaviour {
     [SerializeField] public TextMeshProUGUI target;
     public List<string> woundList = new();
     public Dictionary<string, int> stats;
-    private readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Merchant", "Tombstone", "Blacksmith" };
+    readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Slime", "Merchant", "Blacksmith", "Tombstone" };
     private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
     public int stamina = 1;
     public int targetIndex = 0;
@@ -32,6 +32,7 @@ public class Enemy : MonoBehaviour {
         {"Lich", new Vector2(1.9f, -1.865334f)},
         {"Skeleton", new Vector2(2.1686665f, -2.117f)},
         {"Kobold", new Vector2(2.03233367f, -2.52f)},
+        {"Slime", new Vector2(2.03233367f, -2.52f)},
         {"Gog", new Vector2(2.0360003f, -2.52f)},
         {"Goblin", new Vector2(2.1f, -2.52f)},
     };
@@ -70,7 +71,7 @@ public class Enemy : MonoBehaviour {
     public readonly int lichStamina = 5;
 
     private int GetDisplayIndex(int enemyNum) {
-        return enemyNum == BlacksmithEnemyNum ? MerchantEnemyNum : enemyNum;
+        return enemyNum;
     }
 
     private bool IsVendor(int enemyNum) {
@@ -139,7 +140,7 @@ public class Enemy : MonoBehaviour {
             s.turnManager.RefreshBlackBoxVisibility();
             // hide the stats (don't fight tombstones)
         }
-        else if (s.levelManager.ShouldForceBlacksmithSpawn()) {
+        else if (s.levelManager.sub == LevelManager.BlacksmithSub) {
             bool spawnNewBlacksmith = Save.game.newGame || Save.game.enemyNum != BlacksmithEnemyNum;
             SpawnNewEnemy(BlacksmithEnemyNum, spawnNewBlacksmith);
             s.itemManager.lootText.text = "goods:";
@@ -148,7 +149,7 @@ public class Enemy : MonoBehaviour {
             else { s.itemManager.SpawnBlacksmithItems(true); }
             s.turnManager.RefreshBlackBoxVisibility();
         }
-        else if (s.levelManager.sub == 4) {
+        else if (s.levelManager.sub == LevelManager.MerchantSub) {
             // on a merchant level
             SpawnNewEnemy(MerchantEnemyNum, Save.game.newGame);
             // spawn the merchant
@@ -162,7 +163,7 @@ public class Enemy : MonoBehaviour {
         }
         else { 
             // else some fightable enemy
-            if (Save.game.newGame) { SpawnNewEnemy(Random.Range(3, 7), true); }
+            if (Save.game.newGame) { SpawnNewEnemy(Random.Range(3, 8), true); }
             // if in a new game, spawn a generic enemy
             else { 
                 // else resuming game from teh Savefile
@@ -210,6 +211,7 @@ public class Enemy : MonoBehaviour {
     /// Spawn an enemy based on its number on in the array.
     /// </summary>
     public void SpawnNewEnemy(int enemyNum, bool isNewEnemy) {
+        print($"spawning enemy, index{enemyNum} = {enemyArr[enemyNum]}");
         EnemyAI.InvalidateCachedPlan();
         if (isNewEnemy) {
             // creating new enemy
