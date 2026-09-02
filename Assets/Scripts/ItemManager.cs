@@ -2113,7 +2113,8 @@ public class ItemManager : MonoBehaviour {
                     else { 
                         CreateWeaponWithStats("sword", "harsh", 3, 3, 2, 3);
                     }
-                    // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
+                    MoveToInventory(0, true, false, false);
+                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(0) : "steak");
                     MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("torch");
