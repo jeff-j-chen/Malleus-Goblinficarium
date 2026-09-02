@@ -2,51 +2,68 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// Represents one die on the board, including dragging, attachment state, instant-use item effects,
+/// rerolls, fades, and value/type transformations.
+/// </summary>
 public class Dice : MonoBehaviour {
-    public int diceNum;
-    public string diceType;
-    public string statAddedTo;
-    public bool moveable = true;
-    public bool isAttached = false;
-    public bool isRerolled = false;
-    public bool isRolling = false;
-    public bool tarotUpgradeApplied = false;
-    public bool spawnedByCursedDice = false;
-    public string isOnPlayerOrEnemy = "none";
-    public Vector3 instantiationPos;
-    private SpriteRenderer spriteRenderer;
-    private SpriteRenderer childSpriteRenderer;
-    private Scripts s;
-    private bool wasClickedRecently = false;
-    private bool suppressPointerReleaseAfterInstantAction = false;
-    private bool suspendedEnemyPlanRefreshForDrag = false;
-    private bool dragStartedAttachedToPlayer = false;
-    private string dragStartedPlayerStat = "";
-    private bool detachedForPlayerReflowPreview = false;
-    private string detachedPlayerReflowPreviewStat = "";
-    private int detachedPlayerReflowPreviewIndex = -1;
+    public int diceNum; // current face value from 1 to 6
+    public string diceType; // current die color name such as red, white, or yellow
+    public string statAddedTo; // stat row this die is attached to when `isAttached` is true
+    public bool moveable = true; // true while the player can drag or click this die normally
+    public bool isAttached = false; // true once the die has been placed onto a player or enemy stat row
+    public bool isRerolled = false; // marks enemy dice that have already consumed their one reroll interaction
+    public bool isRolling = false; // blocks overlapping reroll/value animations
+    public bool tarotUpgradeApplied = false; // prevents tarot upgrades from being applied more than once
+    public bool spawnedByCursedDice = false; // identifies bonus draft dice spawned by cursed dice effects
+    public string isOnPlayerOrEnemy = "none"; // board owner: none, player, or enemy
+    public Vector3 instantiationPos; // snap-back position used when dragging and dropping the die
+    private SpriteRenderer spriteRenderer; // renderer for the number/foreground sprite
+    private SpriteRenderer childSpriteRenderer; // renderer for the colored die base child object
+    private Scripts s; // central project references and shared systems
+    private bool wasClickedRecently = false; // short double-click style window used for quick default placement
+    private bool suppressPointerReleaseAfterInstantAction = false; // prevents the release event from re-processing after instant click actions
+    private bool suspendedEnemyPlanRefreshForDrag = false; // true while a drag is batching enemy plan refresh work
+    private bool dragStartedAttachedToPlayer = false; // remembers whether this drag began on a player stat row
+    private string dragStartedPlayerStat = ""; // original player stat row before the current drag started
+    private bool detachedForPlayerReflowPreview = false; // true while temporarily removed from a player row for drag preview spacing
+    private string detachedPlayerReflowPreviewStat = ""; // original stat row to restore if the drag is cancelled
+    private int detachedPlayerReflowPreviewIndex = -1; // original index within that stat row for restoration
 
     private readonly WaitForSeconds[] rollTimes = { new(0.01f), new(0.03f), new(0.06f), new(0.09f), new(0.12f), new(0.15f), new(0.18f), new(0.21f), new(0.24f), new(0.3f) };
-    // different times for rolling 
+    // staggered waits that make rerolls feel like they are slowing to a stop
 
+    /// <summary>
+    /// Caches shared references before any other script tries to interact with this die.
+    /// </summary>
     private void Awake()  {
-        // must be in awake, otherwise s not set fast enough
         s = FindFirstObjectByType<Scripts>();
-        // assign the necessary sprite renderers
     }
 
+    /// <summary>
+    /// Starts the fade-in animation after the die is spawned.
+    /// </summary>
     private void Start() {
         StartCoroutine(FadeIn());
     }
 
+    /// <summary>
+    /// Lazily assigns sprite renderers for code paths that may run before `Start()`.
+    /// </summary>
     private void EnsureRenderersAssigned() {
         spriteRenderer ??= GetComponent<SpriteRenderer>();
         childSpriteRenderer ??= transform.GetChild(0).GetComponent<SpriteRenderer>();
     }
 
+    /// <summary>
+    /// Resolves a pending mirror-copy click before normal drag/drop logic can run.
+    /// </summary>
+    /// <returns>true if the click was consumed by the mirror copy effect</returns>
     private bool TryResolvePendingMirrorCopy() {
         if (!Save.game.pendingMirrorCopy || s.turnManager.isMoving || !s.itemManager.IsFightableEncounter()) { return false; }
 
+        // consume the click immediately so the follow-up mouse-up does not try to drag the same die
         suppressPointerReleaseAfterInstantAction = true;
         Save.game.pendingMirrorCopy = false;
         s.soundManager.PlayClip("zap");
@@ -58,11 +75,16 @@ public class Dice : MonoBehaviour {
         return true;
     }
 
+    /// <summary>
+    /// Resolves a pending spellbook transmute click before normal die interaction.
+    /// </summary>
+    /// <returns>true if the click was consumed by the spellbook effect</returns>
     private bool TryResolvePendingSpellbookTransmute() {
         if (!Save.game.pendingSpellbookTransmute || s.turnManager.isMoving) {
             return false;
         }
 
+        // chest rerolls and discard prompts on enemy dice take priority over spellbook usage
         if (ShouldPrioritizeEnemyDieActionOverSpellbook()) {
             return false;
         }
@@ -73,6 +95,10 @@ public class Dice : MonoBehaviour {
         return true;
     }
 
+    /// <summary>
+    /// Resolves a pending gem color-transform click on an attached player die.
+    /// </summary>
+    /// <returns>true if the click was consumed by the gem transform flow</returns>
     private bool TryResolvePendingGemTransform() {
         if (string.IsNullOrWhiteSpace(Save.game.pendingGemTransformColor) || s.turnManager.isMoving) {
             return false;
@@ -95,6 +121,10 @@ public class Dice : MonoBehaviour {
         return true;
     }
 
+    /// <summary>
+    /// Returns whether an enemy die click should stay reserved for discard/reroll actions.
+    /// </summary>
+    /// <returns>true when enemy-die combat actions should win over spellbook transmute</returns>
     private bool ShouldPrioritizeEnemyDieActionOverSpellbook() {
         if (!isAttached || isOnPlayerOrEnemy != "enemy" || s.enemy.enemyName.text == "Lich") { return false; }
 
@@ -106,9 +136,11 @@ public class Dice : MonoBehaviour {
         return false;
     }
 
+    /// <summary>
+    /// Entry point for mouse-down interaction, including instant-use item effects and tutorial restrictions.
+    /// </summary>
     private void OnMouseDown() {
         if (TryResolvePendingMirrorCopy() || TryResolvePendingSpellbookTransmute() || TryResolvePendingGemTransform()) { return; }
-        // as soon as the mouse button is pressed down
         if (s.tutorial != null) { 
             // if within the tutorial, make sure player can only do certain actions (so that they win)
             if (s.tutorial.isAnimating || s.tutorial.curIndex is 12 or 13 or 22)  {
@@ -180,6 +212,9 @@ public class Dice : MonoBehaviour {
         // }
     }
     
+    /// <summary>
+    /// Finishes mouse interaction unless the click was already consumed by an instant-use effect.
+    /// </summary>
     private void OnMouseUp() {
         if (suppressPointerReleaseAfterInstantAction) {
             suppressPointerReleaseAfterInstantAction = false;
@@ -199,6 +234,9 @@ public class Dice : MonoBehaviour {
         else { DiceUp(); }
     }
 
+    /// <summary>
+    /// Drags the die with tutorial restrictions applied when relevant.
+    /// </summary>
     private void OnMouseDrag() {
         if (suppressPointerReleaseAfterInstantAction) { return; }
 
@@ -326,6 +364,9 @@ public class Dice : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Temporarily removes this die from its player row so the remaining dice can visually reflow during a drag.
+    /// </summary>
     public void BeginPlayerReflowPreview() {
         if (!isAttached || isOnPlayerOrEnemy != "player" || string.IsNullOrEmpty(statAddedTo)) { return; }
         if (detachedForPlayerReflowPreview) { return; }
@@ -339,6 +380,7 @@ public class Dice : MonoBehaviour {
         detachedPlayerReflowPreviewIndex = index;
         diceList.RemoveAt(index);
 
+        // slide the remaining dice left immediately so the player sees the post-drop spacing preview
         for (int i = index; i < diceList.Count; i++) {
             Vector3 position = diceList[i].transform.position;
             position = new Vector2(position.x - s.statSummoner.diceOffset, position.y);
@@ -354,12 +396,16 @@ public class Dice : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Restores this die to its original player row if the drag did not end in a new valid attachment.
+    /// </summary>
     public void FinalizePlayerReflowPreview() {
         if (!detachedForPlayerReflowPreview) { return; }
 
         if (!string.IsNullOrEmpty(statAddedTo)
             && s.statSummoner.addedPlayerDice.TryGetValue(statAddedTo, out List<Dice> currentDice)
             && currentDice.Contains(this)) {
+            // already reattached somewhere valid, so only clear the temporary preview bookkeeping
             ClearPlayerReflowPreviewState();
             return;
         }
@@ -367,6 +413,7 @@ public class Dice : MonoBehaviour {
         if (!string.IsNullOrEmpty(detachedPlayerReflowPreviewStat)
             && s.statSummoner.addedPlayerDice.TryGetValue(detachedPlayerReflowPreviewStat, out List<Dice> originalDice)
             && !originalDice.Contains(this)) {
+            // cancelled drags must restore list order so later repositioning and saves stay consistent
             int restoreIndex = Mathf.Clamp(detachedPlayerReflowPreviewIndex, 0, originalDice.Count);
             originalDice.Insert(restoreIndex, this);
             statAddedTo = detachedPlayerReflowPreviewStat;
@@ -378,12 +425,18 @@ public class Dice : MonoBehaviour {
         ClearPlayerReflowPreviewState();
     }
 
+    /// <summary>
+    /// Clears the temporary state used by the player-row reflow preview system.
+    /// </summary>
     private void ClearPlayerReflowPreviewState() {
         detachedForPlayerReflowPreview = false;
         detachedPlayerReflowPreviewStat = "";
         detachedPlayerReflowPreviewIndex = -1;
     }
 
+    /// <summary>
+    /// Opens a short window where a second release counts as a quick default-placement click.
+    /// </summary>
     private IEnumerator ClickedTimer() { 
         if (!wasClickedRecently) { 
             wasClickedRecently = true;
@@ -511,15 +564,24 @@ public class Dice : MonoBehaviour {
         s.diceSummoner.SaveDiceValues();
     }
 
+    /// <summary>
+    /// Sets the die face value and immediately updates its number sprite.
+    /// </summary>
+    /// <param name="newValue">requested die value, clamped to 1-6</param>
     public void SetDiceValue(int newValue) {
         EnsureRenderersAssigned();
         diceNum = Mathf.Clamp(newValue, 1, 6);
         spriteRenderer.sprite = s.diceSummoner.numArr[diceNum - 1].GetComponent<SpriteRenderer>().sprite;
     }
 
+    /// <summary>
+    /// Changes the die's color type and updates both foreground/background sprite tints.
+    /// </summary>
+    /// <param name="newType">new color name to assign</param>
     public void SetDieType(string newType) {
         EnsureRenderersAssigned();
         diceType = newType;
+        // white and yellow bases need dark face text to stay readable
         spriteRenderer.color = newType is "white" or "yellow" ? Color.black : Color.white;
         childSpriteRenderer.color = newType switch {
             "green" => Colors.green,
@@ -569,7 +631,7 @@ public class Dice : MonoBehaviour {
         string removedSide = isOnPlayerOrEnemy;
         try { s.statSummoner.addedPlayerDice[statAddedTo].Remove(this); } catch { }
         try { s.statSummoner.addedEnemyDice[statAddedTo].Remove(this); } catch { }
-        // attempt to remove from the player/enemy, checking with if statements causes a plethora of bugs for no reason
+        // these removals intentionally fail-soft because several effects can already have detached the die before fade completes
         if (removedStat != "" && shiftOver && (removedSide == "player" || removedSide == "enemy")) {
             s.statSummoner.RepositionDice(removedSide, removedStat);
         }

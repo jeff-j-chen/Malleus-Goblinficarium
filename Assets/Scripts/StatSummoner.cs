@@ -70,6 +70,9 @@ public class StatSummoner : MonoBehaviour {
     };
     private Scripts s;
 
+    /// <summary>
+    /// initializes layout constants and debug text colors based on platform and debug mode
+    /// </summary>
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
         if (PlayerPrefs.GetString("debug") == "on") {
@@ -103,6 +106,9 @@ public class StatSummoner : MonoBehaviour {
         // create the stamina buttons
     }
 
+    /// <summary>
+    /// prints a full stat/dice/wound snapshot to the log when debug mode is on and S is pressed
+    /// </summary>
     private void Update() {
         if (s == null || s.player == null || s.enemy == null || s.turnManager == null) { return; }
         if (PlayerPrefs.GetString(s.DEBUG_KEY) != "on") { return; }
@@ -186,27 +192,38 @@ public class StatSummoner : MonoBehaviour {
         return 0;
     }
 
+    /// <summary>
+    /// total of all flat stat contributors before stamina allocation and dice are added
+    /// includes weapon base, potions, necklets, charms, chalice bonus, encounter bonuses, and lucky dice
+    /// this is what the ai snapshot and SumOfStat use as their starting point
+    /// </summary>
     private int GetPlayerStatTotalWithoutAddedStamina(string stat) {
         string mirroredStat = GetPlayerMirroredStat(stat);
         if (mirroredStat != stat) {
+            // scroll of empowerment / fortification / destruction redirect this stat to another
             return GetPlayerStatTotalWithoutAddedStamina(mirroredStat);
         }
 
         int guardParryBonus = stat == "white" && s?.turnManager != null
             ? s.turnManager.GetPlayerGuardParryBonus()
             : 0;
+        // all-5-gems bonus: treat the weapon base as 6 across all stats
+        int weaponBase = s?.itemManager?.PlayerHasAllGems() == true ? 6 : s.player.stats[stat];
 
-        return s.player.stats[stat]
-            + s.player.potionStats[stat]
-            + s.itemManager.neckletStats[stat]
-            + s.itemManager.charmPassiveStats[stat]
-            + s.itemManager.charmActiveBonus[stat]
-            + s.itemManager.GetSacrificialChaliceAppliedBonus()
-            + GetEncounterWeaponStatBonus(stat)
+        return weaponBase
+            + s.player.potionStats[stat]        // potions of accuracy/speed/etc.
+            + s.itemManager.neckletStats[stat]  // necklet of solidity/rapidity/etc.
+            + s.itemManager.charmPassiveStats[stat]  // always-on charm bonuses
+            + s.itemManager.charmActiveBonus[stat]   // triggered charm bonuses (riposte, aether, etc.)
+            + s.itemManager.GetSacrificialChaliceAppliedBonus()  // chalice drain bonus
+            + GetEncounterWeaponStatBonus(stat)  // weapon-specific per-round bonuses (gladius, etc.)
             + guardParryBonus
             + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
     }
 
+    /// <summary>
+    /// stat total including stamina allocation but not dice — used for stat-square generation and outermost-x
+    /// </summary>
     private int GetPlayerDisplayedStatTotal(string stat) {
         string mirroredStat = GetPlayerMirroredStat(stat);
         if (mirroredStat != stat) {
@@ -216,12 +233,18 @@ public class StatSummoner : MonoBehaviour {
         return GetPlayerStatTotalWithoutAddedStamina(stat) + addedPlayerStamina[stat];
     }
 
+    /// <summary>
+    /// visual-only stat total used only for spawning stat squares — does NOT flow into combat math
+    /// deliberately omits the guard-targeting mirror so the squares always show raw stat directions
+    /// </summary>
     private int GetPlayerVisualStatTotalWithoutAddedStamina(string stat) {
         int guardParryBonus = stat == "white" && s?.turnManager != null
             ? s.turnManager.GetPlayerGuardParryBonus()
             : 0;
+        // mirrors the same 6-gem override used in GetPlayerStatTotalWithoutAddedStamina
+        int weaponBase = s?.itemManager?.PlayerHasAllGems() == true ? 6 : s.player.stats[stat];
 
-        return s.player.stats[stat]
+        return weaponBase
             + s.player.potionStats[stat]
             + s.itemManager.neckletStats[stat]
             + s.itemManager.charmPassiveStats[stat]
@@ -232,10 +255,18 @@ public class StatSummoner : MonoBehaviour {
             + s.itemManager.GetLuckyDiceRoundStatBonus(stat);
     }
 
+    /// <summary>
+    /// visual stat total including stamina — used by GenerateForStat and outermost coordinate helpers
+    /// </summary>
     private int GetPlayerVisualDisplayedStatTotal(string stat) {
         return GetPlayerVisualStatTotalWithoutAddedStamina(stat) + addedPlayerStamina[stat];
     }
 
+    /// <summary>
+    /// returns the stat that a given stat should read from when a scroll redirect is active
+    /// scroll of empowerment redirects red→white, scroll of destruction redirects red→green,
+    /// scroll of fortification redirects white→blue; otherwise returns the same stat unchanged
+    /// </summary>
     private string GetPlayerMirroredStat(string stat) {
         if (stat == "red") {
             if (Save.game.isEmpowered) { return "white"; }
@@ -249,6 +280,9 @@ public class StatSummoner : MonoBehaviour {
         return stat;
     }
 
+    /// <summary>
+    /// maps a stat color key to its human-readable label for debug output
+    /// </summary>
     private string GetStatLabel(string stat) {
         return stat switch {
             "green" => "accuracy",
@@ -542,6 +576,10 @@ public class StatSummoner : MonoBehaviour {
         // sum everything to get the offset
     }
 
+    /// <summary>
+    /// returns any per-round flat bonus from the equipped weapon (gladius attack bonus, etc.)
+    /// returns 0 if the item manager is not available
+    /// </summary>
     private int GetEncounterWeaponStatBonus(string statType) {
         if (s == null || s.itemManager == null) { return 0; }
         return s.itemManager.GetCurrentPlayerWeaponStatBonus(statType);
@@ -580,6 +618,11 @@ public class StatSummoner : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// returns the speed value shown in debug text — 99 means "always acts first" for display purposes
+    /// player gets 99 if the enemy has a knee wound, if the player always acts first (spear/gauntlets),
+    /// or if warhammer stun is active; enemy gets 99 if the player has a knee wound
+    /// </summary>
     private int GetDebugBlueStat(string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             return (s.enemy.woundList.Contains("knee") && s.enemy.enemyName.text != "Lich" || s.itemManager.PlayerAlwaysActsFirst() || s.itemManager.PlayerHasWarhammerStunActive()) ? 99 : SumOfStat("blue", "player");
@@ -625,6 +668,10 @@ public class StatSummoner : MonoBehaviour {
         SetDebugInformationFor("player");
     }
 
+    /// <summary>
+    /// builds a multiline string snapshot of the full combat state for both sides
+    /// triggered by pressing S in debug mode — prints to the unity log
+    /// </summary>
     private string BuildDebugSnapshot() {
         StringBuilder builder = new();
         builder.AppendLine("PLAYER: " + BuildStatSummary("player"));
@@ -680,14 +727,24 @@ public class StatSummoner : MonoBehaviour {
         return builder.ToString();
     }
 
+    /// <summary>
+    /// one-line acc/spd/atk/def summary for the given side, e.g. "2 / 3 / 4 / 1"
+    /// </summary>
     private string BuildStatSummary(string playerOrEnemy) {
         return $"{SumOfStat("green", playerOrEnemy)} / {SumOfStat("blue", playerOrEnemy)} / {SumOfStat("red", playerOrEnemy)} / {SumOfStat("white", playerOrEnemy)}";
     }
 
+    /// <summary>
+    /// formats one stat as "label: total = breakdown", e.g. "attack: 5 = (3 + r2)"
+    /// </summary>
     private string BuildDetailedStatLine(string stat, string playerOrEnemy, string label) {
         return $"{label}: {SumOfStat(stat, playerOrEnemy)} = {BuildStatBreakdown(stat, playerOrEnemy)}";
     }
 
+    /// <summary>
+    /// builds the parenthetical addend breakdown for a stat, e.g. "(3 + r2 + 1 s)"
+    /// handles 99 (always-first) and mirrored stats as special cases
+    /// </summary>
     private string BuildStatBreakdown(string stat, string playerOrEnemy) {
         if (stat == "blue" && SumOfStat(stat, playerOrEnemy) == 99) {
             return "(always higher)";
@@ -713,6 +770,10 @@ public class StatSummoner : MonoBehaviour {
         return "(" + string.Join(" + ", parts) + ")";
     }
 
+    /// <summary>
+    /// returns the flat non-stamina total for a given stat and side
+    /// for enemies this is just their raw stat value (no further breakdown needed)
+    /// </summary>
     private int GetBaseStatWithoutAddedStamina(string stat, string playerOrEnemy) {
         if (playerOrEnemy == "player") {
             return GetPlayerStatTotalWithoutAddedStamina(stat);
@@ -721,23 +782,35 @@ public class StatSummoner : MonoBehaviour {
         return s.enemy.stats[stat];
     }
 
+    /// <summary>
+    /// returns how much stamina has been allocated into the given stat for the given side
+    /// </summary>
     private int GetAddedStamina(string stat, string playerOrEnemy) {
         return playerOrEnemy == "player"
             ? addedPlayerStamina[stat]
             : addedEnemyStamina[stat];
     }
 
+    /// <summary>
+    /// returns all currently non-null dice attached to the given stat and side
+    /// </summary>
     private IEnumerable<Dice> GetAttachedDice(string stat, string playerOrEnemy) {
         return playerOrEnemy == "player"
             ? addedPlayerDice[stat].Where(die => die != null)
             : addedEnemyDice[stat].Where(die => die != null);
     }
 
+    /// <summary>
+    /// formats the wound list as a comma-separated string, or "none" if unwounded
+    /// </summary>
     private string BuildWoundsLine(IEnumerable<string> wounds) {
         List<string> woundList = wounds.Where(wound => !string.IsNullOrWhiteSpace(wound)).ToList();
         return woundList.Count == 0 ? "none" : string.Join(", ", woundList);
     }
 
+    /// <summary>
+    /// lists all unattached dice in the current pool as formatted strings, e.g. "g3, b5, r1"
+    /// </summary>
     private string BuildAvailableDiceLine() {
         List<string> dice = s.diceSummoner.existingDice
             .Where(dieObject => dieObject != null)
@@ -749,14 +822,23 @@ public class StatSummoner : MonoBehaviour {
         return dice.Count == 0 ? "none" : string.Join(", ", dice);
     }
 
+    /// <summary>
+    /// strips leading asterisks from targeting text (used to remove wound-already markers) or returns "none"
+    /// </summary>
     private string CleanTargetText(string targetText) {
         return string.IsNullOrWhiteSpace(targetText) ? "none" : targetText.TrimStart('*');
     }
 
+    /// <summary>
+    /// formats a die as a color abbreviation + face value, e.g. "r4" or "b2"
+    /// </summary>
     private string FormatDie(Dice die) {
         return ColorAbbreviation(die.diceType) + die.diceNum;
     }
 
+    /// <summary>
+    /// single-character abbreviation for a dice color used in debug output
+    /// </summary>
     private string ColorAbbreviation(string colorName) {
         return colorName switch {
             "green" => "g",

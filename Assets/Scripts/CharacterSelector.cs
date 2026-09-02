@@ -2,50 +2,59 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+/// <summary>
+/// Runs the character-select screen, including selection changes, difficulty/endless toggles,
+/// and previewing each character's starting loadout.
+/// </summary>
 public class CharacterSelector : MonoBehaviour {
-    [SerializeField] public int selectionNum;
-    [SerializeField] private Sprite[] icons;
-    [SerializeField] private Sprite releasedButton;
-    [SerializeField] private Sprite pressedButton;
-    [SerializeField] private GameObject leftButton;
-    [SerializeField] private GameObject rightButton;
-    [SerializeField] private TextMeshProUGUI quoteText;
-    [SerializeField] private TextMeshProUGUI perkText;
-    [SerializeField] private GameObject bottomText;
-    [SerializeField] public SimpleFadeIn simpleFadeIn;
-    [SerializeField] public GameObject itemHider;
+    [SerializeField] public int selectionNum; // currently previewed character index
+    [SerializeField] private Sprite[] icons; // full-size portrait sprite for each character slot
+    [SerializeField] private Sprite releasedButton; // default sprite for left/right selector buttons
+    [SerializeField] private Sprite pressedButton; // pressed sprite for left/right selector buttons
+    [SerializeField] private GameObject leftButton; // previous-character button that hides on the first slot
+    [SerializeField] private GameObject rightButton; // next-character button that hides on the last slot
+    [SerializeField] private TextMeshProUGUI quoteText; // flavor quote shown under the portrait
+    [SerializeField] private TextMeshProUGUI perkText; // perk and mode summary text for the selected character
+    [SerializeField] private GameObject bottomText; // button-hint footer hidden when icon prompts are enabled
+    [SerializeField] public SimpleFadeIn simpleFadeIn; // fade controller used when cycling difficulty
+    [SerializeField] public GameObject itemHider; // overlay that obscures starter items for locked characters
     private readonly string[] quotes = {
         "- \"they say 68% of adventurers die of starvation...\"",
         "- \"what comedy is your defiance, beasts!\"",
         "- \"...breastplate costs a fortune; dodging is free...\"",
         "- \"honestly all the carnage is making me sleepy...\"",
-    }; 
+    }; // quote text aligned by character index
     private readonly string[] perks = {
         "* Food restores more stamina",
         "* Gains a yellow die each round\n* Cannot use stamina",
         "* All white dice are set to 1\n* Gains 1 stamina upon inflicting a wound",
         "* White dice buff damage\n* Gains 3 stamina once wounded\n* As stamina reaches 10, wounds are cured and stamina is decreased by 10",
-    }; 
-    private bool preventPlayingFX = true;
-    private Scripts s;
+    }; // base perk text aligned by character index
+    private bool preventPlayingFX = true; // prevents initial screen setup from playing click sounds
+    private Scripts s; // shared systems and item references for the menu scene
     
+    /// <summary>
+    /// Initializes the character-select screen and applies current difficulty visibility rules.
+    /// </summary>
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
         simpleFadeIn = FindFirstObjectByType<SimpleFadeIn>();
-        // get necessary objects
-        // pull in data from the Savefile
         HideItemsByDifficulty(false);
         
-        // select 0 and go to it
         bottomText.SetActive(PlayerPrefs.GetString(s.BUTTONS_KEY) != "on");
         StartCoroutine(AllowFX());
     }
     
+    /// <summary>
+    /// Shows or hides difficulty-dependent starter items, then refreshes the current selection.
+    /// </summary>
+    /// <param name="preserveSelection">keep the current character selection when true</param>
     public void HideItemsByDifficulty(bool preserveSelection = true) { 
         int selectionToKeep = preserveSelection ? selectionNum : 0;
         if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)) { s.itemManager.floorItems[2].GetComponent<Item>().UnHide(); }
         else { s.itemManager.floorItems[2].GetComponent<Item>().Hide(); }
-        // easy has 2nd item
+        // slot 2 is the easy-only bonus item, while slot 1 is always visible
         s.itemManager.floorItems[1].GetComponent<Item>().UnHide();
         selectionNum = Mathf.Clamp(selectionToKeep, 0, icons.Length - 1);
         SetSelection(selectionNum);
@@ -59,6 +68,9 @@ public class CharacterSelector : MonoBehaviour {
         preventPlayingFX = false;
     }
 
+    /// <summary>
+    /// Handles keyboard navigation, difficulty toggles, and character confirmation.
+    /// </summary>
     private void Update() {
         if (Input.GetKeyDown(KeyCode.LeftArrow)) { 
             SetSelection(selectionNum - 1);
@@ -80,12 +92,13 @@ public class CharacterSelector : MonoBehaviour {
         else if (Input.GetKeyDown(KeyCode.E)) { ToggleEndlessMode(); }
         // e toggles endless mode
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) { 
-            // enter selects the character
             Select();
-            // but only if its already unlocked
         }
     }
 
+    /// <summary>
+    /// Confirms the current character if it has been unlocked.
+    /// </summary>
     public void Select() {
         if (Save.persistent.unlockedChars[selectionNum]) { StartCoroutine(LoadMenuScene()); }
     }
@@ -107,41 +120,31 @@ public class CharacterSelector : MonoBehaviour {
     }
 
     /// <summary>
-    /// Select (preview) a character and display it to the player
+    /// Selects a character slot, updates the portrait/description, and previews its starter loadout.
     /// </summary>
+    /// <param name="num">requested character index</param>
     public void SetSelection(int num) {
         if (num is >= 0 and <= 3) {
-            // only allow selections between the number of available characters
             selectionNum = num;
-            // set the current selection num
             if (Save.persistent.unlockedChars[selectionNum]) {
-                // if the current selected character is unlocked
                 itemHider.SetActive(false);
-                // show that character's items
                 quoteText.text = quotes[selectionNum];
                 UpdatePerkText();
-                // show that character's quote and perk
             }
             else {
-                // current selected character is not unlocked
                 itemHider.SetActive(true);
-                // make sure to hide items
                 quoteText.text = "beat game on previous character to unlock";
                 perkText.text = "";
-                // let player know that it's locked
             }
             GetComponent<SpriteRenderer>().sprite = icons[selectionNum];
-            // set the character icon
             if (!preventPlayingFX) { s.soundManager.PlayClip("click0"); }
-            // only play sfx if we want it 
             if (selectionNum == 0) { leftButton.transform.position = new Vector2(-8.53f, 20f); }
-            // hide left button if we are the leftmost (first) character
             else { leftButton.transform.position = new Vector2(-8.53f, 1f); }
-            // otherwise show the left button
             if (selectionNum == 3) { rightButton.transform.position = new Vector2(8.53f, 20f); }
             else { rightButton.transform.position = new Vector2(8.53f, 1f); }
-            // same for the right button, but 
         }
+
+        // starter loadout preview objects are reused, so each selection rewrites their names/modifiers/sprites in place
         switch (num) {
             case 0:
                 s.itemManager.floorItems[0].GetComponent<Item>().itemName = "harsh sword";
@@ -193,7 +196,7 @@ public class CharacterSelector : MonoBehaviour {
                 break;
         }
         if (DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty)) {
-            // rename weapon to be rusty if in nightmare mode
+            // nightmare replaces the normal starter weapon modifier and the non-weapon trade item
             s.itemManager.floorItems[0].GetComponent<Item>().modifier = "rusty";
             string itemName = s.itemManager.floorItems[0].GetComponent<Item>().itemName;
             s.itemManager.floorItems[0].GetComponent<Item>().itemName = "rusty " + ItemManager.GetWeaponBaseName(itemName);
@@ -204,9 +207,8 @@ public class CharacterSelector : MonoBehaviour {
                 s.itemManager.GetItemSprite(nightmareTradeItemName.Replace(' ', '_'));
             // print(s.itemManager.floorItems[0].GetComponent<Item>().itemName);
         }
-        // give the character items based on their class, even if its not unlocked because it will be hidden regardless
+        // selecting the first starter item keeps the item description/highlight logic from being left in an invalid state
         s.itemManager.floorItems[0].GetComponent<Item>().Select(false);
-        // select the first item so its not buggy
     }
 
     /// <summary>
@@ -228,24 +230,22 @@ public class CharacterSelector : MonoBehaviour {
     }
 
     /// <summary>
-    /// Toggles easy mode and handles the hiding.
+    /// Cycles to the next difficulty and fades the preview so starter items can be rebuilt cleanly.
     /// </summary>
     public void CycleDifficulty() {
         if (!simpleFadeIn.lockChanges) {
-            // don't allow toggle of easy if we are fading rn
             s.soundManager.PlayClip("click1");
-            // play clip
-            // toggle the boolean
             StartCoroutine(simpleFadeIn.FadeHide()); 
-            // fade to black and then back
             Save.persistent.gameDifficulty = DifficultyHelper.Next(Save.persistent.gameDifficulty);
             Save.persistent.difficultyVersion = DifficultyHelper.CurrentDifficultyVersion;
 
             Save.SavePersistent();
-            // apply it to the Save file so the next game will have the correct character
         }
     }
 
+    /// <summary>
+    /// Toggles endless mode and refreshes the perk summary text.
+    /// </summary>
     public void ToggleEndlessMode() {
         if (simpleFadeIn.lockChanges) { return; }
 
@@ -255,6 +255,9 @@ public class CharacterSelector : MonoBehaviour {
         UpdatePerkText();
     }
 
+    /// <summary>
+    /// Rebuilds the perk text block for the selected character, difficulty, and endless mode.
+    /// </summary>
     public void UpdatePerkText() { 
         perkText.text = perks[selectionNum];
         if (DifficultyHelper.IsEasy(Save.persistent.gameDifficulty)) { 

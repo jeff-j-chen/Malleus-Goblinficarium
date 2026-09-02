@@ -1,78 +1,76 @@
 ﻿using System.Collections;
 using UnityEngine;
-public class Arrow : MonoBehaviour {
-    [SerializeField] public GameObject[] menuButtons;
-    public readonly float xOffset = -4f;
-    public readonly float yOffset = -0.04f;
-    // how far off the arrow should be on the x and y axes
-    private int currentIndex = 1;
-    // the current index of the menu item the arrow is selecting
-    private Scripts s;
-    // necessary for all files
-    private bool preventPlayingFX = true;
 
+/// <summary>
+/// Controls the title-screen selection arrow for keyboard navigation.
+/// </summary>
+public class Arrow : MonoBehaviour {
+    [SerializeField] public GameObject[] menuButtons; // ordered menu targets the arrow can point at
+    public readonly float xOffset = -4f; // horizontal offset that places the arrow left of the selected button
+    public readonly float yOffset = -0.04f; // slight vertical offset so the arrow visually aligns with the button art
+    private int currentIndex = 1; // current selected menu index, defaulting to new game when continue may be unavailable
+    private Scripts s; // central project references and shared systems
+    private bool preventPlayingFX = true; // blocks startup audio while the arrow snaps into place
+
+    /// <summary>
+    /// Initializes the arrow position and respects the button-hints accessibility toggle.
+    /// </summary>
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
-        // find s
-        // hide/show the continue button if there is a game or not
         MoveToButtonPos(currentIndex);
-        // immediately move to the correct button position
         StartCoroutine(AllowFx());
+        // keep the logical selection on the first button, but visually hide the arrow if button prompts are enabled
         transform.localPosition = PlayerPrefs.GetString(s.BUTTONS_KEY) == "on" ? new Vector2(1000f, 0) : new Vector2(menuButtons[0].transform.position.x + xOffset, menuButtons[0].transform.position.y + yOffset);
     }
 
+    /// <summary>
+    /// Delays sound playback so the initial snap does not click.
+    /// </summary>
     private IEnumerator AllowFx() { 
         yield return new WaitForSeconds(0.1f);
         preventPlayingFX = false;
     }
 
+    /// <summary>
+    /// Reads keyboard menu navigation and forwards the selected button on confirm.
+    /// </summary>
     private void Update() {
         if (Input.GetKeyDown(KeyCode.DownArrow)) {
-            // if player pressed down
             if (currentIndex + 1 < menuButtons.Length) {
-                // if can move the selector (arrow) down
                 currentIndex++;
                 MoveToButtonPos(currentIndex);
-                // increment current index and select the menu item
             }
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow)) {
-            // if player pressed up
-            if (currentIndex - 1 >= 0 && Save.game.newGame == false || currentIndex - 1 >= 1 && Save.game.newGame) {
-                // if can move the selector (arrow) up
+            bool canMoveUp = (!Save.game.newGame && currentIndex - 1 >= 0)
+                || (Save.game.newGame && currentIndex - 1 >= 1);
+            // when no save exists, index 0 is the hidden continue button and must be skipped
+            if (canMoveUp) {
                 currentIndex--;
                 MoveToButtonPos(currentIndex);
-                // decrement current index and select the menu item
             }
         }
         else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) {
-            // if the player presses return or the numpad enter
             s.menuButton.ButtonPress(menuButtons[currentIndex].name);
-            // call the function for button press
         }
     }
 
     /// <summary>
-    /// Move the selection arrow to a menu item to a given index.
+    /// Moves the selection arrow to the requested menu button.
     /// </summary>
+    /// <param name="index">target button index in `menuButtons`</param>
     public void MoveToButtonPos(int index) {
         s = FindFirstObjectByType<Scripts>();
-        // function used to move the arrow to the desired button position
         if (!(index == 0 && Save.game.newGame)) {
-            // as long as we are not trying to select continue when new game is true (previous Save wiped)
             currentIndex = index;
             if (PlayerPrefs.GetString(s.BUTTONS_KEY) == "on") {
-                // offset the arrow all the way off the screen 
+                // button icons replace the arrow in this mode, so park the arrow far off-screen
                 transform.localPosition = new Vector2(menuButtons[index].transform.position.x + 1000f, menuButtons[index].transform.position.y + yOffset);
             }
             else {
                 transform.localPosition = new Vector2(menuButtons[index].transform.position.x + xOffset, menuButtons[index].transform.position.y + yOffset);
             }
-            // move the arrow to the menu icon at the index, with offset
             if (!preventPlayingFX) { s.soundManager.PlayClip("click0"); }
-            // play sound clip
         }
     }
-
-    
 }

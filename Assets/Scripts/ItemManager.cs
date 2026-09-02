@@ -220,8 +220,8 @@ public class ItemManager : MonoBehaviour {
             { "green", 1 }, { "blue", -1 }, { "red", 0 }, { "white", -1 } } },
             // +2g 1r
         { "trident", new Dictionary<string, int> {
-            { "green", 2 }, { "blue", 3 }, { "red", 4 }, { "white", 1 } } },
-            // +1g +1r
+            { "green", 2 }, { "blue", 3 }, { "red", 4 }, { "white", 2 } } },
+            // +1g +1r +1w
         { "warhammer", new Dictionary<string, int> {
             { "green", 2 }, { "blue", -1 }, { "red", 5 }, { "white", 1 } } },
             // +1g +1r
@@ -263,6 +263,8 @@ public class ItemManager : MonoBehaviour {
         { "armor",                  1 },
     };
     [SerializeField] private List<string> itemDropTable;
+    // trader uses same weights but excludes holy_water and thiefs_armband
+    private List<string> traderItemDropTable;
 
     // canonical order for the almanac pages; indices must stay stable
     public static readonly string[] AlmanacWeaponOrder = {
@@ -511,7 +513,7 @@ public class ItemManager : MonoBehaviour {
         {"crossbow",           "ignore enemy parry"},
         {"legendary crossbow", "ignore enemy parry"},
         {"trident",            "attack first for +1 attack"},
-        {"legendary trident",  "attack first for +1 attack"},
+        {"legendary trident",  "attack first for +2 attack"},
         {"warhammer",          "wound to stun"},
         {"legendary warhammer", "wound to stun"},
         {"unstable spellbook",     "pay 2 stamina to transmute a die"},
@@ -1034,7 +1036,7 @@ public class ItemManager : MonoBehaviour {
     }
 
     public void ActivatePlayerActsFirstWeaponBonuses(bool refreshCombatUI = true) {
-        int nextTridentBonus = IsFightableEncounter() && PlayerHasWeapon("trident") ? 1 : 0;
+        int nextTridentBonus = IsFightableEncounter() && PlayerHasWeapon("trident") ? (PlayerHasLegendary() ? 2 : 1) : 0;
         if (tridentImmediateAttackBonus == nextTridentBonus) { return; }
 
         tridentImmediateAttackBonus = nextTridentBonus;
@@ -2106,29 +2108,13 @@ public class ItemManager : MonoBehaviour {
                 // new game, so give the base weapons
                 case 0: {
                     if (isNightmare) {
-                        CreateWeaponWithStats("sword", "rusty", 2, 1, 1, 2);
+                         CreateWeaponWithStats("sword", "rusty", 2, 1, 1, 2);
                     }
                     else { 
                         CreateWeaponWithStats("sword", "harsh", 3, 3, 2, 3);
                     }
                     // CreateWeaponWithStats("maul", "administrative", 10, 10, 10, 10);
                     MoveToInventory(0, true, false, false);
-                    CreateItem(isNightmare ? GetNightmareStarterTradeItemName(0) : "steak");
-                    MoveToInventory(0, true, false, false);
-                    // CreateItem("scroll", "leech");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("bloodletters");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("rabadons");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("potion", "force");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("potion", "rage");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("potion", "strength");
-                    // MoveToInventory(0, true, false, false);
-                    // CreateItem("potion", "alacrity");
-                    // MoveToInventory(0, true, false, false);
                     if (isEasy) {
                         CreateItem("torch");
                         MoveToInventory(0, true, false, false);
@@ -2369,6 +2355,8 @@ public class ItemManager : MonoBehaviour {
         }
     }
 
+    private static readonly HashSet<string> traderExcludedItems = new() { "holy_water", "thiefs_armband" };
+
     private void EnsureDropTablesBuilt() {
         if (itemDropTable == null) {
             itemDropTable = new List<string>();
@@ -2376,11 +2364,23 @@ public class ItemManager : MonoBehaviour {
         if (modifierDropTable == null) {
             modifierDropTable = new List<string>();
         }
+        if (traderItemDropTable == null) {
+            traderItemDropTable = new List<string>();
+        }
 
         if (itemDropTable.Count == 0) {
             foreach (KeyValuePair<string, int> entry in itemDropDict) {
                 for (int i = 0; i < entry.Value; i++) {
                     itemDropTable.Add(entry.Key);
+                }
+            }
+        }
+
+        if (traderItemDropTable.Count == 0) {
+            foreach (KeyValuePair<string, int> entry in itemDropDict) {
+                if (traderExcludedItems.Contains(entry.Key)) { continue; }
+                for (int i = 0; i < entry.Value; i++) {
+                    traderItemDropTable.Add(entry.Key);
                 }
             }
         }
@@ -2668,7 +2668,7 @@ public class ItemManager : MonoBehaviour {
 
         if (!starter) { Save.persistent.weaponsSwapped++; }
         if (!starter) { Save.persistent.itemsFound++; }
-        MarkItemDiscovered(floorItems[index].GetComponent<Item>());
+        if (!starter) { MarkItemDiscovered(floorItems[index].GetComponent<Item>()); }
         // if the item being moved is a weapon 
         GameObject pickedWeapon = floorItems[index];
         pickedWeapon.transform.position = new Vector2(itemX, 3.16f);
@@ -2734,7 +2734,7 @@ public class ItemManager : MonoBehaviour {
         floorItems[index].transform.position = new Vector2(itemX + itemSpacing * s.player.inventory.Count, 3.16f);
         // add the item to the proper location
         if (!starter) { Save.persistent.itemsFound++; }
-        MarkItemDiscovered(floorItems[index].GetComponent<Item>());
+        if (!starter) { MarkItemDiscovered(floorItems[index].GetComponent<Item>()); }
         s.player.inventory.Add(floorItems[index]);
         // add the item to the player's inventory
         floorItems.RemoveAt(index);
@@ -2796,7 +2796,7 @@ public class ItemManager : MonoBehaviour {
     }
 
     private GameObject CreateRandomItemForTrader(int negativeOffset = 0) {
-        string itemKey = itemDropTable[Random.Range(0, itemDropTable.Count)];
+        string itemKey = traderItemDropTable[Random.Range(0, traderItemDropTable.Count)];
         string createdItemName = GetCanonicalCreatedItemName(itemKey);
         return CreateFloorItem(createdItemName, "common", GetItemSprite(itemKey), negativeOffset:negativeOffset, postProcess:SetItemStatsImmediately);
     }
@@ -3055,6 +3055,28 @@ public class ItemManager : MonoBehaviour {
     /// Returns true if the player has an item of the given name.
     /// </summary>
     public bool PlayerHas(string itemName) { return GetInventoryItemCount(itemName) > 0; }
+
+    /// <summary>
+    /// Returns true if the player holds all 5 gems (one of each color).
+    /// Scans the inventory directly by modifier so no cache key aliasing is needed.
+    /// </summary>
+    public bool PlayerHasAllGems() {
+        if (s?.player?.inventory == null) { return false; }
+        bool e = false, r = false, sa = false, t = false, c = false;
+        foreach (GameObject obj in s.player.inventory) {
+            if (obj == null) { continue; }
+            Item item = obj.GetComponent<Item>();
+            if (item == null || item.itemName != "gem" || string.IsNullOrEmpty(item.modifier)) { continue; }
+            switch (item.modifier) {
+                case "emerald":  e  = true; break;
+                case "ruby":     r  = true; break;
+                case "sapphire": sa = true; break;
+                case "topaz":    t  = true; break;
+                case "citrine":  c  = true; break;
+            }
+        }
+        return e && r && sa && t && c;
+    }
 
     public int GetPlayerItemCount(string itemName) { return GetInventoryItemCount(itemName); }
 
@@ -3559,6 +3581,8 @@ public class ItemManager : MonoBehaviour {
     public void SaveInventoryItems(bool forceSave = false) {
         if (s.levelManager != null && (forceSave || !s.player.isDead)) { 
             EnsureInventoryCache();
+            // update gem-set bonus flag whenever inventory changes
+            Save.game.isThanos = PlayerHasAllGems();
             Item equippedWeapon = GetEquippedWeapon();
             if (equippedWeapon == null) {
                 Debug.LogWarning("Skipping inventory save because there is no equipped weapon to serialize");

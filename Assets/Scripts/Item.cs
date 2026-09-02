@@ -478,7 +478,6 @@ public class Item : MonoBehaviour {
         }
 
         s.soundManager.PlayClip("cloak");
-        s.turnManager.SetStatusText("the mirror shatters");
         s.itemManager.MarkItemUsed(this);
         Save.game.pendingMirrorCopy = true;
         ConsumeCommonItemAndReselect();

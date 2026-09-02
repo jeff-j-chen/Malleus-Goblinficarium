@@ -1,129 +1,139 @@
 using System;
 using System.Collections.Generic;
+
+/// <summary>
+/// Serializable snapshot of the current run. This is the authoritative save payload for combat,
+/// inventory, encounter state, delayed item effects, and other mid-run bookkeeping.
+/// </summary>
 [Serializable]
 public class GameData {
-    public bool newGame;
-    public int curCharNum;
-    public string[] floorItemNames;
-    public string[] floorItemTypes;
-    public string[] floorItemMods;
-    public int[] floorItemAccs;
-    public int[] floorItemSpds;
-    public int[] floorItemDmgs;
-    public int[] floorItemDefs;
-    public string[] resumeItemNames;
-    public string[] resumeItemTypes;
-    public string[] resumeItemMods;
-    public int resumeLevel;
-    public int resumeSub;
-    public int resumeAcc;
-    public int resumeSpd;
-    public int resumeDmg;
-    public int resumeDef;
-    public int floorAcc;
-    public int floorSpd;
-    public int floorDmg;
-    public int floorDef;
-    public int potionAcc;
-    public int potionSpd;
-    public int potionDmg;
-    public int potionDef;
-    public int playerStamina;
-    public int enemyStamina;
-    public List<int> diceNumbers;
-    public List<string> diceTypes;
-    public List<string> dicePlayerOrEnemy;
-    public List<string> diceAttachedToStat;
-    public List<bool> diceRerolled;
-    public List<bool> diceTarotUpgraded;
-    public List<bool> diceCursedSpawned;
-    public List<string> playerWounds;
-    public List<string> enemyWounds;
-    public bool playerBleedsOutNextRound;
-    public bool enemyBleedsOutNextRound;
-    public int enemyNum;
-    public bool usedMace;
-    public bool usedAnkh;
-    public bool usedSpellbook;
-    public bool usedHelm;
-    public bool usedBoots;
-    public bool isFurious;
-    public bool isDodgy;
-    public bool isHasty;
-    public bool isBloodthirsty;
-    public bool isCourageous;
-    public bool isDestructive;
-    public bool isFortified;
-    public bool isEmpowered;
-    public int expendedStamina;
-    public int numItemsDroppedForTrade;
-    public bool blacksmithHasForged;
-    public int discardableDieCounter;
-    public bool enemyScrollChestActive;
-    public bool enemyScrollGutsActive;
-    public bool enemyScrollKneeActive;
-    public bool enemyScrollHipActive;
-    public bool enemyScrollHandActive;
-    public bool enemyScrollArmpitsActive;
-    public int enemyWitchHandPenaltyGreen;
-    public int enemyWitchHandPenaltyBlue;
-    public int enemyWitchHandPenaltyRed;
-    public int enemyWitchHandPenaltyWhite;
-    public bool enemyIsDead;
-    public int enemyAcc;
-    public int enemySpd;
-    public int enemyDmg;
-    public int enemyDef;
-    public int enemyTargetIndex;
-    public string[] lastTraderItemNames;
-    public string[] lastTraderItemTypes;
-    public string[] lastTraderItemMods;
-    public int[] lastTraderItemAccs;
-    public int[] lastTraderItemSpds;
-    public int[] lastTraderItemDmgs;
-    public int[] lastTraderItemDefs;
-    public int lastTraderLevel;
-    public int lastTraderSub;
-    public int lastTraderEnemyNum;
-    public bool showAmuletSurvivalStatusText;
-    public bool pendingAmuletInventoryCleanup;
-    public bool pendingAmuletVisualRestore;
-    public bool enemyHasKatarSpeedPenalty;
-    public int enemyKatarSpeedPenaltyAmount;
-    public int enemyKatarBaseSpeedAfterPenalty;
-    public bool isFirstCombatRoundOfEncounter;
-    public bool pendingMirrorCopy;
-    public bool pendingSpellbookTransmute;
-    public string pendingGemTransformColor;
-    public bool pendingDeathcapRestore;
-    public int itemsFoundThisFloor;
-    public int itemsFoundThisFloorLevel;
-    public int itemsFoundThisFloorSub;
-    public bool warhammerStunActive;
-    public bool warhammerStunNextTurn;
-    public int merchantStealAllowanceRemaining;
-    public int pendingLevelStartStaminaBonus;
-    public int luckyStatGreen;
-    public int luckyStatBlue;
-    public int luckyStatRed;
-    public int luckyStatWhite;
-    public bool hasLuckyDiceRoundStats;
+    public bool newGame; // true until a run has progressed far enough to count as resumable
+    public int curCharNum; // current player character index for the active run
+    public string[] floorItemNames; // current floor encounter item names laid out in the scene
+    public string[] floorItemTypes; // parallel type array for `floorItemNames`
+    public string[] floorItemMods; // parallel modifier array for `floorItemNames`
+    public int[] floorItemAccs; // serialized weapon aim bonuses for current floor items
+    public int[] floorItemSpds; // serialized weapon speed bonuses for current floor items
+    public int[] floorItemDmgs; // serialized weapon damage bonuses for current floor items
+    public int[] floorItemDefs; // serialized weapon defense bonuses for current floor items
+    public string[] resumeItemNames; // player inventory/loadout item names restored on resume
+    public string[] resumeItemTypes; // player inventory/loadout item types restored on resume
+    public string[] resumeItemMods; // player inventory/loadout modifiers restored on resume
+    public int resumeLevel; // level restored when continuing a run
+    public int resumeSub; // subfloor restored when continuing a run
+    public int resumeAcc; // player base aim restored on resume
+    public int resumeSpd; // player base speed restored on resume
+    public int resumeDmg; // player base damage restored on resume
+    public int resumeDef; // player base defense restored on resume
+    public int floorAcc; // legacy current-floor weapon aim snapshot
+    public int floorSpd; // legacy current-floor weapon speed snapshot
+    public int floorDmg; // legacy current-floor weapon damage snapshot
+    public int floorDef; // legacy current-floor weapon defense snapshot
+    public int potionAcc; // potion-stored temporary aim bonus
+    public int potionSpd; // potion-stored temporary speed bonus
+    public int potionDmg; // potion-stored temporary damage bonus
+    public int potionDef; // potion-stored temporary defense bonus
+    public int playerStamina; // current player stamina pool
+    public int enemyStamina; // current enemy stamina pool
+    public List<int> diceNumbers; // serialized die face values for all live dice
+    public List<string> diceTypes; // serialized die color names for all live dice
+    public List<string> dicePlayerOrEnemy; // serialized die ownership values: none, player, or enemy
+    public List<string> diceAttachedToStat; // serialized attached stat row for each live die
+    public List<bool> diceRerolled; // whether each saved die has already consumed a reroll
+    public List<bool> diceTarotUpgraded; // whether each saved die already received a tarot upgrade
+    public List<bool> diceCursedSpawned; // whether each saved die originated from cursed dice effects
+    public List<string> playerWounds; // player wounds currently active in the run
+    public List<string> enemyWounds; // enemy wounds currently active in the encounter
+    public bool playerBleedsOutNextRound; // delayed death flag for player bleedout effects
+    public bool enemyBleedsOutNextRound; // delayed death flag for enemy bleedout effects
+    public int enemyNum; // active encounter index in `Enemy.enemyArr`
+    public bool usedMace; // once-per-round or once-per-encounter mace effect consumed
+    public bool usedAnkh; // ankh revive effect consumed
+    public bool usedSpellbook; // spellbook use consumed for the current fight/turn state
+    public bool usedHelm; // helm of might use consumed
+    public bool usedBoots; // boots of dodge use consumed
+    public bool isFurious; // player currently has fury status
+    public bool isDodgy; // player currently has dodge status
+    public bool isHasty; // player currently has haste status
+    public bool isBloodthirsty; // player currently has bloodthirst status
+    public bool isCourageous; // player currently has courage status
+    public bool isDestructive; // player currently has destructive status
+    public bool isFortified; // player currently has fortified status
+    public bool isEmpowered; // player currently has empowered status
+    public int expendedStamina; // stamina already spent this round for effects that care about totals
+    public int numItemsDroppedForTrade; // merchant/trade bookkeeping for floor drops
+    public bool blacksmithHasForged; // true once the blacksmith already performed its forge action
+    public int discardableDieCounter; // number of enemy die discard actions still pending from wounds/effects
+    public bool enemyScrollChestActive; // enemy chest scroll effect armed for the next relevant hit
+    public bool enemyScrollGutsActive; // enemy guts scroll effect armed for the next relevant hit
+    public bool enemyScrollKneeActive; // enemy knee scroll effect armed for the next relevant hit
+    public bool enemyScrollHipActive; // enemy hip scroll effect armed for the next relevant hit
+    public bool enemyScrollHandActive; // enemy hand scroll effect armed for the next relevant hit
+    public bool enemyScrollArmpitsActive; // enemy armpits scroll effect armed for the next relevant hit
+    public int enemyWitchHandPenaltyGreen; // temporary enemy green penalty from witch hand-like effects
+    public int enemyWitchHandPenaltyBlue; // temporary enemy blue penalty from witch hand-like effects
+    public int enemyWitchHandPenaltyRed; // temporary enemy red penalty from witch hand-like effects
+    public int enemyWitchHandPenaltyWhite; // temporary enemy white penalty from witch hand-like effects
+    public bool enemyIsDead; // whether the active encounter has already been defeated
+    public int enemyAcc; // serialized enemy base aim
+    public int enemySpd; // serialized enemy base speed
+    public int enemyDmg; // serialized enemy base damage
+    public int enemyDef; // serialized enemy base defense
+    public int enemyTargetIndex; // serialized enemy target wound index
+    public string[] lastTraderItemNames; // cached merchant/blacksmith inventory names for revisits/resume
+    public string[] lastTraderItemTypes; // cached merchant/blacksmith inventory item types
+    public string[] lastTraderItemMods; // cached merchant/blacksmith inventory modifiers
+    public int[] lastTraderItemAccs; // cached merchant/blacksmith weapon aim bonuses
+    public int[] lastTraderItemSpds; // cached merchant/blacksmith weapon speed bonuses
+    public int[] lastTraderItemDmgs; // cached merchant/blacksmith weapon damage bonuses
+    public int[] lastTraderItemDefs; // cached merchant/blacksmith weapon defense bonuses
+    public int lastTraderLevel; // floor where the cached trader inventory was created
+    public int lastTraderSub; // subfloor where the cached trader inventory was created
+    public int lastTraderEnemyNum; // encounter index that owned the cached trader inventory
+    public bool showAmuletSurvivalStatusText; // delayed UI flag for amulet survival messaging
+    public bool pendingAmuletInventoryCleanup; // deferred inventory cleanup after amulet survival triggers
+    public bool pendingAmuletVisualRestore; // deferred visual refresh after amulet survival triggers
+    public bool enemyHasKatarSpeedPenalty; // enemy currently suffers a katar speed debuff
+    public int enemyKatarSpeedPenaltyAmount; // size of the current katar speed debuff
+    public int enemyKatarBaseSpeedAfterPenalty; // cached post-penalty base speed for later restoration
+    public bool isFirstCombatRoundOfEncounter; // true until the opening combat round has fully resolved
+    public bool pendingMirrorCopy; // player is waiting to click a die for the mirror-copy effect
+    public bool pendingSpellbookTransmute; // player is waiting to click a die for spellbook transmute
+    public string pendingGemTransformColor; // selected gem color waiting for an attached-player-die click
+    public bool pendingDeathcapRestore; // delayed deathcap restoration still needs to fire
+    public int itemsFoundThisFloor; // number of items found on the current floor
+    public int itemsFoundThisFloorLevel; // level where `itemsFoundThisFloor` was counted
+    public int itemsFoundThisFloorSub; // subfloor where `itemsFoundThisFloor` was counted
+    public bool warhammerStunActive; // current round warhammer stun is active on the enemy
+    public bool warhammerStunNextTurn; // warhammer stun has been queued for the next turn
+    public int merchantStealAllowanceRemaining; // how many merchant steals are still legal this encounter
+    public int pendingLevelStartStaminaBonus; // delayed stamina bonus to apply at the next level start
+    public int luckyStatGreen; // stored lucky dice green bonus for the round
+    public int luckyStatBlue; // stored lucky dice blue bonus for the round
+    public int luckyStatRed; // stored lucky dice red bonus for the round
+    public int luckyStatWhite; // stored lucky dice white bonus for the round
+    public bool hasLuckyDiceRoundStats; // true once lucky dice bonuses have been rolled for the round
     // charm active bonuses (applied this round, earned last round)
-    public int charmActiveBonusGreen;
-    public int charmActiveBonusBlue;
-    public int charmActiveBonusRed;
-    public int charmActiveBonusWhite;
+    public int charmActiveBonusGreen; // active green charm bonus applied this round
+    public int charmActiveBonusBlue; // active blue charm bonus applied this round
+    public int charmActiveBonusRed; // active red charm bonus applied this round
+    public int charmActiveBonusWhite; // active white charm bonus applied this round
     // charm bonuses earned this round and applied next round
-    public int charmPendingBonusGreen;
-    public int charmPendingBonusBlue;
-    public int charmPendingBonusRed;
-    public int charmPendingBonusWhite;
-    public int[] charmActiveProcCounts;
-    public int[] charmPendingProcCounts;
+    public int charmPendingBonusGreen; // pending green charm bonus for next round
+    public int charmPendingBonusBlue; // pending blue charm bonus for next round
+    public int charmPendingBonusRed; // pending red charm bonus for next round
+    public int charmPendingBonusWhite; // pending white charm bonus for next round
+    public int[] charmActiveProcCounts; // per-charm proc counts already applied this round
+    public int[] charmPendingProcCounts; // per-charm proc counts queued for next round
     // glass sword shatter state (prevents double-shatter)
-    public bool glassSwordShattered;
-    public float sacrificialChaliceCharge;
+    public bool glassSwordShattered; // whether the glass sword has already shattered in this run state
+    public float sacrificialChaliceCharge; // fractional stored charge for the sacrificial chalice item
+    // set to true when the player carries all 5 gem types simultaneously
+    public bool isThanos; // gem-set completion flag checked by item systems
 
+    /// <summary>
+    /// Initializes a brand-new run snapshot with default values and correctly sized arrays.
+    /// </summary>
     public GameData() {
         newGame = true;
         curCharNum = 0;
@@ -241,6 +251,9 @@ public class GameData {
         sacrificialChaliceCharge = 0f;
     }
 
+    /// <summary>
+    /// Repairs null or legacy save data in-place after loading older files.
+    /// </summary>
     public void Normalize() {
         diceNumbers ??= new List<int>();
         diceTypes ??= new List<string>();
@@ -259,6 +272,7 @@ public class GameData {
         resumeItemTypes ??= new string[9];
         resumeItemMods ??= new string[9];
 
+        // tarot/cursed arrays were added after the original dice save lists, so older saves may be shorter
         while (diceTarotUpgraded.Count < diceNumbers.Count) {
             diceTarotUpgraded.Add(false);
         }
@@ -287,12 +301,14 @@ public class GameData {
         if (charmActiveProcCounts == null || charmActiveProcCounts.Length != 11) { charmActiveProcCounts = new int[11]; }
         if (charmPendingProcCounts == null || charmPendingProcCounts.Length != 11) { charmPendingProcCounts = new int[11]; }
 
+        // non-boss living enemies die permanently on the third wound in older saves too, so recover that state here
         if (enemyNum is not Enemy.MerchantEnemyNum and not Enemy.TombstoneEnemyNum and not Enemy.BlacksmithEnemyNum && enemyNum != 2 && enemyWounds.Count >= 3) {
             enemyIsDead = true;
             enemyBleedsOutNextRound = false;
         }
 
         if (enemyNum is Enemy.MerchantEnemyNum or Enemy.TombstoneEnemyNum or Enemy.BlacksmithEnemyNum || enemyIsDead) {
+            // non-combat encounters and dead encounters must not preserve mid-combat delayed effects
             isFirstCombatRoundOfEncounter = false;
             pendingMirrorCopy = false;
             pendingSpellbookTransmute = false;
@@ -316,6 +332,7 @@ public class GameData {
             }
         }
 
+        // older saves stored the first floor weapon stats only in the legacy floorAcc/floorSpd/floorDmg/floorDef fields
         if (floorItemTypes.Length > 0 && floorItemTypes[0] == "weapon" && floorItemAccs[0] == 0 && floorItemSpds[0] == 0 && floorItemDmgs[0] == 0 && floorItemDefs[0] == 0) {
             floorItemAccs[0] = floorAcc;
             floorItemSpds[0] = floorSpd;

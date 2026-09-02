@@ -6,183 +6,219 @@ using System.Linq;
 using Unity.Profiling;
 using UnityEngine;
 
+/// <summary>
+/// Central enemy-planning system. It chooses draft dice, stamina spending, yellow die routing,
+/// and target selection across all difficulties, with the hard/nightmare planner simulating both
+/// sides to rank candidate plans lexicographically.
+/// ENEMY_AI.md is the behavior spec; this file is the runtime implementation of that spec.
+/// </summary>
 public static class EnemyAI {
-    private static readonly string[] Stats = { "green", "blue", "red", "white" };
-    private static readonly string[] Targets = { "chest", "guts", "knee", "hip", "head", "hand", "armpits", "neck" };
-    private static readonly int[] PreferredTargetSearchOrder = { 7, 6, 4, 5, 3, 2, 1, 0 };
-    private const int AdvancedPlanProfileLogInterval = 10;
-    private const double AdvancedPlanSlowLogThresholdMs = 8d;
-    private const int MaxLikelyPlayerReplyDice = 5;
+    private static readonly string[] Stats = { "green", "blue", "red", "white" }; // canonical enemy/player stat keys used throughout planning
+    private static readonly string[] Targets = { "chest", "guts", "knee", "hip", "head", "hand", "armpits", "neck" }; // wound target names by target index
+    private static readonly int[] PreferredTargetSearchOrder = { 7, 6, 4, 5, 3, 2, 1, 0 }; // fallback preference order when multiple targets are legal
+    private const int AdvancedPlanProfileLogInterval = 10; // how often profiling summaries are refreshed in dev builds
+    private const double AdvancedPlanSlowLogThresholdMs = 8d; // dev-build threshold for logging unusually slow advanced plans
+    private const int MaxLikelyPlayerReplyDice = 5; // cap used when previewing likely player yellow-die reply states
     private static readonly string[][] YellowSearchOrders = {
         new[] { "green", "blue", "red", "white" },
         new[] { "blue", "green", "red", "white" },
         new[] { "red", "green", "blue", "white" },
         new[] { "white", "green", "blue", "red" },
-    };
-    private static readonly ProfilerMarker BuildAdvancedPlanProfiler = new("EnemyAI.BuildAdvancedPlan");
+    }; // preferred yellow re-assignment search order keyed by the die's current row
+    private static readonly ProfilerMarker BuildAdvancedPlanProfiler = new("EnemyAI.BuildAdvancedPlan"); // profiler marker around hard/nightmare planning
     private static readonly Dictionary<string, int> StatIndexByName = new() {
         { "green", 0 },
         { "blue", 1 },
         { "red", 2 },
         { "white", 3 },
-    };
+    }; // maps stat names to shared array indices used in snapshots and helpers
     private static readonly Dictionary<string, int> DefaultDieRanks = new() {
         { "yellow6", 0 }, { "red6", 1 }, { "white6", 2 }, { "yellow5", 3 }, { "red5", 4 }, { "white5", 5 },
         { "yellow4", 6 }, { "red4", 7 }, { "white4", 8 }, { "yellow3", 9 }, { "red3", 10 }, { "white3", 11 },
         { "green6", 12 }, { "yellow2", 13 }, { "red2", 14 }, { "white2", 15 }, { "yellow1", 16 }, { "red1", 17 },
         { "white1", 18 }, { "green5", 19 }, { "green4", 20 }, { "blue6", 21 }, { "green3", 22 }, { "blue5", 23 },
         { "blue4", 24 }, { "green2", 25 }, { "blue3", 26 }, { "green1", 27 }, { "blue2", 28 }, { "blue1", 29 },
-    };
+    }; // legacy draft ranking used by easy/normal heuristics and fallback sorting
 
+    /// <summary>
+    /// Concrete plan the enemy can apply to the live board.
+    /// </summary>
     private sealed class Plan {
-        public int TargetIndex;
-        public Dictionary<string, int> Stamina = NewStatDictionary();
-        public Dictionary<Dice, string> YellowAssignments = new();
+        public int TargetIndex; // wound index the enemy wants to attack this turn
+        public Dictionary<string, int> Stamina = NewStatDictionary(); // stamina spend per stat color
+        public Dictionary<Dice, string> YellowAssignments = new(); // target stat row for each enemy yellow die
     }
 
+    /// <summary>
+    /// Lexicographic scoring payload for one hard/nightmare candidate plan.
+    /// </summary>
     private sealed class AdvancedPlanEvaluation {
-        public bool EnemyKills;
-        public bool EnemyDamagesPlayer;
-        public bool EnemyAvoidsKill;
-        public bool EnemyAvoidsDamage;
-        public bool BreaksPlayerKill;
-        public bool BreaksPlayerDamage;
-        public bool BreaksPlayerProtection;
-        public bool StripsPlayerStamina;
-        public bool BreaksPlayerSpeed;
-        public bool RemovesPlayerRed;
-        public bool RemovesPlayerWhite;
-        public bool RemovesPlayerBestDie;
-        public bool BreaksPlayerTarget;
-        public bool UsesChestOnHighValuePlayerDice;
-        public bool UsesChestAsLastDitchGamble;
-        public bool UsesAimStaminaForNonFatalTrade;
-        public bool EnemyActsFirst;
-        public int SpentStamina;
-        public int RedOverspend;
-        public int BlueOverspend;
-        public int GreenOverspend;
-        public int WhiteOverspend;
-        public int ResourceOverspend;
-        public int TargetIndex;
+        public bool EnemyKills; // candidate kills the player outright
+        public bool EnemyDamagesPlayer; // candidate lands a wound even if it does not kill
+        public bool EnemyAvoidsKill; // candidate prevents the player from killing the enemy
+        public bool EnemyAvoidsDamage; // candidate prevents the player from damaging the enemy
+        public bool BreaksPlayerKill; // candidate specifically breaks an existing player kill line
+        public bool BreaksPlayerDamage; // candidate specifically breaks an existing player damage line
+        public bool BreaksPlayerProtection; // candidate strips dodge/parry/other one-shot protection
+        public bool StripsPlayerStamina; // candidate empties the player's temporary stamina adds
+        public bool BreaksPlayerSpeed; // candidate removes the player's go-first advantage
+        public bool RemovesPlayerRed; // candidate eliminates the player's red dice pressure
+        public bool RemovesPlayerWhite; // candidate eliminates the player's white dice defense
+        public bool RemovesPlayerBestDie; // candidate removes the player's most valuable attached die state
+        public bool BreaksPlayerTarget; // candidate knocks aim below the player's chosen target threshold
+        public bool UsesChestOnHighValuePlayerDice; // chest was used to hit high-value player dice state
+        public bool UsesChestAsLastDitchGamble; // chest is only being used as a desperate damage-preserving gamble
+        public bool UsesAimStaminaForNonFatalTrade; // candidate spends green stamina for a weak non-lethal trade
+        public bool EnemyActsFirst; // true if the resulting state gives the enemy turn order priority
+        public int SpentStamina; // total stamina committed by the plan
+        public int RedOverspend; // excess red spending beyond the needed breakpoint
+        public int BlueOverspend; // excess blue spending beyond the needed breakpoint
+        public int GreenOverspend; // excess green spending beyond the needed breakpoint
+        public int WhiteOverspend; // excess white spending beyond the needed breakpoint
+        public int ResourceOverspend; // combined breakpoint waste measured with alternate resource heuristics
+        public int TargetIndex; // chosen target wound index for tie-breaking
 
+        /// <summary>
+        /// Returns summed overspend across all four stamina colors.
+        /// </summary>
         public int TotalOverspend => RedOverspend + BlueOverspend + GreenOverspend + WhiteOverspend;
     }
 
+    /// <summary>
+    /// Evaluation payload for choosing one draft die before it is attached.
+    /// </summary>
     private sealed class DraftChoiceEvaluation {
-        public AdvancedPlanEvaluation BestPlan;
-        public bool CompletesKillBreakpoint;
-        public bool CompletesHitBreakpoint;
-        public bool CompletesOrderBreakpoint;
-        public bool CompletesArmpitsBreakpoint;
-        public bool CompletesHeadBreakpoint;
-        public bool CompletesDefenseBreakpoint;
-        public bool DeniesPlayerKill;
-        public bool DeniesPlayerDamage;
-        public bool DeniesPlayerDefense;
-        public bool ReinforcesPlayerDamage;
-        public bool ReinforcesPlayerDefense;
-        public bool DeniesPlayerGoFirst;
-        public bool DeniesPlayerTarget;
-        public string DieType;
-        public bool IsYellow;
-        public bool LosesValueToHatchet;
-        public int DieValue;
-        public int EffectiveEnemyValue;
-        public int EffectivePlayerValue;
-        public float FallbackScore;
-        public float ProgressScore;
-        public float PlayerDenialScore;
+        public AdvancedPlanEvaluation BestPlan; // best resulting combat plan if this draft die is taken
+        public bool CompletesKillBreakpoint; // die completes an immediate lethal breakpoint
+        public bool CompletesHitBreakpoint; // die completes an immediate damage breakpoint
+        public bool CompletesOrderBreakpoint; // die secures go-first order
+        public bool CompletesArmpitsBreakpoint; // die enables the armpits wound line
+        public bool CompletesHeadBreakpoint; // die enables the head wound line
+        public bool CompletesDefenseBreakpoint; // die closes a defensive survival breakpoint
+        public bool DeniesPlayerKill; // taking this die breaks the player's current kill line
+        public bool DeniesPlayerDamage; // taking this die breaks the player's current damage line
+        public bool DeniesPlayerDefense; // taking this die prevents a player defensive breakpoint
+        public bool ReinforcesPlayerDamage; // leaving/taking this die may strengthen player damage lines
+        public bool ReinforcesPlayerDefense; // leaving/taking this die may strengthen player defense lines
+        public bool DeniesPlayerGoFirst; // die helps stop the player from moving first
+        public bool DeniesPlayerTarget; // die helps stop the player from reaching a preferred target
+        public string DieType; // color of the draft die under evaluation
+        public bool IsYellow; // whether the draft die is yellow and therefore flexible
+        public bool LosesValueToHatchet; // whether hatchet interactions reduce the die's effective value
+        public int DieValue; // raw face value of the draft die
+        public int EffectiveEnemyValue; // heuristic value to the enemy after synergies/constraints
+        public int EffectivePlayerValue; // heuristic value if the player were to claim it instead
+        public float FallbackScore; // tie-break score for otherwise equal draft choices
+        public float ProgressScore; // score for how much the die advances the enemy plan
+        public float PlayerDenialScore; // score for how much the die denies the player's plan
     }
 
+    /// <summary>
+    /// Evaluation payload for choosing which attached player die to discard live.
+    /// </summary>
     private sealed class LiveDiscardEvaluation {
-        public bool BreaksKill;
-        public bool BreaksDamage;
-        public bool BreaksGoFirst;
-        public bool BreaksTarget;
-        public bool RestoresDefense;
-        public bool IsYellow;
-        public int DieValue;
+        public bool BreaksKill; // removing this die stops the player's kill line
+        public bool BreaksDamage; // removing this die stops the player's damage line
+        public bool BreaksGoFirst; // removing this die flips initiative back to the enemy
+        public bool BreaksTarget; // removing this die drops player aim below its target threshold
+        public bool RestoresDefense; // removing this die prevents the player from piercing defense
+        public bool IsYellow; // yellow dice are flexible and usually more valuable to remove
+        public int DieValue; // raw die face used for tie-breaking
     }
 
+    /// <summary>
+    /// Scratch context reused while previewing draft decisions against likely player replies.
+    /// </summary>
     private sealed class DraftPreviewContext {
-        public PlannerSnapshot BaseSnapshot;
-        public List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> PlayerYellowReassignmentOptions = new();
-        public Dictionary<YellowAssignmentStateKey, PlannerSnapshot> PlayerSnapshotCache = new();
-        public Dictionary<Dice, List<(Dictionary<string, int> totals, Dictionary<string, int> counts)>> ReplyStatesByExcludedDie = new();
-        public Dictionary<DraftPreviewCacheKey, AdvancedPlanEvaluation> PreviewEvaluationCache = new();
+        public PlannerSnapshot BaseSnapshot; // base combat snapshot before simulating preview branches
+        public List<(Dictionary<string, int> totals, Dictionary<string, int> counts)> PlayerYellowReassignmentOptions = new(); // likely player yellow assignment states
+        public Dictionary<YellowAssignmentStateKey, PlannerSnapshot> PlayerSnapshotCache = new(); // cached snapshots keyed by player yellow state
+        public Dictionary<Dice, List<(Dictionary<string, int> totals, Dictionary<string, int> counts)>> ReplyStatesByExcludedDie = new(); // reply options after excluding one contested draft die
+        public Dictionary<DraftPreviewCacheKey, AdvancedPlanEvaluation> PreviewEvaluationCache = new(); // memoized preview evaluations for repeated branches
     }
 
+    /// <summary>
+    /// Lightweight simulated attached die used by planner snapshots.
+    /// </summary>
     private sealed class SimAttachedDie {
-        public string Stat;
-        public int Value;
-        public bool IsRerolled;
-        public bool IsYellow;
+        public string Stat; // attached stat row in the simulated board state
+        public int Value; // current simulated face value
+        public bool IsRerolled; // whether the simulated die has already spent its reroll opportunity
+        public bool IsYellow; // whether the simulated die is yellow and therefore flexible
 
+        /// <summary>
+        /// Returns a shallow clone for snapshot copying.
+        /// </summary>
         public SimAttachedDie Clone() {
             return (SimAttachedDie)MemberwiseClone();
         }
     }
 
+    /// <summary>
+    /// Immutable-ish board snapshot used as the base for hard/nightmare simulations.
+    /// </summary>
     private sealed class PlannerSnapshot {
-        public int PlayerAim;
-        public int PlayerSpd;
-        public int PlayerAtt;
-        public int PlayerDef;
-        public bool PlayerGuardSelected;
-        public int PlayerPendingGuardParryBonus;
-        public int EnemyBaseAim;
-        public int EnemyBaseSpd;
-        public int EnemyBaseAtt;
-        public int EnemyBaseDef;
-        public int PlayerTargetIndex;
-        public int PlayerWoundCount;
-        public int EnemyWoundCount;
-        public int PlayerAddedGreen;
-        public int PlayerAddedBlue;
-        public int PlayerAddedRed;
-        public int PlayerAddedWhite;
-        public int PlayerGreenDiceCount;
-        public int PlayerBlueDiceCount;
-        public int PlayerRedDiceCount;
-        public int PlayerWhiteDiceCount;
-        public int EnemyBaseGreenDiceCount;
-        public int EnemyBaseBlueDiceCount;
-        public int EnemyBaseRedDiceCount;
-        public int EnemyBaseWhiteDiceCount;
-        public int PlayerGreenDiceSum;
-        public int PlayerBlueDiceSum;
-        public int PlayerRedDiceSum;
-        public int PlayerWhiteDiceSum;
-        public int EnemyBaseGreenDiceSum;
-        public int EnemyBaseBlueDiceSum;
-        public int EnemyBaseRedDiceSum;
-        public int EnemyBaseWhiteDiceSum;
-        public int EnemyAttachedDiceCount;
-        public bool PlayerHasArmor;
-        public bool PlayerHasDodgy;
-        public bool PlayerCanBecomeDodgy;
-        public bool PlayerHasMaul;
-        public int PlayerCrystalShardCopies;
-        public int PlayerCrystalShardLossPerShatter;
-        public int PlayerBulwarkImmediateParryBonus;
-        public int PlayerInevitableImmediateBonus;
-        public int PlayerRiposteImmediateBonus;
-        public int PlayervindictiveImmediateBonus;
-        public int PlayerTridentImmediateBonus;
-        public int PlayerScimitarDiscardCount;
-        public bool PlayerHasGlassSword;
-        public bool PlayerGlassSwordShattered;
-        public int PlayerGlassSwordAimDeltaOnShatter;
-        public int PlayerGlassSwordSpdDeltaOnShatter;
-        public int PlayerGlassSwordAttDeltaOnShatter;
-        public int PlayerGlassSwordDefDeltaOnShatter;
-        public bool EnemyIsLich;
-        public bool PlayerSpeedLockedHigh;
-        public bool EnemySpeedLockedHigh;
-        public List<SimAttachedDie> PlayerAttachedDice = new();
-        public List<SimAttachedDie> EnemyAttachedDice = new();
+        public int PlayerAim; // current player aim total before simulated changes
+        public int PlayerSpd; // current player speed total before simulated changes
+        public int PlayerAtt; // current player attack total before simulated changes
+        public int PlayerDef; // current player defense total before simulated changes
+        public bool PlayerGuardSelected; // whether the player currently has guard selected as the target
+        public int PlayerPendingGuardParryBonus; // pending extra parry from guard-related effects
+        public int EnemyBaseAim; // enemy aim before simulated yellow/stamina changes
+        public int EnemyBaseSpd; // enemy speed before simulated yellow/stamina changes
+        public int EnemyBaseAtt; // enemy attack before simulated yellow/stamina changes
+        public int EnemyBaseDef; // enemy defense before simulated yellow/stamina changes
+        public int PlayerTargetIndex; // player target wound index at snapshot creation time
+        public int PlayerWoundCount; // number of active player wounds
+        public int EnemyWoundCount; // number of active enemy wounds
+        public int PlayerAddedGreen; // player temporary green stamina additions in play
+        public int PlayerAddedBlue; // player temporary blue stamina additions in play
+        public int PlayerAddedRed; // player temporary red stamina additions in play
+        public int PlayerAddedWhite; // player temporary white stamina additions in play
+        public int PlayerGreenDiceCount; // count of player green-attached dice
+        public int PlayerBlueDiceCount; // count of player blue-attached dice
+        public int PlayerRedDiceCount; // count of player red-attached dice
+        public int PlayerWhiteDiceCount; // count of player white-attached dice
+        public int EnemyBaseGreenDiceCount; // count of enemy green-attached dice before yellow reassignment
+        public int EnemyBaseBlueDiceCount; // count of enemy blue-attached dice before yellow reassignment
+        public int EnemyBaseRedDiceCount; // count of enemy red-attached dice before yellow reassignment
+        public int EnemyBaseWhiteDiceCount; // count of enemy white-attached dice before yellow reassignment
+        public int PlayerGreenDiceSum; // sum of player green-attached die values
+        public int PlayerBlueDiceSum; // sum of player blue-attached die values
+        public int PlayerRedDiceSum; // sum of player red-attached die values
+        public int PlayerWhiteDiceSum; // sum of player white-attached die values
+        public int EnemyBaseGreenDiceSum; // sum of enemy green-attached die values before yellow reassignment
+        public int EnemyBaseBlueDiceSum; // sum of enemy blue-attached die values before yellow reassignment
+        public int EnemyBaseRedDiceSum; // sum of enemy red-attached die values before yellow reassignment
+        public int EnemyBaseWhiteDiceSum; // sum of enemy white-attached die values before yellow reassignment
+        public int EnemyAttachedDiceCount; // total enemy attached dice count at snapshot time
+        public bool PlayerHasArmor; // whether armor is active in the simulated baseline
+        public bool PlayerHasDodgy; // whether dodge protection is already active
+        public bool PlayerCanBecomeDodgy; // whether the player can still gain dodge from current state
+        public bool PlayerHasMaul; // whether maul-specific rules apply to simulated hits
+        public int PlayerCrystalShardCopies; // number of crystal shard effects still active
+        public int PlayerCrystalShardLossPerShatter; // stat loss per crystal shard shatter
+        public int PlayerBulwarkImmediateParryBonus; // immediate parry bonus from bulwark
+        public int PlayerInevitableImmediateBonus; // immediate bonus from inevitable-like effects
+        public int PlayerRiposteImmediateBonus; // immediate bonus from riposte-like effects
+        public int PlayervindictiveImmediateBonus; // immediate bonus from vindictive-like effects
+        public int PlayerTridentImmediateBonus; // immediate bonus from trident-like effects
+        public int PlayerScimitarDiscardCount; // remaining scimitar discard responses
+        public bool PlayerHasGlassSword; // whether glass sword rules apply
+        public bool PlayerGlassSwordShattered; // whether glass sword already shattered
+        public int PlayerGlassSwordAimDeltaOnShatter; // aim loss applied when glass sword shatters
+        public int PlayerGlassSwordSpdDeltaOnShatter; // speed loss applied when glass sword shatters
+        public int PlayerGlassSwordAttDeltaOnShatter; // attack loss applied when glass sword shatters
+        public int PlayerGlassSwordDefDeltaOnShatter; // defense loss applied when glass sword shatters
+        public bool EnemyIsLich; // whether the current enemy follows lich-specific rules
+        public bool PlayerSpeedLockedHigh; // whether player speed is forced to win ties
+        public bool EnemySpeedLockedHigh; // whether enemy speed is forced to win ties
+        public List<SimAttachedDie> PlayerAttachedDice = new(); // simulated player attached dice list
+        public List<SimAttachedDie> EnemyAttachedDice = new(); // simulated enemy attached dice list
 
+        /// <summary>
+        /// Deep-copies the attached-die lists while cloning scalar snapshot values.
+        /// </summary>
         public PlannerSnapshot Clone() {
             PlannerSnapshot clone = (PlannerSnapshot)MemberwiseClone();
             clone.PlayerAttachedDice = PlayerAttachedDice.Select(die => die.Clone()).ToList();
@@ -191,16 +227,24 @@ public static class EnemyAI {
         }
     }
 
+    /// <summary>
+    /// Hashable representation of one yellow-die assignment state.
+    /// Stores both totals and die counts because a sum of 6 from one die behaves differently
+    /// than a sum of 6 split across several dice during draft preview simulation.
+    /// </summary>
     private readonly struct YellowAssignmentStateKey : IEquatable<YellowAssignmentStateKey> {
-        private readonly int greenTotal;
-        private readonly int blueTotal;
-        private readonly int redTotal;
-        private readonly int whiteTotal;
-        private readonly int greenCount;
-        private readonly int blueCount;
-        private readonly int redCount;
-        private readonly int whiteCount;
+        private readonly int greenTotal; // sum of yellow value routed to green
+        private readonly int blueTotal; // sum of yellow value routed to blue
+        private readonly int redTotal; // sum of yellow value routed to red
+        private readonly int whiteTotal; // sum of yellow value routed to white
+        private readonly int greenCount; // number of yellow dice routed to green
+        private readonly int blueCount; // number of yellow dice routed to blue
+        private readonly int redCount; // number of yellow dice routed to red
+        private readonly int whiteCount; // number of yellow dice routed to white
 
+        /// <summary>
+        /// Captures one yellow assignment state from totals/count dictionaries.
+        /// </summary>
         public YellowAssignmentStateKey(Dictionary<string, int> yellowTotals, Dictionary<string, int> yellowCounts) {
             greenTotal = yellowTotals["green"];
             blueTotal = yellowTotals["blue"];
@@ -241,10 +285,18 @@ public static class EnemyAI {
         }
     }
 
+    /// <summary>
+    /// Cache key for draft preview evaluation.
+    /// Combines the likely player reply state with the enemy preview state because either side's
+    /// yellow routing can change the resulting advanced-plan evaluation.
+    /// </summary>
     private readonly struct DraftPreviewCacheKey : IEquatable<DraftPreviewCacheKey> {
-        private readonly YellowAssignmentStateKey playerState;
-        private readonly YellowAssignmentStateKey previewState;
+        private readonly YellowAssignmentStateKey playerState; // simulated player reply routing state
+        private readonly YellowAssignmentStateKey previewState; // simulated enemy post-pick routing state
 
+        /// <summary>
+        /// Captures both sides' yellow-assignment states for preview memoization.
+        /// </summary>
         public DraftPreviewCacheKey(
             Dictionary<string, int> playerTotals,
             Dictionary<string, int> playerCounts,
@@ -273,21 +325,21 @@ public static class EnemyAI {
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-    public static string LastAdvancedPlanProfileSummary { get; private set; } = "advanced plan profiler idle";
-    private static int advancedPlanProfileRuns;
-    private static double advancedPlanProfileTotalMs;
-    private static double advancedPlanProfileMaxMs;
-    private static int advancedPlanCacheHits;
-    private static int advancedPlanCacheMisses;
+    public static string LastAdvancedPlanProfileSummary { get; private set; } = "advanced plan profiler idle"; // latest dev-build summary text for debugging planner cost
+    private static int advancedPlanProfileRuns; // number of profiled advanced-plan builds
+    private static double advancedPlanProfileTotalMs; // accumulated build time for averaging
+    private static double advancedPlanProfileMaxMs; // slowest recorded advanced-plan build
+    private static int advancedPlanCacheHits; // advanced-plan cache hits in dev builds
+    private static int advancedPlanCacheMisses; // advanced-plan cache misses in dev builds
 #endif
 
-    private static int suppressTargetEvaluationDepth;
-    private static int cachedAdvancedPlanKey;
-    private static Plan cachedAdvancedPlan;
-    private static bool hasCachedAdvancedPlan;
+    private static int suppressTargetEvaluationDepth; // guards against recursive retargeting while applying a plan
+    private static int cachedAdvancedPlanKey; // signature for the single-entry advanced-plan cache
+    private static Plan cachedAdvancedPlan; // last built advanced plan for the current board signature
+    private static bool hasCachedAdvancedPlan; // whether the single-entry advanced-plan cache is populated
 
     /// <summary>
-    /// clear the single-entry advanced-plan cache
+    /// Clears the single-entry advanced-plan cache.
     /// </summary>
     public static void InvalidateCachedPlan() {
         hasCachedAdvancedPlan = false;
@@ -295,70 +347,76 @@ public static class EnemyAI {
         cachedAdvancedPlanKey = 0;
     }
 
+    /// <summary>
+    /// Fully mutable simulated combat state used while evaluating candidate plans.
+    /// </summary>
     private sealed class SimState {
-        public int PlayerAim;
-        public int PlayerSpd;
-        public int PlayerAtt;
-        public int PlayerDef;
-        public bool PlayerGuardSelected;
-        public int PlayerPendingGuardParryBonus;
-        public int EnemyAim;
-        public int EnemySpd;
-        public int EnemyAtt;
-        public int EnemyDef;
-        public int EnemyTargetIndex;
-        public int PlayerWoundCount;
-        public int EnemyWoundCount;
-        public int PlayerAddedGreen;
-        public int PlayerAddedBlue;
-        public int PlayerAddedRed;
-        public int PlayerAddedWhite;
-        public int EnemyAddedGreen;
-        public int EnemyAddedBlue;
-        public int EnemyAddedRed;
-        public int EnemyAddedWhite;
-        public int PlayerGreenDiceCount;
-        public int PlayerBlueDiceCount;
-        public int PlayerRedDiceCount;
-        public int PlayerWhiteDiceCount;
-        public int EnemyGreenDiceCount;
-        public int EnemyBlueDiceCount;
-        public int EnemyRedDiceCount;
-        public int EnemyWhiteDiceCount;
-        public int PlayerGreenDiceSum;
-        public int PlayerBlueDiceSum;
-        public int PlayerRedDiceSum;
-        public int PlayerWhiteDiceSum;
-        public int EnemyGreenDiceSum;
-        public int EnemyBlueDiceSum;
-        public int EnemyRedDiceSum;
-        public int EnemyWhiteDiceSum;
-        public bool PlayerHasArmor;
-        public bool PlayerHasDodgy;
-        public bool PlayerCanBecomeDodgy;
-        public bool PlayerHasMaul;
-        public int PlayerCrystalShardCopies;
-        public int PlayerCrystalShardLossPerShatter;
-        public int PlayerBulwarkImmediateParryBonus;
-        public int PlayerInevitableImmediateBonus;
-        public int PlayerRiposteImmediateBonus;
-        public int PlayervindictiveImmediateBonus;
-        public int PlayerTridentImmediateBonus;
-        public int PlayerScimitarDiscardCount;
-        public bool PlayerHasGlassSword;
-        public bool PlayerGlassSwordShattered;
-        public int PlayerGlassSwordAimDeltaOnShatter;
-        public int PlayerGlassSwordSpdDeltaOnShatter;
-        public int PlayerGlassSwordAttDeltaOnShatter;
-        public int PlayerGlassSwordDefDeltaOnShatter;
-        public bool EnemyIsLich;
-        public bool PlayerSpeedLockedHigh;
-        public bool EnemySpeedLockedHigh;
-        public bool PlayerImmuneToWounds;
-        public float Bonus;
-        public List<SimAttachedDie> PlayerAttachedDice = new();
-        public List<SimAttachedDie> EnemyAttachedDice = new();
+        public int PlayerAim; // mutable player aim after simulated wounds, discards, and triggers
+        public int PlayerSpd; // mutable player speed after simulated wounds, discards, and triggers
+        public int PlayerAtt; // mutable player attack after simulated wounds, discards, and triggers
+        public int PlayerDef; // mutable player defense after simulated wounds, discards, and triggers
+        public bool PlayerGuardSelected; // whether the player is guarding instead of attacking
+        public int PlayerPendingGuardParryBonus; // guard/buckler parry bonus already committed for this resolution
+        public int EnemyAim; // mutable enemy aim after yellow routing and stamina spend
+        public int EnemySpd; // mutable enemy speed after yellow routing and stamina spend
+        public int EnemyAtt; // mutable enemy attack after yellow routing and stamina spend
+        public int EnemyDef; // mutable enemy defense after yellow routing and stamina spend
+        public int EnemyTargetIndex; // simulated wound target index the enemy is attacking
+        public int PlayerWoundCount; // active player wounds in this simulated branch
+        public int EnemyWoundCount; // active enemy wounds in this simulated branch
+        public int PlayerAddedGreen; // player temporary green stamina add still present in this branch
+        public int PlayerAddedBlue; // player temporary blue stamina add still present in this branch
+        public int PlayerAddedRed; // player temporary red stamina add still present in this branch
+        public int PlayerAddedWhite; // player temporary white stamina add still present in this branch
+        public int EnemyAddedGreen; // enemy temporary green stamina add committed by this plan
+        public int EnemyAddedBlue; // enemy temporary blue stamina add committed by this plan
+        public int EnemyAddedRed; // enemy temporary red stamina add committed by this plan
+        public int EnemyAddedWhite; // enemy temporary white stamina add committed by this plan
+        public int PlayerGreenDiceCount; // count of player green dice surviving in this branch
+        public int PlayerBlueDiceCount; // count of player blue dice surviving in this branch
+        public int PlayerRedDiceCount; // count of player red dice surviving in this branch
+        public int PlayerWhiteDiceCount; // count of player white dice surviving in this branch
+        public int EnemyGreenDiceCount; // count of enemy green dice surviving in this branch
+        public int EnemyBlueDiceCount; // count of enemy blue dice surviving in this branch
+        public int EnemyRedDiceCount; // count of enemy red dice surviving in this branch
+        public int EnemyWhiteDiceCount; // count of enemy white dice surviving in this branch
+        public int PlayerGreenDiceSum; // summed player green die value in this branch
+        public int PlayerBlueDiceSum; // summed player blue die value in this branch
+        public int PlayerRedDiceSum; // summed player red die value in this branch
+        public int PlayerWhiteDiceSum; // summed player white die value in this branch
+        public int EnemyGreenDiceSum; // summed enemy green die value in this branch
+        public int EnemyBlueDiceSum; // summed enemy blue die value in this branch
+        public int EnemyRedDiceSum; // summed enemy red die value in this branch
+        public int EnemyWhiteDiceSum; // summed enemy white die value in this branch
+        public bool PlayerHasArmor; // whether one-hit armor protection is still intact
+        public bool PlayerHasDodgy; // whether dodgy is already active
+        public bool PlayerCanBecomeDodgy; // whether boots can still convert into dodgy before an enemy-second hit
+        public bool PlayerHasMaul; // whether any successful player hit should be treated as lethal
+        public int PlayerCrystalShardCopies; // crystal shards still available to shatter on incoming wounds
+        public int PlayerCrystalShardLossPerShatter; // stat loss each shattered crystal shard inflicts
+        public int PlayerBulwarkImmediateParryBonus; // extra parry granted immediately if enemy attacks first
+        public int PlayerInevitableImmediateBonus; // immediate player attack gained after enemy-first resolution
+        public int PlayerRiposteImmediateBonus; // immediate player attack gained after a successful parry
+        public int PlayervindictiveImmediateBonus; // immediate player attack gained after taking a wound
+        public int PlayerTridentImmediateBonus; // immediate player attack granted if player acts first with trident
+        public int PlayerScimitarDiscardCount; // number of enemy dice the player may discard after a parry
+        public bool PlayerHasGlassSword; // whether the glass sword shatter transformation can still apply
+        public bool PlayerGlassSwordShattered; // whether glass sword has already shattered in this branch
+        public int PlayerGlassSwordAimDeltaOnShatter; // aim delta applied when glass sword shatters
+        public int PlayerGlassSwordSpdDeltaOnShatter; // speed delta applied when glass sword shatters
+        public int PlayerGlassSwordAttDeltaOnShatter; // attack delta applied when glass sword shatters
+        public int PlayerGlassSwordDefDeltaOnShatter; // defense delta applied when glass sword shatters
+        public bool EnemyIsLich; // whether enemy uses lich exceptions like no hip stamina lock
+        public bool PlayerSpeedLockedHigh; // player always wins initiative in this branch
+        public bool EnemySpeedLockedHigh; // enemy always wins initiative in this branch
+        public bool PlayerImmuneToWounds; // reserved scratch flag for wound immunity branches
+        public float Bonus; // soft heuristic bonus used only by non-lexicographic fallback scoring helpers
+        public List<SimAttachedDie> PlayerAttachedDice = new(); // mutable player dice list for discard/wound simulation
+        public List<SimAttachedDie> EnemyAttachedDice = new(); // mutable enemy dice list for discard/wound simulation
 
+        /// <summary>
+        /// Deep-copies the mutable simulated board state for branch evaluation.
+        /// </summary>
         public SimState Clone() {
             SimState clone = (SimState)MemberwiseClone();
             clone.PlayerAttachedDice = PlayerAttachedDice.Select(die => die.Clone()).ToList();
@@ -368,8 +426,9 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// choose the best available die for the enemy
+    /// Chooses the best currently unattached draft die for the enemy and attaches it.
     /// </summary>
+    /// <param name="s">shared scene references and combat systems</param>
     public static void ChooseBestDie(Scripts s) {
         List<Dice> availableDice = s.diceSummoner.existingDice
             .Select(diceObject => diceObject.GetComponent<Dice>())
@@ -378,6 +437,7 @@ public static class EnemyAI {
 
         if (availableDice.Count == 0) { return; }
 
+        // hard/nightmare use full preview simulation; easy/normal keep the legacy rank list
         Dice chosenDie = DifficultyHelper.UsesAdvancedEnemyAI(Save.persistent.gameDifficulty)
             ? ChooseAdvancedDraftDie(s, availableDice)
             : ChooseDefaultDraftDie(availableDice);
@@ -388,12 +448,14 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// build and apply the enemy's current live plan
+    /// Builds the enemy's current live plan and applies it directly to the board.
     /// </summary>
+    /// <param name="s">shared scene references and combat systems</param>
     public static void ApplyLivePlan(Scripts s) {
         if (!CanPlan(s)) { return; }
 
         Plan plan = BuildPlan(s);
+        // applying a plan mutates target/stamina/dice state; suppress recursive target evaluation during that window
         suppressTargetEvaluationDepth++;
         try {
             ApplyPlan(s, plan);
@@ -404,11 +466,13 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// build the nightmare plan at attack time and reveal it step-by-step
+    /// Builds the nightmare plan at attack time and animates each change before applying it.
     /// </summary>
+    /// <param name="s">shared scene references and combat systems</param>
     public static IEnumerator AnimateAndApplyNightmarePlan(Scripts s) {
         if (!CanPlan(s)) { yield break; }
 
+        // nightmare hides intent during draft, so capture both the visible current state and the hidden planned state
         PlannerSnapshot snapshot = BuildPlannerSnapshot(s);
         Plan currentPlan = CaptureCurrentEnemyPlanState(s);
         Plan plan = BuildPlan(s);
@@ -437,6 +501,7 @@ public static class EnemyAI {
             targetSteps = 0;
         }
 
+        // only play reveal clicks when the animation actually communicates a meaningful combat change
         bool playSoundForSteps = preventedPlayerHit || createdEnemyHit || changedTargetWhileStillHitting;
         bool playSoundForTargetSteps = createdEnemyHit || changedTargetWhileStillHitting;
 
@@ -448,6 +513,7 @@ public static class EnemyAI {
             return stepsCompleted < totalSteps;
         }
 
+        // reveal order is fixed by spec: stamina first, then yellow die moves, then target shifts
         foreach (string stat in Stats) {
             int current = startingStamina[stat];
             int target = plan.Stamina[stat];
@@ -484,12 +550,15 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// get the best current target index for the enemy
+    /// Returns the best current target index for the enemy.
     /// </summary>
+    /// <param name="s">shared scene references and combat systems</param>
+    /// <returns>target index in `Targets`</returns>
     public static int GetBestTargetIndex(Scripts s) {
         if (!CanTarget(s)) { return 0; }
         if (suppressTargetEvaluationDepth > 0) { return Mathf.Clamp(s.enemy.targetIndex, 0, Targets.Length - 1); }
 
+        // hard/nightmare only use the advanced planner once the draft is fully resolved
         if (DifficultyHelper.UsesAdvancedEnemyAI(Save.persistent.gameDifficulty) && HasAnyDiceInPlay(s) && s.diceSummoner.CountUnattachedDice() == 0) {
             return BuildPlan(s).TargetIndex;
         }
@@ -498,8 +567,11 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// choose which player die should be discarded by a head wound
+    /// Chooses which attached player die should be discarded by a head-wound style effect.
     /// </summary>
+    /// <param name="s">shared scene references and combat systems</param>
+    /// <param name="playerDice">candidate player-attached dice</param>
+    /// <returns>best die to discard, or null if none exist</returns>
     public static Dice GetBestPlayerDieToDiscard(Scripts s, List<Dice> playerDice) {
         if (playerDice == null || playerDice.Count == 0) { return null; }
         if (!DifficultyHelper.UsesAdvancedEnemyAI(Save.persistent.gameDifficulty)) {
@@ -522,7 +594,7 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// check whether the enemy can legally build a plan right now
+    /// Returns whether the enemy can legally build a combat plan right now.
     /// </summary>
     private static bool CanPlan(Scripts s) {
         return s != null
@@ -539,7 +611,7 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// check whether the enemy can legally retarget right now
+    /// Returns whether the enemy is allowed to retarget right now.
     /// </summary>
     private static bool CanTarget(Scripts s) {
         return s != null
@@ -550,20 +622,21 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// check whether the current round has any live dice in play yet
+    /// Returns whether the current round has any live dice in play yet.
     /// </summary>
     private static bool HasAnyDiceInPlay(Scripts s) {
         return s != null && s.diceSummoner != null && s.diceSummoner.existingDice.Count > 0;
     }
 
     /// <summary>
-    /// dispatch to the correct planner for the current difficulty
+    /// Dispatches to the correct planner for the current difficulty and cache state.
     /// </summary>
     private static Plan BuildPlan(Scripts s) {
         string difficulty = DifficultyHelper.Normalize(Save.persistent.gameDifficulty);
         if (DifficultyHelper.IsEasy(difficulty)) { return BuildEasyPlan(s); }
         if (DifficultyHelper.IsNormal(difficulty)) { return BuildNormalPlan(s); }
 
+        // hard and nightmare share the same advanced brain; only visibility/reveal differs elsewhere
         int cacheKey = CreateAdvancedPlanCacheKey(s);
         if (hasCachedAdvancedPlan && cacheKey == cachedAdvancedPlanKey) {
     #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -584,14 +657,15 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// build the easy-mode threshold plan
+    /// Builds the easy-mode threshold plan.
     /// </summary>
     private static Plan BuildEasyPlan(Scripts s) {
+        // easy is intentionally just normal planning with visible intent, so reuse the exact same thresholds
         return BuildNormalPlan(s);
     }
 
     /// <summary>
-    /// build the normal-mode threshold plan
+    /// Builds the normal-mode threshold plan using direct breakpoint checks.
     /// </summary>
     private static Plan BuildNormalPlan(Scripts s) {
         Plan plan = CreateBaselinePlan(s);
@@ -608,10 +682,12 @@ public static class EnemyAI {
         int naturalAim = s.enemy.stats["green"] + GetFixedEnemyDiceSum(s, "green") + GetAssignedYellowSum(plan, "green");
         int bulwarkBonus = s.itemManager.GetEffectiveCharmCount("bulwark");
 
+        // normal mode never funds neck with stamina, so pre-neck targeting is clamped to 0..6 first
         plan.TargetIndex = GetDefaultTargetIndex(s, Mathf.Min(naturalAim, 6));
 
         int playerDefAgainstCurrentOrder = playerDef + (enemySpd > playerSpd ? bulwarkBonus : 0);
         if (enemyAtt <= playerDefAgainstCurrentOrder && enemyAtt + remainingStamina > playerDefAgainstCurrentOrder) {
+            // threshold rule 1: spend only the exact red amount needed to start dealing damage
             int spend = playerDefAgainstCurrentOrder - enemyAtt + 1;
             plan.Stamina["red"] += spend;
             remainingStamina -= spend;
@@ -620,6 +696,7 @@ public static class EnemyAI {
 
         int playerDefIfEnemyGoesFirst = playerDef + bulwarkBonus;
         if (enemyAtt > playerDefIfEnemyGoesFirst && playerSpd >= enemySpd && playerAtt > enemyDef && enemySpd + remainingStamina > playerSpd) {
+            // threshold rule 2: if going first protects the hit line, spend the exact blue amount to flip order
             int spend = playerSpd - enemySpd + 1;
             plan.Stamina["blue"] += spend;
             remainingStamina -= spend;
@@ -627,11 +704,13 @@ public static class EnemyAI {
 
         enemyDef = GetEnemyStatWithPlan(s, plan, "white");
         if (playerAtt > enemyDef && s.statSummoner.SumOfStat("green", "player") >= 0 && enemyDef + remainingStamina >= playerAtt) {
+            // threshold rule 3: if survival is reachable, spend the exact white amount to survive the reply
             int spend = playerAtt - enemyDef;
             plan.Stamina["white"] += spend;
         }
 
         if (naturalAim >= 7) {
+            // only natural aim unlocks neck in easy/normal
             plan.TargetIndex = GetDefaultTargetIndex(s, naturalAim);
         }
 
@@ -639,13 +718,14 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// build the hard and nightmare search plan
+    /// Builds the hard/nightmare search plan by simulating yellow routing and stamina spending.
     /// </summary>
     private static Plan BuildAdvancedPlan(Scripts s) {
         using (BuildAdvancedPlanProfiler.Auto()) {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
+            // snapshot once, then search over yellow routing + compressed stamina breakpoints + legal targets
             PlannerSnapshot snapshot = BuildPlannerSnapshot(s);
             List<Dice> yellowDice = GetEnemyYellowDice(s).ToList();
             string[] yellowAssignments = new string[yellowDice.Count];
@@ -663,6 +743,7 @@ public static class EnemyAI {
             int bestTargetIndex = GetDefaultTargetIndex(s, snapshot.EnemyBaseAim);
             HashSet<YellowAssignmentStateKey> visitedYellowStates = new();
 
+            // fast path: if there are no yellow branches and no spendable stamina, only target selection can vary
             if (TryBuildZeroResourceAdvancedPlan(s, snapshot, yellowDice, out Plan zeroResourcePlan, out int zeroResourceCandidates)) {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 RecordAdvancedPlanProfile(stopwatch, 1, zeroResourceCandidates, 0);
@@ -674,6 +755,7 @@ public static class EnemyAI {
                 candidatesEvaluated++;
                 AdvancedPlanEvaluation evaluation = EvaluateAdvancedPlanCandidate(s, snapshot, targetIndex, yellowTotals, yellowCounts, staminaPlan);
                 if (IsTrulyFutileAdvancedEvaluation(evaluation)) {
+                    // permanent stamina is too valuable to waste on plans that change no meaningful gate
                     futileCandidatesSkipped++;
                     return false;
                 }
@@ -695,6 +777,7 @@ public static class EnemyAI {
                 YellowAssignmentStateKey yellowState = new(yellowTotals, yellowCounts);
                 if (!visitedYellowStates.Add(yellowState)) { return false; }
 
+                // once yellow routing is fixed, only breakpoint-relevant stamina spends are searched
                 yellowLeavesVisited++;
                 int baseAim = snapshot.EnemyBaseAim + yellowTotals["green"];
                 int baseSpd = snapshot.EnemyBaseSpd + yellowTotals["blue"];
@@ -730,6 +813,7 @@ public static class EnemyAI {
                                 if (greenSpend > remainingAfterRed) { continue; }
 
                                 staminaPlan["green"] = greenSpend;
+                                // first lexicographically perfect kill found here can terminate the whole search
                                 if (TryCandidate(targetIndex)) { return true; }
                             }
                         }
@@ -745,6 +829,7 @@ public static class EnemyAI {
                 }
 
                 string curStat = string.IsNullOrEmpty(yellowDice[index].statAddedTo) ? "red" : yellowDice[index].statAddedTo;
+                // yellow search order is biased toward the die's current row so harmless rearrangements are tried first
                 foreach (string stat in GetYellowSearchOrder(curStat)) {
                     yellowAssignments[index] = stat;
                     yellowTotals[stat] += yellowDice[index].diceNum;
@@ -784,7 +869,7 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// evaluate a candidate by building a fresh planner snapshot on demand
+    /// Evaluates one advanced-plan candidate by building a fresh snapshot on demand.
     /// </summary>
     private static AdvancedPlanEvaluation EvaluateAdvancedPlanCandidate(
         Scripts s,
@@ -797,7 +882,7 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// evaluate one hard-mode candidate against the current board snapshot
+    /// Evaluates one hard-mode candidate against an existing board snapshot.
     /// </summary>
     private static AdvancedPlanEvaluation EvaluateAdvancedPlanCandidate(
         Scripts s,
@@ -840,6 +925,7 @@ public static class EnemyAI {
         evaluation.UsesChestOnHighValuePlayerDice = false;
 
         if (enemyActsFirst) {
+            // branch A from ENEMY_AI.md: enemy hits before the player can apply their wound/guard response
             SimState afterEnemyHit = state.Clone();
             if (enemyBreaksProtectionBefore) {
                 ConsumePlayerProtection(afterEnemyHit);
@@ -847,6 +933,7 @@ public static class EnemyAI {
             if (enemyAppliesNewWoundBefore) {
                 ApplyWoundToPlayer(afterEnemyHit, enemyTarget, s);
             }
+            // immediate player counters like inevitable, vindictive, riposte, scimitar all live here
             ApplyImmediatePlayerResponseAfterEnemyActsFirst(afterEnemyHit, s, enemyWasParriedBefore, enemyDamagesBefore);
 
             bool playerCanHitAfter = !afterEnemyHit.PlayerGuardSelected && afterEnemyHit.PlayerAim >= 0 && afterEnemyHit.PlayerAtt > afterEnemyHit.EnemyDef;
@@ -864,8 +951,8 @@ public static class EnemyAI {
             evaluation.BreaksPlayerKill = playerKillsBefore && !playerKillsAfter;
             evaluation.BreaksPlayerDamage = playerDamagesBefore && !playerDamagesAfter;
             evaluation.BreaksPlayerProtection = enemyBreaksProtectionBefore;
-            // enemy acts first means player has no speed advantage; a knee lock adds
-            // no gate value this round even if it permanently locks future rounds
+            // enemy acts first means the player already lost this round's order check,
+            // so knee matters only if some future-round behavior later reads the locked state
             evaluation.BreaksPlayerSpeed = !enemyActsFirst && afterEnemyHit.EnemySpeedLockedHigh;
             evaluation.BreaksPlayerTarget = !state.PlayerGuardSelected
                 && snapshot.PlayerTargetIndex >= 0
@@ -899,6 +986,7 @@ public static class EnemyAI {
             return evaluation;
         }
 
+        // branch B from ENEMY_AI.md: player attacks first, so enemy evaluation must survive the incoming wound before swinging
         SimState afterPlayerHit = state.Clone();
         if (playerDamagesBefore && !afterPlayerHit.EnemyIsLich) {
             ApplyWoundToEnemy(afterPlayerHit, playerTarget, s);
@@ -941,7 +1029,7 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// compare two advanced evaluations using the lexicographic gate ordering
+    /// Compares two advanced evaluations using the lexicographic gate ordering.
     /// </summary>
     private static bool IsBetterAdvancedEvaluation(AdvancedPlanEvaluation candidate, AdvancedPlanEvaluation current) {
         if (candidate == null) { return false; }
@@ -985,7 +1073,7 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// detect the zero-cost perfect kill that can short-circuit the search
+    /// Returns whether a candidate is a zero-cost perfect kill that can short-circuit the search.
     /// </summary>
     private static bool IsPerfectAdvancedEvaluation(AdvancedPlanEvaluation evaluation) {
         return evaluation != null
@@ -995,7 +1083,7 @@ public static class EnemyAI {
     }
 
     /// <summary>
-    /// reject stamina plans that spend resources without changing any relevant gate
+    /// Rejects stamina plans that spend resources without changing any relevant evaluation gate.
     /// </summary>
     private static bool IsTrulyFutileAdvancedEvaluation(AdvancedPlanEvaluation evaluation) {
         if (evaluation == null || evaluation.SpentStamina <= 0) { return false; }
@@ -1007,6 +1095,10 @@ public static class EnemyAI {
         return evaluation.TotalOverspend >= evaluation.SpentStamina;
     }
 
+    /// <summary>
+    /// Legacy float-scored evaluator retained for draft cleanup heuristics and debugging.
+    /// The real hard/nightmare planner prefers the lexicographic gates above this method.
+    /// </summary>
     private static float EvaluateAdvancedState(
         Scripts s,
         int targetIndex,
@@ -1036,6 +1128,7 @@ public static class EnemyAI {
 
         if (enemyActsFirst) {
             if (enemyCanHit) {
+                // reward live hits heavily, then evaluate how much the post-hit reply is blunted
                 score += 1200f;
                 if (enemyKills && enemyHitApplies) { score += 100000f; }
 
@@ -1107,6 +1200,7 @@ public static class EnemyAI {
             }
         }
 
+        // the farther a spend drifts away from a real breakpoint, the more this heuristic should distrust it
         score -= GetFutileStaminaPenalty(s, state, targetIndex, staminaPlan);
         if (!enemyCanHit) { score -= 900f; }
         if (enemyTarget == "neck" && PlayerHasOneShotProtection(state)) { score -= 600f; }
@@ -1126,6 +1220,7 @@ public static class EnemyAI {
             TargetIndex = GetDefaultTargetIndex(s, s.statSummoner.SumOfStat("green", "enemy"))
         };
 
+        // baseline yellow routing mirrors the live board before any optimization moves them elsewhere
         foreach (Dice yellowDie in GetEnemyYellowDice(s)) {
             plan.YellowAssignments[yellowDie] = yellowDie.statAddedTo == string.Empty ? "red" : yellowDie.statAddedTo;
         }
@@ -1155,6 +1250,7 @@ public static class EnemyAI {
         int playerGlassSwordDefDeltaOnShatter = 0;
 
         if (playerHasGlassSword && !Save.game.glassSwordShattered) {
+            // snapshot the stat delta now so later wound simulation can apply the shatter without rereading live equipment
             playerGlassSwordAimDeltaOnShatter = 0 - s.player.stats["green"];
             playerGlassSwordSpdDeltaOnShatter = 1 - s.player.stats["blue"];
             playerGlassSwordAttDeltaOnShatter = 1 - s.player.stats["red"];
@@ -1183,6 +1279,7 @@ public static class EnemyAI {
         int playerWhiteDiceSum = GetDiceSum(s.statSummoner.addedPlayerDice["white"]);
 
         if (Save.game.isDestructive) {
+            // destructive/empowered/fortified rewrite one player row to mirror another before planning starts
             playerAddedRed = playerAddedGreen;
             playerRedDiceCount = playerGreenDiceCount;
             playerRedDiceSum = playerGreenDiceSum;
@@ -1243,7 +1340,7 @@ public static class EnemyAI {
             PlayerInevitableImmediateBonus = GetEffectiveTriggeredPlayerCharmBonus(s, "inevitable"),
             PlayerRiposteImmediateBonus = GetEffectiveTriggeredPlayerCharmBonus(s, "riposte"),
             PlayervindictiveImmediateBonus = GetEffectiveTriggeredPlayerCharmBonus(s, "vindictive", 2),
-            PlayerTridentImmediateBonus = s.itemManager.PlayerHasWeapon("trident") ? 1 : 0,
+            PlayerTridentImmediateBonus = s.itemManager.PlayerHasWeapon("trident") ? (s.itemManager.PlayerHasLegendary() ? 2 : 1) : 0,
             PlayerScimitarDiscardCount = s.itemManager.PlayerHasWeapon("scimitar") ? (playerHasLegendaryWeapon ? 2 : 1) : 0,
             PlayerHasGlassSword = playerHasGlassSword,
             PlayerGlassSwordShattered = Save.game.glassSwordShattered,
@@ -1263,6 +1360,7 @@ public static class EnemyAI {
         List<SimAttachedDie> dice = new();
         if (s?.statSummoner?.addedPlayerDice == null) { return dice; }
 
+        // copy only the information the planner actually reasons about, not whole live Dice components
         foreach (string stat in Stats) {
             foreach (Dice attachedDie in s.statSummoner.addedPlayerDice[stat]) {
                 if (attachedDie == null || !attachedDie.isAttached || attachedDie.isOnPlayerOrEnemy != "player") { continue; }
@@ -1288,6 +1386,7 @@ public static class EnemyAI {
                     continue;
                 }
 
+                // enemy yellow dice are tracked separately through totals/counts because they can be rerouted during search
                 dice.Add(new SimAttachedDie {
                     Stat = stat,
                     Value = attachedDie.diceNum,
@@ -1383,6 +1482,7 @@ public static class EnemyAI {
             EnemyAttachedDice = snapshot.EnemyAttachedDice.Select(die => die.Clone()).ToList(),
         };
 
+        // yellow dice are converted into estimated attached dice so discard/head logic can treat them like real dice later
         AppendEstimatedEnemyYellowDice(state.EnemyAttachedDice, yellowTotals, yellowCounts);
 
         bool playerActsFirst = state.PlayerSpeedLockedHigh || (!state.EnemySpeedLockedHigh && state.PlayerSpd >= state.EnemySpd);
@@ -1390,12 +1490,17 @@ public static class EnemyAI {
             state.PlayerAtt += state.PlayerTridentImmediateBonus;
         }
 
+        // soft bonuses/penalties here only affect heuristic helpers, never the main lexicographic planner
         if (PlayerHasOneShotProtection(state)) { state.Bonus -= 150f; }
         if (!snapshot.PlayerGuardSelected && snapshot.PlayerTargetIndex == 6 && state.PlayerRedDiceSum > 0) { state.Bonus -= state.PlayerRedDiceSum * 12f; }
         if (!snapshot.PlayerGuardSelected && snapshot.PlayerTargetIndex == 4 && snapshot.EnemyAttachedDiceCount > 0) { state.Bonus -= 180f; }
         return state;
     }
 
+    /// <summary>
+    /// Adds synthetic yellow dice into the simulated enemy attached-die list.
+    /// This lets discard/head/chest helpers reason about yellow dice without special-case logic later.
+    /// </summary>
     private static void AppendEstimatedEnemyYellowDice(List<SimAttachedDie> attachedDice, Dictionary<string, int> yellowTotals, Dictionary<string, int> yellowCounts) {
         if (attachedDice == null || yellowTotals == null || yellowCounts == null) { return; }
 
@@ -1411,6 +1516,10 @@ public static class EnemyAI {
         }
     }
 
+    /// <summary>
+    /// Splits a known yellow total into a plausible multiset of die values.
+    /// Exact faces are unknown in snapshot form, so this produces a bounded approximation.
+    /// </summary>
     private static IEnumerable<int> BuildEstimatedDieValues(int total, int count) {
         if (total <= 0 || count <= 0) { yield break; }
 
@@ -1429,6 +1538,8 @@ public static class EnemyAI {
         if (!playerCanHit) { return false; }
         if (string.IsNullOrEmpty(playerTarget) || playerTarget == "guard") { return false; }
         if (state.PlayerHasMaul) { return true; }
+        // planner fatal helpers intentionally treat "third unique wound" as the fatal bucket;
+        // neck bleed-out is modeled elsewhere and does not count here as same-round lethal
         return !s.enemy.woundList.Contains(playerTarget) && state.EnemyWoundCount >= 2;
     }
 
@@ -1445,18 +1556,24 @@ public static class EnemyAI {
         return !s.player.woundList.Contains(enemyTarget) && state.PlayerWoundCount >= 2;
     }
 
+    /// <summary>
+    /// Applies one player wound to a simulated state using the same immediate consequences as combat.
+    /// </summary>
     private static void ApplyWoundToPlayer(SimState state, string target, Scripts s) {
         switch (target) {
             case "guts":
+                // guts reduces every attached die by one pip, which is equivalent here to subtracting die counts per stat
                 state.PlayerAim -= state.PlayerGreenDiceCount;
                 state.PlayerSpd -= state.PlayerBlueDiceCount;
                 state.PlayerAtt -= state.PlayerRedDiceCount;
                 state.PlayerDef -= state.PlayerWhiteDiceCount;
                 break;
             case "knee":
+                // a player knee wound means the enemy now wins order checks unless an override already says otherwise
                 state.EnemySpeedLockedHigh = true;
                 break;
             case "hip":
+                // hip refunds and clears all added stamina on the wounded side immediately
                 state.PlayerAim -= state.PlayerAddedGreen;
                 state.PlayerSpd -= state.PlayerAddedBlue;
                 state.PlayerAtt -= state.PlayerAddedRed;
@@ -1467,28 +1584,36 @@ public static class EnemyAI {
                 state.PlayerAddedWhite = 0;
                 break;
             case "head":
+                // head discards the player's best attached die according to the live discard comparator
                 ApplyBestPlayerDiscard(state, s);
                 break;
             case "hand":
+                // hand removes all white dice from the wounded side
                 state.PlayerDef -= state.PlayerWhiteDiceSum;
                 state.PlayerWhiteDiceCount = 0;
                 state.PlayerWhiteDiceSum = 0;
                 state.PlayerAttachedDice.RemoveAll(die => die.Stat == "white");
                 break;
             case "armpits":
+                // armpits removes all red dice from the wounded side
                 state.PlayerAtt -= state.PlayerRedDiceSum;
                 state.PlayerRedDiceCount = 0;
                 state.PlayerRedDiceSum = 0;
                 state.PlayerAttachedDice.RemoveAll(die => die.Stat == "red");
                 break;
             case "chest":
+                // chest itself does not directly change stats here; it unlocks rescue rerolls, represented as a heuristic nudge
                 state.Bonus -= 650f;
                 break;
             case "neck":
+                // neck bleed-out is tracked outside the immediate stat model
                 break;
         }
     }
 
+    /// <summary>
+    /// Applies one enemy wound to a simulated state using the same immediate consequences as combat.
+    /// </summary>
     private static void ApplyWoundToEnemy(SimState state, string target, Scripts s) {
         switch (target) {
             case "guts":
@@ -1524,6 +1649,7 @@ public static class EnemyAI {
                 state.EnemyRedDiceSum = 0;
                 break;
             case "chest":
+                // enemy chest lowers confidence in the branch because player reroll pressure gets unlocked
                 state.Bonus -= 900f;
                 break;
             case "neck":
@@ -1547,6 +1673,7 @@ public static class EnemyAI {
 
     private static bool EnemyHitConnects(SimState state, bool enemyCanHit, bool enemyActsFirst) {
         if (!enemyCanHit) { return false; }
+        // if the enemy attacks second and boots/dodgy can still activate, treat the hit as dodged entirely
         if (!enemyActsFirst && PlayerCanBecomeDodgy(state)) { return false; }
         return true;
     }
@@ -1569,15 +1696,20 @@ public static class EnemyAI {
         }
     }
 
+    /// <summary>
+    /// Applies player immediate-response effects after an enemy-first swing resolves.
+    /// </summary>
     private static void ApplyImmediatePlayerResponseAfterEnemyActsFirst(SimState state, Scripts s, bool enemyWasParried, bool enemyDamagedPlayer) {
         ApplyImmediatePlayerEnemyFirstAlwaysOnEffects(state);
 
         if (enemyDamagedPlayer) {
+            // wound-triggered responses like vindictive/crystal shard/glass sword happen before any counterattack check
             ApplyImmediatePlayerWoundResponseEffects(state);
             return;
         }
 
         if (enemyWasParried) {
+            // parry-triggered responses like riposte/scimitar only happen when the attack failed on defense
             ApplyImmediatePlayerParryResponseEffects(state, s);
         }
     }
@@ -1588,11 +1720,15 @@ public static class EnemyAI {
         }
     }
 
+    /// <summary>
+    /// Applies wound-triggered player effects such as vindictive, crystal shard, and glass sword shatter.
+    /// </summary>
     private static void ApplyImmediatePlayerWoundResponseEffects(SimState state) {
         if (state.PlayervindictiveImmediateBonus > 0) {
             state.PlayerAtt += state.PlayervindictiveImmediateBonus;
         }
 
+        // crystal shards resolve before glass sword; if a shard absorbs the wound, glass sword does not also shatter
         bool crystalShardShatters = state.PlayerCrystalShardCopies > 0;
         if (crystalShardShatters) {
             int shatteredCopies = state.PlayerCrystalShardCopies;
@@ -1609,16 +1745,23 @@ public static class EnemyAI {
         }
     }
 
+    /// <summary>
+    /// Applies parry-triggered player effects such as riposte and scimitar discards.
+    /// </summary>
     private static void ApplyImmediatePlayerParryResponseEffects(SimState state, Scripts s) {
         if (state.PlayerRiposteImmediateBonus > 0) {
             state.PlayerAtt += state.PlayerRiposteImmediateBonus;
         }
 
+        // legendary scimitar can discard twice; each discard re-runs the same best-die logic on the updated state
         for (int i = 0; i < state.PlayerScimitarDiscardCount; i++) {
             ApplyBestEnemyDiscard(state, s);
         }
     }
 
+    /// <summary>
+    /// Removes the highest-impact player die from a simulated state.
+    /// </summary>
     private static void ApplyBestPlayerDiscard(SimState state, Scripts s) {
         if (state?.PlayerAttachedDice == null || state.PlayerAttachedDice.Count == 0) { return; }
 
@@ -1682,6 +1825,8 @@ public static class EnemyAI {
             return false;
         }
 
+        // chest rescue rerolls only currently-unrerolled player green/red dice with value >= 3,
+        // because those are the dice most capable of turning off the player's pending hit line
         SimState bestCaseState = state.Clone();
         bool rerolledAnyDie = false;
         foreach (SimAttachedDie attachedDie in bestCaseState.PlayerAttachedDice) {
@@ -1736,6 +1881,7 @@ public static class EnemyAI {
     }
 
     private static float GetTargetUtility(Scripts s, string target, SimState state, bool onPlayer) {
+        // heuristic utilities only help legacy float scoring and draft cleanup; the real planner uses gate ordering instead
         return target switch {
             "guts" => onPlayer ? 800f + state.PlayerRedDiceCount * 160f : -600f,
             "knee" => onPlayer ? GetEnemyKneeTargetUtility(state) : -700f,
@@ -1783,6 +1929,7 @@ public static class EnemyAI {
     ) {
         if (s == null || snapshot == null || currentPlan == null || plan == null) { return; }
 
+        // if the hidden plan still does not produce a hit, nightmare should not waste time revealing empty retarget shuffles
         if (plannedEvaluation != null && !plannedEvaluation.EnemyDamagesPlayer && plan.TargetIndex != startingTargetIndex) {
             plan.TargetIndex = startingTargetIndex;
             plannedEvaluation = EvaluatePlanOutcome(s, snapshot, plan);
@@ -1794,6 +1941,7 @@ public static class EnemyAI {
         if (!changedYellowAssignments || changedStamina || changedTarget) { return; }
         if (!HasMatchingNightmareOutcome(currentEvaluation, plannedEvaluation)) { return; }
 
+        // pure cosmetic yellow shuffles are suppressed when they do not change the coarse combat result
         foreach (KeyValuePair<Dice, string> assignment in currentPlan.YellowAssignments) {
             if (assignment.Key == null) { continue; }
             plan.YellowAssignments[assignment.Key] = assignment.Value;
@@ -1832,6 +1980,13 @@ public static class EnemyAI {
 
         List<Dice> yellowDice = GetEnemyYellowDice(s).ToList();
 
+        // commit sequence mirrors ENEMY_AI.md exactly:
+        // 1) refund existing stamina adds
+        // 2) clear current yellow attachments
+        // 3) attach yellows per plan
+        // 4) apply new stamina adds
+        // 5) spend base stamina
+        // 6) update target and recompute stats/positions
         int refunded = s.statSummoner.addedEnemyStamina.Values.Sum();
         foreach (string stat in Stats) {
             s.statSummoner.addedEnemyStamina[stat] = 0;
@@ -1887,6 +2042,7 @@ public static class EnemyAI {
             return;
         }
 
+        // nightmare reveal adds stamina one pip at a time so the player can watch the hidden commitment appear
         s.statSummoner.addedEnemyStamina[stat] += 1;
         s.enemy.stamina = Mathf.Max(0, s.enemy.stamina - 1);
         s.enemy.staminaCounter.text = s.enemy.stamina.ToString();
@@ -1918,6 +2074,7 @@ public static class EnemyAI {
     private static void AdvanceEnemyTargetStep(Scripts s, int direction) {
         if (direction == 0) { return; }
 
+        // nightmare reveal walks the target one wound at a time instead of teleporting to the final target
         s.enemy.targetIndex = Mathf.Clamp(s.enemy.targetIndex + direction, 0, Targets.Length - 1);
         s.turnManager.RecalculateMaxFor("enemy");
     }
@@ -1950,6 +2107,7 @@ public static class EnemyAI {
             PlayerYellowReassignmentOptions = GetPlayerYellowReassignmentPreviewOptions(s)
         };
 
+        // compare every candidate by its worst likely post-pick outcome, not just its immediate raw value
         Dice bestDie = null;
         DraftChoiceEvaluation bestEvaluation = null;
         foreach (Dice dice in availableDice) {
@@ -1962,6 +2120,7 @@ public static class EnemyAI {
 
         if (bestDie == null) { return availableDice[0]; }
 
+        // once a winning color/strategy is chosen, take the highest face of that color still on the board
         return availableDice
             .Where(dice => dice != null && dice.diceType == bestDie.diceType)
             .OrderByDescending(dice => dice.diceNum)
@@ -2034,6 +2193,7 @@ public static class EnemyAI {
         };
 
         foreach (string stat in GetDraftAssignmentOptions(s, dice)) {
+            // each legal enemy attachment row gets its own full preview plan evaluation
             AdvancedPlanEvaluation preview = GetDraftPreviewEvaluation(s, snapshot, dice, stat, availableDice, previewContext);
             if (IsBetterAdvancedEvaluation(preview, evaluation.BestPlan)) {
                 evaluation.BestPlan = preview;
@@ -2073,6 +2233,7 @@ public static class EnemyAI {
     ) {
         int effectiveEnemyValue = GetEffectiveEnemyDraftValue(s, dice);
         if (effectiveEnemyValue <= 0) {
+            // some picks only matter as denial to the player, so evaluate the preview with zero self-gain
             return GetWorstCaseDraftPreviewEvaluation(
                 s,
                 snapshot,
@@ -2102,6 +2263,8 @@ public static class EnemyAI {
     ) {
         Dictionary<string, int> zeroTotals = NewStatDictionary();
         Dictionary<string, int> zeroCounts = NewStatDictionary();
+        // baseline = enemy takes the die and the player gets no extra reply die at all;
+        // later reply states then try to worsen that outcome from the enemy's perspective
         AdvancedPlanEvaluation baseline = GetCachedDraftPreviewEvaluation(
             s,
             snapshot,
@@ -2171,6 +2334,7 @@ public static class EnemyAI {
 
         int value = dice.diceNum;
         if (s.enemy.enemyName.text != "Lich") {
+            // enemy wounds apply immediately to newly drafted enemy dice too, except for lich exceptions
             if (dice.diceType == "red" && (s.enemy.woundList.Contains("armpits") || s.itemManager.EnemyHasTemporaryArmpitsInjury())) { return 0; }
             if (dice.diceType == "white" && (s.enemy.woundList.Contains("hand") || s.itemManager.EnemyHasTemporaryHandInjury())) { return 0; }
             if (s.enemy.woundList.Contains("guts") || s.itemManager.EnemyHasTemporaryGutsInjury()) {
@@ -2187,6 +2351,7 @@ public static class EnemyAI {
         if (dice.diceType == "blue" && IsDraftInitiativeLocked(s)) { return 0; }
 
         int value = dice.diceNum;
+        // mirror the player's own immediate on-attach penalties so denial logic previews the real value they would get
         if (s.player.woundList.Contains("guts")) {
             value = Mathf.Max(0, value - 1);
         }
@@ -2223,6 +2388,7 @@ public static class EnemyAI {
         bool killEnabledNow = enemyAim >= 7 && enemyAtt > playerDef;
         bool killEnabledAfterPick = nextEnemyAim >= 7 && nextEnemyAtt > playerDef;
 
+        // these flags capture the "self-benefit first" breakpoint completions described in ENEMY_AI.md
         evaluation.CompletesKillBreakpoint |= !killEnabledNow && killEnabledAfterPick;
         evaluation.CompletesHitBreakpoint |= enemyAtt <= playerDef && nextEnemyAtt > playerDef;
         evaluation.CompletesOrderBreakpoint |= !initiativeLocked && !enemyActsFirstNow && enemyActsFirstAfterPick;
@@ -2249,6 +2415,7 @@ public static class EnemyAI {
         Dictionary<string, int> playerCounts
     ) {
         PlannerSnapshot preview = source.Clone();
+        // draft previews model the player as if they immediately attached the likely reply die(s)
         preview.PlayerAim += playerTotals["green"];
         preview.PlayerSpd += playerTotals["blue"];
         preview.PlayerAtt += playerTotals["red"];
@@ -2287,6 +2454,7 @@ public static class EnemyAI {
         }
 
         if (IsPlayerGuardSelected(s)) {
+            // if the player is guarding, white-focused yellow routing is the only reply state that really matters
             AddPreviewState(results, visited, currentTotals, currentCounts);
 
             Dictionary<string, int> guardTotals = NewStatDictionary();
@@ -2317,6 +2485,8 @@ public static class EnemyAI {
         bool playerActsFirst = playerSpeedLockedHigh || (!enemySpeedLockedHigh && playerSpd >= enemySpd);
         bool enemyThreatens = enemyAtt > playerDef;
         bool playerCanHit = playerAim >= 0 && playerAtt > enemyDef;
+        // build a few likely reply patterns rather than the full combinatorial yellow search,
+        // keeping previews cheap while still covering the strongest player reply shapes
         int neededGreenForTarget = Mathf.Max(0, targetAim - nonYellowAim);
         int neededGreenToHit = Mathf.Max(0, 0 - nonYellowAim);
         int neededGreen = Mathf.Max(neededGreenForTarget, neededGreenToHit);
@@ -2419,6 +2589,7 @@ public static class EnemyAI {
 
         AddReplyState(NewStatDictionary(), NewStatDictionary());
 
+        // previews only consider a small likely subset of player reply dice to keep hard/nightmare draft evaluation bounded
         List<Dice> playerReplyDice = GetLikelyPlayerReplyDice(s, availableDice, excludedDie).ToList();
 
         foreach (Dice replyDie in playerReplyDice) {
@@ -2527,6 +2698,7 @@ public static class EnemyAI {
             }
         }
 
+        // start with the single die the player wants most overall, then add one top die per color bucket
         AddLikelyDie(remainingDice
             .OrderByDescending(dice => GetPlayerDieDesireScore(s, dice))
             .ThenByDescending(dice => dice.diceNum)
@@ -2597,6 +2769,7 @@ public static class EnemyAI {
     ) {
         if (s == null || snapshot == null) { return null; }
 
+        // this is basically a miniature advanced-plan search run on the hypothetical post-pick board
         Dictionary<string, int> staminaPlan = NewStatDictionary();
         AdvancedPlanEvaluation best = null;
         int totalAvailableStamina = Mathf.Max(0, s.enemy.stamina);
@@ -2650,6 +2823,7 @@ public static class EnemyAI {
 
         if (best != null) { return best; }
 
+        // if no candidate improved anything, still evaluate the zero-spend current target so callers get a real preview object
         staminaPlan["green"] = 0;
         staminaPlan["blue"] = 0;
         staminaPlan["red"] = 0;
@@ -2692,6 +2866,14 @@ public static class EnemyAI {
     private static bool IsBetterDraftChoice(DraftChoiceEvaluation candidate, DraftChoiceEvaluation current) {
         if (candidate == null) { return false; }
         if (current == null) { return true; }
+        // draft ordering follows ENEMY_AI.md:
+        // 1) compare real preview plans
+        // 2) compare coarse preview outcomes
+        // 3) same-color higher face protection
+        // 4) hard denial flags
+        // 5) preview stamina cleanliness
+        // 6) self breakpoint completions
+        // 7) softer denial/progress cleanup
         if (IsBetterDraftPlanPreview(candidate.BestPlan, current.BestPlan)) { return true; }
         if (IsBetterDraftPlanPreview(current.BestPlan, candidate.BestPlan)) { return false; }
         if (IsBetterDraftOutcomePreview(candidate.BestPlan, current.BestPlan)) { return true; }
@@ -2926,6 +3108,7 @@ public static class EnemyAI {
 
         if (!enemyCanHitNow && !enemyCanDefendNow) { return false; }
         if (playerSpd >= enemySpd || effectivePlayerValue <= 0) { return false; }
+        // player wins ties, so denial here only means "player could have reached strict/locking first-move status with this die"
         return (dice.diceType == "blue" || dice.diceType == "yellow") && playerSpd + effectivePlayerValue >= enemySpd;
     }
 
@@ -3024,6 +3207,7 @@ public static class EnemyAI {
         chosenDie.moveable = false;
         chosenDie.isOnPlayerOrEnemy = "enemy";
 
+        // advanced yellow draft picks are previewed against every stat row before being committed
         string attachStat = chosenDie.diceType == "yellow" && DifficultyHelper.UsesAdvancedEnemyAI(Save.persistent.gameDifficulty)
             ? ChooseBestYellowStatForDraft(s, chosenDie)
             : (chosenDie.diceType == "yellow" ? "red" : chosenDie.diceType);
@@ -3046,6 +3230,7 @@ public static class EnemyAI {
         s.statSummoner.SetDebugInformationFor("enemy");
 
         if (s.diceSummoner.CountUnattachedDice() == 0) {
+            // once the draft is over, both combat previews and visible hard-mode intent need to be fully refreshed
             s.turnManager.RecalculateMaxFor("player");
             s.turnManager.RecalculateMaxFor("enemy");
             s.turnManager.RefreshEnemyPlanIfNeeded();
@@ -3072,6 +3257,7 @@ public static class EnemyAI {
 
     private static int GetDefaultTargetIndex(Scripts s, int aim) {
         int maxTarget = Mathf.Clamp(aim, 0, 7);
+        // walk downward from the highest legal wound until finding one the player does not already have
         for (int i = maxTarget; i >= 0; i--) {
             if (!s.player.woundList.Contains(Targets[i])) {
                 return i;
@@ -3380,6 +3566,8 @@ public static class EnemyAI {
 
     private static int CreateAdvancedPlanCacheKey(Scripts s) {
         HashCode hash = new();
+        // every fact that can change the planner outcome must be represented here,
+        // otherwise hard/nightmare may reuse stale plans after a mid-round change
         hash.Add(DifficultyHelper.Normalize(Save.persistent.gameDifficulty));
         hash.Add(s.player.targetIndex);
         hash.Add(s.enemy.targetIndex);
@@ -3539,6 +3727,7 @@ public static class EnemyAI {
 
         if (options.Count <= 1) { return options; }
 
+        // blue spend is only worth searching if the resulting speed line can still support a real attack outcome
         return options
             .Where(blueSpend => blueSpend == 0 || baseAtt + Mathf.Max(0, totalAvailableStamina - blueSpend) > GetProjectedPlayerDefenseForEnemyAttack(snapshot, baseSpd + blueSpend))
             .ToList();
@@ -3670,6 +3859,7 @@ public static class EnemyAI {
             return GetExactAttackSpendNeeded(GetEffectivePlayerDefenseForEnemyAttack(previewState, true), previewState.EnemyAtt);
         }
 
+        // if the player wounds first, red spending must be evaluated against the enemy's post-wound attack total instead
         string playerTarget = GetPlayerTargetName(snapshot.PlayerTargetIndex, snapshot.PlayerGuardSelected);
         bool playerCanHit = !previewState.PlayerGuardSelected && previewState.PlayerAim >= 0 && previewState.PlayerAtt > previewState.EnemyDef;
         bool playerDamages = PlayerHitDamagesEnemy(s, previewState, playerTarget, playerCanHit);
@@ -3827,6 +4017,7 @@ public static class EnemyAI {
         bool enemyActsFirstAfterSpend = state.EnemySpeedLockedHigh || (!state.PlayerSpeedLockedHigh && state.EnemySpd > state.PlayerSpd);
 
         if (!enemyActsFirstAfterSpend && PlayerCanBecomeDodgy(state)) {
+            // spending into a hit that dodgy will blank is especially wasteful
             penalty += staminaPlan["red"] * 140f;
             penalty += staminaPlan["green"] * 110f;
         }
@@ -4016,6 +4207,7 @@ public static class EnemyAI {
 
         switch (stat) {
             case "red": {
+            // reward shrinking the damage gap, especially when the enemy still cannot hit at all
                 int currentGap = Mathf.Max(0, playerDef + 1 - enemyAtt);
                 int nextGap = Mathf.Max(0, playerDef + 1 - (enemyAtt + effectiveEnemyValue + futureStamina));
                 int gapReduction = currentGap - nextGap;
@@ -4026,6 +4218,7 @@ public static class EnemyAI {
                 break;
             }
             case "white": {
+                // reward shrinking the survival gap, especially when the enemy currently cannot defend itself
                 int currentGap = Mathf.Max(0, playerAtt - enemyDef);
                 int nextGap = Mathf.Max(0, playerAtt - (enemyDef + effectiveEnemyValue + futureStamina));
                 int gapReduction = currentGap - nextGap;
@@ -4053,6 +4246,7 @@ public static class EnemyAI {
                 break;
             }
             case "green": {
+                // green progress tracks distance to the next meaningful wound breakpoint rather than raw aim inflation
                 int nextBreakpoint = enemyAim < 4 ? 4 : enemyAim < 6 ? 6 : enemyAim < 7 ? 7 : -1;
                 if (nextBreakpoint > 0) {
                     int currentGap = Mathf.Max(0, nextBreakpoint - enemyAim);
@@ -4103,6 +4297,9 @@ public static class EnemyAI {
         return DefaultDieRanks.TryGetValue(dice.diceType + dice.diceNum, out int rank) ? rank : int.MaxValue;
     }
 
+    /// <summary>
+    /// Creates a fresh zeroed stat dictionary keyed by the four combat colors.
+    /// </summary>
     private static Dictionary<string, int> NewStatDictionary() {
         return new Dictionary<string, int> {
             { "green", 0 },

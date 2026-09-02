@@ -1,15 +1,23 @@
 ﻿using System;
 using UnityEngine;
-public class HighlightCalculator : MonoBehaviour {
-    [SerializeField] private GameObject highlighter;
-    public GameObject[] highlights = new GameObject[4];
-    public BoxCollider2D[] highlightColliders = new BoxCollider2D[4];
-    private Scripts s;
-    private readonly Vector2 offScreen = new(0, 20);
-    public int diceTakenByPlayer = 0;
-    private readonly Vector2 small = new(10f, 1f);
-    private readonly Vector2 large = new(10f, 10f);
 
+/// <summary>
+/// Owns the temporary drop targets shown while the player drags dice and applies the resulting
+/// attachment, wound, and turn-flow side effects when a die lands on a valid highlight.
+/// </summary>
+public class HighlightCalculator : MonoBehaviour {
+    [SerializeField] private GameObject highlighter; // highlight prefab instantiated once per player stat
+    public GameObject[] highlights = new GameObject[4]; // active highlight objects for green/blue/red/white rows
+    public BoxCollider2D[] highlightColliders = new BoxCollider2D[4]; // colliders used to detect valid drop targets
+    private Scripts s; // shared project references and systems
+    private readonly Vector2 offScreen = new(0, 20); // parking position used to hide highlights when not dragging
+    public int diceTakenByPlayer = 0; // number of draft dice the player has taken in the current pick sequence
+    private readonly Vector2 small = new(10f, 1f); // collider size for yellow/furious drops that can land on any row
+    private readonly Vector2 large = new(10f, 10f); // collider size for normal one-row drops
+
+    /// <summary>
+    /// Caches shared references and spawns the four reusable highlight objects.
+    /// </summary>
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
         HandleHighlightInitiation();
@@ -28,13 +36,14 @@ public class HighlightCalculator : MonoBehaviour {
             highlightColliders[i].transform.localScale = s.mobileMode 
                 ? s.diceSummoner.mobileDiceScale 
                 : s.diceSummoner.desktopDiceScale;
-            // put the data of each highlight in, and scale it based on the size
+            // highlight sprites share die scale so their hover footprint matches the board exactly
         }
     }
 
     /// <summary>
-    /// Show all the valid highlights, depending on the die's type. 
+    /// Shows the legal drop targets for the currently dragged die.
     /// </summary>
+    /// <param name="dice">die currently being dragged or clicked</param>
     public void ShowValidHighlights(Dice dice) {
         if (dice.diceType == "yellow" || Save.game.isFurious) {
             // if yellow
@@ -57,8 +66,9 @@ public class HighlightCalculator : MonoBehaviour {
     }
 
     /// <summary>
-    /// Show a single highlight for a given typ eof dice..
+    /// Shows the one legal highlight for a normal non-yellow die.
     /// </summary>
+    /// <param name="diceType">stat color the die is allowed to attach to</param>
     private void ShowSingleHighlight(string diceType) {
         int diceIndex = Array.IndexOf(Colors.colorNameArr, diceType);
         // get the index of the color relative to the colorName array
@@ -82,6 +92,12 @@ public class HighlightCalculator : MonoBehaviour {
     /// <summary>
     /// Attempt to snap the die to position (nearest highlight).
     /// </summary>
+    /// <param name="dice">die being dropped</param>
+    /// <param name="curInstantiationPos">current fallback snap-back position</param>
+    /// <param name="moveable">updated moveable state after the drop resolves</param>
+    /// <param name="instantiationPos">updated snap-back position after the drop resolves</param>
+    /// <param name="xOverride">optional x position override used for quick-click default drops</param>
+    /// <param name="yOverride">optional y position override used for quick-click default drops</param>
     public void SnapToPosition(Dice dice, Vector3 curInstantiationPos, out bool moveable, out Vector3 instantiationPos, float xOverride=100f, float yOverride=100f) {
         // overrides if we want to drop the dice off at a specific location rather than mouse
         // can't use vector3 because its non-nullable
@@ -102,13 +118,18 @@ public class HighlightCalculator : MonoBehaviour {
     /// <summary>
     /// Shift all die attached to a stat after a yellow one is moved.
     /// </summary>
+    /// <param name="dice">yellow die being moved between player rows</param>
     private void MoveOtherDiceAfterYellow(Dice dice) {
         dice.BeginPlayerReflowPreview();
     }
 
     /// <summary>
-    /// Handles dice drops of all kinds.
+    /// Resolves a die drop against the active highlight colliders and applies all side effects.
     /// </summary>
+    /// <param name="dice">die being dropped</param>
+    /// <param name="moveable">updated moveable state</param>
+    /// <param name="instantiationPos">updated final snap position</param>
+    /// <param name="mousePos">world position used for overlap checks</param>
     private void HandleAllDiceDrops(Dice dice, ref bool moveable, ref Vector3 instantiationPos, Vector3 mousePos) {
         foreach (BoxCollider2D curCollider in highlightColliders) {
             // for each collider
@@ -120,7 +141,7 @@ public class HighlightCalculator : MonoBehaviour {
                     // if the dice is yellow or player is furious
                     if (Save.game.isFurious) {
                         if (dice.diceType is "green" or "red" or "blue") { dice.GetComponent<SpriteRenderer>().color = Color.black; }
-                        // change the color of the spots to match the die
+                        // fury converts all attached player dice into yellow dice, so fix both face-text and base tint here
                         dice.transform.GetChild(0).GetComponent<SpriteRenderer>().color = Colors.yellow;
                         dice.diceType = Colors.colorNameArr[4];
                         // make the die yellow
@@ -186,6 +207,7 @@ public class HighlightCalculator : MonoBehaviour {
                         // enemy moves normally
                     }
                     if (s.diceSummoner.CountUnattachedDice() == 0) {
+                        // once the draft row is empty, both combat previews must refresh from final attached totals
                         s.turnManager.RecalculateMaxFor("player");
                         s.turnManager.RecalculateMaxFor("enemy");
                         s.turnManager.RefreshEnemyPlanIfNeeded();
@@ -207,6 +229,8 @@ public class HighlightCalculator : MonoBehaviour {
     /// <summary>
     /// Handle a normal dice being dropped onto a highlight.
     /// </summary>
+    /// <param name="addTo">player stat row the die should attach to</param>
+    /// <param name="dice">die being attached</param>
     private void HandleNormalDrop(string addTo, Dice dice) {
         bool chestReroll = s.player.woundList.Contains("chest") && dice.diceNum >= 4;
         s.statSummoner.AddDiceToPlayer(addTo, dice);
@@ -226,6 +250,8 @@ public class HighlightCalculator : MonoBehaviour {
     /// <summary>
     /// Handle a yellow dice being dropped on to a highlight.
     /// </summary>
+    /// <param name="addTo">player stat row the yellow die should attach to</param>
+    /// <param name="dice">yellow die being moved or attached</param>
     private void HandleYellowDrop(string addTo, Dice dice) {
         bool wasAlreadyAttached = dice.isAttached;
         s.statSummoner.AddDiceToPlayer(addTo, dice);
@@ -244,7 +270,7 @@ public class HighlightCalculator : MonoBehaviour {
     }
 
     /// <summary>
-    /// Move all highlights off the screen. 
+    /// Moves all highlight objects off-screen so they are no longer visible or interactable.
     /// </summary>
     public void HideHighlights() {
         foreach (GameObject highlight in highlights) {

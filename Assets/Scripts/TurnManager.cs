@@ -1163,8 +1163,8 @@ public class TurnManager : MonoBehaviour {
             s.enemy.GetComponent<SpriteRenderer>().sprite = s.enemy.GetDeathSprite();
             s.enemy.SetEnemyPositionAfterDeath();
             // if enemy dies, set sprite and proper position
-            s.itemManager.SpawnItems();
-            // spawn items
+            // skip loot if the player also died this round — SetTombstoneData handles cleanup
+            if (!s.player.isDead) { s.itemManager.SpawnItems(); }
             RefreshBlackBoxVisibility();
             // hide the enemy's stats
             if (s.tutorial != null) { s.tutorial.Increment(); }
@@ -1398,8 +1398,12 @@ public class TurnManager : MonoBehaviour {
         string enemyAttackStatusText = null;
         bool chaliceWillDrink = false;
         bool playerBleedsOutThisRound = PlayerBleedsOutThisRound();
-        bool playerWouldAutoHeal = Save.game.curCharNum == 3 && s.player.woundList.Count < 2 && s.player.stamina >= 7;
+
         bool enemyHitOnExistingWound = s.player.woundList.Contains(s.enemy.target.text);
+        bool playerWouldAutoHeal = Save.game.curCharNum == 3
+            && !enemyHitOnExistingWound
+            && ((s.player.woundList.Count < 2 && s.player.stamina >= 7)
+                || (s.player.woundList.Count == 2 && s.player.stamina >= 10));
         bool enemyHitCountsAsWounded = !Save.game.isDodgy;
         bool enemyHitAddsPersistentWound = enemyHitCountsAsWounded && !enemyHitOnExistingWound && !playerWouldAutoHeal;
         bool enemyHitIsFatal = enemyHitAddsPersistentWound && s.player.woundList.Count == 2;
@@ -1488,11 +1492,22 @@ public class TurnManager : MonoBehaviour {
                     StartCoroutine(ShatterGlassSwordAfterDelay());
                 }
 
-                if (Save.game.curCharNum == 3 && s.player.woundList.Count < 2 && s.player.stamina >= 7) {
+                if (Save.game.curCharNum == 3 && s.player.woundList.Count < 2 && s.player.stamina >= 7 && !enemyHitOnExistingWound) {
                     // if on the 4th char, they are able to heal back (wont die instantly), and has sufficient stamina to heal the next move
+                    // clear any lingering neck bleed-out so a prior neck wound doesn't still kill after this heal
+                    SetBleedOutNextRound("player", false, saveGame: false);
+                    playerBleedOutPendingThisRound = false;
                     s.player.woundList.Clear();
                     StartCoroutine(HealAfterDelay());
                     // decrementing and healing handled in the coro
+                }
+                else if (Save.game.curCharNum == 3 && s.player.woundList.Count == 2 && s.player.stamina >= 10 && !enemyHitOnExistingWound) {
+                    // lethal 3rd wound survived: drain 10 stamina and clear all wounds including neck bleed-out
+                    SetBleedOutNextRound("player", false, saveGame: false);
+                    playerBleedOutPendingThisRound = false;
+                    s.player.woundList.Clear();
+                    Save.game.playerWounds = s.player.woundList;
+                    StartCoroutine(HealAfterDelay(10));
                 }
                 else {
                     if (Save.game.curCharNum == 3 && s.player.stamina < 7) {
@@ -1634,9 +1649,9 @@ public class TurnManager : MonoBehaviour {
     }
 
 
-    private IEnumerator HealAfterDelay() {
+    private IEnumerator HealAfterDelay(int staminaCost = 7) {
         yield return s.delays[1f];
-        s.turnManager.ChangeStaminaOf("player", -7);
+        s.turnManager.ChangeStaminaOf("player", -staminaCost);
         // bypass changestaminaof and instead directly change the stamina, to differentiate from healing from eating
         if (s.tutorial == null) { Save.SaveGame(); }
         s.soundManager.PlayClip("blip0");

@@ -133,7 +133,7 @@ public class TombstoneData : MonoBehaviour {
         Save.game.newGame = true;
         // player died, so make the next game a new one
         if (s.tutorial == null) { Save.SaveGame(); }
-        for (int i = 0; i < s.itemManager.floorItems.Count; i++){
+        while (s.itemManager.floorItems.Count > 0) {
             s.itemManager.MoveToInventory(0, true, false, false);
             // move all items on the floor to the player's inventory
         }

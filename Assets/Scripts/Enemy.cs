@@ -5,28 +5,34 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
+
+/// <summary>
+/// Owns enemy spawning, persistence restoration, stamina/wound state, and top-level AI hooks.
+/// This class decides what kind of encounter is present, while `EnemyAI` decides how a fightable
+/// enemy allocates dice and target selection once combat begins.
+/// </summary>
 public class Enemy : MonoBehaviour {
-    public const int MerchantEnemyNum = 8;
-    public const int BlacksmithEnemyNum = 9;
-    public const int TombstoneEnemyNum = 10;
-    [SerializeField] public RuntimeAnimatorController[] controllers;
-    [SerializeField] public RuntimeAnimatorController lichDeathController;
-    [SerializeField] private Sprite[] icons;
-    [SerializeField] private Sprite tombstoneIcon;
-    [SerializeField] private Sprite[] deathSprites;
-    [SerializeField] private GameObject iconGameobject;
-    [SerializeField] public TextMeshProUGUI enemyName;
-    [SerializeField] public TextMeshProUGUI woundGUIElement;
-    [SerializeField] public TextMeshProUGUI staminaCounter;
-    [SerializeField] public TextMeshProUGUI target;
-    public List<string> woundList = new();
-    public Dictionary<string, int> stats;
-    readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Slime", "Merchant", "Blacksmith", "Tombstone" };
-    private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" };
-    public int stamina = 1;
-    public int targetIndex = 0;
-    private readonly Vector2 basePosition = new(1.9f, -1.866667f);
-    private readonly Vector2 iconPosition = new(6.16667f, 3.333333f);
+    public const int MerchantEnemyNum = 8; // index of the merchant pseudo-enemy in `enemyArr`
+    public const int BlacksmithEnemyNum = 9; // index of the blacksmith pseudo-enemy in `enemyArr`
+    public const int TombstoneEnemyNum = 10; // index of the tombstone pseudo-enemy in `enemyArr`
+    [SerializeField] public RuntimeAnimatorController[] controllers; // animator/controller per enemy display index
+    [SerializeField] public RuntimeAnimatorController lichDeathController; // special lich death controller used elsewhere in combat/death flows
+    [SerializeField] private Sprite[] icons; // portrait/icon sprite per enemy display index
+    [SerializeField] private Sprite tombstoneIcon; // dedicated icon because tombstone has no normal animated portrait
+    [SerializeField] private Sprite[] deathSprites; // corpse sprite per enemy name for post-kill loot scenes
+    [SerializeField] private GameObject iconGameobject; // separate portrait object shown in the encounter UI
+    [SerializeField] public TextMeshProUGUI enemyName; // visible enemy/encounter name text
+    [SerializeField] public TextMeshProUGUI woundGUIElement; // wound list UI text driven by turn manager
+    [SerializeField] public TextMeshProUGUI staminaCounter; // stamina UI text for the current encounter
+    [SerializeField] public TextMeshProUGUI target; // current targeted wound text shown in combat
+    public List<string> woundList = new(); // active enemy wounds in order applied
+    public Dictionary<string, int> stats; // base enemy stats keyed by color name
+    readonly string[] enemyArr = { "Cloaked", "Devil", "Lich", "Skeleton", "Kobold", "Gog", "Goblin", "Slime", "Merchant", "Blacksmith", "Tombstone" }; // canonical encounter names by save/spawn index
+    private readonly string[] valueArr = { "yellow6", "red6", "white6", "yellow5", "red5", "white5", "yellow4", "red4", "white4", "yellow3", "red3", "white3", "green6", "yellow2", "red2", "white2", "yellow1", "red1", "white1", "green5", "green4", "blue6", "green3", "blue5", "blue4", "green2", "blue3", "green1", "blue2", "blue1" }; // legacy die ranking list retained for older heuristics and debugging context
+    public int stamina = 1; // current enemy stamina for this encounter
+    public int targetIndex = 0; // current targeted wound index in the enemy target array
+    private readonly Vector2 basePosition = new(1.9f, -1.866667f); // default world position for most living enemies
+    private readonly Vector2 iconPosition = new(6.16667f, 3.333333f); // fixed world position for the encounter portrait/icon
     private readonly Dictionary<string, Vector2> deathPositions = new() {
         {"Devil", new Vector2(2.24f, -2.25f)},
         {"Lich", new Vector2(1.9f, -1.865334f)},
@@ -64,27 +70,41 @@ public class Enemy : MonoBehaviour {
         {"33", 5},
         {"41", 6},
     };
-    private Scripts s;
-    public int spawnNum;
-    private readonly List<Dice> availableDice = new();
-    private readonly List<int> diceValuations = new();
-    public readonly int lichStamina = 5;
+    private Scripts s; // shared project references and service locator
+    public int spawnNum; // encounter index currently loaded into this enemy object
+    private readonly List<Dice> availableDice = new(); // legacy scratch list kept for AI/debug helper compatibility
+    private readonly List<int> diceValuations = new(); // legacy valuation scratch list kept for AI/debug helper compatibility
+    public readonly int lichStamina = 5; // fixed stamina for lich encounters regardless of difficulty table
 
+    /// <summary>
+    /// Returns the sprite/controller display index for a saved enemy number.
+    /// </summary>
+    /// <param name="enemyNum">enemy index stored in save data</param>
+    /// <returns>matching display index for sprite/controller arrays</returns>
     private int GetDisplayIndex(int enemyNum) {
         return enemyNum;
     }
 
+    /// <summary>
+    /// Returns whether the encounter index is a non-combat vendor.
+    /// </summary>
+    /// <param name="enemyNum">encounter index to test</param>
     private bool IsVendor(int enemyNum) {
         return enemyNum == MerchantEnemyNum || enemyNum == BlacksmithEnemyNum;
     }
 
+    /// <summary>
+    /// Computes starting enemy stamina from level, subfloor, difficulty, and special-case encounters.
+    /// </summary>
+    /// <param name="enemyNum">enemy encounter index being spawned</param>
+    /// <returns>starting stamina for that encounter</returns>
     private int GetSpawnStamina(int enemyNum) {
-
         bool useHardStamina = DifficultyHelper.IsHard(Save.persistent.gameDifficulty)
             || DifficultyHelper.IsNightmare(Save.persistent.gameDifficulty);
         Dictionary<string, int> staminaTable = useHardStamina ? givenStaminaHard : givenStamina;
 
         if (enemyArr[enemyNum] == "Devil" || enemyArr[enemyNum] == "Cloaked") {
+            // devil scales beyond floor 4 instead of using the normal per-subfloor table
             int devilBonus = s.levelManager.level - 4;
             if (devilBonus < 0) { devilBonus = 0; }
             return staminaTable["41"] + Mathf.FloorToInt(devilBonus * 1.5f);
@@ -108,11 +128,17 @@ public class Enemy : MonoBehaviour {
         return fallbackStamina + levelBonus;
     }
 
+    /// <summary>
+    /// Returns whether the current save already has encounter floor items stored.
+    /// </summary>
     private bool HasSavedFloorItems() {
         return Save.game.floorItemNames != null
             && Save.game.floorItemNames.Any(itemName => !string.IsNullOrEmpty(itemName));
     }
 
+    /// <summary>
+    /// Synchronizes save-state counters that depend on current wounds and encounter type.
+    /// </summary>
     private void SyncWoundDerivedEnemyState() {
         if (woundList == null) { woundList = new List<string>(); }
 
@@ -120,11 +146,15 @@ public class Enemy : MonoBehaviour {
             && enemyName.text is not "Merchant" and not "Blacksmith" and not "Tombstone" and not "Lich"
             && !Save.game.enemyIsDead;
 
+        // head wounds allow exactly one discard prompt for normal living enemies, never for vendors/lich/corpses
         Save.game.discardableDieCounter = canUseWoundDerivedAbilities && woundList.Contains("head")
             ? Mathf.Clamp(Save.game.discardableDieCounter, 0, 1)
             : 0;
     }
 
+    /// <summary>
+    /// Chooses and spawns the correct encounter type when the scene loads or resumes.
+    /// </summary>
     private void Start() {
         s = FindFirstObjectByType<Scripts>();
         s.turnManager.RefreshBlackBoxVisibility();
@@ -208,8 +238,10 @@ public class Enemy : MonoBehaviour {
     }
 
     /// <summary>
-    /// Spawn an enemy based on its number on in the array.
+    /// Spawns a fresh encounter or restores a saved one based on the encounter index.
     /// </summary>
+    /// <param name="enemyNum">index in `enemyArr` that identifies the encounter</param>
+    /// <param name="isNewEnemy">true when generating a fresh encounter, false when restoring from save data</param>
     public void SpawnNewEnemy(int enemyNum, bool isNewEnemy) {
         print($"spawning enemy, index{enemyNum} = {enemyArr[enemyNum]}");
         EnemyAI.InvalidateCachedPlan();
@@ -333,6 +365,7 @@ public class Enemy : MonoBehaviour {
     /// </summary>
     private IEnumerator DiscardBestPlayerDieCoro() {
         yield return s.delays[0.25f];
+        // wait one beat so the player's latest drop fully settles before the AI evaluates what to discard
         List<Dice> curAvailableDice = new();
         foreach (GameObject curDice in s.diceSummoner.existingDice) {
             Dice diceScript = curDice.GetComponent<Dice>();
